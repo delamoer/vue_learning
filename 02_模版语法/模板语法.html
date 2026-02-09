@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模板语法</title>
+  <script type="text/javascript" src="../js/vue.js"></script>
+</head>
+
+
+<body>
+  <!--
+    Vue模板语法有2大类：
+      1、插值语法：
+        功能：用于解析标签体内容(简单理解就是夹在类似   <h3>hello, {{name}}, {{age}}</h3>中间的内容)
+        写法：{{xxx}} xxx要写成js表达式，且xxx可以自动读取到data中的所有属性
+      2、指令语法：
+        功能：用于解析标签（包括：标签属性、标签体内容、绑定事件……）
+        举例：v-bind:href="xxx" 或 简写为 :href="xxx"，xxx要写成js表达式，且xxx可以自动读取到data中的所有属性
+        备注：vue、中有很多的指令，且形式都是v-???，此处我们只是以v-bind举例
+  -->
+  <div id="root">
+    <h1>插值语法</h1>
+    <h3>hello, {{name}}, {{age}}</h3>
+    <hr />
+    <h1>指令语法</h1>
+    <a v-bind:href="url">点我跳转百度</a>
+    <a :href="url">点我跳转百度</a>
+  </div>
+  <script type="text/javascript">
+    Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+
+    const x = new Vue({
+      el: "#root",  // el 用于指定当前Vue实例为哪个容器服务，值通常为css选择器字符串
+      data: {
+        "name": "张三",
+        "age": 18,
+        "url": "http://www.baidu.com"
+      } //data 中用于存储数据，数据供el所制定的容器所使用，值为对象或函数
+    })
+  </script>
+</body>
+
+</html>

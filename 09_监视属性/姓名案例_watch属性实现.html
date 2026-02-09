@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>姓名案例_watch属性实现</title>
+  <script type="text/javascript" src="../js/vue.js"></script>
+</head>
+
+
+<body>
+  <!--
+      计算属性和监视属性之间的区别：
+          1、计算属性能完成的功能，监视属性都可以完成
+          2、监视属性能完成的功能，计算属性不一定能完成，比如watch可以进行异步操作
+      两个重要的小原则：
+          1、所有被Vue管理的函数，最好写成普通函数，这样this的指向才是vm或组件实例对象
+          2、所有不被Vue管理的函数（定时器回调函数。ajax回调函数等）最好写成箭头函数，这样this的指向才是vm或组件实例对象
+  -->
+  <div id="root">
+    <h3>hello, {{name}}, {{age}}</h3>
+    姓：<input type="text" v-model="firstName"> <br />
+    名：<input type="text" v-model="lastName"> <br />
+    测试：<input type="text" v-model="x"> <br />
+    姓名：<span>{{fullName}}</span>
+  </div>
+  <script type="text/javascript">
+    Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+    const v = new Vue({
+
+      data() {
+        return {
+          name: "张三",
+          age: 18,
+          url: "http://www.baidu.com",
+          firstName: "张",
+          lastName: "三",
+          fullName: "张-三"
+        }
+      },
+      watch: {
+        firstName(newValue, oldValue) {
+          this.fullName = newValue + '' + this.lastName
+        },
+        lastName(newValue, oldValue) {
+          this.fullName = this.firstName + '' + newValue
+        }
+
+      }
+    },
+
+    )
+    v.$mount("#root")
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>回顾Object.defineProperty方法</title>
+  <script type="text/javascript" src="../js/vue.js"></script>
+</head>
+
+<!--
+有点像java的java Bean
+-->
+
+<body>
+  <script type="text/javascript">
+    let number = 18
+    let person = {
+      name: "zhangsan",
+      sex: "male"
+      // age:18
+    }
+    Object.defineProperty(person, "age", {
+      // value: 18,
+      // enumerable: true, //控制属性是否可以枚举遍历，默认为false
+      // writable: true, //控制属性是否可以被修改，，默认为false
+      // configurable: true, //控制属性是否可以被删除，，默认为false
+      get() {
+        console.log("有人读取了age属性")
+        return number;
+      },
+
+      set(value) {
+        console.log("有人修改了age属性，且值是", value)
+        number = value
+      }
+    })
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>el与data的两种写法</title>
+  <script type="text/javascript" src="../js/vue.js"></script>
+</head>
+
+
+<body>
+  <!--
+    data与el的2种写法
+      1、el的两种写法
+        （1） new Vue的时候配置el属性
+        （2）先创建Vue实例，随后再通过$mount绑定容器
+      2、data的两种写法
+        （1）对象式
+        （2）函数式
+        如何选择：在组件上，data必须使用函数式，否则会报错
+      3、一个重要原则：
+        由Vue管理的函数，一定不要写箭头函数，一旦写了箭头函数，this就不是这个Vue实例了
+  -->
+  <div id="root">
+    <h3>hello, {{name}}, {{age}}</h3>
+  </div>
+  <script type="text/javascript">
+    Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+    // //el的两种写法
+    // const v = new Vue({
+    //   // el: "#root",  // el的第一种写法
+    //   data: {
+    //     "name": "张三",
+    //     "age": 18,
+    //     "url": "http://www.baidu.com"
+    //   } //data 中用于存储数据，数据供el所制定的容器所使用，值为对象或函数
+    // })
+    // v.$mount("#root") //el的第二种写法，绑定容器
+
+    //el的两种写法
+    const v = new Vue({
+      // el: "#root",  // el的第一种写法
+      //   data: {
+      //     "name": "张三",
+      //     "age": 18,
+      //     "url": "http://www.baidu.com"
+      //   } //data的第一种写法
+      data() {
+        return {
+          name: "张三",
+          age: 18,
+          url: "http://www.baidu.com"
+        }
+      } //data 的第二种写法
+    })
+    v.$mount("#root") //el的第二种写法，绑定容器
+  </script>
+</body>
+
+</html>
