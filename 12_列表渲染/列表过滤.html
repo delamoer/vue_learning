@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>列表过滤</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+  </head>
+
+  <body>
+    <!--
+      列表过滤：
+        1、配合v-if进行过滤：适用于简单的过滤条件，直接在模板中使用v-if进行条件判断，缺点是当列表项较多时，性能可能会受到影响，因为每次渲染都会执行v-if的条件判断
+        2、配合watch操作数据进行过滤：适用于复杂的过滤条件，可以在watch中监听搜索文本的变化，然后根据搜索文本来过滤列表数据，优点是性能较好，因为只在搜索文本变化时才会执行过滤操作，缺点是需要额外的代码来处理过滤逻辑
+        3、配合computed操作数据进行过滤：适用于复杂的过滤条件，可以在computed中定义一个计算属性，根据搜索文本来过滤列表数据，优点是性能较好，因为计算属性会基于其依赖进行缓存，只有当依赖发生变化时才会重新计算，缺点是需要额外的代码来处理过滤逻辑
+  -->
+    <div id="root">
+      <h2>人员列表</h2>
+      <!-- 遍历列表渲染 -->
+      <input type="text" v-model="searchText" placeholder="请输入搜索内容" />
+      <!--配合v-if进行过滤-->
+      <ul>
+        <li
+          v-for="(person, index) in persons"
+          :key="person.id"
+          v-if="person.name.includes(searchText)"
+        >
+          {{ person.name }} - {{ person.age }}- {{ person.sex }}
+        </li>
+      </ul>
+
+      <!--配合watch操作数据进行过滤-->
+      <ul>
+        <li v-for="(person, index) in filteredPersons" :key="person.id">
+          {{ person.name }} - {{ person.age }} - {{ person.sex }}
+        </li>
+      </ul>
+      <!--配合computed操作数据进行过滤-->
+      <ul>
+        <li v-for="(person, index) in filteredPersons" :key="person.id">
+          {{ person.name }} - {{ person.age }} - {{ person.sex }}
+        </li>
+      </ul>
+    </div>
+    <script type="text/javascript">
+      Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+      const v = new Vue({
+        data: {
+          searchText: "",
+          persons: [
+            { id: 1, name: "马冬梅", age: 18, sex: "女" },
+            { id: 2, name: "周冬雨", age: 19, sex: "女" },
+            { id: 3, name: "周杰伦", age: 20, sex: "男" },
+            { id: 4, name: "温兆伦", age: 21, sex: "男" },
+          ],
+          // filteredPersons: [],
+        },
+        watch: {
+        //   searchText: {
+        //     immediate: true, //立即执行一次handler函数，获取初始值,不然页面上初始显示为空
+        //     handler(newVal, oldVal) {
+        //       console.log("搜索内容改变了", newVal, oldVal);
+        //       this.filteredPersons = this.persons.filter((person) =>
+        //         person.name.includes(this.searchText),
+        //       );
+        //     },
+        //   },
+        },
+        computed: {
+          filteredPersons() {
+            return this.persons.filter((person) =>
+              person.name.includes(this.searchText),
+            );
+          },
+        },
+        methods: {},
+      });
+      v.$mount("#root");
+    </script>
+  </body>
+</html>

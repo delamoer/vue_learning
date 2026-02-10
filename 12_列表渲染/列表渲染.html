@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>列表渲染</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+  </head>
+
+  <body>
+    <!--
+      列表渲染：
+        1、v-for：通过遍历数组或对象来渲染列表
+                注意：
+                  （1）、v-for必须使用key属性来唯一标识每个元素，key的值应该是一个唯一的字符串或数字，通常使用数据项的id作为key，不建议使用index作为key，因为index可能会发生变化，导致渲染性能下降和组件状态混乱
+                  （2）、v-for可以用在template标签上，template标签不会被渲染到页面上，可以用来包裹多个元素
+                  （3）、v-for可以和v-if一起使用，但v-if优先级比v-for高，会先执行v-if再执行v-for
+                  （4）、v-for可以用在组件上，可以通过props传递数据给组件
+                  （5）、v-for可以用在普通元素上，可以通过插值表达式来显示数据
+        2、key的作用：
+          1、提高渲染性能：当数据发生变化时，Vue会根据key来判断哪些元素需要更新，哪些元素可以复用，从而提高渲染性能
+          2、保持组件状态：当数据发生变化时，Vue会根据key来判断哪些组件需要更新，哪些组件可以复用，从而保持组件状态不变
+          3、避免渲染错误：当数据发生变化时，Vue会根据key来判断哪些元素需要更新，哪些元素可以复用，从而避免渲染错误
+        3、key的原理：
+          Vue会根据key来创建一个映射表，记录每个元素的key和对应的DOM元素，当数据发生变化时，Vue会根据key来判断哪些元素需要更新，哪些元素可以复用，从而提高渲染性能和保持组件状态不变
+        4、一般选择什么作为key：
+          1、唯一的字符串或数字：通常使用数据项的id作为key，因为id是唯一的，不会发生变化，能够保证渲染性能和组件状态的稳定
+          2、避免使用index作为key：因为index可能会发生变化，导致  渲染性能下降和组件状态混乱，尤其是在列表项被添加、删除或重新排序时
+          3、如果没有唯一的字符串或数字，可以使用其他唯一的属性作为key，但要确保该属性在数据项中是唯一的，并且不会发生变化
+          4、如果没有唯一的属性可以使用，可以考虑使用第三方库来生成唯一的key，例如uuid库，但要注意生成的key应该是稳定的，不会在每次渲染时都发生变化，比如指定随机数种子，否则会导致渲染性能下降和组件状态混乱
+          5、如果数据项没有唯一的属性可以使用，并且无法使用第三方库来生成唯一的key，可以考虑使用index作为key，但要注意在列表项被添加、删除或重新排序时，可能会导致渲染性能下降和组件状态混乱，因此需要谨慎使用
+  -->
+    <div id="root">
+      <h2>人员列表</h2>
+      <!-- 遍历列表渲染 -->
+      <ul>
+        <li v-for="(person, index) in persons" :key="person.id">
+          {{ person.name }} - {{ person.age }}
+        </li>
+      </ul>
+      <h2>汽车信息</h2>
+      <!-- 遍历对象渲染 -->
+      <ul>
+        <li>名称: {{ car.name }}</li>
+        <li>价格: {{ car.price }}</li>
+        <li>颜色: {{ car.color }}</li>
+      </ul> 
+
+    </div>
+    <script type="text/javascript">
+      Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+      const v = new Vue({
+        data: {
+          persons: [
+            { id: 1, name: "张三", age: 18 },
+            { id: 2, name: "李四", age: 19 },
+            { id: 3, name: "王五", age: 20 },
+          ],  
+          car:{
+            name: "奔驰",
+            price: 1000000,
+            color:  "red",
+          }
+
+        },
+        methods: {
+        },
+      });
+      v.$mount("#root");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>条件渲染</title>
+    <style>
+      .basic {
+        width: 200px;
+        height: 50px;
+        background-color: bisque;
+        color: aqua;
+      }
+
+      .happy {
+        color: chocolate;
+      }
+
+      .sad {
+        color: cadetblue;
+        background-color: rgb(131, 123, 113);
+      }
+
+      .normal {
+        color: black;
+        background-color: rgb(131, 35, 92);
+      }
+
+    </style>
+    <script type="text/javascript" src="../js/vue.js"></script>
+  </head>
+
+  <body>
+    <!--
+      条件渲染：
+        1、v-show：通过修改元素的display属性来控制元素的显示和隐藏
+                特点：不会销毁元素，切换速度快
+                注意：
+                  （1）、v-show不能用在template标签上
+                  （2）、v-show默认值是true，显示元素
+                  （3）、v-show不能和v-if同时使用在同一个元素上
+                  （4）、v-show会影响元素的占位情况，隐藏后元素不占位
+                  （5）、v-show适用于频繁切换显示状态的场景
+                  （6）、v-show会影响元素的初始渲染性能，初始渲染时就会渲染该元素
+                  （7）、v-show会影响SEO，不利于SEO优化
+                  （8）、v-show会影响无障碍访问
+                  （9）、v-show会影响CSS选择器的使用
+                  （10）、v-show会影响事件监听器的使用
+        2、v-if：通过添加或删除元素来控制元素的显示和隐藏 
+                特点：会销毁元素，切换速度慢
+                注意：
+                  （1）、v-if可以用在template标签上
+                  （2）、v-if默认值是false，隐藏元素
+                  （3）、v-if不能和v-show同时使用在同一个元素上
+                  （4）、v-if不会影响元素的占位情况，隐藏后元素不占位
+                  （5）、v-if适用于不频繁切换显示状态的场景
+                  （6）、v-if不会影响元素的初始渲染性能，初始渲染时不会渲染该元素
+                  （7）、v-if不会影响SEO，有利于SEO优化
+                  （8）、v-if不会影响无障碍访问
+                  （9）、v-if不会影响CSS选择器的使用
+                  （10）、v-if不会影响事件监听器的使用
+  -->
+    <div id="root">
+      <!-- 使用v-show做条件渲染-->
+       <h2 v-show="isShow">Hello atguigu</h2>
+      <button @click="isShow = !isShow">切换显示状态</button>
+      <br /><br />  
+      <!-- 使用v-if做条件渲染-->
+      <h2 v-if="isShow">Hello atguigu2</h2> 
+      <h2 v-else-if="isShow === false">Hello atguigu3</h2>
+      <h2 v-else>Hello atguigu4</h2>  
+      <!-- 使用v-if与template组合-->
+      <template v-if="isShow">
+        <h3>atguigu5</h3>
+        <h3>atguigu6</h3>
+      </template>
+
+    </div>
+    <script type="text/javascript">
+      Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+      const v = new Vue({
+        data: {
+          isShow: true,
+          mod: "normal",
+          classArr: ["happy", "sad", "normal"],
+          classObject: {
+            basic: true,
+            normal: false,
+          },
+          styleObject: {
+            fontSize: "40px",
+            backgroundColor: "blue",
+          },
+        },
+        methods: {
+          changeMode() {
+            const class_index = Math.floor(Math.random() * 3);
+            this.mod = this.classArr[class_index];
+          },
+        },
+      });
+      v.$mount("#root");
+    </script>
+  </body>
+</html>

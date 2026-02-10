@@ -1,50 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>绑定样式</title>
+    <style>
+      .basic {
+        width: 200px;
+        height: 50px;
+        background-color: bisque;
+        color: aqua;
+      }
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>绑定样式</title>
-  <style>
-    .basic {
-      width: 200px;
-      height: 50px;
-      background-color: bisque;
-      color: aqua;
-    }
+      .happy {
+        color: chocolate;
+      }
 
-    .happy {
-      color: chocolate;
-    }
+      .sad {
+        color: cadetblue;
+        background-color: rgb(131, 123, 113);
+      }
 
-    .sad {
-      color: cadetblue;
-      background-color: rgb(131, 123, 113);
-    }
+      .normal {
+        color: black;
+        background-color: rgb(131, 35, 92);
+      }
 
-    .normal {
-      color: black;
-      background-color: rgb(131, 35, 92);
-    }
+      .atguigu1 {
+        color: blue;
+      }
 
-    .atguigu1 {
-      color: blue
-    }
+      .atguigu2 {
+        color: blueviolet;
+      }
 
-    .atguigu2 {
-      color: blueviolet
-    }
+      .atguigu3 {
+        color: brown;
+      }
+    </style>
+    <script type="text/javascript" src="../js/vue.js"></script>
+  </head>
 
-    .atguigu3 {
-      color: brown
-    }
-  </style>
-  <script type="text/javascript" src="../js/vue.js"></script>
-</head>
-
-
-<body>
-  <!--
+  <body>
+    <!--
       绑定样式：
         1、class样式
           写法：class="xxx","xxx"可以是字符串、对象、数组
@@ -54,47 +52,47 @@
         2、style样式
           :style = "{fontSize:xxx}"
   -->
-  <div id="root">
-    <!-- 绑定class样式 --字符串写法：适用于样式的类名不确定，需要动态指定-->
-    <div class="basic" :class="mod" @click="changeMode">{{name}}</div><br /><br>
+    <div id="root">
+      <!-- 绑定class样式 --字符串写法：适用于样式的类名不确定，需要动态指定-->
+      <div class="basic" :class="mod" @click="changeMode">{{name}}</div>
+      <br /><br />
 
-    <!-- 绑定class样式 --数组写法：适用于样式的个数不确定，类名也不确定，需要动态指定-->
-    <div class="basic" :class="classArr" @click="changeMode">{{name}}</div><br /><br>
+      <!-- 绑定class样式 --数组写法：适用于样式的个数不确定，类名也不确定，需要动态指定-->
+      <div class="basic" :class="classArr" @click="changeMode">{{name}}</div>
+      <br /><br />
 
-    <!-- 绑定class样式 --对象写法：适用于样式的个数确定，类名也确定，但需要动态指定是否使用样式-->
-    <div class="basic" :class="classObject" @click="changeMode">{{name}}</div><br /><br>
+      <!-- 绑定class样式 --对象写法：适用于样式的个数确定，类名也确定，但需要动态指定是否使用样式-->
+      <div class="basic" :class="classObject" @click="changeMode">{{name}}</div>
+      <br /><br />
 
-    <!-- 绑定style样式 --对象写法-->
-    <div class="basic" :style="styleObject" @click="changeMode">{{name}}</div><br /><br>
-
-  </div>
-  <script type="text/javascript">
-    Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
-    const v = new Vue(
-      {
+      <!-- 绑定style样式 --对象写法-->
+      <div class="basic" :style="styleObject" @click="changeMode">{{name}}</div>
+      <br /><br />
+    </div>
+    <script type="text/javascript">
+      Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+      const v = new Vue({
         data: {
           name: "张三",
           mod: "normal",
           classArr: ["happy", "sad", "normal"],
           classObject: {
             basic: true,
-            normal: false
+            normal: false,
           },
           styleObject: {
             fontSize: "40px",
-            backgroundColor: "blue"
-          }
+            backgroundColor: "blue",
+          },
         },
         methods: {
           changeMode() {
-            const class_index = Math.floor(Math.random() * 3)
-            this.mod = this.classArr[class_index]
-          }
-        }
-      }
-    )
-    v.$mount("#root")
-  </script>
-</body>
-
+            const class_index = Math.floor(Math.random() * 3);
+            this.mod = this.classArr[class_index];
+          },
+        },
+      });
+      v.$mount("#root");
+    </script>
+  </body>
 </html>
