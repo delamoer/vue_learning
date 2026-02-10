@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>列表排序</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+  </head>
+
+  <body>
+    <!--
+      列表排序：
+        1、配合computed操作数据进行排序：适用于简单的排序条件，可以在computed中定义一个计算属性，根据排序条件来排序列表数据，优点是性能较好，因为计算属性会基于其依赖进行缓存，只有当依赖发生变化时才会重新计算，缺点是需要额外的代码来处理排序逻辑
+        2、配合methods操作数据进行排序：适用于复杂的排序条件，可以在methods中定义一个方法，根据排序条件来排序列表数据，优点是可以处理复杂的排序逻辑，缺点是性能可能会受到影响，因为每次调用方法都会执行排序操作
+        易错点：
+              当使用computed进行排序时，不能直接修改计算属性的值，因为计算属性是基于其依赖进行缓存的，应该在computed中根据排序条件来返回排序后的数据，而不是在methods中直接修改计算属性的值。
+        备注：
+              在实际开发中，通常会将排序和过滤结合起来使用，可以在computed中同时处理排序和过滤逻辑，根据用户的输入来动态更新列表的显示。
+        其他推荐方法：
+          1、使用第三方库：可以使用像 Lodash 这样的第三方库来简化排序和过滤的操作，提供更丰富的功能和更好的性能。
+          2、服务端排序和过滤：对于大型数据集，可以考虑将排序和过滤逻辑放在服务器端进行处理，减少客户端的负担，提高性能。
+        -->
+    <div id="root">
+      <h2>人员列表</h2>
+      <input type="text" v-model="searchText" placeholder="请输入搜索内容" />
+      <button @click="sortByAge">按年龄升序</button>
+      <button @click="sortByAgeDesc">按年龄降序</button>
+      <button @click="sortByName">按姓名排序</button>
+      <ul>
+        <li v-for="(person, index) in filteredPersons" :key="person.id">
+          {{ person.name }} - {{ person.age }} - {{ person.sex }}
+        </li>
+      </ul>
+    </div>
+    <script type="text/javascript">
+      Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+      const v = new Vue({
+        data: {
+          searchText: "",
+          sortType: "",
+          persons: [
+            { id: 1, name: "马冬梅", age: 18, sex: "女" },
+            { id: 2, name: "周冬雨", age: 19, sex: "女" },
+            { id: 3, name: "周杰伦", age: 20, sex: "男" },
+            { id: 4, name: "温兆伦", age: 21, sex: "男" },
+          ],
+        },
+        computed: {
+          filteredPersons() {
+            let filtered = this.persons.filter((person) =>
+              person.name.includes(this.searchText),
+            );
+            if (this.sortType === "ageAsc") {
+              filtered.sort((a, b) => a.age - b.age);
+            } else if (this.sortType === "ageDesc") {
+              filtered.sort((a, b) => b.age - a.age);
+            } else if (this.sortType === "name") {
+              filtered.sort((a, b) => a.name.localeCompare(b.name));
+            }
+            return filtered;
+          },
+        },
+        methods: {
+          //filteredPersons 是 computed 计算属性，是直接被计算出来的，不能直接修改它的值，所以我们在 methods 中排序其实是无效的，页面不会更新。正确的做法是直接在 computed 中根据 sortType 来排序 filteredPersons，这样每次访问 filteredPersons 时都会根据当前的 sortType 进行排序。
+          // sortByAge() {
+          //   this.filteredPersons = this.filteredPersons.sort((a, b) => a.age - b.age);
+          // },
+          // sortByAgeDesc() {
+          //   this.filteredPersons = this.filteredPersons.sort((a, b) => b.age - a.age);
+          // },
+          // sortByName() {
+          //   this.filteredPersons = this.filteredPersons.sort((a, b) => a.name.localeCompare(b.name));
+          // },
+          sortByAge() {
+            this.sortType = "ageAsc";
+          },
+          sortByAgeDesc() {
+            this.sortType = "ageDesc";
+          },
+          sortByName() {
+            this.sortType = "name";
+          },
+        },
+      });
+      v.$mount("#root");
+    </script>
+  </body>
+</html>
