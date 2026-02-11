@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 过滤器学习案例</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+    
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+      #root { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
+      h1 { color: #333; text-align: center; margin-bottom: 10px; font-size: 28px; }
+      .subtitle { text-align: center; color: #999; margin-bottom: 30px; font-size: 14px; }
+      h2 { color: #667eea; margin-top: 30px; margin-bottom: 15px; font-size: 20px; border-left: 4px solid #667eea; padding-left: 10px; }
+      .example-box { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea; }
+      .example-title { font-weight: bold; color: #333; margin-bottom: 10px; font-size: 16px; }
+      .result { background: white; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #e0e0e0; }
+      .result > div { margin: 8px 0; }
+      .label { color: #666; font-weight: 500; display: inline-block; width: 150px; }
+      .value { color: #333; font-weight: bold; }
+      .highlight { color: #667eea; font-weight: bold; }
+      code { background: #ffe6e6; padding: 2px 6px; border-radius: 3px; color: #e74c3c; font-size: 13px; }
+      pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 10px 0; }
+      .note { background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0; }
+      .note-title { font-weight: bold; color: #856404; margin-bottom: 5px; }
+      .warning { background: #f8d7da; border-left-color: #dc3545; }
+      .warning .note-title { color: #721c24; }
+      hr { margin: 30px 0; border: none; border-top: 2px solid #f0f0f0; }
+      .input-demo { margin: 15px 0; }
+      .input-demo input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 300px; font-size: 14px; transition: all 0.3s; }
+      .input-demo input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    </style>
+  </head>
+
+  <body>
+    <!--
+      ==================== Vue 2 过滤器（Filters）完整教程 ====================
+      
+      一、什么是过滤器？
+        过滤器是 Vue 2 中用于文本格式化的功能，可以在插值表达式 {{ }} 和 v-bind 中使用。
+        注意：Vue 3 已移除过滤器，推荐使用计算属性或方法替代。
+        
+      二、过滤器的语法：
+        1. 基本用法：{{ message | filterName }}
+        2. 串联使用：{{ message | filter1 | filter2 }}
+        3. 带参数：{{ message | filterName(arg1, arg2) }}
+        4. v-bind 中使用：<div :id="rawId | formatId"></div>
+        
+      三、过滤器的类型：
+        1. 局部过滤器 - 在 Vue 实例的 filters 选项中定义，只能在当前实例中使用
+        2. 全局过滤器 - 使用 Vue.filter() 定义，所有实例都可以使用
+        
+      四、过滤器的特点：
+        1. 接收表达式的值作为第一个参数
+        2. 可以接收额外的参数
+        3. 必须返回处理后的值
+        4. 不会改变原始数据，只改变显示结果
+        5. 可以串联使用，前一个过滤器的结果作为后一个的输入
+        
+      五、常见应用场景：
+        1. 日期格式化（时间戳 → 可读日期）
+        2. 货币格式化（数字 → 货币符号 + 千分位）
+        3. 文本转换（大小写转换、截取等）
+        4. 数字格式化（保留小数位、百分比等）
+        5. 状态转换（0/1 → 启用/禁用）
+        
+      六、注意事项：
+        1. 过滤器应该是纯函数，不应该有副作用
+        2. 过滤器不能访问 this（指向 Vue 实例）
+        3. 复杂的逻辑建议使用计算属性代替
+        4. Vue 3 已移除，学习时了解即可
+  -->
+    <div id="root">
+        <h1>🎨 Vue 2 过滤器完整学习案例</h1>
+        <p class="subtitle">Filters - 文本格式化的便捷工具（Vue 3 已移除，推荐使用计算属性）</p>
+
+        <!-- ========== 1. 日期格式化 ========== -->
+        <h2>📅 1. 日期格式化过滤器</h2>
+        <div class="example-box">
+            <div class="example-title">将时间戳转换为可读的日期格式</div>
+            <pre v-pre>// 过滤器定义
+                Vue.filter('formatDate', function(value, format = 'YYYY-MM-DD') {
+                // ... 日期格式化逻辑
+                })
+
+                // 使用方式
+                {{ timestamp | formatDate }}
+                {{ timestamp | formatDate('YYYY-MM-DD HH:mm:ss') }}</pre>
+
+            <div class="result">
+              <div><span class="label">原始时间戳：</span><span class="value">{{ timestamp }}</span></div>
+              <div><span class="label">默认格式：</span><span class="value highlight">{{ timestamp | formatDate }}</span></div>
+              <div><span class="label">完整格式：</span><span class="value highlight">{{ timestamp | formatDate('YYYY-MM-DD HH:mm:ss') }}</span></div>
+              <div><span class="label">中文格式：</span><span class="value highlight">{{ timestamp | formatDate('YYYY年MM月DD日 HH:mm') }}</span></div>
+              <div><span class="label">仅时间：</span><span class="value highlight">{{ timestamp | formatDate('HH:mm:ss') }}</span></div>
+            </div>
+        </div>
+
+        <!-- ========== 2. 货币格式化 ========== -->
+        <h2>💰 2. 货币格式化过滤器</h2>
+        <div class="example-box">
+            <div class="example-title">将数字转换为货币格式（千分位 + 货币符号）</div>
+            <pre v-pre>// 过滤器定义
+                Vue.filter('currency', function(value, symbol = '¥', decimals = 2) {
+                // ... 货币格式化逻辑
+                })
+
+                // 使用方式
+                {{ price | currency }}
+                {{ price | currency('$', 2) }}</pre>
+
+            <div class="result">
+              <div><span class="label">原始金额：</span><span class="value">{{ price }}</span></div>
+              <div><span class="label">人民币：</span><span class="value highlight">{{ price | currency }}</span></div>
+              <div><span class="label">美元：</span><span class="value highlight">{{ price | currency('$', 2) }}</span></div>
+              <div><span class="label">欧元：</span><span class="value highlight">{{ price | currency('€', 2) }}</span></div>
+              <div><span class="label">无小数：</span><span class="value highlight">{{ price | currency('￥', 0) }}</span></div>
+            </div>
+        </div>
+
+        <!-- ========== 3. 文本转换 ========== -->
+        <h2>📝 3. 文本转换过滤器</h2>
+        <div class="example-box">
+            <div class="example-title">大小写转换、文本截取等</div>
+            <div class="input-demo">
+                <label>输入文本测试：</label>
+                <input type="text" v-model="textInput" placeholder="输入文本试试..." />
+            </div>
+
+            <div class="result">
+              <div><span class="label">原始文本：</span><span class="value">{{ textInput }}</span></div>
+              <div><span class="label">首字母大写：</span><span class="value highlight">{{ textInput | capitalize }}</span></div>
+              <div><span class="label">全部大写：</span><span class="value highlight">{{ textInput | uppercase }}</span></div>
+              <div><span class="label">全部小写：</span><span class="value highlight">{{ textInput | lowercase }}</span></div>
+              <div><span class="label">截取前10字符：</span><span class="value highlight">{{ textInput | truncate(10) }}</span></div>
+              <div><span class="label">带省略号截取：</span><span class="value highlight">{{ textInput | truncate(15, '...') }}</span></div>
+            </div>
+        </div>
+
+        <!-- ========== 4. 数字格式化 ========== -->
+        <h2>🔢 4. 数字格式化过滤器</h2>
+        <div class="example-box">
+            <div class="example-title">小数位、百分比、千分位等</div>
+            <div class="input-demo">
+                <label>输入数字测试：</label>
+                <input type="number" v-model.number="numberInput" placeholder="输入数字试试..." />
+            </div>
+
+            <div class="result">
+              <div><span class="label">原始数字：</span><span class="value">{{ numberInput }}</span></div>
+              <div><span class="label">保留2位小数：</span><span class="value highlight">{{ numberInput | toFixed(2) }}</span></div>
+              <div><span class="label">百分比：</span><span class="value highlight">{{ numberInput | percent }}</span></div>
+              <div><span class="label">千分位：</span><span class="value highlight">{{ numberInput | numberFormat }}</span></div>
+              <div><span class="label">文件大小：</span><span class="value highlight">{{ numberInput | fileSize }}</span></div>
+            </div>
+        </div>
+
+        <!-- ========== 5. 状态转换 ========== -->
+        <h2>🔄 5. 状态转换过滤器</h2>
+        <div class="example-box">
+            <div class="example-title">将数字或布尔值转换为可读文本</div>
+
+            <div class="result">
+              <div><span class="label">布尔值 true：</span><span class="value highlight">{{ true | statusText }}</span></div>
+              <div><span class="label">布尔值 false：</span><span class="value highlight">{{ false | statusText }}</span></div>
+              <div><span class="label">数字 1：</span><span class="value highlight">{{ 1 | statusText }}</span></div>
+              <div><span class="label">数字 0：</span><span class="value highlight">{{ 0 | statusText }}</span></div>
+              <div><span class="label">性别 1：</span><span class="value highlight">{{ 1 | genderText }}</span></div>
+              <div><span class="label">性别 0：</span><span class="value highlight">{{ 0 | genderText }}</span></div>
+            </div>
+        </div>
+
+        <!-- ========== 6. 过滤器串联使用 ========== -->
+        <h2>⛓️ 6. 过滤器串联使用</h2>
+        <div class="example-box">
+            <div class="example-title">多个过滤器可以串联，从左到右依次执行</div>
+            <pre v-pre>// 串联语法
+                    {{ message | filter1 | filter2 | filter3 }}
+
+                    // 执行顺序：message → filter1 → filter2 → filter3</pre>
+
+            <div class="result">
+              <div><span class="label">原始文本：</span><span class="value">{{ longText }}</span></div>
+              <div><span class="label">截取 + 大写：</span><span class="value highlight">{{ longText | truncate(20) | uppercase }}</span></div>
+              <div><span class="label">大写 + 截取：</span><span class="value highlight">{{ longText | uppercase | truncate(20) }}</span></div>
+            </div>
+        </div>
+
+        <!-- ========== 7. 局部过滤器 vs 全局过滤器 ========== -->
+        <h2>🎯 7. 局部过滤器 vs 全局过滤器</h2>
+        <div class="example-box">
+            <div class="example-title">局部过滤器只在定义它的 Vue 实例中可用</div>
+            <pre v-pre>// 全局过滤器定义（所有实例都可用）
+Vue.filter('uppercase', function(value) {
+  return value.toString().toUpperCase();
+});
+
+// 局部过滤器定义（仅当前实例可用）
+new Vue({
+  el: '#root',
+  filters: {
+    reverse(value) {
+      return value.toString().split('').reverse().join('');
+    },
+    repeat(value, times = 2) {
+      return value.toString().repeat(times);
+    }
+  }
+});</pre>
+
+            <div class="input-demo">
+                <label>输入文本测试局部过滤器：</label>
+                <input type="text" v-model="localFilterTest" placeholder="输入文本试试..." />
+            </div>
+
+            <div class="result">
+              <div><span class="label">原始文本：</span><span class="value">{{ localFilterTest }}</span></div>
+              <div><span class="label">【全局】大写：</span><span class="value highlight">{{ localFilterTest | uppercase }}</span></div>
+              <div><span class="label">【局部】反转：</span><span class="value highlight">{{ localFilterTest | reverse }}</span></div>
+              <div><span class="label">【局部】重复2次：</span><span class="value highlight">{{ localFilterTest | repeat(2) }}</span></div>
+              <div><span class="label">【局部】重复3次：</span><span class="value highlight">{{ localFilterTest | repeat(3) }}</span></div>
+              <div><span class="label">【局部】占位符：</span><span class="value highlight">{{ emptyValue | placeholder('暂无数据') }}</span></div>
+              <div><span class="label">【局部】高亮显示：</span><span class="value highlight" v-html="localFilterTest | highlight"></span></div>
+            </div>
+        </div>
+
+        <div class="note">
+          <div class="note-title">📌 全局过滤器 vs 局部过滤器的区别</div>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>全局过滤器</strong>：使用 <code>Vue.filter('name', fn)</code> 定义，在所有 Vue 实例中都可以使用</li>
+            <li><strong>局部过滤器</strong>：在 Vue 实例的 <code>filters</code> 选项中定义，只能在当前实例中使用</li>
+            <li><strong>优先级</strong>：当全局过滤器和局部过滤器同名时，局部过滤器优先</li>
+            <li><strong>使用场景</strong>：通用的格式化用全局过滤器，特定组件的用局部过滤器</li>
+          </ul>
+        </div>
+
+        <hr />
+
+        <!-- ========== 重要提示 ========== -->
+        <div class="note warning">
+          <div class="note-title">⚠️ Vue 3 重要变化</div>
+          <p>Vue 3 已经<strong>完全移除了过滤器功能</strong>，官方推荐使用以下替代方案：</p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>计算属性</strong> - 用于需要缓存的复杂逻辑</li>
+            <li><strong>方法</strong> - 用于简单的格式化逻辑</li>
+          </ul>
+          <pre v-pre style="margin-top: 10px;">// Vue 3 替代方案示例
+                computed: {
+                formattedDate() {
+                    return this.formatDate(this.timestamp);
+                }
+                }
+
+                // 或者使用方法
+                methods: {
+                formatDate(value) {
+                    return new Date(value).toLocaleDateString();
+                }
+                }
+
+                // 模板中使用
+                {{ formattedDate }}
+                {{ formatDate(timestamp) }}</pre>
+        </div>
+
+        <div class="note">
+          <div class="note-title">💡 学习建议</div>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>如果是学习 Vue 2：了解过滤器的用法，快速过一遍即可</li>
+            <li>如果准备用 Vue 3：重点学习计算属性和方法，过滤器了解概念即可</li>
+            <li>维护老项目时需要了解过滤器，因为很多 Vue 2 项目在使用</li>
+            <li>新项目建议直接用 Vue 3 的方式（计算属性/方法）</li>
+          </ul>
+        </div>
+
+      </div>
+
+    <script type="text/javascript">
+      Vue.config.productionTip = false;
+
+      // ========== 全局过滤器定义 ==========
+      
+      // 1. 日期格式化过滤器
+      Vue.filter('formatDate', function(value, format = 'YYYY-MM-DD') {
+        if (!value) return '';
+        const date = new Date(value);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        return format
+          .replace('YYYY', year)
+          .replace('MM', month)
+          .replace('DD', day)
+          .replace('HH', hours)
+          .replace('mm', minutes)
+          .replace('ss', seconds)
+          .replace('年', '年')
+          .replace('月', '月')
+          .replace('日', '日');
+      });
+      
+      // 2. 货币格式化过滤器
+      Vue.filter('currency', function(value, symbol = '¥', decimals = 2) {
+        if (value === null || value === undefined) return '';
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+        
+        const fixed = num.toFixed(decimals);
+        const parts = fixed.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        
+        return symbol + parts.join('.');
+      });
+      
+      // 3. 首字母大写
+      Vue.filter('capitalize', function(value) {
+        if (!value) return '';
+        value = value.toString();
+        return value.charAt(0).toUpperCase() + value.slice(1);
+      });
+      
+      // 4. 全部大写
+      Vue.filter('uppercase', function(value) {
+        if (!value) return '';
+        return value.toString().toUpperCase();
+      });
+      
+      // 5. 全部小写
+      Vue.filter('lowercase', function(value) {
+        if (!value) return '';
+        return value.toString().toLowerCase();
+      });
+      
+      // 6. 文本截取过滤器
+      Vue.filter('truncate', function(value, length, suffix = '...') {
+        if (!value) return '';
+        value = value.toString();
+        if (value.length <= length) return value;
+        return value.substring(0, length) + suffix;
+      });
+      
+      // 7. 保留小数位
+      Vue.filter('toFixed', function(value, decimals = 2) {
+        if (value === null || value === undefined) return '';
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+        return num.toFixed(decimals);
+      });
+      
+      // 8. 百分比格式化
+      Vue.filter('percent', function(value) {
+        if (value === null || value === undefined) return '';
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+        return (num * 100).toFixed(2) + '%';
+      });
+      
+      // 9. 千分位格式化
+      Vue.filter('numberFormat', function(value) {
+        if (value === null || value === undefined) return '';
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      });
+      
+      // 10. 文件大小格式化
+      Vue.filter('fileSize', function(bytes) {
+        if (bytes === 0) return '0 B';
+        if (!bytes) return '';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+      });
+      
+      // 11. 状态文本转换
+      Vue.filter('statusText', function(value) {
+        return value === true || value === 1 ? '启用' : '禁用';
+      });
+      
+      // 12. 性别文本转换
+      Vue.filter('genderText', function(value) {
+        return value === 1 ? '男' : '女';
+      });
+
+      // ========== Vue 实例 ==========
+      const vm = new Vue({
+        el: '#root',
+        data: {
+          timestamp: Date.now(),
+          price: 1234567.89,
+          textInput: 'hello world',
+          numberInput: 12345.6789,
+          longText: 'this is a very long text for testing filter chain functionality',
+          localFilterTest: 'Vue',
+          emptyValue: ''
+        },
+        
+        // ========== 局部过滤器定义（仅当前实例可用） ==========
+        filters: {
+          // 1. 反转字符串
+          reverse(value) {
+            if (!value) return '';
+            return value.toString().split('').reverse().join('');
+          },
+          
+          // 2. 重复字符串
+          repeat(value, times = 2) {
+            if (!value) return '';
+            return value.toString().repeat(times);
+          },
+          
+          // 3. 空值占位符
+          placeholder(value, text = '暂无数据') {
+            return value || text;
+          },
+          
+          // 4. 高亮显示（添加背景色）
+          highlight(value) {
+            if (!value) return '';
+            return `<mark style="background: #ffeb3b; padding: 2px 4px; border-radius: 3px;">${value}</mark>`;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
