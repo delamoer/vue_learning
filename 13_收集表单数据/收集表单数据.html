@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>收集表单数据</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+    
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+      #root { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
+      h1 { color: #333; text-align: center; margin-bottom: 30px; font-size: 28px; }
+      form { line-height: 1.8; }
+      label { color: #555; font-weight: 500; }
+      input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="date"], input[type="time"], select, textarea { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: all 0.3s; }
+      input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+      button { padding: 10px 24px; margin-right: 10px; border: none; border-radius: 5px; font-size: 14px; cursor: pointer; transition: all 0.3s; font-weight: 500; }
+      button[type="submit"] { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+      button[type="submit"]:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+      button[type="button"] { background: #f5f5f5; color: #666; }
+      button[type="button"]:hover { background: #e0e0e0; }
+      .test-data-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+      .test-data-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4); }
+      hr { margin: 30px 0; border: none; border-top: 2px solid #f0f0f0; }
+      h3 { color: #333; margin-bottom: 15px; }
+      pre { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+      .validation-msg { display: block; margin-top: 5px; font-size: 12px; }
+      .error { color: #e74c3c; }
+      .success { color: #27ae60; }
+      .warning { color: #f39c12; }
+      .data-type-section { background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin-top: 20px; }
+      .type-item { margin: 5px 0; font-size: 13px; }
+      .type-label { font-weight: bold; color: #856404; }
+      
+      .password-wrapper { position: relative; display: inline-block; }
+      .password-wrapper input { padding-right: 40px; }
+      .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 5px; margin: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+      .toggle-password:hover .eye { border-color: #667eea; }
+      .toggle-password:hover .eye::before { background: #667eea; }
+      .toggle-password:hover .eye-slash { background: #667eea; }
+      
+      .eye { position: relative; width: 20px; height: 10px; border: 2px solid #999; border-radius: 50% 50% 50% 50% / 100% 100% 0% 0%; transition: all 0.3s; }
+      .eye::before { content: ''; position: absolute; width: 6px; height: 6px; background: #999; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); transition: all 0.3s; }
+      .eye-slash { position: absolute; width: 2px; height: 22px; background: #999; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); transition: all 0.3s; }
+    </style>
+  </head>
+
+  <body>
+    <!--
+      ==================== Vue 表单数据收集完整教程 ====================
+      
+      一、v-model 双向数据绑定：
+        1. 作用：实现表单输入和应用数据的双向绑定
+        2. 原理：v-model是语法糖，底层通过监听input事件更新数据，通过value属性显示数据
+        3. 适用元素：input、textarea、select等表单元素
+        
+      二、v-model 的三个修饰符：
+        1. .lazy   - 在 change 事件而非 input 事件触发时更新（失去焦点或按回车时更新）
+        2. .number - 自动将输入值转换为数字类型
+        3. .trim   - 自动去除输入内容首尾的空格
+        
+      三、常用表单元素类型及数据类型：
+        【文本输入类】
+        1. type="text"     - 普通文本框 → 字符串（应用：姓名、地址等）
+        2. type="email"    - 邮箱输入框 → 字符串（自带邮箱格式验证）
+        3. type="password" - 密码输入框 → 字符串（输入内容显示为圆点）
+        4. type="number"   - 数字输入框 → 数字（带上下箭头，可设置min/max/step）
+        5. <textarea>      - 多行文本域 → 字符串（rows设置行数）
+        
+        【选择类】
+        6. type="radio"    - 单选框 → 字符串（多个单选框绑定同一个v-model，value决定选中值）
+        7. type="checkbox" - 复选框 → 数组（多选）或布尔值（单个）
+        8. <select>        - 下拉单选 → 字符串（<option>的value作为绑定值）
+        9. <select multiple> - 下拉多选 → 数组（按住Ctrl多选，实际项目中较少用）
+        
+        【日期时间类】
+        10. type="date"    - 日期选择器 → 字符串（格式：yyyy-MM-dd）
+        11. type="time"    - 时间选择器 → 字符串（格式：HH:mm）
+        
+        【特殊类型】
+        12. type="range"   - 范围滑块 → 数字（需设置min/max/step，适合音量、亮度等）
+        13. type="color"   - 颜色选择器 → 字符串（返回十六进制颜色值，如#ff0000）
+        
+      四、label 标签的三种关联方式：
+        1. for + id 显式关联：<label for="id">文字</label> <input id="id">
+           - 点击label文字会聚焦/选中对应input
+           - 适合文本框、数字框等独立输入元素
+           
+        2. 包裹式隐式关联：<label><input />文字</label>
+           - 不需要for和id，label直接包裹input
+           - 代码简洁，适合单选框、复选框
+           
+        3. 无关联label：<label>标题文字</label>
+           - 仅作为标题或分组说明，不可点击
+           
+      五、表单验证要点：
+        1. 使用 @submit.prevent 阻止表单默认提交行为（防止页面刷新）
+        2. 在提交方法中进行数据验证（非空、格式、一致性等）
+        3. 使用 v-if 条件渲染显示实时验证提示
+        
+      六、数据展示技巧：
+        1. 使用计算属性(computed)格式化展示数据
+        2. 使用插值表达式{{ }}实时显示数据
+        3. 使用:style动态样式绑定
+        4. 敏感数据（如密码）在展示时需要脱敏处理
+        
+      ==================== 学习建议 ====================
+      1. 每个表单类型都要动手测试，观察数据变化
+      2. 注意不同表单元素绑定的数据类型差异
+      3. 理解 v-model 修饰符的使用场景
+      4. 掌握 label 的关联方式，提升用户体验
+      5. 学会基本的表单验证逻辑
+  -->
+    <div id="root">
+      <h1>📝 Vue 表单数据收集完整案例</h1>
+      <form @submit.prevent="submitForm">
+        <!-- 
+          写法一：for + id 显式关联（推荐用于文本输入框）
+          特点：
+            1. label 的 for 属性值必须与 input 的 id 值完全一致
+            2. 点击 label 文字，会自动聚焦到对应的 input
+            3. label 和 input 可以分开放置（不需要嵌套）
+            4. 适合文本框、数字框等独立的输入元素
+        -->
+        <label for="name">姓名：</label>
+        <input type="text" id="name" v-model="name" />
+        <span style="color: gray; font-size: 12px;">（点击"姓名："文字试试）</span>
+        <br /><br />
+        
+        <!-- 
+          type="number" 数字输入框的特点：
+            1. 显示上下箭头（spinner），点击可以加减数值
+            2. 使用键盘 ↑↓ 键也可以增减
+            3. min：最小值限制
+            4. max：最大值限制  
+            5. step：每次增减的步长，默认为 1
+            6. 只能输入数字，自动过滤字母等非数字字符
+        -->
+        <label for="age">年龄：</label>
+        <input type="number" id="age" v-model.number="age" min="0" max="150" step="1" />
+        <span style="color: gray; font-size: 12px;">（限制：0-150岁，每次±1。试试点箭头或按↑↓键）</span>
+        <br /><br />
+        
+        <label for="email">邮箱：</label>
+        <input type="email" id="email" v-model.trim="email" />
+        <span style="color: gray; font-size: 12px;">（点击"邮箱："文字试试）</span>        <span v-if="email && !isValidEmail" class="validation-msg error">✗ 邮箱格式不正确</span>
+        <span v-if="email && isValidEmail" class="validation-msg success">✓ 邮箱格式正确</span>        <br /><br />
+        
+        <!-- 
+          写法二：包裹式隐式关联（推荐用于单选框/复选框）
+          特点：
+            1. label 直接包裹 input，不需要 for 和 id
+            2. 点击 label 文字，会自动选中/取消选中 input
+            3. 代码更简洁，减少 id 命名
+            4. 适合单选框、复选框等选择类元素
+        -->
+        <label style="font-weight: bold;">性别：</label>
+        <span style="color: gray; font-size: 12px;">（包裹式写法，点击文字试试）</span>
+        <br />
+        <label>
+          <input type="radio" value="男" v-model="gender" />
+          男
+        </label>
+        <label>
+          <input type="radio" value="女" v-model="gender" />
+          女
+        </label>
+        <br /><br />
+        
+        <!-- 
+          写法三：for + id 用于单选框/复选框（也可以用）
+          特点：
+            1. 与写法一相同，但分离的写法
+            2. 点击 label 文字，会选中对应的 input
+            3. 需要为每个 input 设置唯一的 id
+            4. 适合需要灵活布局的场景
+        -->
+        <label style="font-weight: bold;">爱好：</label>
+        <span style="color: gray; font-size: 12px;">（for+id 分离式写法，点击文字试试）</span>
+        <br />
+        <input type="checkbox" id="hobby1" value="篮球" v-model="hobbies" />
+        <label for="hobby1">篮球</label>
+        <input type="checkbox" id="hobby2" value="足球" v-model="hobbies" />
+        <label for="hobby2">足球</label>
+        <input type="checkbox" id="hobby3" value="游泳" v-model="hobbies" />
+        <label for="hobby3">游泳</label>
+        <input type="checkbox" id="hobby4" value="阅读" v-model="hobbies" />
+        <label for="hobby4">阅读</label>
+        <br /><br />
+        
+        <!-- 下拉单选框：城市 -->
+        <label for="city">所在城市：</label>
+        <select id="city" v-model="city">
+          <option value="">请选择城市</option>
+          <option value="北京">北京</option>
+          <option value="上海">上海</option>
+          <option value="广州">广州</option>
+          <option value="深圳">深圳</option>
+          <option value="杭州">杭州</option>
+        </select>
+        <br /><br />
+        
+        <!-- 
+          下拉多选框：技能
+          特点：
+            1. 添加 multiple 属性可以多选
+            2. v-model 绑定的数据类型是数组
+            3. 按住 Ctrl (Windows) 或 Command (Mac) 可以选择多项
+            4. 用户体验不太好，实际项目中更推荐用复选框
+        -->
+        <label for="skills">掌握的技能：</label>
+        <select id="skills" v-model="skills" multiple size="4">
+          <option value="HTML">HTML</option>
+          <option value="CSS">CSS</option>
+          <option value="JavaScript">JavaScript</option>
+          <option value="Vue">Vue</option>
+          <option value="React">React</option>
+          <option value="Node.js">Node.js</option>
+        </select>
+        <span style="color: gray; font-size: 12px;">（按住Ctrl可多选）</span>
+        <br /><br />
+        
+        <!-- 文本域：个人简介 -->
+        <label for="intro">个人简介：</label>
+        <br />
+        <textarea id="intro" v-model.lazy="intro" rows="5" cols="50" placeholder="请输入个人简介..."></textarea>
+        <span style="color: gray; font-size: 12px;">（使用.lazy修饰符，失去焦点时才更新）</span>
+        <br /><br />
+        
+        <!-- 
+          密码输入框：type="password"
+          特点：
+            1. 输入的内容会显示为圆点或星号，保护隐私
+            2. 数据类型仍然是字符串
+            3. 常与 type="text" 配合做密码确认
+            4. 密码可见性切换：点击眼睛图标可以查看/隐藏密码（提升用户体验）
+        -->
+        <label for="password">密码：</label>
+        <div class="password-wrapper">
+          <input :type="showPassword ? 'text' : 'password'" id="password" v-model="password" placeholder="请输入密码（至少6位）" />
+          <button type="button" class="toggle-password" @click="showPassword = !showPassword" :title="showPassword ? '隐藏密码' : '显示密码'">
+            <span class="eye"></span>
+            <span v-if="!showPassword" class="eye-slash"></span>
+          </button>
+        </div>
+        <span v-if="password" class="validation-msg" :class="passwordStrengthClass">
+          {{ passwordStrengthText }}
+        </span>
+        <br /><br />
+        
+        <label for="confirmPassword">确认密码：</label>
+        <div class="password-wrapper">
+          <input :type="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
+          <button type="button" class="toggle-password" @click="showConfirmPassword = !showConfirmPassword" :title="showConfirmPassword ? '隐藏密码' : '显示密码'">
+            <span class="eye"></span>
+            <span v-if="!showConfirmPassword" class="eye-slash"></span>
+          </button>
+        </div>
+        <span v-if="password && confirmPassword && password !== confirmPassword" style="color: red; font-size: 12px;">两次密码不一致！</span>
+        <br /><br />
+        
+        <!-- 
+          日期选择器：type="date"
+          特点：
+            1. 浏览器会显示日历选择器
+            2. 返回格式为 yyyy-MM-dd （如：2026-02-11）
+            3. 可以设置 min 和 max 限制日期范围
+        -->
+        <label for="birthday">出生日期：</label>
+        <input type="date" id="birthday" v-model="birthday" />
+        <br /><br />
+        
+        <!-- 
+          时间选择器：type="time"
+          特点：
+            1. 选择具体的时间（时:分）
+            2. 返回格式为 HH:mm （如：14:30）
+        -->
+        <label for="appointmentTime">预约时间：</label>
+        <input type="time" id="appointmentTime" v-model="appointmentTime" />
+        <br /><br />
+        
+        <!-- 
+          范围滑块：type="range"
+          特点：
+            1. 通过拖动滑块选择数值
+            2. 必须设置 min、max 和 step
+            3. 适合选择范围内的数值（如音量、亮度等）
+            4. 用户体验好，但不够精确
+        -->
+        <label for="satisfaction">满意度：</label>
+        <input type="range" id="satisfaction" v-model.number="satisfaction" min="0" max="100" step="1" />
+        <span>{{ satisfaction }}%</span>
+        <span style="color: gray; font-size: 12px;">（拖动滑块试试）</span>
+        <br /><br />
+        
+        <!-- 
+          颜色选择器：type="color"
+          特点：
+            1. 浏览器会显示颜色选择器
+            2. 返回十六进制颜色值（如：#ff0000）
+            3. 可以用于主题色、标签颜色等场景
+        -->
+        <label for="favoriteColor">喜欢的颜色：</label>
+        <input type="color" id="favoriteColor" v-model="favoriteColor" />
+        <span :style="{ color: favoriteColor, fontWeight: 'bold' }">{{ favoriteColor }}</span>
+        <br /><br />
+        
+        <!-- 复选框：同意协议 -->
+        <input type="checkbox" id="agree" v-model="agree" />
+        <label for="agree">我已阅读并同意用户协议</label>
+        <br /><br />
+        
+        <button type="submit">✓ 提交</button>
+        <button type="button" @click="resetForm">↻ 重置</button>
+        <button type="button" class="test-data-btn" @click="fillTestData">⚡ 快速填充测试数据</button>
+      </form>
+      
+      <hr />
+      <h3>📊 收集到的数据：</h3>
+      <pre>{{ userInfo }}</pre>
+      
+      <div class="data-type-section">
+        <h3>🔍 数据类型分析（帮助理解不同表单元素的数据类型）：</h3>
+        <div class="type-item" v-for="(item, index) in dataTypes" :key="index">
+          <span class="type-label">{{ item.field }}:</span> 
+          <code>{{ item.type }}</code> - 
+          <span style="color: #666;">{{ item.value }}</span>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
+      const v = new Vue({
+        data: {
+          name: "",
+          age: null,
+          email: "",
+          gender: "男",  // 默认选中男
+          hobbies: [],  // 爱好数组
+          city: "",     // 城市
+          skills: [],   // 掌握的技能（多选）
+          intro: "",    // 个人简介
+          password: "", // 密码
+          confirmPassword: "", // 确认密码
+          showPassword: false, // 控制密码可见性
+          showConfirmPassword: false, // 控制确认密码可见性
+          birthday: "", // 出生日期
+          appointmentTime: "", // 预约时间
+          satisfaction: 50, // 满意度（默认50%）
+          favoriteColor: "#409EFF", // 喜欢的颜色（默认蓝色）
+          agree: false  // 是否同意协议
+        },
+        computed: {
+          // 计算属性：格式化用户信息
+          userInfo() {
+            return {
+              姓名: this.name,
+              年龄: this.age,
+              邮箱: this.email,
+              性别: this.gender,
+              爱好: this.hobbies,
+              城市: this.city,
+              技能: this.skills,
+              简介: this.intro,
+              密码: this.password ? '******' : '',
+              出生日期: this.birthday,
+              预约时间: this.appointmentTime,
+              满意度: this.satisfaction + '%',
+              喜欢的颜色: this.favoriteColor,
+              同意协议: this.agree
+            }
+          },
+          
+          isValidEmail() {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(this.email);
+          },
+          
+          passwordStrength() {
+            const pwd = this.password;
+            if (!pwd) return 0;
+            if (pwd.length < 6) return 1;
+            if (pwd.length >= 6 && pwd.length < 10) return 2;
+            if (pwd.length >= 10 && /[A-Z]/.test(pwd) && /[a-z]/.test(pwd) && /[0-9]/.test(pwd)) return 3;
+            return 2;
+          },
+          
+          passwordStrengthText() {
+            const strength = this.passwordStrength;
+            if (strength === 0) return '';
+            if (strength === 1) return '✗ 密码强度：弱（至少6位）';
+            if (strength === 2) return '◐ 密码强度：中等';
+            return '✓ 密码强度：强';
+          },
+          
+          passwordStrengthClass() {
+            const strength = this.passwordStrength;
+            if (strength === 1) return 'error';
+            if (strength === 2) return 'warning';
+            if (strength === 3) return 'success';
+            return '';
+          },
+          
+          dataTypes() {
+            return [
+              { field: '姓名', type: typeof this.name, value: `"${this.name}" (字符串)` },
+              { field: '年龄', type: typeof this.age, value: `${this.age} (使用.number修饰符转为数字)` },
+              { field: '邮箱', type: typeof this.email, value: `"${this.email}" (字符串，使用.trim去空格)` },
+              { field: '性别', type: typeof this.gender, value: `"${this.gender}" (单选框→字符串)` },
+              { field: '爱好', type: Array.isArray(this.hobbies) ? 'array' : typeof this.hobbies, value: `[${this.hobbies.join(', ')}] (复选框多选→数组)` },
+              { field: '城市', type: typeof this.city, value: `"${this.city}" (下拉单选→字符串)` },
+              { field: '技能', type: Array.isArray(this.skills) ? 'array' : typeof this.skills, value: `[${this.skills.join(', ')}] (多选下拉→数组)` },
+              { field: '满意度', type: typeof this.satisfaction, value: `${this.satisfaction} (range滑块→数字)` },
+              { field: '颜色', type: typeof this.favoriteColor, value: `"${this.favoriteColor}" (颜色选择器→十六进制字符串)` },
+              { field: '同意协议', type: typeof this.agree, value: `${this.agree} (单个复选框→布尔值)` },
+              { field: '生日', type: typeof this.birthday, value: `"${this.birthday}" (日期选择器→yyyy-MM-dd字符串)` },
+              { field: '预约时间', type: typeof this.appointmentTime, value: `"${this.appointmentTime}" (时间选择器→HH:mm字符串)` }
+            ];
+          }
+        },
+        methods: {
+          // 提交表单
+          submitForm() {
+            if (!this.agree) {
+              alert('❌ 请先同意用户协议！');
+              return;
+            }
+            
+            if (!this.name) {
+              alert('❌ 请输入姓名！');
+              return;
+            }
+            
+            if (this.email && !this.isValidEmail) {
+              alert('❌ 邮箱格式不正确！');
+              return;
+            }
+            
+            if (this.password && this.password.length < 6) {
+              alert('❌ 密码至少需要6位！');
+              return;
+            }
+            
+            if (this.password && this.password !== this.confirmPassword) {
+              alert('❌ 两次输入的密码不一致！');
+              return;
+            }
+            
+            if (this.age !== null && (this.age < 0 || this.age > 150)) {
+              alert('❌ 年龄必须在0-150之间！');
+              return;
+            }
+            
+            console.log('✅ 提交的表单数据：', this.userInfo);
+            console.log('🔐 真实密码（实际项目中需要加密）：', this.password);
+            console.log('📋 数据类型信息：', this.dataTypes);
+            alert('✅ 表单提交成功！请查看控制台。');
+          },
+          
+          fillTestData() {
+            this.name = '张三';
+            this.age = 25;
+            this.email = 'zhangsan@example.com';
+            this.gender = '男';
+            this.hobbies = ['篮球', '阅读'];
+            this.city = '北京';
+            this.skills = ['HTML', 'CSS', 'Vue'];
+            this.intro = '这是一段测试用的个人简介，用于快速填充表单数据进行测试。';
+            this.password = 'Test123456';
+            this.confirmPassword = 'Test123456';
+            this.birthday = '1999-01-01';
+            this.appointmentTime = '14:30';
+            this.satisfaction = 85;
+            this.favoriteColor = '#ff6b6b';
+            this.agree = true;
+            
+            alert('⚡ 测试数据已填充！现在可以直接提交或修改数据进行测试。');
+          },
+          
+          // 重置表单
+          resetForm() {
+            this.name = '';
+            this.age = null;
+            this.email = '';
+            this.gender = '男';
+            this.hobbies = [];
+            this.city = '';
+            this.skills = [];
+            this.intro = '';
+            this.password = '';
+            this.confirmPassword = '';
+            this.birthday = '';
+            this.appointmentTime = '';
+            this.satisfaction = 50;
+            this.favoriteColor = '#409EFF';
+            this.agree = false;
+          }
+        },
+      });
+      v.$mount("#root");
+    </script>
+  </body>
+</html>
