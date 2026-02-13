@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 自定义指令学习案例</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #root {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-left: 4px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .example-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .result>div {
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .label {
+            color: #666;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            color: #333;
+            font-weight: bold;
+            display: block;
+        }
+
+        .highlight {
+            color: #667eea;
+        }
+
+        code {
+            background: #ffe6e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #e74c3c;
+            font-size: 13px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .note-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .success-note {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .success-note .note-title {
+            color: #155724;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .demo-box {
+            border: 2px dashed #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            background: white;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin: 5px 0;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .drag-box {
+            width: 200px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: move;
+            user-select: none;
+            position: relative;
+        }
+
+        .copy-demo {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #2196f3;
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        .permission-box {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .admin-only {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+
+        .user-only {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+        }
+
+        .guest-only {
+            background: #fce4ec;
+            border: 2px solid #e91e63;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .image-container {
+            display: inline-block;
+            margin: 10px;
+            position: relative;
+        }
+
+        .image-container img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .loading-placeholder {
+            width: 200px;
+            height: 150px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #999;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+            background: #f5f5f5;
+        }
+
+        table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+    <!--
+      ==================== Vue 自定义指令完整教程 ====================
+      
+      一、什么是自定义指令？
+        除了 Vue 内置的指令（v-model、v-show 等），Vue 允许注册自定义指令。
+        自定义指令主要用于对普通 DOM 元素进行底层操作。
+        
+      二、指令的注册方式：
+        1. 全局指令：Vue.directive('指令名', { 钩子函数 })
+        2. 局部指令：在 Vue 实例的 directives 选项中定义
+        
+      三、指令的钩子函数（生命周期）：
+        1. bind - 只调用一次，指令第一次绑定到元素时调用
+        2. inserted - 被绑定元素插入父节点时调用
+        3. update - 所在组件的 VNode 更新时调用
+        4. componentUpdated - 组件的 VNode 及其子 VNode 全部更新后调用
+        5. unbind - 只调用一次，指令与元素解绑时调用
+        
+      四、钩子函数的参数：
+        - el：指令所绑定的元素，可以直接操作 DOM
+        - binding：一个对象，包含以下属性：
+          * name：指令名（不包括 v- 前缀）
+          * value：指令的绑定值（如 v-mydir="1+1" 中，值为 2）
+          * oldValue：指令绑定的前一个值（仅在 update 和 componentUpdated 中可用）
+          * expression：指令的表达式（如 v-mydir="1+1" 中，表达式为 "1+1"）
+          * arg：传给指令的参数（如 v-mydir:foo 中，参数为 "foo"）
+          * modifiers：修饰符对象（如 v-mydir.foo.bar 中，修饰符对象为 {foo:true, bar:true}）
+        - vnode：Vue 编译生成的虚拟节点
+        - oldVnode：上一个虚拟节点（仅在 update 和 componentUpdated 中可用）
+        
+      五、常见实战案例：
+        1. v-focus - 页面加载时自动聚焦
+        2. v-color - 动态修改文字颜色
+        3. v-copy - 一键复制文本
+        4. v-drag - 元素拖拽
+        5. v-permission - 权限控制显示/隐藏
+        6. v-debounce - 防抖处理
+        7. v-longpress - 长按触发事件
+        8. v-emoji - 限制输入表情符号
+        
+      六、注意事项：
+        1. 指令名不要和内置指令冲突
+        2. 指令中尽量避免操作数据，主要用于 DOM 操作
+        3. 如果只需要 bind 和 update，可以使用函数简写
+        4. 指令的参数和修饰符可以动态绑定
+  -->
+    <div id="root">
+        <h1>🎯 Vue 自定义指令完整学习案例</h1>
+        <p class="subtitle">Custom Directives - 掌握底层 DOM 操控能力</p>
+
+        <!-- ========== 1. v-focus 自动聚焦 ========== -->
+        <h2>🎯 1. v-focus - 自动聚焦指令</h2>
+        <div class="example-box">
+            <div class="example-title">页面加载时自动聚焦到输入框</div>
+            <pre v-pre>// 全局指令定义
+                    Vue.directive('focus', {
+                    inserted(el) {
+                        el.focus();
+                    }
+                    });
+
+                    // 使用
+                    &lt;input v-focus /&gt;
+                </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">普通输入框：</span>
+                    <input type="text" placeholder="普通输入框" />
+                </div>
+                <div>
+                    <span class="label">使用 v-focus 的输入框（页面加载时自动聚焦）：</span>
+                    <input type="text" v-focus placeholder="这个输入框会自动获得焦点" />
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 2. v-color 动态颜色 ========== -->
+        <h2>🎨 2. v-color - 动态颜色指令</h2>
+        <div class="example-box">
+            <div class="example-title">根据绑定值动态修改文字颜色</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('color', {
+                bind(el, binding) {
+                    el.style.color = binding.value;
+                },
+                update(el, binding) {
+                    el.style.color = binding.value;
+                }
+                });
+
+                // 使用
+                &lt;div v-color="colorValue"&gt;文本&lt;/div&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">选择颜色：</span>
+                    <button class="btn-secondary" @click="textColor = 'red'">红色</button>
+                    <button class="btn-secondary" @click="textColor = 'blue'">蓝色</button>
+                    <button class="btn-secondary" @click="textColor = 'green'">绿色</button>
+                    <button class="btn-secondary" @click="textColor = '#ff6b6b'">粉色</button>
+                    <button class="btn-secondary" @click="textColor = '#667eea'">紫色</button>
+                </div>
+                <div>
+                    <span class="label">效果展示：</span>
+                    <div class="demo-box">
+                        <h3 v-color="textColor" style="font-size: 24px;">这段文字的颜色会动态改变</h3>
+                        <p v-color="textColor">当前颜色值：{{ textColor }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 3. v-copy 一键复制 ========== -->
+        <h2>📋 3. v-copy - 一键复制指令</h2>
+        <div class="example-box">
+            <div class="example-title">点击元素时复制指定文本到剪贴板</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('copy', {
+                bind(el, binding) {
+                    el.addEventListener('click', () => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = binding.value;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('复制成功：' + binding.value);
+                    });
+                }
+                });
+
+                // 使用
+                &lt;button v-copy="copyText"&gt;点击复制&lt;/button&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">输入要复制的内容：</span>
+                    <input type="text" v-model="copyText" placeholder="输入内容" />
+                </div>
+                <div>
+                    <span class="label">点击下方文本复制：</span>
+                    <div class="copy-demo" v-copy="copyText" style="cursor: pointer;">
+                        点击复制：{{ copyText }}
+                    </div>
+                    <button class="btn-primary" v-copy="copyText">📋 复制到剪贴板</button>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 4. v-drag 拖拽指令 ========== -->
+        <h2>🖱️ 4. v-drag - 元素拖拽指令</h2>
+        <div class="example-box">
+            <div class="example-title">让元素可以自由拖拽</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('drag', {
+                bind(el) {
+                    el.style.position = 'absolute';
+                    el.onmousedown = function(e) {
+                    let disX = e.clientX - el.offsetLeft;
+                    let disY = e.clientY - el.offsetTop;
+                    
+                    document.onmousemove = function(e) {
+                        el.style.left = e.clientX - disX + 'px';
+                        el.style.top = e.clientY - disY + 'px';
+                    };
+                    
+                    document.onmouseup = function() {
+                        document.onmousemove = null;
+                        document.onmouseup = null;
+                    };
+                    };
+                }
+                });
+
+                // 使用
+                &lt;div v-drag&gt;拖拽我&lt;/div&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">试试拖拽下面的方块：</span>
+                    <div
+                        style="position: relative; height: 300px; border: 2px dashed #ddd; border-radius: 8px; margin-top: 10px;">
+                        <div v-drag class="drag-box">
+                            🖱️ 拖拽我
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 5. v-permission 权限控制 ========== -->
+        <h2>🔐 5. v-permission - 权限控制指令</h2>
+        <div class="example-box">
+            <div class="example-title">根据用户权限显示/隐藏元素</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('permission', {
+                inserted(el, binding) {
+                    const userRole = binding.value;
+                    const currentRole = 'admin'; // 模拟当前用户角色
+                    
+                    if (userRole !== currentRole) {
+                    el.parentNode && el.parentNode.removeChild(el);
+                    }
+                }
+                });
+
+                // 使用
+                &lt;div v-permission="'admin'"&gt;管理员可见&lt;/div&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">切换用户角色：</span>
+                    <button class="btn-secondary" @click="currentRole = 'admin'">管理员</button>
+                    <button class="btn-secondary" @click="currentRole = 'user'">普通用户</button>
+                    <button class="btn-secondary" @click="currentRole = 'guest'">访客</button>
+                    <p style="margin-top: 10px;">当前角色：<strong :style="{color: '#667eea'}">{{ currentRole }}</strong></p>
+                </div>
+                <div>
+                    <span class="label">权限控制效果：</span>
+                    <div class="permission-box admin-only" v-permission="'admin'">
+                        🔑 仅管理员可见的内容
+                    </div>
+                    <div class="permission-box user-only" v-permission="'user'">
+                        👤 仅普通用户可见的内容
+                    </div>
+                    <div class="permission-box guest-only" v-permission="'guest'">
+                        👁️ 仅访客可见的内容
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 6. v-debounce 防抖指令 ========== -->
+        <h2>⏱️ 6. v-debounce - 防抖指令</h2>
+        <div class="example-box">
+            <div class="example-title">输入框防抖，减少触发次数</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('debounce', {
+                inserted(el, binding) {
+                    let timer;
+                    el.addEventListener('input', () => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        binding.value();
+                    }, 500);
+                    });
+                }
+                });
+
+                // 使用
+                &lt;input v-debounce="handleInput" /&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">普通输入（每次输入都触发）：</span>
+                    <input type="text" @input="normalInputCount++" placeholder="输入试试" />
+                    <p>触发次数：<strong style="color: #e74c3c;">{{ normalInputCount }}</strong></p>
+                </div>
+                <div>
+                    <span class="label">防抖输入（停止输入500ms后触发）：</span>
+                    <input type="text" v-debounce="handleDebounceInput" placeholder="输入试试" />
+                    <p>触发次数：<strong style="color: #28a745;">{{ debounceInputCount }}</strong></p>
+                </div>
+                <div>
+                    <p style="color: #666; font-size: 13px;">💡 提示：快速输入多个字符，对比两者的触发次数</p>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 7. v-longpress 长按指令 ========== -->
+        <h2>👆 7. v-longpress - 长按触发指令</h2>
+        <div class="example-box">
+            <div class="example-title">长按元素触发指定事件</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('longpress', {
+                bind(el, binding) {
+                    let timer;
+                    el.addEventListener('mousedown', () => {
+                    timer = setTimeout(() => {
+                        binding.value();
+                    }, 1000);
+                    });
+                    
+                    el.addEventListener('mouseup', () => {
+                    clearTimeout(timer);
+                    });
+                }
+                });
+
+                // 使用
+                &lt;button v-longpress="handleLongPress"&gt;长按我&lt;/button&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">长按按钮（按住1秒触发）：</span>
+                    <button class="btn-primary" v-longpress="handleLongPress">
+                        👆 长按我 1 秒
+                    </button>
+                    <p style="margin-top: 10px;">长按触发次数：<strong style="color: #667eea;">{{ longPressCount }}</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 8. v-emoji 限制表情 ========== -->
+        <h2>😀 8. v-emoji - 限制表情输入指令</h2>
+        <div class="example-box">
+            <div class="example-title">禁止输入表情符号</div>
+            <pre v-pre>// 全局指令定义
+                Vue.directive('emoji', {
+                bind(el, binding) {
+                    el.addEventListener('input', (e) => {
+                    const reg = /[^\u0020-\u007E\u00A0-\u00BE\u2E80-\uA4CF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF\u0080-\u009F\u2000-\u201f\u2026\u2022\u20ac\r\n]/g;
+                    if (reg.test(e.target.value)) {
+                        e.target.value = e.target.value.replace(reg, '');
+                        el.dispatchEvent(new Event('input'));
+                    }
+                    });
+                }
+                });
+
+                // 使用
+                &lt;input v-emoji v-model="text" /&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">普通输入框（可输入表情）：</span>
+                    <input type="text" v-model="normalText" placeholder="试试输入表情 😀" />
+                    <p>输入内容：{{ normalText }}</p>
+                </div>
+                <div>
+                    <span class="label">限制表情输入框（表情会被过滤）：</span>
+                    <input type="text" v-emoji v-model="emojiText" placeholder="试试输入表情 😀" />
+                    <p>输入内容：{{ emojiText }}</p>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 9. 指令简写形式 vs 完整形式 ========== -->
+        <h2>📝 9. 指令简写形式 vs 完整形式</h2>
+        <div class="example-box">
+            <div class="example-title">理解简写形式和完整形式的区别与使用场景</div>
+            
+            <div class="note" style="margin-bottom: 15px;">
+                <div class="note-title">💡 核心概念</div>
+                <p style="margin-top: 10px;"><strong>简写形式：</strong>当指令只需要在 <code>bind</code> 和 <code>update</code> 时执行相同逻辑时，可以使用函数简写。</p>
+                <p style="margin-top: 5px;"><strong>完整形式：</strong>需要在不同生命周期钩子中执行不同逻辑时，必须使用对象形式。</p>
+            </div>
+
+            <pre v-pre>// ========== 简写形式（常用） ==========
+// 适用场景：bind 和 update 执行相同逻辑
+Vue.directive('color-simple', function(el, binding) {
+  el.style.color = binding.value;  // bind 和 update 都执行这段代码
+});
+
+// ========== 完整形式（灵活） ==========
+// 适用场景：需要在不同生命周期执行不同逻辑
+Vue.directive('color-full', {
+  bind(el, binding) {
+    console.log('指令首次绑定时执行');
+    el.style.color = binding.value;
+  },
+  inserted(el) {
+    console.log('元素插入到父节点时执行');
+  },
+  update(el, binding) {
+    console.log('数据更新时执行');
+    el.style.color = binding.value;
+  },
+  unbind(el) {
+    console.log('指令解绑时执行');
+  }
+});</pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">示例1：简写形式 - 动态背景色</span>
+                    <div class="demo-box">
+                        <input type="color" v-model="bgColor" style="width: 60px; height: 40px;" />
+                        <div v-bg-simple="bgColor" style="padding: 20px; margin-top: 10px; border-radius: 5px; text-align: center; color: white; font-weight: bold;">
+                            简写形式：背景色会自动更新
+                        </div>
+                        <p style="margin-top: 5px; font-size: 13px; color: #666;">当前色值：{{ bgColor }}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="label">示例2：完整形式 - 渐入动画</span>
+                    <div class="demo-box">
+                        <button class="btn-primary" @click="showFadeBox = !showFadeBox">
+                            {{ showFadeBox ? '隐藏' : '显示' }} 元素
+                        </button>
+                        <div v-if="showFadeBox" v-fade-full style="padding: 20px; margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 5px; text-align: center; font-weight: bold;">
+                            完整形式：我有渐入效果！
+                        </div>
+                        <p style="margin-top: 5px; font-size: 13px; color: #666;">💡 切换显示/隐藏观察渐入动画（使用 inserted 钩子实现）</p>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="label">示例3：完整形式 - 输入框计数器</span>
+                    <div class="demo-box">
+                        <div style="position: relative; display: inline-block; width: 100%;">
+                            <input v-counter-full type="text" v-model="counterText" placeholder="输入文字..." style="padding-right: 60px;" />
+                        </div>
+                        <p style="margin-top: 5px; font-size: 13px; color: #666;">💡 输入框右侧显示字符计数（使用 inserted 和 update 钩子）</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="example-box" style="background: #e8f5e9; border-left-color: #4caf50;">
+            <div class="example-title">🔄 五个生命周期钩子详解</div>
+            <table style="width: 100%; margin-top: 10px;">
+                <tr>
+                    <th style="width: 20%;">钩子函数</th>
+                    <th style="width: 40%;">触发时机</th>
+                    <th style="width: 40%;">使用场景</th>
+                </tr>
+                <tr>
+                    <td><code>bind</code></td>
+                    <td>指令第一次绑定到元素时</td>
+                    <td>初始化设置、添加事件监听</td>
+                </tr>
+                <tr>
+                    <td><code>inserted</code></td>
+                    <td>元素插入父节点时</td>
+                    <td>需要父节点的操作（如获取父元素宽度）</td>
+                </tr>
+                <tr>
+                    <td><code>update</code></td>
+                    <td>组件 VNode 更新时</td>
+                    <td>响应数据变化（可能在子节点更新前）</td>
+                </tr>
+                <tr>
+                    <td><code>componentUpdated</code></td>
+                    <td>组件及子节点全部更新后</td>
+                    <td>需要等待所有子节点更新的操作</td>
+                </tr>
+                <tr>
+                    <td><code>unbind</code></td>
+                    <td>指令与元素解绑时</td>
+                    <td>清理工作（移除事件监听、定时器）</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="note">
+            <div class="note-title">🎯 如何选择简写还是完整形式？</div>
+            <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                <tr style="background: #f5f5f5;">
+                    <th style="padding: 8px; border: 1px solid #ddd;">使用场景</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">推荐形式</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">示例</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">只需要设置样式</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">✅ 简写</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-color</code>、<code>v-bg</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">需要动画效果</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">✅ 完整（使用 inserted）</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-fade</code>、<code>v-slide</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">需要添加事件监听</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">✅ 完整（bind + unbind）</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-click-outside</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">需要父元素信息</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">✅ 完整（使用 inserted）</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-tooltip</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">需要清理资源</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">✅ 完整（使用 unbind）</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-drag</code>、<code>v-resize</code></td>
+                </tr>
+            </table>
+            <p style="margin-top: 10px; color: #856404;"><strong>经验法则：</strong>80% 的情况用简写就够了，只有需要特殊生命周期钩子时才用完整形式。</p>
+        </div>
+
+        <hr />
+
+        <!-- ========== 10. 全局 vs 局部指令 ========== -->
+        <h2>🎯 10. 全局指令 vs 局部指令</h2>
+        <div class="example-box">
+            <div class="example-title">对比全局指令和局部指令的区别</div>
+            <pre v-pre>// 全局指令（所有 Vue 实例都可用）
+                Vue.directive('global-directive', {
+                bind(el, binding) {
+                    // ...
+                }
+                });
+
+                // 局部指令（仅当前实例可用）
+                new Vue({
+                directives: {
+                    'local-directive': {
+                    bind(el, binding) {
+                        // ...
+                    }
+                    }
+                }
+                });
+            </pre>
+
+            <div class="result">
+                <div>
+                    <p><strong>全局指令示例（v-focus, v-color 等）：</strong></p>
+                    <input v-focus type="text" placeholder="使用全局 v-focus 指令" style="margin: 10px 0;" />
+                </div>
+                <div>
+                    <p><strong>局部指令示例（v-highlight）：</strong></p>
+                    <p v-highlight style="padding: 10px; margin: 10px 0;">这段文字使用了局部 v-highlight 指令</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 全局 vs 局部指令选择建议</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>全局指令</strong>：适用于整个应用都会用到的指令（如 v-focus、v-copy）</li>
+                <li><strong>局部指令</strong>：适用于特定组件或页面的指令（如 v-highlight）</li>
+                <li><strong>优先级</strong>：局部指令优先级高于全局指令</li>
+                <li><strong>命名规范</strong>：使用小写字母和连字符（如 v-my-directive）</li>
+            </ul>
+        </div>
+
+        <hr />
+
+        <!-- ========== 总结 ========== -->
+        <div class="note success-note">
+            <div class="note-title">📚 自定义指令知识总结</div>
+            <table>
+                <tr>
+                    <th>指令名</th>
+                    <th>作用</th>
+                    <th>实际应用场景</th>
+                </tr>
+                <tr>
+                    <td><code>v-focus</code></td>
+                    <td>自动聚焦</td>
+                    <td>登录页面、搜索框</td>
+                </tr>
+                <tr>
+                    <td><code>v-color</code></td>
+                    <td>动态颜色</td>
+                    <td>主题切换、状态标识</td>
+                </tr>
+                <tr>
+                    <td><code>v-copy</code></td>
+                    <td>一键复制</td>
+                    <td>分享链接、口令复制</td>
+                </tr>
+                <tr>
+                    <td><code>v-drag</code></td>
+                    <td>元素拖拽</td>
+                    <td>弹窗拖拽、布局调整</td>
+                </tr>
+                <tr>
+                    <td><code>v-permission</code></td>
+                    <td>权限控制</td>
+                    <td>按钮权限、菜单显示</td>
+                </tr>
+                <tr>
+                    <td><code>v-debounce</code></td>
+                    <td>防抖处理</td>
+                    <td>搜索输入、表单提交</td>
+                </tr>
+                <tr>
+                    <td><code>v-longpress</code></td>
+                    <td>长按触发</td>
+                    <td>删除确认、快捷操作</td>
+                </tr>
+                <tr>
+                    <td><code>v-emoji</code></td>
+                    <td>限制表情</td>
+                    <td>用户名输入、评论过滤</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="note">
+            <div class="note-title">🎯 最佳实践</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>明确职责</strong>：指令专注于 DOM 操作，复杂逻辑放在组件中</li>
+                <li><strong>避免冲突</strong>：指令命名不要与内置指令重复</li>
+                <li><strong>性能优化</strong>：避免在指令中进行大量计算或频繁操作</li>
+                <li><strong>清理资源</strong>：在 unbind 钩子中移除事件监听器</li>
+                <li><strong>简写形式</strong>：只需要 bind 和 update 时可以使用函数简写</li>
+                <li><strong>文档说明</strong>：团队开发时要写清楚指令的用法和参数</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        Vue.config.productionTip = false;
+
+        // ========== 全局指令定义 ==========
+
+        // 1. v-focus - 自动聚焦
+        Vue.directive('focus', {
+            inserted(el) {
+                el.focus();
+            }
+        });
+
+        // 2. v-color - 动态颜色（函数简写形式）
+        Vue.directive('color', function (el, binding) {
+            el.style.color = binding.value;
+        });
+
+        // 3. v-copy - 一键复制
+        Vue.directive('copy', {
+            bind(el, binding) {
+                el.addEventListener('click', () => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = binding.value;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            alert('✅ 复制成功：' + binding.value);
+                        }
+                    } catch (err) {
+                        alert('❌ 复制失败');
+                    }
+                    document.body.removeChild(textarea);
+                });
+            }
+        });
+
+        // 4. v-drag - 元素拖拽
+        Vue.directive('drag', {
+            bind(el) {
+                el.style.cursor = 'move';
+                el.style.position = 'absolute';
+                el.style.left = '50px';
+                el.style.top = '50px';
+
+                el.onmousedown = function (e) {
+                    const disX = e.clientX - el.offsetLeft;
+                    const disY = e.clientY - el.offsetTop;
+
+                    document.onmousemove = function (e) {
+                        const left = e.clientX - disX;
+                        const top = e.clientY - disY;
+
+                        // 限制拖拽范围
+                        const parent = el.parentElement;
+                        const maxLeft = parent.offsetWidth - el.offsetWidth;
+                        const maxTop = parent.offsetHeight - el.offsetHeight;
+
+                        el.style.left = Math.max(0, Math.min(left, maxLeft)) + 'px';
+                        el.style.top = Math.max(0, Math.min(top, maxTop)) + 'px';
+                    };
+
+                    document.onmouseup = function () {
+                        document.onmousemove = null;
+                        document.onmouseup = null;
+                    };
+
+                    return false;
+                };
+            }
+        });
+
+        // 5. v-permission - 权限控制
+        Vue.directive('permission', {
+            inserted(el, binding, vnode) {
+                const requiredRole = binding.value;
+                const vm = vnode.context;
+
+                // 使用 Vue 实例来响应式更新
+                vm.$watch('currentRole', (newRole) => {
+                    if (newRole !== requiredRole) {
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = '';
+                    }
+                }, { immediate: true });
+            }
+        });
+
+        // 6. v-debounce - 防抖
+        Vue.directive('debounce', {
+            inserted(el, binding) {
+                let timer;
+                el.addEventListener('input', () => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        binding.value();
+                    }, 500);
+                });
+            }
+        });
+
+        // 7. v-longpress - 长按
+        Vue.directive('longpress', {
+            bind(el, binding) {
+                let timer;
+
+                const startPress = () => {
+                    timer = setTimeout(() => {
+                        binding.value();
+                    }, 1000);
+                };
+
+                const cancelPress = () => {
+                    clearTimeout(timer);
+                };
+
+                el.addEventListener('mousedown', startPress);
+                el.addEventListener('mouseup', cancelPress);
+                el.addEventListener('mouseleave', cancelPress);
+            }
+        });
+
+        // 8. v-emoji - 限制表情
+        Vue.directive('emoji', {
+            bind(el) {
+                const input = el.tagName === 'INPUT' ? el : el.querySelector('input');
+                if (!input) return;
+
+                input.addEventListener('input', function (e) {
+                    const reg = /[^\u0020-\u007E\u00A0-\u00BE\u2E80-\uA4CF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF\u0080-\u009F\u2000-\u201f\u2026\u2022\u20ac\r\n]/g;
+                    if (reg.test(this.value)) {
+                        this.value = this.value.replace(reg, '');
+                        // 触发 Vue 的数据更新
+                        this.dispatchEvent(new Event('input'));
+                    }
+                });
+            }
+        });
+
+        // ========== 9. 简写形式示例 ==========
+        
+        // v-bg-simple - 动态背景色（简写形式）
+        // 简写形式：bind 和 update 都会执行这个函数
+        Vue.directive('bg-simple', function(el, binding) {
+            el.style.backgroundColor = binding.value;
+        });
+
+        // ========== 完整形式示例 ==========
+        
+        // v-fade-full - 渐入动画（完整形式）
+        Vue.directive('fade-full', {
+            inserted(el) {
+                // 元素插入时执行渐入动画
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.6s ease-in';
+                
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                }, 50);
+            }
+        });
+
+        // v-counter-full - 输入框字符计数（完整形式）
+        Vue.directive('counter-full', {
+            inserted(el) {
+                // 创建计数器元素
+                const counter = document.createElement('span');
+                counter.style.position = 'absolute';
+                counter.style.right = '10px';
+                counter.style.top = '50%';
+                counter.style.transform = 'translateY(-50%)';
+                counter.style.color = '#999';
+                counter.style.fontSize = '12px';
+                counter.style.pointerEvents = 'none';
+                
+                const input = el.tagName === 'INPUT' ? el : el.querySelector('input');
+                if (input) {
+                    // 设置父元素为相对定位
+                    el.parentElement.style.position = 'relative';
+                    
+                    // 初始化计数
+                    counter.textContent = input.value.length + ' 字符';
+                    el.parentElement.appendChild(counter);
+                    
+                    // 保存计数器元素引用，用于 unbind 时清理
+                    el._counterElement = counter;
+                }
+            },
+            update(el) {
+                // 数据更新时更新计数
+                const input = el.tagName === 'INPUT' ? el : el.querySelector('input');
+                const counter = el._counterElement;
+                if (input && counter) {
+                    counter.textContent = input.value.length + ' 字符';
+                    // 字数超过20时变红
+                    counter.style.color = input.value.length > 20 ? '#e74c3c' : '#999';
+                }
+            },
+            unbind(el) {
+                // 清理计数器元素
+                if (el._counterElement && el._counterElement.parentNode) {
+                    el._counterElement.parentNode.removeChild(el._counterElement);
+                }
+            }
+        });
+
+        // ========== Vue 实例 ==========
+        const vm = new Vue({
+            el: '#root',
+            data: {
+                // v-color 数据
+                textColor: '#667eea',
+
+                // v-copy 数据
+                copyText: 'Hello Vue Custom Directive!',
+
+                // v-permission 数据
+                currentRole: 'admin',
+
+                // v-debounce 数据
+                normalInputCount: 0,
+                debounceInputCount: 0,
+
+                // v-longpress 数据
+                longPressCount: 0,
+
+                // v-emoji 数据
+                normalText: '',
+                emojiText: '',
+
+                // 简写 vs 完整形式数据
+                bgColor: '#667eea',
+                showFadeBox: false,
+                counterText: ''
+            },
+
+            methods: {
+                // 防抖输入处理
+                handleDebounceInput() {
+                    this.debounceInputCount++;
+                },
+
+                // 长按处理
+                handleLongPress() {
+                    this.longPressCount++;
+                    alert('🎉 长按触发成功！');
+                }
+            },
+
+            // ========== 局部指令定义 ==========
+            directives: {
+                // v-highlight - 高亮显示（局部指令）
+                highlight: {
+                    inserted(el) {
+                        el.style.background = 'linear-gradient(90deg, #ffd89b 0%, #19547b 100%)';
+                        el.style.backgroundClip = 'text';
+                        el.style.webkitBackgroundClip = 'text';
+                        el.style.color = 'transparent';
+                        el.style.fontWeight = 'bold';
+                        el.style.fontSize = '18px';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
