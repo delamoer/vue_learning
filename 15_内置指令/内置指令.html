@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 内置指令学习案例</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #root {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-left: 4px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .example-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .result>div {
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .label {
+            color: #666;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            color: #333;
+            font-weight: bold;
+            display: block;
+        }
+
+        .highlight {
+            color: #667eea;
+        }
+
+        code {
+            background: #ffe6e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #e74c3c;
+            font-size: 13px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .note-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .warning {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .warning .note-title {
+            color: #721c24;
+        }
+
+        .danger {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .danger .note-title {
+            color: #c62828;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .input-demo {
+            margin: 15px 0;
+        }
+
+        .input-demo input,
+        .input-demo textarea {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input-demo textarea {
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .input-demo input:focus,
+        .input-demo textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .demo-box {
+            border: 2px dashed #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            background: white;
+        }
+
+        .cloak-demo {
+            font-size: 24px;
+            color: #e74c3c;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+        .once-counter {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .hidden-content {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .xss-warning {
+            background: #ffcdd2;
+            padding: 10px;
+            border-radius: 4px;
+            border: 2px solid #f44336;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!--
+      ==================== Vue 内置指令完整教程 ====================
+      
+      一、什么是指令？
+        指令 (Directives) 是带有 v- 前缀的特殊属性，用于在模板中添加响应式行为。
+        
+      二、本节重点学习的指令：
+        1. v-text - 更新元素的 textContent
+        2. v-html - 更新元素的 innerHTML（⚠️ 注意 XSS 安全问题）
+        3. v-cloak - 防止页面闪烁（隐藏未编译模板）
+        4. v-once - 只渲染一次，后续不再响应数据变化
+        5. v-pre - 跳过编译，显示原始的 Mustache 标签
+        
+      三、已学习的指令（简要回顾）：
+        ✅ v-bind (:) - 动态绑定属性
+        ✅ v-on (@) - 事件监听
+        ✅ v-model - 双向数据绑定
+        ✅ v-if / v-else-if / v-else - 条件渲染
+        ✅ v-show - 切换 display 属性
+        ✅ v-for - 列表渲染
+        
+      四、指令的特点：
+        1. 都以 v- 开头（Vue 的标识）
+        2. 绑定在 HTML 元素上
+        3. 值可以是表达式、变量或方法
+        4. 某些指令有修饰符（如 @click.stop）
+        
+      五、使用场景：
+        1. v-text - 防止 XSS 攻击，安全显示文本
+        2. v-html - 需要渲染富文本内容（⚠️ 仅用于可信内容）
+        3. v-cloak - 解决网速慢时的页面闪烁问题
+        4. v-once - 静态内容优化，减少不必要的更新
+        5. v-pre - 显示 Vue 语法本身，或跳过大量静态内容的编译
+        
+      六、注意事项：
+        ⚠️ v-html 有 XSS 风险，永远不要用在用户提交的内容上
+        ⚠️ v-text 和 {{ }} 的区别：v-text 会替换整个元素内容
+        ⚠️ v-cloak 需要配合 CSS [v-cloak] { display: none; } 使用
+  -->
+    <div id="root">
+        <h1>🎯 Vue 内置指令完整学习案例</h1>
+        <p class="subtitle">Built-in Directives - 掌握 Vue 的核心指令系统</p>
+
+        <!-- ========== 1. v-text 指令 ========== -->
+        <h2>📝 1. v-text - 更新元素的文本内容</h2>
+        <div class="example-box">
+            <div class="example-title">v-text 会将数据解释为纯文本，防止 XSS 攻击</div>
+            <pre v-pre>
+                &lt;div v-text="message"&gt;&lt;/div&gt;
+                &lt;!-- 等价于 --&gt;
+                &lt;div&gt;{{ message }}&lt;/div&gt;
+
+                &lt;!-- 区别：v-text 会替换元素内的所有内容 --&gt;
+                &lt;div v-text="message"&gt;这段文字会被替换&lt;/div&gt;
+            </pre>
+
+            <div class="input-demo">
+                <label>输入文本测试 v-text：</label>
+                <input type="text" v-model="textContent" placeholder="试试输入 <h1>标题</h1>" />
+            </div>
+
+            <div class="result">
+                <div>
+                    <span class="label">1️⃣ 使用 v-text 指令：</span>
+                    <div class="demo-box" v-text="textContent"></div>
+                </div>
+                <div>
+                    <span class="label">2️⃣ 使用插值语法 {{ }}：</span>
+                    <div class="demo-box">{{ textContent }}</div>
+                </div>
+                <div>
+                    <span class="label">3️⃣ v-text 会替换所有内容：</span>
+                    <div class="demo-box" v-text="textContent">这段文字会被完全替换掉</div>
+                </div>
+                <div>
+                    <span class="label">4️⃣ 插值语法可以保留其他内容：</span>
+                    <div class="demo-box">前缀: {{ textContent }} :后缀</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 v-text vs {{ }} 插值语法</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>相同点</strong>：都将数据作为纯文本显示，都能防止 XSS 攻击</li>
+                <li><strong>不同点</strong>：v-text 会替换元素的全部内容，{{ }} 可以只替换部分内容</li>
+                <li><strong>推荐</strong>：大多数情况使用 {{ }}，需要替换整个元素内容时用 v-text</li>
+            </ul>
+        </div>
+
+        <hr />
+
+        <!-- ========== 2. v-html 指令 ========== -->
+        <h2>🔥 2. v-html - 渲染 HTML 内容</h2>
+        <div class="example-box">
+            <div class="example-title">v-html 会将数据解释为 HTML结构，可以渲染富文本</div>
+            <pre v-pre>
+                &lt;div v-html="htmlContent"&gt;&lt;/div&gt;
+                &lt;!-- ⚠️ 永远不要用在用户提交的内容上！ --&gt;
+                &lt;div v-html="userInput"&gt;&lt;/div&gt;  
+                &lt;!-- 危险！会造成 XSS 攻击 --&gt;
+            </pre>
+
+            <div class="input-demo">
+                <label>输入 HTML 测试 v-html：</label>
+                <input type="text" v-model="htmlContent" placeholder="试试输入 <h3 style='color:red;'>红色标题</h3>" />
+            </div>
+
+            <div class="result">
+                <div>
+                    <span class="label">1️⃣ 使用 v-html（HTML会被渲染）：</span>
+                    <div class="demo-box" v-html="htmlContent"></div>
+                </div>
+                <div>
+                    <span class="label">2️⃣ 使用 v-text（HTML被当作文本）：</span>
+                    <div class="demo-box" v-text="htmlContent"></div>
+                </div>
+                <div>
+                    <span class="label">3️⃣ 使用 插值语法（HTML被当作文本）：</span>
+                    <div class="demo-box">{{ htmlContent }}</div>
+                </div>
+            </div>
+
+            <div class="input-demo">
+                <label>富文本内容示例（安全内容）：</label>
+                <button class="btn-secondary" @click="loadSafeHTML">加载富文本内容</button>
+            </div>
+
+            <div class="result" v-if="richTextContent">
+                <div>
+                    <span class="label">富文本渲染效果：</span>
+                    <div class="demo-box" v-html="richTextContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note danger">
+            <div class="note-title">⚠️ XSS 安全警告</div>
+            <div class="xss-warning">
+                <p><strong>永远不要将用户提交的内容用 v-html 渲染！</strong></p>
+                <p>恶意用户可以注入如下代码：</p>
+                <code>&lt;img src=x onerror="alert('XSS攻击!')"&gt;</code><br />
+                <code>&lt;script&gt;document.cookie // 窃取cookie&lt;/script&gt;</code>
+                <p style="margin-top: 10px;"><strong>安全做法：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>仅在可信内容（如后端返回的富文本）上使用 v-html</li>
+                    <li>对用户输入进行严格的 HTML 转义和过滤</li>
+                    <li>使用专业的 HTML 净化库（如 DOMPurify）</li>
+                    <li>优先使用 v-text 或 {{ }} 显示用户内容</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 3. v-cloak 指令 ========== -->
+        <h2>⏱️ 3. v-cloak - 防止页面闪烁</h2>
+        <div class="example-box">
+            <div class="example-title">在 Vue 实例创建完成前隐藏未编译的模板</div>
+            <pre v-pre>
+                &lt;!-- CSS 中定义 --&gt;
+                &lt;style&gt;
+                [v-cloak] { display: none; }
+                &lt;/style&gt;
+
+                &lt;!-- 在根元素上使用 --&gt;
+                &lt;div id="app" v-cloak&gt;
+                {{ message }}  &lt;!-- 在 Vue 加载前不会显示 --&gt;
+                &lt;/div&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">使用场景说明：</span>
+                    <div class="demo-box">
+                        <p>当网速较慢或 Vue.js 文件较大时，用户可能会短暂看到：</p>
+                        <div class="cloak-demo" style="color: #999;" v-pre>{{ message }} {{ user.name }}</div>
+                        <p style="margin-top: 10px;">这种"花括号闪烁"会影响用户体验。</p>
+                        <p><strong>解决方案：</strong>给根元素添加 v-cloak，配合 CSS 隐藏未编译的模板。</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="label">实际效果（本页面已使用 v-cloak）：</span>
+                    <div class="demo-box">
+                        <p>✅ 你现在看到的页面没有出现花括号闪烁</p>
+                        <p>✅ 这是因为根元素使用了 v-cloak</p>
+                        <p>✅ 在 CSS 中定义了 [v-cloak] { display: none; }</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 v-cloak 使用技巧</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>必须配合 CSS</strong>：在样式中定义 <code>[v-cloak] { display: none; }</code></li>
+                <li><strong>通常用在根元素</strong>：<code>&lt;div id="app" v-cloak&gt;</code></li>
+                <li><strong>Vue 实例挂载后自动移除</strong>：Vue 编译完成后会自动删除 v-cloak 属性</li>
+                <li><strong>适用场景</strong>：网速较慢、Vue 文件较大、SPA 应用的首屏加载</li>
+            </ul>
+        </div>
+
+        <hr />
+
+        <!-- ========== 4. v-once 指令 ========== -->
+        <h2>🔒 4. v-once - 只渲染一次</h2>
+        <div class="example-box">
+            <div class="example-title">元素和组件只渲染一次，后续更新会被跳过</div>
+            <pre v-pre>&lt;span v-once&gt;{{ initialValue }}&lt;/span&gt;
+
+                &lt;!-- 性能优化：大量静态内容 --&gt;
+                &lt;div v-once&gt;
+                &lt;h1&gt;{{ staticTitle }}&lt;/h1&gt;
+                &lt;p&gt;{{ staticDescription }}&lt;/p&gt;
+                &lt;/div&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">计数器值（会响应变化）：</span>
+                    <div class="once-counter">{{ counter }}</div>
+                </div>
+                <div>
+                    <span class="label">初始值（使用 v-once，不会变化）：</span>
+                    <div class="once-counter" style="color: #999;" v-once>{{ counter }}</div>
+                </div>
+                <div>
+                    <button class="btn-primary" @click="counter++">点击增加计数</button>
+                    <button class="btn-secondary" @click="counter = 0">重置计数</button>
+                </div>
+                <div>
+                    <span class="label">说明：</span>
+                    <div class="demo-box">
+                        <p>• 第一个计数器会实时更新</p>
+                        <p>• 第二个计数器使用了 v-once，永远显示初始值 0</p>
+                        <p>• v-once 适用于静态内容，可以提升性能</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 v-once 使用场景</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>静态内容</strong>：页面标题、说明文字等不会改变的内容</li>
+                <li><strong>初始值显示</strong>：需要显示数据的初始状态时</li>
+                <li><strong>性能优化</strong>：大量静态元素时，减少 Vue 的更新开销</li>
+                <li><strong>注意</strong>：不会响应任何数据变化，刷新页面才会重新渲染</li>
+            </ul>
+        </div>
+
+        <hr />
+
+        <!-- ========== 5. v-pre 指令 ========== -->
+        <h2>📋 5. v-pre - 跳过编译</h2>
+        <div class="example-box">
+            <div class="example-title">跳过元素及其子元素的编译，显示原始 Mustache 标签</div>
+            <pre v-pre>&lt;!-- 显示 Vue 语法本身 --&gt;
+                &lt;div v-pre&gt;
+                {{ 这不会被编译 }}
+                &lt;span v-text="message"&gt;&lt;/span&gt;  &lt;!-- 指令也不会执行 --&gt;
+                &lt;/div&gt;
+
+                &lt;!-- 性能优化：大量静态内容 --&gt;
+                &lt;div v-pre&gt;
+                &lt;!-- 这里的大量 HTML 内容不会被 Vue 编译，提升性能 --&gt;
+                &lt;/div&gt;
+            </pre>
+
+            <div class="result">
+                <div>
+                    <span class="label">1️⃣ 正常内容（会被编译）：</span>
+                    <div class="demo-box">
+                        <p>当前计数: {{ counter }}</p>
+                        <p>文本内容: {{ textContent }}</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="label">2️⃣ 使用 v-pre（不会被编译）：</span>
+                    <div class="demo-box" v-pre>
+                        <p>当前计数: {{ counter }}</p>
+                        <p>文本内容: {{ textContent }}</p>
+                        <span v-text="message"></span>
+                    </div>
+                </div>
+                <div>
+                    <span class="label">3️⃣ 显示 Vue 语法示例（常用于教学）：</span>
+                    <div class="demo-box" v-pre>
+                        <p>基本语法: {{ message }}</p>
+                        <p>指令用法: <span v-text="content"></span></p>
+                        <p>事件绑定: <button @click="handleClick">点击</button></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 v-pre 使用场景</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>显示 Vue 代码</strong>：教学文档、技术博客中展示 Vue 语法</li>
+                <li><strong>大量静态内容</strong>：减少编译时间，提升首屏加载速度</li>
+                <li><strong>包含 Mustache 的文本</strong>：需要显示 {{ }} 本身而非其值</li>
+                <li><strong>与 v-once 区别</strong>：v-pre 完全跳过编译，v-once 编译一次后不再更新</li>
+            </ul>
+        </div>
+
+        <hr />
+
+        <!-- ========== 综合对比 ========== -->
+        <h2>🔄 6. 指令综合对比</h2>
+        <div class="example-box">
+            <div class="example-title">通过对比理解不同指令的特点</div>
+
+            <div class="input-demo">
+                <label>输入测试内容：</label>
+                <input type="text" v-model="compareTest" placeholder="输入内容观察各指令的效果" />
+            </div>
+
+            <div class="result">
+                <div>
+                    <span class="label">插值语法 {{ }}：</span>
+                    <div class="demo-box">内容是: {{ compareTest }}</div>
+                </div>
+                <div>
+                    <span class="label">v-text 指令：</span>
+                    <div class="demo-box" v-text="compareTest"></div>
+                </div>
+                <div>
+                    <span class="label">v-html 指令（输入 &lt;b&gt;粗体&lt;/b&gt; 试试）：</span>
+                    <div class="demo-box" v-html="compareTest"></div>
+                </div>
+                <div>
+                    <span class="label">v-once 指令（只显示初始值）：</span>
+                    <div class="demo-box" v-once>{{ compareTest }}</div>
+                </div>
+                <div>
+                    <span class="label" v-pre>v-pre 指令（显示原始代码）：</span>
+                    <div class="demo-box" v-pre>{{ compareTest }}</div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 总结 ========== -->
+        <div class="note">
+            <div class="note-title">📚 内置指令总结</div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="background: #f5f5f5;">
+                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">指令</th>
+                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">作用</th>
+                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">使用场景</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-text</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">更新元素文本内容</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">需要替换整个元素内容</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-html</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">渲染 HTML 内容</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">富文本、可信的 HTML（⚠️ 注意安全）</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-cloak</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">隐藏未编译模板</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">防止页面闪烁</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-once</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">只渲染一次</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">静态内容、性能优化</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>v-pre</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">跳过编译</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">显示 Vue 语法、大量静态内容</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="note warning">
+            <div class="note-title">🎯 最佳实践</div>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>优先使用 {{ }}</strong>：简洁直观，最常用的文本显示方式</li>
+                <li><strong>谨慎使用 v-html</strong>：仅用于可信内容，避免 XSS 攻击</li>
+                <li><strong>合理使用 v-once</strong>：静态内容多时可显著提升性能</li>
+                <li><strong>根元素加 v-cloak</strong>：提升用户体验，避免页面闪烁</li>
+                <li><strong>文档中使用 v-pre</strong>：展示代码示例时必备</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        Vue.config.productionTip = false;
+
+        const vm = new Vue({
+            el: '#root',
+            data: {
+                // v-text 测试数据
+                textContent: '<h1>这是 HTML 标签</h1>',
+
+                // v-html 测试数据
+                htmlContent: '<b style="color: blue;">蓝色粗体文字</b>',
+                richTextContent: '',
+
+                // v-once 测试数据
+                counter: 0,
+
+                // 综合对比测试数据
+                compareTest: 'Hello Vue!'
+            },
+
+            methods: {
+                // 加载富文本内容
+                loadSafeHTML() {
+                    this.richTextContent = `
+              <h3 style="color: #667eea; margin-bottom: 10px;">📰 这是一段富文本内容</h3>
+              <p style="line-height: 1.8;">
+                这是一段<strong>富文本</strong>示例，包含了
+                <span style="color: red;">彩色文字</span>、
+                <b>粗体</b>、
+                <i>斜体</i>等样式。
+              </p>
+              <ul style="margin-top: 10px; line-height: 1.8;">
+                <li>列表项 1</li>
+                <li>列表项 2</li>
+                <li>列表项 3</li>
+              </ul>
+              <p style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+                💡 提示：这是后端返回的安全 HTML 内容，可以放心使用 v-html 渲染。
+              </p>
+            `;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
