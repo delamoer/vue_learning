@@ -1,0 +1,1535 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 生命周期钩子完整学习指南</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #root {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-left: 4px solid #667eea;
+            padding-left: 10px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .example-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .result > div {
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .label {
+            color: #666;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            color: #333;
+            font-weight: bold;
+            display: block;
+        }
+
+        code {
+            background: #ffe6e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #e74c3c;
+            font-size: 13px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .note-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .success-note {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .success-note .note-title {
+            color: #155724;
+        }
+
+        .error-note {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .error-note .note-title {
+            color: #721c24;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .demo-box {
+            border: 2px dashed #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            background: white;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin: 5px 0;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .lifecycle-log {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .log-item {
+            padding: 3px 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .hook-name {
+            color: #66d9ef;
+            font-weight: bold;
+        }
+
+        .hook-time {
+            color: #a1efe4;
+        }
+
+        .hook-status {
+            color: #a6e22e;
+        }
+
+        .lifecycle-diagram {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .lifecycle-item {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .lifecycle-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-box {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+
+        .status-before {
+            background: #ffe6e6;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .status-during {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .status-after {
+            background: #e8f5e9;
+            border-left: 4px solid #28a745;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 15px 0;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            background: white;
+        }
+
+        .comparison-table tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+
+        .hook-category {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .hook-category-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .hook-item {
+            display: inline-block;
+            background: white;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .hook-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <!--
+      ==================== Vue 生命周期钩子完整教程 ====================
+      
+      一、什么是生命周期？
+        Vue 实例有一个完整的生命周期，从创建、初始化数据、编译模板、挂载 DOM、
+        更新数据、卸载的整个过程。我们可以在生命周期的不同阶段钩入回调函数。
+        
+      二、生命周期的8个主要钩子：
+        1. beforeCreate - 实例创建前
+        2. created - 实例创建后
+        3. beforeMount - 挂载前
+        4. mounted - 挂载后
+        5. beforeUpdate - 更新前
+        6. updated - 更新后
+        7. beforeDestroy - 销毁前
+        8. destroyed - 销毁后
+        
+        Vue 3.0+ 新增钩子：
+        - setup（替代大部分 created 逻辑）
+        - onBeforeMount、onMounted
+        - onBeforeUpdate、onUpdated
+        - onBeforeUnmount、onUnmounted
+        
+      三、生命周期的3个主要阶段：
+        1. 初始化阶段（Initialization）
+           - beforeCreate -> created -> beforeMount -> mounted
+        2. 更新阶段（Updating）
+           - beforeUpdate -> updated
+        3. 销毁阶段（Destruction）
+           - beforeDestroy -> destroyed
+           
+      四、各阶段的特点：
+        
+        【初始化阶段】
+        beforeCreate：
+          - 实例已创建，但未初始化数据
+          - 不能访问 data、computed、methods
+          - 这个阶段几乎不用
+          
+        created：
+          - 实例完全创建，数据已初始化
+          - 可以访问 data、computed、methods
+          - 适合进行 Ajax 请求、事件监听等初始化操作
+          - 此时 DOM 还未挂载
+          
+        beforeMount：
+          - $el 还未挂载到真实 DOM
+          - 虚拟 DOM 已创建，但未转换为真实 DOM
+          
+        mounted：
+          - 实例已挂载，可以访问真实 DOM（$el）
+          - 适合进行 DOM 操作、初始化第三方库 (echarts, leaflet)
+          
+        【更新阶段】
+        beforeUpdate：
+          - 数据更新了，但 DOM 还未重新渲染
+          - 可以在更新前进行某些检查或记录
+          
+        updated：
+          - 数据更新，DOM 已重新渲染
+          - 可以进行依赖于 DOM 的操作
+          - ⚠️ 避免在此处修改数据（会导致无限循环）
+          
+        【销毁阶段】
+        beforeDestroy：
+          - 实例销毁前，此时实例仍然完全可用
+          - 应该在此处清理资源（移除事件监听、关闭定时器等）
+          
+        destroyed：
+          - 实例已销毁，所有事件监听和定时器都应该已清理
+          - Vue 实例与 DOM 的连接已断开
+          
+      五、常见操作在生命周期的最佳位置：
+        
+        初始化数据：created 或 beforeCreate（不推荐）
+        发送 Ajax 请求：created 或 mounted
+          - created：更早获得数据
+          - mounted：确保 DOM 已准备好
+        初始化 DOM：mounted
+        访问 DOM：mounted 或 updated
+        添加事件监听：mounted
+        移除事件监听：beforeDestroy
+        清理定时器：beforeDestroy
+        初始化第三方库：mounted
+  -->
+    <div id="root">
+        <h1>🎯 Vue 生命周期钩子完整学习指南</h1>
+        <p class="subtitle">Lifecycle Hooks - 掌握实例的完整生命过程</p>
+
+        <!-- ========== 1. 生命周期概览 ========== -->
+        <h2>📊 1. Vue 生命周期全景图</h2>
+        <div class="example-box">
+            <div class="example-title">Vue 实例生命周期的8个关键时刻</div>
+            <div class="lifecycle-diagram">
+                <div class="lifecycle-item">new Vue()</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                
+                <div class="lifecycle-item">beforeCreate</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                
+                <div class="lifecycle-item">created</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                
+                <div class="lifecycle-item">beforeMount</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                
+                <div class="lifecycle-item">mounted</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                <br />
+                
+                <div style="color: #999; font-size: 12px; margin: 10px 0;">监听到数据变化 ⬇️</div>
+                
+                <div class="lifecycle-item" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">beforeUpdate</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                
+                <div class="lifecycle-item" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">updated</div>
+                <div class="lifecycle-arrow">⬇️</div>
+
+                <div style="color: #999; font-size: 12px; margin: 10px 0;">调用 $destroy 或组件卸载 ⬇️</div>
+
+                <div class="lifecycle-item" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #333;">beforeDestroy</div>
+                <div class="lifecycle-arrow">⬇️</div>
+                
+                <div class="lifecycle-item" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #333;">destroyed</div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 3 个主要阶段</div>
+            <table class="comparison-table">
+                <tr>
+                    <th>阶段名称</th>
+                    <th>包含钩子</th>
+                    <th>主要特点</th>
+                </tr>
+                <tr>
+                    <td><strong>初始化阶段</strong></td>
+                    <td>beforeCreate → created → beforeMount → mounted</td>
+                    <td>实例创建、数据初始化、DOM 挂载</td>
+                </tr>
+                <tr>
+                    <td><strong>更新阶段</strong></td>
+                    <td>beforeUpdate → updated</td>
+                    <td>响应式数据变化、DOM 更新</td>
+                </tr>
+                <tr>
+                    <td><strong>销毁阶段</strong></td>
+                    <td>beforeDestroy → destroyed</td>
+                    <td>清理资源、卸载实例</td>
+                </tr>
+            </table>
+        </div>
+
+        <hr />
+
+        <!-- ========== 2. 初始化阶段详解 ========== -->
+        <h2>🚀 2. 初始化阶段详解</h2>
+        <div class="example-box">
+            <div class="example-title">从 new Vue() 到 mounted 的过程</div>
+
+            <h3>beforeCreate（创建前）- 最早的钩子</h3>
+            <pre v-pre>new Vue({
+  beforeCreate() {
+    console.log('1️⃣ beforeCreate - 实例尚未初始化');
+    console.log('data:', this.data);        // undefined
+    console.log('methods:', this.methods);  // undefined
+    console.log('$el:', this.$el);          // undefined
+  }
+});</pre>
+
+            <div class="status-box status-before">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>❌ 无法访问 data</li>
+                    <li>❌ 无法访问 methods</li>
+                    <li>❌ 无法访问计算属性</li>
+                    <li>❌ 无法访问 $el</li>
+                    <li>✅ 实例刚好被创建</li>
+                </ul>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>created（创建后）- 数据初始化完成</h3>
+            <pre v-pre>new Vue({
+  data() {
+    return { count: 0 }
+  },
+  created() {
+    console.log('2️⃣ created - 实例已初始化');
+    console.log('this.count:', this.count);    // 0
+    console.log('$el:', this.$el);              // undefined（DOM 还未挂载）
+    
+    // 这里适合做：
+    // - 初始化数据
+    // - 发送 Ajax 请求
+    // - 设置事件监听
+  }
+});</pre>
+
+            <div class="status-box status-during">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 数据已初始化</li>
+                    <li>✅ 可访问 methods 和计算属性</li>
+                    <li>✅ 可访问响应式数据</li>
+                    <li>❌ DOM 未挂载（$el 为 undefined）</li>
+                    <li>❌ 页面还看不到内容</li>
+                </ul>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>beforeMount（挂载前）- 模板编译完成</h3>
+            <pre v-pre>new Vue({
+  beforeMount() {
+    console.log('3️⃣ beforeMount - 页面即将挂载');
+    console.log('html:', this.$el.innerHTML);  // 原始 HTML（未编译）
+    console.log('data:', this.message);        // ✅ 可以访问
+    
+    // 此时虚拟 DOM 已创建，但未转换为真实 DOM
+  }
+});</pre>
+
+            <div class="status-box status-during">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 虚拟 DOM 已创建</li>
+                    <li>✅ 可访问所有数据</li>
+                    <li>⚠️ 真实 DOM 还未生成</li>
+                    <li>❌ 页面还看不到内容</li>
+                </ul>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>mounted（挂载后）- 最常用的钩子</h3>
+            <pre v-pre>new Vue({
+  mounted() {
+    console.log('4️⃣ mounted - 页面已挂载到 DOM');
+    console.log('$el:', this.$el);                    // ✅ 可以访问真实 DOM
+    console.log('html:', this.$el.innerHTML);        // ✅ 可以看到编译后的 HTML
+    console.log('dom elements:', this.$refs);        // ✅ 可以访问 ref 元素
+    
+    // 这里最适合做：
+    // - DOM 操作
+    // - 初始化 jQuery、echarts 等第三方库
+    // - 为 DOM 添加事件监听
+  }
+});</pre>
+
+            <div class="status-box status-after">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 真实 DOM 已挂载</li>
+                    <li>✅ $el 可用</li>
+                    <li>✅ 可以进行所有 DOM 操作</li>
+                    <li>✅ 第三方库初始化的最佳时机</li>
+                    <li>✅ 页面已完全渲染</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="result">
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #e0e0e0;">
+                <span class="label">📝 初始化阶段演示（查看浏览器控制台）：</span>
+                <button class="btn-primary" @click="createInitDemo">创建新的初始化演示</button>
+                <p style="margin-top: 10px; font-size: 13px; color: #666;">点击按钮会 new 一个全新的 Vue 实例，观察控制台输出的各个生命周期钩子调用顺序。</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 3. 更新阶段详解 ========== -->
+        <h2>🔄 3. 更新阶段详解</h2>
+        <div class="example-box">
+            <div class="example-title">响应式数据变化触发的两个钩子</div>
+
+            <h3>beforeUpdate（更新前）- 数据变了，页面还没变</h3>
+            <pre v-pre>new Vue({
+  data() {
+    return { count: 0 }
+  },
+  beforeUpdate() {
+    console.log('beforeUpdate - 数据已变，但 DOM 未更新');
+    console.log('this.count:', this.count);          // ✅ 新值
+    console.log('DOM 中显示的值:', this.$el.innerHTML);  // ❌ 旧值
+    
+    // 可以在这里检查将要进行什么改动
+    // 但不要修改数据（会导致死循环）
+  }
+});</pre>
+
+            <div class="status-box status-before">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 响应式数据已更新</li>
+                    <li>✅ 计算属性已重算</li>
+                    <li>❌ DOM 还未更新</li>
+                    <li>❌ 页面看不到新值</li>
+                    <li>⚠️ 不要修改数据（会导致死循环）</li>
+                </ul>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>updated（更新后）- 数据和页面都已更新</h3>
+            <pre v-pre>new Vue({
+  data() {
+    return { count: 0 }
+  },
+  updated() {
+    console.log('updated - 页面已更新');
+    console.log('this.count:', this.count);          // ✅ 新值
+    console.log('DOM 中显示的值:', this.$el.innerHTML);  // ✅ 新值
+    
+    // 这里可以进行依赖于 DOM 的操作
+    // 但仍然要小心，避免修改数据导致死循环
+  }
+});</pre>
+
+            <div class="status-box status-after">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 响应式数据已更新</li>
+                    <li>✅ DOM 已重新渲染</li>
+                    <li>✅ 页面显示最新值</li>
+                    <li>✅ 可以进行 DOM 相关操作</li>
+                    <li>⚠️ 避免修改数据</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="result">
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #e0e0e0;">
+                <span class="label">📝 更新阶段演示：</span>
+                <div style="margin-top: 10px;">
+                    <p>当前计数：<strong style="color: #667eea; font-size: 18px;">{{ updateCounter }}</strong></p>
+                    <button class="btn-primary" @click="updateCounter++">增加计数</button>
+                    <button class="btn-secondary" @click="updateCounter--">减少计数</button>
+                    <button class="btn-danger" @click="clearUpdateLog">清空日志</button>
+                </div>
+                <div class="lifecycle-log">
+                    <div v-if="updateLog.length === 0" style="color: #999; text-align: center; padding: 20px;">
+                        修改上面的计数值，观察生命周期日志...
+                    </div>
+                    <div v-for="(log, index) in updateLog" :key="index" class="log-item">
+                        <span class="hook-time">{{ log.time }}</span> 
+                        <span class="hook-name">{{ log.hook }}</span> 
+                        <span class="hook-status">{{ log.message }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 4. 销毁阶段详解 ========== -->
+        <h2>🗑️ 4. 销毁阶段详解</h2>
+        <div class="example-box">
+            <div class="example-title">清理资源的最后时刻</div>
+
+            <h3>beforeDestroy（销毁前）- 最后的清理机会</h3>
+            <pre v-pre>new Vue({
+  mounted() {
+    // 添加事件监听
+    this.handleResize = () => console.log('窗口大小改变');
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeDestroy() {
+    console.log('beforeDestroy - 关键！应该在这里清理资源');
+    
+    // ✅ 移除事件监听
+    window.removeEventListener('resize', this.handleResize);
+    
+    // ✅ 清理定时器
+    clearInterval(this.timer);
+    clearTimeout(this.timeout);
+    
+    // ✅ 取消 Ajax 请求
+    if (this.request) {
+      this.request.cancel();
+    }
+    
+    // ✅ 销毁第三方库
+    if (this.chart) {
+      this.chart.dispose();  // echarts
+    }
+    
+    // 此时实例仍然完全可用
+  }
+});</pre>
+
+            <div class="status-box status-before">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 实例仍然完全可用</li>
+                    <li>✅ 所有数据和方法仍可访问</li>
+                    <li>✅ 最后的清理机会</li>
+                    <li>❌ 即将销毁</li>
+                </ul>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>destroyed（销毁后）- 一切已断开连接</h3>
+            <pre v-pre>new Vue({
+  destroyed() {
+    console.log('destroyed - 实例已销毁');
+    
+    // ❌ 所有事件监听都应该已移除
+    // ❌ 所有定时器都应该已清理
+    // ❌ Vue 实例与 DOM 的连接已断开
+    // ❌ 响应式系统已停止工作
+  }
+});</pre>
+
+            <div class="status-box status-after">
+                <strong>此时的状态：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>✅ 实例已销毁</li>
+                    <li>❌ 响应式数据已移除</li>
+                    <li>❌ 所有事件监听已移除</li>
+                    <li>❌ 不应该再修改数据</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="result">
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #e0e0e0;">
+                <span class="label">📝 销毁阶段演示：</span>
+                <div style="margin-top: 10px;">
+                    <p>销毁演示实例：{{ destroyShowText }}</p>
+                    <button class="btn-primary" @click="createDestroyDemo">创建销毁演示实例</button>
+                    <button class="btn-danger" @click="destroyDemo" v-if="showDestroyText">销毁实例 ($destroy)</button>
+                    <p style="margin-top: 10px; font-size: 13px; color: #666;">点击按钮创建一个实例，然后销毁它，观察控制台的钩子调用。</p>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 5. 常见操作在各阶段的最佳位置 ========== -->
+        <h2>📋 5. 常见操作在生命周期的最佳位置</h2>
+        <div class="example-box">
+            <div class="example-title">来看看各个常见操作应该放在哪个钩子里</div>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>常见操作</th>
+                    <th>最佳位置</th>
+                    <th>备用位置</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td><strong>初始化数据</strong></td>
+                    <td>created</td>
+                    <td>beforeCreate（很少用）</td>
+                    <td>数据已初始化，可立即使用</td>
+                </tr>
+                <tr>
+                    <td><strong>发送 Ajax</strong></td>
+                    <td>created 或 mounted</td>
+                    <td>-</td>
+                    <td>created 更早获得数据；mounted 确保 DOM 就绪</td>
+                </tr>
+                <tr>
+                    <td><strong>DOM 操作</strong></td>
+                    <td>mounted 或 updated</td>
+                    <td>-</td>
+                    <td>需要真实 DOM，不能在 created</td>
+                </tr>
+                <tr>
+                    <td><strong>第三方库初始化</strong></td>
+                    <td>mounted</td>
+                    <td>-</td>
+                    <td>如 echarts、swiper，需要真实 DOM</td>
+                </tr>
+                <tr>
+                    <td><strong>事件监听添加</strong></td>
+                    <td>mounted</td>
+                    <td>-</td>
+                    <td>需要真实 DOM 对象</td>
+                </tr>
+                <tr>
+                    <td><strong>事件监听移除</strong></td>
+                    <td>beforeDestroy</td>
+                    <td>-</td>
+                    <td>防止内存泄漏</td>
+                </tr>
+                <tr>
+                    <td><strong>定时器清理</strong></td>
+                    <td>beforeDestroy</td>
+                    <td>-</td>
+                    <td>必须清理，否则会继续运行</td>
+                </tr>
+                <tr>
+                    <td><strong>取消 Ajax 请求</strong></td>
+                    <td>beforeDestroy</td>
+                    <td>-</td>
+                    <td>避免请求完成后数据混乱</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="note success-note">
+            <div class="note-title">✅ 最常用的组合</div>
+            <pre v-pre>// 最常见的使用模式
+new Vue({
+  data() {
+    return { items: [] }
+  },
+  
+  created() {
+    // 1. 发送 Ajax 获取数据
+    this.fetchData();
+  },
+  
+  mounted() {
+    // 2. 初始化第三方库
+    this.initChart();
+    
+    // 3. 添加事件监听
+    window.addEventListener('resize', this.handleResize);
+  },
+  
+  beforeDestroy() {
+    // 4. 清理资源
+    window.removeEventListener('resize', this.handleResize);
+    if (this.chart) {
+      this.chart.dispose();
+    }
+  },
+  
+  methods: {
+    fetchData() { /* ... */ },
+    initChart() { /* ... */ },
+    handleResize() { /* ... */ }
+  }
+});</pre>
+        </div>
+
+        <hr />
+
+        <!-- ========== 6. 生命周期钩子详细对比表 ========== -->
+        <h2>🔍 6. 8 个钩子的详细对比</h2>
+        <div class="example-box">
+            <div class="example-title">快速查阅各钩子的属性和使用场景</div>
+
+            <table>
+                <tr>
+                    <th>钩子函数</th>
+                    <th>调用时机</th>
+                    <th>能访问的内容</th>
+                    <th>常见用途</th>
+                    <th>使用频率</th>
+                </tr>
+                <tr>
+                    <td><code>beforeCreate</code></td>
+                    <td>实例创建前</td>
+                    <td>几乎什么都不能访问</td>
+                    <td>几乎不用</td>
+                    <td>⭐</td>
+                </tr>
+                <tr>
+                    <td><code>created</code></td>
+                    <td>实例创建后</td>
+                    <td>data、methods、computed、$watch</td>
+                    <td>初始化、Ajax 请求、事件监听</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td><code>beforeMount</code></td>
+                    <td>挂载前</td>
+                    <td>虚拟 DOM 已创建</td>
+                    <td>一般不用</td>
+                    <td>⭐</td>
+                </tr>
+                <tr>
+                    <td><code>mounted</code></td>
+                    <td>挂载后</td>
+                    <td>$el、真实 DOM、$refs</td>
+                    <td>DOM 操作、第三方库初始化</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td><code>beforeUpdate</code></td>
+                    <td>更新前</td>
+                    <td>新数据、旧 DOM</td>
+                    <td>记录状态、执行前置检查</td>
+                    <td>⭐⭐</td>
+                </tr>
+                <tr>
+                    <td><code>updated</code></td>
+                    <td>更新后</td>
+                    <td>新数据、新 DOM</td>
+                    <td>DOM 相关操作（谨慎）</td>
+                    <td>⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td><code>beforeDestroy</code></td>
+                    <td>销毁前</td>
+                    <td>所有数据仍可用</td>
+                    <td>资源清理、移除监听</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td><code>destroyed</code></td>
+                    <td>销毁后</td>
+                    <td>很少使用</td>
+                    <td>几乎不用</td>
+                    <td>⭐</td>
+                </tr>
+            </table>
+        </div>
+
+        <hr />
+
+        <!-- ========== 7. 完整实战案例 ========== -->
+        <h2>💡 7. 完整实战案例：用户列表组件</h2>
+        <div class="example-box">
+            <div class="example-title">演示生命周期在真实项目中的应用</div>
+
+            <pre v-pre>// 完整的用户列表组件
+new Vue({
+  el: '#user-list',
+  data() {
+    return {
+      users: [],
+      loading: false,
+      error: null,
+      page: 1
+    }
+  },
+  
+  // 【初始化阶段】
+  created() {
+    console.log('created: 初始化组件');
+    // 1. 第一次加载数据
+    this.fetchUsers();
+    // 2. 添加全局滚动监听（分页）
+    this.handleScroll = this.onWindowScroll.bind(this);
+  },
+  
+  mounted() {
+    console.log('mounted: 挂载完成');
+    // 1. 添加滚动事件监听（需要真实 DOM）
+    window.addEventListener('scroll', this.handleScroll);
+    // 2. 初始化第三方库
+    this.initTooltip();
+  },
+  
+  // 【更新阶段】
+  beforeUpdate() {
+    console.log('beforeUpdate: 数据即将更新，记录当前状态');
+    // 可以保存滚动位置、焦点等
+  },
+  
+  updated() {
+    console.log('updated: 页面已更新');
+    // 可以进行 DOM 相关的操作
+    // 注意：不要修改数据，会导致死循环
+  },
+  
+  // 【销毁阶段】
+  beforeDestroy() {
+    console.log('beforeDestroy: 清理资源');
+    // 1. 移除事件监听 ✅
+    window.removeEventListener('scroll', this.handleScroll);
+    // 2. 取消 Ajax 请求 ✅
+    if (this.fetchRequest) {
+      this.fetchRequest.cancel();
+    }
+    // 3. 清理定时器 ✅
+    clearTimeout(this.timer);
+    // 4. 销毁第三方库 ✅
+    this.tooltip && this.tooltip.dispose();
+  },
+  
+  methods: {
+    async fetchUsers() {
+      try {
+        this.loading = true;
+        // 模拟 Ajax 请求
+        let response = await fetch(`/api/users?page=${this.page}`);
+        this.users = await response.json();
+        this.error = null;
+      } catch (err) {
+        this.error = err.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    onWindowScroll() {
+      // 检查是否滚动到底部，如果是，加载更多
+      if (this.isScrollAtBottom()) {
+        this.page++;
+        this.fetchUsers();
+      }
+    },
+    
+    isScrollAtBottom() {
+      return window.innerHeight + window.scrollY >= document.body.offsetHeight;
+    },
+    
+    initTooltip() {
+      // 初始化 Tooltip、Popover 等
+    }
+  }
+});</pre>
+
+            <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                <strong>这个案例展示了：</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>created：初始化数据、第一次 Ajax 请求</li>
+                    <li>mounted：添加 DOM 事件、初始化第三方库</li>
+                    <li>beforeDestroy：移除监听、取消请求、清理定时器</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 8. 常见注意事项 ========== -->
+        <h2>⚠️ 8. 常见注意事项和陷阱</h2>
+        <div class="example-box">
+            <div class="example-title">避免在生命周期中踩坑</div>
+
+            <h3>❌ 陷阱 1：在 updated 中修改数据导致死循环</h3>
+            <pre v-pre>// ❌ 错误示例：会导致死循环！
+new Vue({
+  data() {
+    return { count: 0 }
+  },
+  updated() {
+    this.count++;  // ❌ 修改数据 -> 触发更新 -> 再次执行 updated -> 再次修改数据...
+  }
+});</pre>
+
+            <div class="error-note">
+                <div class="note-title">如何修复？</div>
+                <pre v-pre>// ✅ 正确做法1：改用 watch
+watch: {
+  count() {
+    // 响应式地处理数据变化
+  }
+}
+
+// ✅ 正确做法2：设置标志位防止重复
+updated() {
+  if (!this.isUpdating) {
+    this.isUpdating = true;
+    // 做一些 DOM 操作
+  }
+}</pre>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>❌ 陷阱 2：在 beforeDestroy 中忘记清理资源</h3>
+            <pre v-pre>// ❌ 错误示例：会导致内存泄漏
+new Vue({
+  mounted() {
+    // 添加事件监听
+    window.addEventListener('resize', this.handleResize);
+    // 创建定时器
+    this.timer = setInterval(() => {
+      // 每秒执行
+    }, 1000);
+  }
+  // ❌ 没有在 beforeDestroy 中清理！
+});</pre>
+
+            <div class="error-note">
+                <div class="note-title">如何修复？</div>
+                <pre v-pre>// ✅ 正确做法：在 beforeDestroy 中清理
+beforeDestroy() {
+  // 移除事件监听
+  window.removeEventListener('resize', this.handleResize);
+  // 清理定时器
+  clearInterval(this.timer);
+}</pre>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>❌ 陷阱 3：在 created 中尝试访问 DOM</h3>
+            <pre v-pre>// ❌ 错误示例：DOM 还未挂载
+new Vue({
+  created() {
+    // ❌ $el 是 undefined
+    const el = this.$el;
+    // ❌ 无法访问 ref
+    this.$refs.input.focus();
+  }
+});</pre>
+
+            <div class="error-note">
+                <div class="note-title">如何修复？</div>
+                <pre v-pre>// ✅ 正确做法：使用 mounted 或 $nextTick
+mounted() {
+  // ✅ $el 已可用
+  const el = this.$el;
+  // ✅ 可以访问 ref
+  this.$refs.input.focus();
+}
+
+// 或在 created 中使用 $nextTick
+created() {
+  this.$nextTick(() => {
+    // 这里 DOM 已准备好
+    this.$refs.input.focus();
+  });
+}</pre>
+            </div>
+
+            <hr style="margin: 20px 0;" />
+
+            <h3>❌ 陷阱 4：在 mounted 中进行大量同步操作</h3>
+            <pre v-pre>// ❌ 不推荐：会阻塞主线程
+new Vue({
+  mounted() {
+    // ❌ 这会冻结页面
+    for (let i = 0; i < 1000000; i++) {
+      this.processData();
+    }
+  }
+});</pre>
+
+            <div class="error-note">
+                <div class="note-title">如何修复？</div>
+                <pre v-pre">// ✅ 使用异步方式
+mounted() {
+  // 方案1：使用 setTimeout 分块处理
+  setTimeout(() => {
+    this.processLargeData();
+  }, 0);
+  
+  // 方案2：使用 Worker
+  const worker = new Worker('worker.js');
+  worker.postMessage(this.data);
+}</pre>
+            </div>
+        </div>
+
+        <hr />
+
+        <!-- ========== 9. 快速参考 ========== -->
+        <h2>📚 9. 生命周期速查表</h2>
+        <div class="example-box">
+            <div class="example-title">快速查找你需要的钩子</div>
+
+            <h3>我想做什么？→ 应该用哪个钩子？</h3>
+            <table>
+                <tr>
+                    <th>目标</th>
+                    <th>使用钩子</th>
+                    <th>代码示例</th>
+                </tr>
+                <tr>
+                    <td><strong>页面加载时获取数据</strong></td>
+                    <td>created</td>
+                    <td><code>this.fetchData()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>输入框自动聚焦</strong></td>
+                    <td>mounted</td>
+                    <td><code>this.$refs.input.focus()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>页面大小改变重新计算</strong></td>
+                    <td>mounted + beforeDestroy</td>
+                    <td><code>window.addEventListener/removeEventListener</code></td>
+                </tr>
+                <tr>
+                    <td><strong>初始化第三方库</strong></td>
+                    <td>mounted</td>
+                    <td><code>this.chart = new Chart()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>监听数据变化</strong></td>
+                    <td>watch（不是钩子）</td>
+                    <td><code>watch: { data() {} }</code></td>
+                </tr>
+                <tr>
+                    <td><strong>清理定时器</strong></td>
+                    <td>beforeDestroy</td>
+                    <td><code>clearInterval(this.timer)</code></td>
+                </tr>
+                <tr>
+                    <td><strong>保存数据到本地</strong></td>
+                    <td>beforeDestroy</td>
+                    <td><code>localStorage.setItem(...)</code></td>
+                </tr>
+                <tr>
+                    <td><strong>检查数据是否有效</strong></td>
+                    <td>beforeUpdate</td>
+                    <td>日志记录、状态检查</td>
+                </tr>
+            </table>
+        </div>
+
+        <hr />
+
+        <!-- ========== 10. 总结 ========== -->
+        <div class="note success-note">
+            <div class="note-title">📚 关键要点总结</div>
+            
+            <h3>3 个阶段 8 个钩子</h3>
+            <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                <tr style="background: #667eea; color: white;">
+                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>初始化</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">beforeCreate → created → beforeMount → mounted</td>
+                </tr>
+                <tr style="background: #f5576c; color: white;">
+                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>更新</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">beforeUpdate → updated</td>
+                </tr>
+                <tr style="background: #fa709a; color: white;">
+                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>销毁</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">beforeDestroy → destroyed</td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 20px;">两个最常用的钩子</h3>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+                <li><strong>created</strong> ⭐⭐⭐⭐⭐
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>✅ 数据初始化</li>
+                        <li>✅ 发送 Ajax 请求</li>
+                        <li>✅ 添加全局事件监听</li>
+                    </ul>
+                </li>
+                <li style="margin-top: 10px;"><strong>mounted</strong> ⭐⭐⭐⭐⭐
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>✅ DOM 操作</li>
+                        <li>✅ 初始化第三方库</li>
+                        <li>✅ 添加 DOM 事件监听</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">关键规则</h3>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+                <li>✅ created：可以访问数据但不能访问 DOM</li>
+                <li>✅ mounted：可以访问 DOM</li>
+                <li>✅ beforeDestroy：一定要清理资源</li>
+                <li>❌ 不要在 updated 中修改数据→死循环</li>
+                <li>❌ 不要忘记清理事件监听→内存泄漏</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        Vue.config.productionTip = false;
+
+        const vm = new Vue({
+            el: '#root',
+            data: {
+                // 更新阶段演示
+                updateCounter: 0,
+                updateLog: [],
+                // 日志锁，防止在生命周期钩子中修改响应式数据导致死循环
+                _logLock: false,
+
+                // 销毁阶段演示
+                showDestroyText: false,
+                destroyShowText: '(暂无演示实例)',
+                destroyDemoVm: null
+            },
+
+            methods: {
+                // 创建初始化演示
+                createInitDemo() {
+                    console.clear();
+                    console.log('%c========== 初始化阶段演示 ==========', 'color: #667eea; font-size: 16px; font-weight: bold;');
+                    
+                    const initVm = new Vue({
+                        el: '#demo-init',
+                        data() {
+                            return { message: '你好 Vue' }
+                        },
+                        beforeCreate() {
+                            console.log('%c1️⃣ beforeCreate', 'color: #f5576c; font-weight: bold;');
+                            console.log('   能访问 data?', this.$data ? '❌ 不能' : '❌ 不能');
+                            console.log('   能访问 methods?', this.$options.methods ? '❌ 不能' : '❌ 不能');
+                            console.log('   $el:', this.$el);
+                        },
+                        created() {
+                            console.log('%c2️⃣ created', 'color: #f5576c; font-weight: bold;');
+                            console.log('   data 已初始化:', this.message);
+                            console.log('   能访问 methods?', typeof this.sayHello === 'function' ? '✅ 能' : '❌ 不能');
+                            console.log('   $el:', this.$el);
+                        },
+                        beforeMount() {
+                            console.log('%c3️⃣ beforeMount', 'color: #f5576c; font-weight: bold;');
+                            console.log('   HTML:', this.$el ? this.$el.innerHTML : 'undefined');
+                            console.log('   DOM 已挂载?', this.$el ? '❌ 还没' : '❌ 还没');
+                        },
+                        mounted() {
+                            console.log('%c4️⃣ mounted', 'color: #28a745; font-weight: bold;');
+                            console.log('   ✅ 实例已挂载');
+                            console.log('   HTML:', this.$el.innerHTML);
+                            console.log('   可以进行 DOM 操作');
+                            console.log('%c========== 初始化完成 ==========', 'color: #667eea; font-size: 16px; font-weight: bold;');
+                        },
+                        methods: {
+                            sayHello() {
+                                return 'Hello';
+                            }
+                        }
+                    });
+
+                    // 3秒后销毁
+                    setTimeout(() => {
+                        initVm.$destroy();
+                    }, 3000);
+                },
+
+                // 安全的日志函数：带锁，避免在钩子中直接触发响应式更新的循环
+                safeLog(hook, message) {
+                    if (this._logLock) return;
+                    this._logLock = true;
+                    const timestamp = new Date().toLocaleTimeString();
+                    this.updateLog.unshift({ time: timestamp, hook, message });
+                    if (this.updateLog.length > 20) {
+                        this.updateLog.pop();
+                    }
+                    // 在下一次 DOM 更新周期之后释放锁
+                    this.$nextTick(() => {
+                        this._logLock = false;
+                    });
+                },
+
+                // 更新阶段演示的 beforeUpdate（仅记录到控制台，避免修改响应式数据）
+                onBeforeUpdate() {
+                    const timestamp = new Date().toLocaleTimeString();
+                    console.log(`${timestamp} beforeUpdate: 数据变为 ${this.updateCounter}，DOM 还未更新`);
+                },
+
+                // 更新阶段演示的 updated（通过 safeLog 安全记录到视图）
+                onUpdated() {
+                    this.safeLog('updated', `DOM 已更新，现在显示 ${this.updateCounter}`);
+                },
+
+                // 清空日志
+                clearUpdateLog() {
+                    this.updateLog = [];
+                },
+
+                // 创建销毁演示
+                createDestroyDemo() {
+                    console.clear();
+                    console.log('%c========== 销毁阶段演示 ==========', 'color: #667eea; font-size: 16px; font-weight: bold;');
+                    
+                    this.showDestroyText = true;
+                    this.destroyShowText = '演示实例已创建，点击下面的按钮销毁它';
+                    // 创建一个临时容器并挂载到页面，确保 mounted/beforeDestroy 能被触发
+                    const container = document.createElement('div');
+                    container.id = 'destroy-demo-container';
+                    container.style.padding = '10px';
+                    container.style.margin = '10px 0';
+                    container.style.border = '1px dashed #ddd';
+                    container.textContent = '销毁演示容器（将被销毁）';
+                    document.body.appendChild(container);
+
+                    this.destroyDemoVm = new Vue({
+                        el: container,
+                        data() {
+                            return { message: '我是即将被销毁的实例', timer: null }
+                        },
+                        beforeCreate() {
+                            console.log('%c1️⃣ beforeCreate', 'color: #fa709a; font-weight: bold;');
+                        },
+                        created() {
+                            console.log('%c2️⃣ created', 'color: #fa709a; font-weight: bold;');
+                            console.log('   实例已创建，数据已初始化');
+                        },
+                        beforeMount() {
+                            console.log('%c3️⃣ beforeMount', 'color: #fa709a; font-weight: bold;');
+                        },
+                        mounted() {
+                            console.log('%c4️⃣ mounted', 'color: #fa709a; font-weight: bold;');
+                            // 模拟添加事件监听和定时器（注意：短频率以便演示，不会无限刷屏）
+                            this.timer = setInterval(() => {
+                                console.log('⏰ (演示定时器运行中)');
+                            }, 2000);
+                        },
+                        beforeDestroy() {
+                            console.log('%c5️⃣ beforeDestroy - 清理资源开始', 'color: #fa709a; font-weight: bold;');
+                            console.log('   ✅ 清理定时器');
+                            if (this.timer) {
+                                clearInterval(this.timer);
+                                this.timer = null;
+                            }
+                            console.log('   ✅ 移除容器节点');
+                            // 在销毁前移除挂载的 DOM 容器，避免残留
+                            if (this.$el && this.$el.parentNode) {
+                                this.$el.parentNode.removeChild(this.$el);
+                            }
+                        },
+                        destroyed() {
+                            console.log('%c6️⃣ destroyed - 实例已销毁', 'color: #fa709a; font-weight: bold;');
+                            console.log('   实例与 DOM 的连接已断开');
+                            console.log('%c========== 销毁完成 ==========', 'color: #667eea; font-size: 16px; font-weight: bold;');
+                        }
+                    });
+                },
+
+                // 销毁演示实例
+                destroyDemo() {
+                    if (this.destroyDemoVm) {
+                        try {
+                            this.destroyDemoVm.$destroy();
+                        } catch (e) {
+                            console.warn('销毁实例时发生错误：', e);
+                        }
+                        this.destroyDemoVm = null;
+                        this.showDestroyText = false;
+                        this.destroyShowText = '(演示实例已销毁)';
+                    }
+                }
+            },
+
+            beforeUpdate() {
+                this.onBeforeUpdate();
+            },
+
+            updated() {
+                this.onUpdated();
+            }
+        });
+    </script>
+</body>
+
+</html>
