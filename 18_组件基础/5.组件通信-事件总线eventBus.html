@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue组件通信 - 事件总线EventBus</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .main-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-title h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-title p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .demo-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .demo-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .demo-desc {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .demo-desc strong {
+            color: #667eea;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .concept-box h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .concept-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .concept-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .concept-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .analogy-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .analogy-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .analogy-box p {
+            color: #856404;
+            line-height: 1.8;
+        }
+
+        .component-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .component {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .component-a {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .component-b {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .component-c {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .component h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .component button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .component-a button {
+            background: white;
+            color: #667eea;
+        }
+
+        .component-a button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .component-b button {
+            background: white;
+            color: #f5576c;
+        }
+
+        .component-b button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .component-c button {
+            background: white;
+            color: #00f2fe;
+        }
+
+        .component-c button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .component input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid white;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .message-display {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            min-height: 60px;
+            word-break: break-word;
+        }
+
+        .event-log {
+            background: #2c3e50;
+            color: #2ecc71;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .event-log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .event-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-log .timestamp {
+            color: #3498db;
+        }
+
+        .event-log .event-name {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .event-log .event-data {
+            color: #f39c12;
+        }
+
+        .code-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .code-example .comment {
+            color: #95a5a6;
+        }
+
+        .code-example .keyword {
+            color: #3498db;
+        }
+
+        .code-example .string {
+            color: #2ecc71;
+        }
+
+        .code-example .function {
+            color: #e74c3c;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .comparison-table tr:hover {
+            background: #e9ecef;
+        }
+
+        .highlight {
+            background: #ffffcc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .best-practice {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .best-practice h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .best-practice ul {
+            color: #155724;
+            padding-left: 25px;
+            line-height: 1.8;
+        }
+
+        .chat-container {
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            max-width: 70%;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.sent {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-message.received {
+            background: white;
+            color: #333;
+            margin-right: auto;
+        }
+
+        .chat-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .chat-input-area button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .chat-input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .todo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .todo-category {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .todo-category h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .todo-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .todo-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .todo-item button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .todo-item button:hover {
+            background: #218838;
+        }
+
+        .statistics {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-title">
+        <h1>🚌 Vue组件通信 - 事件总线EventBus</h1>
+        <p>兄弟组件 & 任意组件之间的通信解决方案</p>
+    </div>
+
+    <!-- Demo 1: 什么是事件总线 -->
+    <div id="app1" class="demo-container">
+        <h2 class="demo-title">📚 Demo 1: 什么是事件总线（Event Bus）</h2>
+        
+        <div class="concept-box">
+            <h3>🎯 核心概念</h3>
+            <ul>
+                <li><strong>事件总线（Event Bus）</strong>：一个空的Vue实例，作为中央事件管理器</li>
+                <li><strong>作用</strong>：实现任意组件之间的通信（尤其是兄弟组件）</li>
+                <li><strong>原理</strong>：利用Vue实例的$on、$emit、$off方法</li>
+                <li><strong>适用场景</strong>：组件层级复杂，props和$emit不方便时</li>
+            </ul>
+        </div>
+
+        <div class="analogy-box">
+            <h4>🏢 类比：公司内的广播系统</h4>
+            <p>
+                <strong>想象一个公司的广播系统：</strong><br><br>
+                
+                <strong>1️⃣ 广播室（Event Bus）</strong><br>
+                - 就像公司的广播室，负责接收和发送消息<br>
+                - 它本身是个空房间，只是个通信中介<br><br>
+                
+                <strong>2️⃣ 部门员工（各个组件）</strong><br>
+                - 销售部（组件A）可以通过广播发消息<br>
+                - 技术部（组件B）可以监听广播接收消息<br>
+                - 人事部（组件C）也可以监听和发送<br><br>
+                
+                <strong>3️⃣ 通信过程</strong><br>
+                - 销售部拿起话筒广播："下午3点开会"（$emit触发事件）<br>
+                - 所有订阅了"会议通知"频道的部门都能听到（$on监听事件）<br>
+                - 各部门不需要直接联系，通过广播室就能通信<br><br>
+                
+                <strong>💡 这就是Event Bus的本质：一个中央消息中间件！</strong>
+            </p>
+        </div>
+
+        <div class="code-example">
+<span class="comment">// 1. 创建事件总线（在main.js或单独文件中）</span>
+<span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()<br>
+
+<span class="comment">// 或者挂载到Vue原型上，方便全局访问</span>
+Vue.prototype.$bus = <span class="keyword">new</span> Vue()<br>
+
+<span class="comment">// 2. 组件A：发送消息（触发事件）</span>
+EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'Hello from A'</span>)<br>
+
+<span class="comment">// 3. 组件B：接收消息（监听事件）</span>
+EventBus.<span class="function">$on</span>(<span class="string">'message'</span>, (data) => {
+    console.log(data) <span class="comment">// 'Hello from A'</span>
+})<br>
+
+<span class="comment">// 4. 组件销毁时：移除监听（避免内存泄漏）</span>
+EventBus.<span class="function">$off</span>(<span class="string">'message'</span>)<br>
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>通信方式</th>
+                    <th>适用场景</th>
+                    <th>优点</th>
+                    <th>缺点</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>props</strong></td>
+                    <td>父→子</td>
+                    <td>简单直观，类型验证</td>
+                    <td>只能单向向下传递</td>
+                </tr>
+                <tr>
+                    <td><strong>$emit</strong></td>
+                    <td>子→父</td>
+                    <td>明确的事件流向</td>
+                    <td>只能向上传递一层</td>
+                </tr>
+                <tr>
+                    <td><strong>Event Bus</strong></td>
+                    <td>任意组件间</td>
+                    <td>灵活，跨层级通信</td>
+                    <td>难以追踪，容易混乱</td>
+                </tr>
+                <tr>
+                    <td><strong>Vuex</strong></td>
+                    <td>大型应用状态管理</td>
+                    <td>集中管理，易于调试</td>
+                    <td>学习成本高，小应用过重</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="demo-desc">
+            <strong>💡 理解要点：</strong><br>
+            1. Event Bus本质是一个空的Vue实例，只利用它的事件系统<br>
+            2. 组件通过$bus.$emit()发送事件，通过$bus.$on()监听事件<br>
+            3. 特别适合兄弟组件通信，避免了"父→子→孙"的层层传递<br>
+            4. 使用后要记得$off()移除监听，防止内存泄漏<br>
+            5. 中小型项目推荐，大型项目建议使用Vuex
+        </div>
+    </div>
+
+    <!-- Demo 2: 基础使用 - 兄弟组件通信 -->
+    <div id="app2" class="demo-container">
+        <h2 class="demo-title">🎬 Demo 2: 基础使用 - 兄弟组件通信</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>两个兄弟组件（ComponentA和ComponentB）之间互相发送消息
+        </div>
+
+        <div class="component-container">
+            <component-a></component-a>
+            <component-b></component-b>
+        </div>
+
+        <div class="event-log">
+            <div><strong>📋 事件日志：</strong></div>
+            <div v-for="(log, index) in eventLogs" :key="index" class="event-log-item">
+                <span class="timestamp">[{{ log.time }}]</span> 
+                <span class="event-name">{{ log.event }}</span> - 
+                <span class="event-data">{{ log.data }}</span>
+            </div>
+            <div v-if="eventLogs.length === 0" style="color: #95a5a6; padding: 10px 0;">
+                暂无事件记录，点击按钮触发事件...
+            </div>
+        </div>
+
+        <div class="code-example">
+<span class="comment">// 创建事件总线</span><br>
+<span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()<br>
+
+<span class="comment">// 组件A：发送消息</span><br>
+Vue.<span class="function">component</span>(<span class="string">'component-a'</span>, {
+    template: `
+        &lt;div class="component component-a"&gt;
+            &lt;h3&gt;组件 A&lt;/h3&gt;
+            &lt;button @click="sendToB"&gt;发送消息给B&lt;/button&gt;
+        &lt;/div&gt;
+    `,
+    methods: {
+        <span class="function">sendToB</span>() {
+            <span class="comment">// 触发事件，发送数据</span>
+            EventBus.<span class="function">$emit</span>(<span class="string">'a-to-b'</span>, <span class="string">'Hello from A!'</span>)
+        }
+    }
+})<br>
+
+<span class="comment">// 组件B：接收消息</span><br>
+Vue.<span class="function">component</span>(<span class="string">'component-b'</span>, {
+    data() {
+        <span class="keyword">return</span> {
+            message: <span class="string">'等待接收消息...'</span>
+        }
+    },
+    mounted() {
+        <span class="comment">// 监听事件，接收数据</span><br>
+        EventBus.<span class="function">$on</span>(<span class="string">'a-to-b'</span>, (data) => {
+            <span class="keyword">this</span>.message = data
+        })
+    },
+    beforeDestroy() {
+        <span class="comment">// 组件销毁前移除监听</span>
+        EventBus.<span class="function">$off</span>(<span class="string">'a-to-b'</span>)
+    }
+})
+        </div>
+    </div>
+
+    <!-- Demo 3: 传递复杂数据 -->
+    <div id="app3" class="demo-container">
+        <h2 class="demo-title">📦 Demo 3: 传递复杂数据对象</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>组件发送者输入用户信息，接收者实时显示
+        </div>
+
+        <div class="component-container">
+            <sender-component></sender-component>
+            <receiver-component></receiver-component>
+        </div>
+
+        <div class="code-example">
+<span class="comment">// 发送复杂对象</span>
+<span class="keyword">const</span> userInfo = {
+    name: <span class="string">'张三'</span>,
+    age: 25,
+    skills: [<span class="string">'Vue'</span>, <span class="string">'JavaScript'</span>, <span class="string">'CSS'</span>]
+}
+
+EventBus.<span class="function">$emit</span>(<span class="string">'user-update'</span>, userInfo)
+
+<span class="comment">// 接收复杂对象</span>
+EventBus.<span class="function">$on</span>(<span class="string">'user-update'</span>, (user) => {
+    console.log(user.name)    <span class="comment">// '张三'</span>
+    console.log(user.age)     <span class="comment">// 25</span>
+    console.log(user.skills)  <span class="comment">// ['Vue', 'JavaScript', 'CSS']</span>
+})
+        </div>
+    </div>
+
+    <!-- Demo 4: 多对多通信 -->
+    <div id="app4" class="demo-container">
+        <h2 class="demo-title">🔀 Demo 4: 多对多通信 - 聊天室</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>模拟多个用户在聊天室中发送和接收消息（多对多通信）
+        </div>
+
+        <div class="component-container">
+            <chat-user name="小明" color="#667eea"></chat-user>
+            <chat-user name="小红" color="#f5576c"></chat-user>
+            <chat-user name="小刚" color="#00f2fe"></chat-user>
+        </div>
+
+        <div class="demo-desc" style="margin-top: 20px;">
+            <strong>💡 注意：</strong>所有用户都监听同一个事件'chat-message'，因此任何一个用户发送消息，其他所有用户都能收到。这就是Event Bus的"广播"特性！
+        </div>
+    </div>
+
+    <!-- Demo 5: 条件监听与取消监听 -->
+    <div id="app5" class="demo-container">
+        <h2 class="demo-title">🎚️ Demo 5: $on、$once、$off 详解</h2>
+        
+        <div class="demo-desc">
+            <strong>学习：</strong>Event Bus的三个核心API的使用方法
+        </div>
+
+        <api-test></api-test>
+
+        <table class="comparison-table" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>API方法</th>
+                    <th>语法</th>
+                    <th>作用</th>
+                    <th>使用场景</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>$on</strong></td>
+                    <td>$bus.$on('event', callback)</td>
+                    <td>监听事件，可触发多次</td>
+                    <td>持续监听，如聊天消息</td>
+                </tr>
+                <tr>
+                    <td><strong>$once</strong></td>
+                    <td>$bus.$once('event', callback)</td>
+                    <td>监听事件，只触发一次后自动移除</td>
+                    <td>一次性操作，如弹窗确认</td>
+                </tr>
+                <tr>
+                    <td><strong>$off</strong></td>
+                    <td>$bus.$off('event', callback?)</td>
+                    <td>移除事件监听</td>
+                    <td>组件销毁时，防止内存泄漏</td>
+                </tr>
+                <tr>
+                    <td><strong>$emit</strong></td>
+                    <td>$bus.$emit('event', ...args)</td>
+                    <td>触发事件，传递数据</td>
+                    <td>发送消息或通知</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="code-example">
+<span class="comment">// 1. $on - 持续监听</span>
+EventBus.<span class="function">$on</span>(<span class="string">'message'</span>, (data) => {
+    console.log(data)
+})
+EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'第1次'</span>) <span class="comment">// 触发</span>
+EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'第2次'</span>) <span class="comment">// 触发</span>
+EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'第3次'</span>) <span class="comment">// 触发</span>
+
+<span class="comment">// 2. $once - 只监听一次</span>
+EventBus.<span class="function">$once</span>(<span class="string">'init'</span>, (data) => {
+    console.log(data)
+})
+EventBus.<span class="function">$emit</span>(<span class="string">'init'</span>, <span class="string">'第1次'</span>) <span class="comment">// 触发</span>
+EventBus.<span class="function">$emit</span>(<span class="string">'init'</span>, <span class="string">'第2次'</span>) <span class="comment">// 不触发</span>
+
+<span class="comment">// 3. $off - 移除监听</span>
+<span class="keyword">const</span> handler = (data) => console.log(data)
+EventBus.<span class="function">$on</span>(<span class="string">'test'</span>, handler)
+EventBus.<span class="function">$off</span>(<span class="string">'test'</span>, handler)  <span class="comment">// 移除特定回调</span>
+EventBus.<span class="function">$off</span>(<span class="string">'test'</span>)          <span class="comment">// 移除该事件所有回调</span>
+EventBus.<span class="function">$off</span>()                  <span class="comment">// 移除所有事件监听（慎用！）</span>
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ 重要注意事项</h4>
+            <p>
+                <strong>1. 必须在beforeDestroy中$off：</strong><br>
+                &nbsp;&nbsp;&nbsp;如果组件被销毁但没有移除监听，会造成内存泄漏！<br><br>
+                
+                <strong>2. $off移除监听的三种方式：</strong><br>
+                &nbsp;&nbsp;&nbsp;• $off('event', callback) - 移除特定事件的特定回调<br>
+                &nbsp;&nbsp;&nbsp;• $off('event') - 移除特定事件的所有回调<br>
+                &nbsp;&nbsp;&nbsp;• $off() - 移除所有事件监听（慎用，会影响其他组件）<br><br>
+                
+                <strong>3. 回调函数不能用箭头函数：</strong><br>
+                &nbsp;&nbsp;&nbsp;如果需要访问组件的this，不能用箭头函数，除非在外面用变量保存this
+            </p>
+        </div>
+    </div>
+
+    <!-- Demo 6: 实战案例 - Todo分类管理 -->
+    <div id="app6" class="demo-container">
+        <h2 class="demo-title">✅ Demo 6: 实战案例 - Todo分类管理</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>三个分类面板（工作、学习、生活），点击完成按钮可将任务移到"已完成"面板
+        </div>
+
+        <todo-input></todo-input>
+        
+        <div class="todo-container">
+            <todo-list category="工作" color="#667eea"></todo-list>
+            <todo-list category="学习" color="#f5576c"></todo-list>
+            <todo-list category="生活" color="#00f2fe"></todo-list>
+        </div>
+
+        <div class="todo-container" style="margin-top: 20px;">
+            <todo-completed></todo-completed>
+        </div>
+
+        <div class="statistics">
+            <todo-statistics></todo-statistics>
+        </div>
+
+        <div class="demo-desc" style="margin-top: 20px;">
+            <strong>💡 技术要点：</strong><br>
+            1. 输入组件通过$emit('add-todo', {category, text})发送新任务<br>
+            2. 各分类面板通过$on('add-todo')接收并添加任务<br>
+            3. 点击完成按钮通过$emit('complete-todo', {category, text})通知<br>
+            4. 已完成面板通过$on('complete-todo')接收并显示<br>
+            5. 统计组件监听所有事件，实时更新数据
+        </div>
+    </div>
+
+    <!-- Demo 7: 最佳实践 -->
+    <div id="app7" class="demo-container">
+        <h2 class="demo-title">🌟 Demo 7: Event Bus 最佳实践</h2>
+        
+        <div class="best-practice">
+            <h4>✅ 推荐做法</h4>
+            <ul>
+                <li><strong>统一管理事件名称：</strong>在单独的常量文件中定义事件名，避免拼写错误</li>
+                <li><strong>挂载到Vue原型：</strong>Vue.prototype.$bus = new Vue()，方便全局访问</li>
+                <li><strong>在mounted中监听：</strong>确保组件已挂载，避免监听失败</li>
+                <li><strong>在beforeDestroy中移除：</strong>必须$off移除监听，防止内存泄漏</li>
+                <li><strong>事件命名规范：</strong>使用kebab-case，如'user-login'、'data-update'</li>
+                <li><strong>传递数据封装：</strong>复杂数据用对象封装，便于扩展</li>
+                <li><strong>添加注释：</strong>在$emit和$on处添加注释，说明事件用途</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <h4>❌ 避免的做法</h4>
+            <p>
+                ❌ <strong>滥用Event Bus：</strong>不是所有通信都要用，父子组件优先用props/$emit<br>
+                ❌ <strong>忘记$off：</strong>组件销毁不移除监听会内存泄漏<br>
+                ❌ <strong>事件命名混乱：</strong>没有规范，难以维护<br>
+                ❌ <strong>过度使用$bus.$off()：</strong>移除所有监听会影响其他组件<br>
+                ❌ <strong>大型项目使用：</strong>Event Bus适合中小项目，大型项目用Vuex
+            </p>
+        </div>
+
+        <div class="code-example">
+<span class="comment">// ===== eventBus.js =====</span>
+<span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>
+
+<span class="comment">// 创建事件总线</span>
+<span class="keyword">export</span> <span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()
+
+<span class="comment">// 定义事件名称常量（避免拼写错误）</span>
+<span class="keyword">export</span> <span class="keyword">const</span> EVENT_TYPES = {
+    USER_LOGIN: <span class="string">'user-login'</span>,
+    USER_LOGOUT: <span class="string">'user-logout'</span>,
+    DATA_UPDATE: <span class="string">'data-update'</span>,
+    SHOW_TOAST: <span class="string">'show-toast'</span>
+}
+
+<span class="comment">// ===== main.js =====</span>
+<span class="keyword">import</span> { EventBus } <span class="keyword">from</span> <span class="string">'./eventBus'</span>
+
+<span class="comment">// 挂载到Vue原型，全局访问</span>
+Vue.prototype.$bus = EventBus
+
+<span class="comment">// ===== ComponentA.vue =====</span>
+<span class="keyword">import</span> { EVENT_TYPES } <span class="keyword">from</span> <span class="string">'@/eventBus'</span>
+
+<span class="keyword">export</span> <span class="keyword">default</span> {
+    methods: {
+        <span class="function">login</span>() {
+            <span class="comment">// 使用常量，避免拼写错误</span>
+            <span class="keyword">this</span>.$bus.<span class="function">$emit</span>(EVENT_TYPES.USER_LOGIN, {
+                username: <span class="string">'张三'</span>,
+                token: <span class="string">'abc123'</span>
+            })
+        }
+    }
+}
+
+<span class="comment">// ===== ComponentB.vue =====</span>
+<span class="keyword">import</span> { EVENT_TYPES } <span class="keyword">from</span> <span class="string">'@/eventBus'</span>
+
+<span class="keyword">export</span> <span class="keyword">default</span> {
+    data() {
+        <span class="keyword">return</span> {
+            userInfo: <span class="keyword">null</span>
+        }
+    },
+    mounted() {
+        <span class="comment">// 监听登录事件</span>
+        <span class="keyword">this</span>.$bus.<span class="function">$on</span>(EVENT_TYPES.USER_LOGIN, <span class="keyword">this</span>.handleLogin)
+    },
+    methods: {
+        <span class="function">handleLogin</span>(data) {
+            <span class="keyword">this</span>.userInfo = data
+        }
+    },
+    beforeDestroy() {
+        <span class="comment">// 必须移除监听！</span>
+        <span class="keyword">this</span>.$bus.<span class="function">$off</span>(EVENT_TYPES.USER_LOGIN, <span class="keyword">this</span>.handleLogin)
+    }
+}
+        </div>
+
+        <div class="analogy-box">
+            <h4>🎯 Event Bus vs Vuex 如何选择？</h4>
+            <p>
+                <strong>使用 Event Bus 的场景：</strong><br>
+                • 中小型项目（10-30个组件）<br>
+                • 偶尔需要跨组件通信<br>
+                • 不需要状态持久化<br>
+                • 临时的、一次性的事件通知<br><br>
+                
+                <strong>使用 Vuex 的场景：</strong><br>
+                • 大型项目（30+组件）<br>
+                • 多个组件共享状态<br>
+                • 需要状态持久化（如登录信息）<br>
+                • 需要时间旅行调试<br>
+                • 复杂的状态变更逻辑<br><br>
+                
+                <strong>💡 记住：Event Bus是轻量级工具，Vuex是完整的状态管理方案！</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Demo 2: 基础使用 ====================
+        const EventBus2 = new Vue()
+
+        Vue.component('component-a', {
+            template: `
+                <div class="component component-a">
+                    <h3>组件 A 👈</h3>
+                    <button @click="sendToB">📤 发送消息给B</button>
+                    <div class="message-display">
+                        <strong>收到来自B的消息：</strong><br>
+                        {{ messageFromB }}
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    messageFromB: '(暂无)'
+                }
+            },
+            mounted() {
+                EventBus2.$on('b-to-a', (data) => {
+                    this.messageFromB = data
+                    this.$root.addLog('b-to-a', data)
+                })
+            },
+            methods: {
+                sendToB() {
+                    const message = `Hello from A! 时间：${new Date().toLocaleTimeString()}`
+                    EventBus2.$emit('a-to-b', message)
+                    this.$root.addLog('a-to-b', message)
+                }
+            },
+            beforeDestroy() {
+                EventBus2.$off('b-to-a')
+            }
+        })
+
+        Vue.component('component-b', {
+            template: `
+                <div class="component component-b">
+                    <h3>组件 B 👉</h3>
+                    <button @click="sendToA">📤 发送消息给A</button>
+                    <div class="message-display">
+                        <strong>收到来自A的消息：</strong><br>
+                        {{ messageFromA }}
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    messageFromA: '(暂无)'
+                }
+            },
+            mounted() {
+                EventBus2.$on('a-to-b', (data) => {
+                    this.messageFromA = data
+                    this.$root.addLog('a-to-b', data)
+                })
+            },
+            methods: {
+                sendToA() {
+                    const message = `Hi from B! 时间：${new Date().toLocaleTimeString()}`
+                    EventBus2.$emit('b-to-a', message)
+                    this.$root.addLog('b-to-a', message)
+                }
+            },
+            beforeDestroy() {
+                EventBus2.$off('a-to-b')
+            }
+        })
+
+        new Vue({
+            el: '#app2',
+            data: {
+                eventLogs: []
+            },
+            methods: {
+                addLog(event, data) {
+                    this.eventLogs.push({
+                        time: new Date().toLocaleTimeString(),
+                        event: event,
+                        data: data
+                    })
+                    // 只保留最近10条
+                    if (this.eventLogs.length > 10) {
+                        this.eventLogs.shift()
+                    }
+                }
+            }
+        })
+
+        // ==================== Demo 3: 传递复杂数据 ====================
+        const EventBus3 = new Vue()
+
+        Vue.component('sender-component', {
+            template: `
+                <div class="component component-a">
+                    <h3>发送者 📤</h3>
+                    <input v-model="userInfo.name" placeholder="姓名">
+                    <input v-model.number="userInfo.age" type="number" placeholder="年龄">
+                    <input v-model="userInfo.job" placeholder="职业">
+                    <button @click="sendUserInfo">发送用户信息</button>
+                </div>
+            `,
+            data() {
+                return {
+                    userInfo: {
+                        name: '张三',
+                        age: 25,
+                        job: '前端工程师'
+                    }
+                }
+            },
+            methods: {
+                sendUserInfo() {
+                    // 发送对象（会自动深拷贝吗？不会！注意引用问题）
+                    EventBus3.$emit('user-info-update', { ...this.userInfo })
+                }
+            }
+        })
+
+        Vue.component('receiver-component', {
+            template: `
+                <div class="component component-b">
+                    <h3>接收者 📥</h3>
+                    <div class="message-display">
+                        <div v-if="receivedUser">
+                            <strong>收到的用户信息：</strong><br>
+                            姓名：{{ receivedUser.name }}<br>
+                            年龄：{{ receivedUser.age }}<br>
+                            职业：{{ receivedUser.job }}
+                        </div>
+                        <div v-else style="color: rgba(255,255,255,0.6);">
+                            等待接收数据...
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    receivedUser: null
+                }
+            },
+            mounted() {
+                EventBus3.$on('user-info-update', (user) => {
+                    this.receivedUser = user
+                })
+            },
+            beforeDestroy() {
+                EventBus3.$off('user-info-update')
+            }
+        })
+
+        new Vue({
+            el: '#app3'
+        })
+
+        // ==================== Demo 4: 多对多通信 - 聊天室 ====================
+        const EventBus4 = new Vue()
+
+        Vue.component('chat-user', {
+            props: ['name', 'color'],
+            template: `
+                <div class="component" :style="{ background: 'linear-gradient(135deg, ' + color + ' 0%, ' + darkenColor(color) + ' 100%)' }">
+                    <h3>{{ name }} 💬</h3>
+                    <input v-model="message" @keyup.enter="sendMessage" placeholder="输入消息...">
+                    <button @click="sendMessage">发送</button>
+                    <div class="message-display">
+                        <div><strong>聊天记录：</strong></div>
+                        <div v-for="(msg, index) in messages" :key="index" style="padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            <strong>{{ msg.sender }}：</strong>{{ msg.text }}
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    message: '',
+                    messages: []
+                }
+            },
+            mounted() {
+                // 监听聊天消息
+                EventBus4.$on('chat-message', (data) => {
+                    // 不显示自己发的消息（已经在发送时添加了）
+                    if (data.sender !== this.name) {
+                        this.messages.push(data)
+                    }
+                })
+            },
+            methods: {
+                sendMessage() {
+                    if (this.message.trim()) {
+                        const msgData = {
+                            sender: this.name,
+                            text: this.message,
+                            time: new Date().toLocaleTimeString()
+                        }
+                        // 先添加到自己的消息列表
+                        this.messages.push(msgData)
+                        // 再广播给其他用户
+                        EventBus4.$emit('chat-message', msgData)
+                        this.message = ''
+                    }
+                },
+                darkenColor(color) {
+                    // 简单地返回一个更深的颜色
+                    return color === '#667eea' ? '#764ba2' : 
+                           color === '#f5576c' ? '#b91f45' : 
+                           '#00b8d4'
+                }
+            },
+            beforeDestroy() {
+                EventBus4.$off('chat-message')
+            }
+        })
+
+        new Vue({
+            el: '#app4'
+        })
+
+        // ==================== Demo 5: API测试 ====================
+        const EventBus5 = new Vue()
+
+        Vue.component('api-test', {
+            template: `
+                <div>
+                    <div class="component-container">
+                        <div class="component component-a">
+                            <h3>$on 测试</h3>
+                            <button @click="testOn">触发$on事件</button>
+                            <div class="message-display">
+                                触发次数：{{ onCount }}
+                            </div>
+                        </div>
+                        
+                        <div class="component component-b">
+                            <h3>$once 测试</h3>
+                            <button @click="setupOnce">设置$once监听</button>
+                            <button @click="testOnce">触发$once事件</button>
+                            <div class="message-display">
+                                触发次数：{{ onceCount }}<br>
+                                <span style="font-size: 0.9em;">(多次点击也只会触发一次)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="component component-c">
+                            <h3>$off 测试</h3>
+                            <button @click="setupOff">设置监听</button>
+                            <button @click="testOff">触发事件</button>
+                            <button @click="removeOff">移除监听</button>
+                            <div class="message-display">
+                                触发次数：{{ offCount }}<br>
+                                监听状态：{{ isOffListening ? '监听中' : '已移除' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    onCount: 0,
+                    onceCount: 0,
+                    offCount: 0,
+                    isOffListening: false
+                }
+            },
+            mounted() {
+                // $on 持续监听
+                EventBus5.$on('on-test', () => {
+                    this.onCount++
+                })
+            },
+            methods: {
+                testOn() {
+                    EventBus5.$emit('on-test')
+                },
+                setupOnce() {
+                    this.onceCount = 0
+                    // $once 只监听一次
+                    EventBus5.$once('once-test', () => {
+                        this.onceCount++
+                    })
+                    alert('$once监听已设置，点击"触发$once事件"按钮测试')
+                },
+                testOnce() {
+                    EventBus5.$emit('once-test')
+                },
+                setupOff() {
+                    this.isOffListening = true
+                    this.offCount = 0
+                    EventBus5.$on('off-test', this.offHandler)
+                },
+                offHandler() {
+                    this.offCount++
+                },
+                testOff() {
+                    EventBus5.$emit('off-test')
+                },
+                removeOff() {
+                    EventBus5.$off('off-test', this.offHandler)
+                    this.isOffListening = false
+                }
+            },
+            beforeDestroy() {
+                EventBus5.$off('on-test')
+                EventBus5.$off('once-test')
+                EventBus5.$off('off-test')
+            }
+        })
+
+        new Vue({
+            el: '#app5'
+        })
+
+        // ==================== Demo 6: Todo分类管理 ====================
+        const EventBus6 = new Vue()
+
+        Vue.component('todo-input', {
+            template: `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: white; margin-bottom: 15px; text-align: center;">➕ 添加新任务</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <select v-model="category" style="padding: 10px; border-radius: 6px; border: none; font-size: 1em;">
+                            <option value="工作">工作</option>
+                            <option value="学习">学习</option>
+                            <option value="生活">生活</option>
+                        </select>
+                        <input v-model="todoText" @keyup.enter="addTodo" placeholder="输入任务内容..." 
+                               style="flex: 1; padding: 10px; border-radius: 6px; border: none; font-size: 1em;">
+                        <button @click="addTodo" style="padding: 10px 25px; background: white; color: #667eea; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                            添加
+                        </button>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    category: '工作',
+                    todoText: ''
+                }
+            },
+            methods: {
+                addTodo() {
+                    if (this.todoText.trim()) {
+                        EventBus6.$emit('add-todo', {
+                            category: this.category,
+                            text: this.todoText,
+                            id: Date.now()
+                        })
+                        this.todoText = ''
+                    }
+                }
+            }
+        })
+
+        Vue.component('todo-list', {
+            props: ['category', 'color'],
+            template: `
+                <div class="todo-category">
+                    <h4>{{ category }} ({{ todos.length }})</h4>
+                    <div v-for="todo in todos" :key="todo.id" class="todo-item">
+                        <span>{{ todo.text }}</span>
+                        <button @click="completeTodo(todo)">✓ 完成</button>
+                    </div>
+                    <div v-if="todos.length === 0" style="text-align: center; padding: 20px; color: #999;">
+                        暂无任务
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    todos: []
+                }
+            },
+            mounted() {
+                EventBus6.$on('add-todo', (data) => {
+                    if (data.category === this.category) {
+                        this.todos.push(data)
+                    }
+                })
+            },
+            methods: {
+                completeTodo(todo) {
+                    EventBus6.$emit('complete-todo', {
+                        category: this.category,
+                        text: todo.text
+                    })
+                    const index = this.todos.indexOf(todo)
+                    if (index > -1) {
+                        this.todos.splice(index, 1)
+                    }
+                }
+            },
+            beforeDestroy() {
+                EventBus6.$off('add-todo')
+            }
+        })
+
+        Vue.component('todo-completed', {
+            template: `
+                <div class="todo-category" style="grid-column: 1 / -1; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                    <h4 style="color: white; border-bottom-color: white;">✅ 已完成 ({{ completed.length }})</h4>
+                    <div v-for="(item, index) in completed" :key="index" class="todo-item" style="background: rgba(255,255,255,0.2);">
+                        <span>【{{ item.category }}】{{ item.text }}</span>
+                        <span style="font-size: 0.9em; opacity: 0.8;">{{ item.time }}</span>
+                    </div>
+                    <div v-if="completed.length === 0" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.7);">
+                        还没有完成的任务
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    completed: []
+                }
+            },
+            mounted() {
+                EventBus6.$on('complete-todo', (data) => {
+                    this.completed.push({
+                        ...data,
+                        time: new Date().toLocaleTimeString()
+                    })
+                })
+            },
+            beforeDestroy() {
+                EventBus6.$off('complete-todo')
+            }
+        })
+
+        Vue.component('todo-statistics', {
+            template: `
+                <div style="display: flex; justify-content: space-around; width: 100%;">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ totalAdded }}</div>
+                        <div class="stat-label">总添加</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ totalCompleted }}</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ completionRate }}%</div>
+                        <div class="stat-label">完成率</div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    totalAdded: 0,
+                    totalCompleted: 0
+                }
+            },
+            computed: {
+                completionRate() {
+                    if (this.totalAdded === 0) return 0
+                    return Math.round((this.totalCompleted / this.totalAdded) * 100)
+                }
+            },
+            mounted() {
+                EventBus6.$on('add-todo', () => {
+                    this.totalAdded++
+                })
+                EventBus6.$on('complete-todo', () => {
+                    this.totalCompleted++
+                })
+            },
+            beforeDestroy() {
+                EventBus6.$off('add-todo')
+                EventBus6.$off('complete-todo')
+            }
+        })
+
+        new Vue({
+            el: '#app6'
+        })
+    </script>
+</body>
+</html>

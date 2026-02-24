@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue组件通信 - provide/inject 依赖注入</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .main-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-title h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-title p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .demo-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .demo-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .demo-desc {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .demo-desc strong {
+            color: #667eea;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .concept-box h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .concept-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .concept-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .concept-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .analogy-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .analogy-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .analogy-box p {
+            color: #856404;
+            line-height: 1.8;
+        }
+
+        .spring-comparison {
+            background: #d1ecf1;
+            border-left: 5px solid #0c5460;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .spring-comparison h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .spring-comparison p {
+            color: #0c5460;
+            line-height: 1.8;
+        }
+
+        .component-tree {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tree-node {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .tree-node:before {
+            content: "└─";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .tree-node.root:before {
+            content: "📦";
+        }
+
+        .tree-provider {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .tree-inject {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .code-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .code-example .comment {
+            color: #95a5a6;
+        }
+
+        .code-example .keyword {
+            color: #3498db;
+        }
+
+        .code-example .string {
+            color: #2ecc71;
+        }
+
+        .code-example .function {
+            color: #e74c3c;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .comparison-table tr:hover {
+            background: #e9ecef;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .best-practice {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .best-practice h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .best-practice ul {
+            color: #155724;
+            padding-left: 25px;
+            line-height: 1.8;
+        }
+
+        .theme-container {
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .theme-light {
+            background: #ffffff;
+            color: #333333;
+        }
+
+        .theme-dark {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .theme-blue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .theme-switch {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .theme-switch button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .theme-switch button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .component-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .nested-component {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .permission-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .permission-admin {
+            background: #28a745;
+            color: white;
+        }
+
+        .permission-user {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .permission-guest {
+            background: #6c757d;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .form-group input.error {
+            border-color: #dc3545;
+        }
+
+        .form-group input.success {
+            border-color: #28a745;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-title">
+        <h1>💉 Vue组件通信 - provide/inject</h1>
+        <p>祖孙组件跨层级依赖注入 | 优雅的状态共享方案</p>
+    </div>
+
+    <!-- Demo 1: 什么是 provide/inject -->
+    <div id="app1" class="demo-container">
+        <h2 class="demo-title">📚 Demo 1: 什么是 provide/inject？</h2>
+        
+        <div class="concept-box">
+            <h3>🎯 核心概念</h3>
+            <ul>
+                <li><strong>provide（提供）</strong>：祖先组件提供数据或方法</li>
+                <li><strong>inject（注入）</strong>：后代组件注入使用数据或方法</li>
+                <li><strong>跨层级传递</strong>：无需逐层传递props，直达后代组件</li>
+                <li><strong>依赖注入（DI）</strong>：实现控制反转（IoC）的设计模式</li>
+            </ul>
+        </div>
+
+        <div class="spring-comparison">
+            <h4>🏢 类比：Spring 依赖注入（你会秒懂！）</h4>
+            <p>
+                <strong>Spring 中的依赖注入：</strong><br><br>
+                
+                <strong>1️⃣ 提供Bean（相当于 provide）</strong><br>
+                <code style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 3px;">
+                @Component<br>
+                public class UserService {}
+                </code><br><br>
+                
+                <strong>2️⃣ 注入使用（相当于 inject）</strong><br>
+                <code style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 3px;">
+                @Autowired<br>
+                private UserService userService;
+                </code><br><br>
+                
+                <strong>3️⃣ 无需手动传递</strong><br>
+                - Spring容器自动注入，不需要在构造函数中一层层传递<br>
+                - Vue的provide/inject也是同样的原理！<br><br>
+                
+                <strong>💡 核心思想：</strong>祖先"提供"资源，后代"注入"使用，中间组件无感知！
+            </p>
+        </div>
+
+        <div class="component-tree">
+            <div class="tree-node root">App（根组件）</div>
+            <div class="tree-node" style="margin-left: 20px;">
+                <span class="tree-provider">provide: { theme: 'dark' }</span> ← 祖先提供
+            </div>
+            <div class="tree-node" style="margin-left: 40px;">└─ Header（头部）</div>
+            <div class="tree-node" style="margin-left: 60px;">└─ Nav（导航）</div>
+            <div class="tree-node" style="margin-left: 80px;">└─ NavItem（导航项）</div>
+            <div class="tree-node" style="margin-left: 100px;">
+                <span class="tree-inject">inject: ['theme']</span> ← 后代注入使用
+            </div>
+            <div class="tree-node" style="margin-left: 100px;">✅ 跨越4层直接获取！</div>
+        </div>
+
+        <div class="code-example">
+<span class="comment">// 祖先组件：提供数据</span>
+<span class="keyword">export</span> <span class="keyword">default</span> {
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            theme: <span class="string">'dark'</span>,
+            username: <span class="string">'张三'</span>,
+            userRole: <span class="string">'admin'</span>
+        }
+    }
+}<br>
+
+<span class="comment">// 后代组件：注入使用（跨N层！）</span>
+<span class="keyword">export</span> <span class="keyword">default</span> {
+    <span class="function">inject</span>: [<span class="string">'theme'</span>, <span class="string">'username'</span>, <span class="string">'userRole'</span>],
+    mounted() {
+        console.log(<span class="keyword">this</span>.theme)     <span class="comment">// 'dark'</span>
+        console.log(<span class="keyword">this</span>.username)  <span class="comment">// '张三'</span>
+        console.log(<span class="keyword">this</span>.userRole)  <span class="comment">// 'admin'</span>
+    }
+}
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>通信方式</th>
+                    <th>适用场景</th>
+                    <th>优点</th>
+                    <th>缺点</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>props</strong></td>
+                    <td>父→子（单层）</td>
+                    <td>明确、类型安全</td>
+                    <td>多层传递繁琐（props地狱）</td>
+                </tr>
+                <tr>
+                    <td><strong>$emit</strong></td>
+                    <td>子→父（单层）</td>
+                    <td>事件明确</td>
+                    <td>只能向上一层</td>
+                </tr>
+                <tr>
+                    <td><strong>Event Bus</strong></td>
+                    <td>任意组件</td>
+                    <td>灵活</td>
+                    <td>难追踪、易混乱</td>
+                </tr>
+                <tr>
+                    <td><strong>provide/inject</strong></td>
+                    <td>祖孙跨层级</td>
+                    <td>简洁、无需中间层</td>
+                    <td>默认不响应式</td>
+                </tr>
+                <tr>
+                    <td><strong>Vuex</strong></td>
+                    <td>全局状态</td>
+                    <td>完整状态管理</td>
+                    <td>学习成本高、小应用过重</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="demo-desc">
+            <strong>💡 理解要点：</strong><br>
+            1. provide/inject 是 Vue 内置的依赖注入机制<br>
+            2. 类似 Spring 的 @Autowired，自动注入依赖<br>
+            3. 解决 props 多层传递的"props drilling"问题<br>
+            4. 适合主题、权限、多语言等跨层级共享数据<br>
+            5. Vue 3 中默认支持响应式，Vue 2 需要特殊处理
+        </div>
+    </div>
+
+    <!-- Demo 2: 基础用法 - 静态数据注入 -->
+    <div id="app2" class="demo-container">
+        <h2 class="demo-title">🎬 Demo 2: 基础用法 - 静态数据注入</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>App提供用户信息，深层子组件直接注入使用（无需props逐层传递）
+        </div>
+
+        <app-root></app-root>
+
+        <div class="code-example">
+<span class="comment">// 根组件：提供数据</span>
+Vue.<span class="function">component</span>(<span class="string">'app-root'</span>, {
+    <span class="function">provide</span>: {
+        <span class="comment">// 简单写法：直接提供静态数据</span>
+        appName: <span class="string">'Vue学习平台'</span>,
+        version: <span class="string">'2.6.14'</span>,
+        author: <span class="string">'张三'</span>
+    }
+})<br>
+
+<span class="comment">// 中间层组件：不需要接收和传递!</span>
+Vue.<span class="function">component</span>(<span class="string">'middle-layer'</span>, {
+    <span class="comment">// 什么都不用做，数据自动穿透！</span>
+})<br>
+
+<span class="comment">// 孙组件：直接注入使用</span>
+Vue.<span class="function">component</span>(<span class="string">'deep-child'</span>, {
+    <span class="function">inject</span>: [<span class="string">'appName'</span>, <span class="string">'version'</span>, <span class="string">'author'</span>],
+    mounted() {
+        console.log(<span class="keyword">this</span>.appName)  <span class="comment">// 可以直接用！</span>
+        console.log(<span class="keyword">this</span>.version)
+        console.log(<span class="keyword">this</span>.author)
+    }
+})
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ 注意：静态 provide 的局限性</h4>
+            <p>
+                <strong>1. 不能访问 this：</strong><br>
+                &nbsp;&nbsp;&nbsp;provide: { value: this.xxx } ❌ 错误！this是undefined<br><br>
+                
+                <strong>2. 数据不响应：</strong><br>
+                &nbsp;&nbsp;&nbsp;祖先组件修改数据，后代组件不会更新（除非特殊处理）<br><br>
+                
+                <strong>3. 只能提供静态值：</strong><br>
+                &nbsp;&nbsp;&nbsp;适合提供不变的配置信息，如 appName、version 等
+            </p>
+        </div>
+    </div>
+
+    <!-- Demo 3: 响应式注入 - 函数式 provide -->
+    <div id="app3" class="demo-container">
+        <h2 class="demo-title">⚡ Demo 3: 响应式注入 - 让数据动起来！</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>实现响应式的用户信息注入，祖先修改数据，后代自动更新
+        </div>
+
+        <responsive-app></responsive-app>
+
+        <div class="code-example">
+<span class="comment">// ❌ 错误写法：静态 provide 不响应式</span>
+{
+    data() {
+        <span class="keyword">return</span> { count: 0 }
+    },
+    provide: {
+        count: <span class="keyword">this</span>.count  <span class="comment">// ❌ this是undefined</span>
+    }
+}<br>
+
+<span class="comment">// ✅ 正确写法1：provide 改为函数</span>
+{
+    data() {
+        <span class="keyword">return</span> { count: 0 }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            count: <span class="keyword">this</span>.count  <span class="comment">// ❌ 仍然不响应！</span>
+        }
+    }
+}<br>
+
+<span class="comment">// ✅ 正确写法2：提供整个组件实例（Vue 2 推荐）</span>
+{
+    data() {
+        <span class="keyword">return</span> { count: 0 }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            app: <span class="keyword">this</span>  <span class="comment">// ✅ 提供整个实例，访问 app.count</span>
+        }
+    }
+}<br>
+
+<span class="comment">// ✅ 正确写法3：使用 Vue.observable（Vue 2.6+推荐）</span>
+{
+    data() {
+        <span class="keyword">return</span> {
+            state: Vue.<span class="function">observable</span>({ count: 0 })
+        }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            state: <span class="keyword">this</span>.state  <span class="comment">// ✅ 响应式对象</span>
+        }
+    }
+}
+        </div>
+
+        <div class="best-practice">
+            <h4>✅ Vue 2 响应式 provide 最佳实践</h4>
+            <ul>
+                <li><strong>方法1：提供实例</strong> - provide: () => ({ app: this })，子组件访问 app.xxx</li>
+                <li><strong>方法2：Vue.observable</strong> - 将data对象转为响应式，最优雅</li>
+                <li><strong>方法3：提供方法</strong> - provide方法，子组件调用方法修改状态</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Demo 4: 实战案例 - 主题切换 -->
+    <div id="app4" class="demo-container">
+        <h2 class="demo-title">🎨 Demo 4: 实战案例 - 全局主题切换</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>App提供主题，所有深层组件自动应用主题样式
+        </div>
+
+        <theme-app></theme-app>
+
+        <div class="code-example">
+<span class="comment">// App组件：提供主题状态和切换方法</span>
+Vue.<span class="function">component</span>(<span class="string">'theme-app'</span>, {
+    data() {
+        <span class="keyword">return</span> {
+            currentTheme: <span class="string">'light'</span>
+        }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            <span class="comment">// 提供响应式数据</span>
+            themeState: <span class="keyword">this</span>,
+            <span class="comment">// 提供切换方法</span>
+            changeTheme: (theme) => {
+                <span class="keyword">this</span>.currentTheme = theme
+            }
+        }
+    }
+})<br>
+
+<span class="comment">// 深层子组件：注入并使用</span>
+Vue.<span class="function">component</span>(<span class="string">'deep-component'</span>, {
+    <span class="function">inject</span>: [<span class="string">'themeState'</span>, <span class="string">'changeTheme'</span>],
+    computed: {
+        <span class="function">theme</span>() {
+            <span class="keyword">return</span> <span class="keyword">this</span>.themeState.currentTheme
+        }
+    },
+    methods: {
+        <span class="function">switchTheme</span>(newTheme) {
+            <span class="keyword">this</span>.<span class="function">changeTheme</span>(newTheme)
+        }
+    }
+})
+        </div>
+    </div>
+
+    <!-- Demo 5: 实战案例 - 权限控制 -->
+    <div id="app5" class="demo-container">
+        <h2 class="demo-title">🔐 Demo 5: 实战案例 - 权限控制系统</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>根据用户角色控制功能权限（admin可删除，user只读，guest无权）
+        </div>
+
+        <permission-app></permission-app>
+
+        <div class="code-example">
+<span class="comment">// App组件：提供用户信息和权限判断方法</span>
+{
+    data() {
+        <span class="keyword">return</span> {
+            user: {
+                name: <span class="string">'张三'</span>,
+                role: <span class="string">'admin'</span> <span class="comment">// admin | user | guest</span>
+            }
+        }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            userInfo: <span class="keyword">this</span>.user,
+            <span class="comment">// 权限判断方法</span>
+            <span class="function">hasPermission</span>: (permission) => {
+                <span class="keyword">const</span> permissions = {
+                    admin: [<span class="string">'read'</span>, <span class="string">'write'</span>, <span class="string">'delete'</span>],
+                    user: [<span class="string">'read'</span>, <span class="string">'write'</span>],
+                    guest: [<span class="string">'read'</span>]
+                }
+                <span class="keyword">return</span> permissions[<span class="keyword">this</span>.user.role].<span class="function">includes</span>(permission)
+            }
+        }
+    }
+}<br>
+
+<span class="comment">// 子组件：根据权限显示/隐藏功能</span>
+{
+    <span class="function">inject</span>: [<span class="string">'userInfo'</span>, <span class="string">'hasPermission'</span>],
+    computed: {
+        <span class="function">canDelete</span>() {
+            <span class="keyword">return</span> <span class="keyword">this</span>.<span class="function">hasPermission</span>(<span class="string">'delete'</span>)
+        }
+    }
+}
+        </div>
+    </div>
+
+    <!-- Demo 6: 实战案例 - 表单验证 -->
+    <div id="app6" class="demo-container">
+        <h2 class="demo-title">📝 Demo 6: 实战案例 - 表单验证（Element UI原理）</h2>
+        
+        <div class="demo-desc">
+            <strong>场景：</strong>模拟 Element UI 的表单验证，Form提供验证方法，FormItem注入使用
+        </div>
+
+        <custom-form></custom-form>
+
+        <div class="code-example">
+<span class="comment">// Form组件：提供验证规则和验证方法</span>
+Vue.<span class="function">component</span>(<span class="string">'custom-form'</span>, {
+    data() {
+        <span class="keyword">return</span> {
+            formData: {
+                username: <span class="string">''</span>,
+                email: <span class="string">''</span>
+            },
+            rules: {
+                username: [
+                    { required: <span class="keyword">true</span>, message: <span class="string">'用户名必填'</span> },
+                    { min: 3, message: <span class="string">'至少3个字符'</span> }
+                ],
+                email: [
+                    { required: <span class="keyword">true</span>, message: <span class="string">'邮箱必填'</span> },
+                    { pattern: <span class="string">/^.+@.+$/</span>, message: <span class="string">'邮箱格式错误'</span> }
+                ]
+            }
+        }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            formInstance: <span class="keyword">this</span>
+        }
+    }
+})<br>
+
+<span class="comment">// FormItem组件：注入Form实例，实现验证</span>
+Vue.<span class="function">component</span>(<span class="string">'custom-form-item'</span>, {
+    props: [<span class="string">'prop'</span>],
+    <span class="function">inject</span>: [<span class="string">'formInstance'</span>],
+    methods: {
+        <span class="function">validate</span>() {
+            <span class="keyword">const</span> rules = <span class="keyword">this</span>.formInstance.rules[<span class="keyword">this</span>.prop]
+            <span class="keyword">const</span> value = <span class="keyword">this</span>.formInstance.formData[<span class="keyword">this</span>.prop]
+            <span class="comment">// 执行验证逻辑...</span>
+        }
+    }
+})
+        </div>
+
+        <div class="analogy-box">
+            <h4>💡 这就是 Element UI 的原理！</h4>
+            <p>
+                <strong>el-form 的实现原理：</strong><br><br>
+                
+                1️⃣ <strong>&lt;el-form&gt;</strong> 通过 provide 提供表单实例<br>
+                2️⃣ <strong>&lt;el-form-item&gt;</strong> 通过 inject 注入表单实例<br>
+                3️⃣ <strong>&lt;el-input&gt;</strong> 通过 inject 注入 form-item 实例<br>
+                4️⃣ 三层嵌套，通过 provide/inject 实现数据流通！<br><br>
+                
+                <strong>这就是为什么写 Element UI 表单时，三个组件能完美配合！</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Demo 7: inject 高级用法 -->
+    <div id="app7" class="demo-container">
+        <h2 class="demo-title">🚀 Demo 7: inject 高级用法</h2>
+        
+        <div class="demo-desc">
+            <strong>学习：</strong>inject 的默认值、别名、from 语法
+        </div>
+
+        <div class="code-example">
+<span class="comment">// 1. 数组语法（简单）</span>
+{
+    inject: [<span class="string">'theme'</span>, <span class="string">'user'</span>]
+    <span class="comment">// 直接使用：this.theme, this.user</span>
+}<br>
+
+<span class="comment">// 2. 对象语法（推荐，支持更多选项）</span>
+{
+    inject: {
+        <span class="comment">// 基本用法</span>
+        theme: {
+            from: <span class="string">'theme'</span>  <span class="comment">// 从哪个key注入</span>
+        },
+        
+        <span class="comment">// 设置默认值</span>
+        locale: {
+            from: <span class="string">'locale'</span>,
+            <span class="keyword">default</span>: <span class="string">'zh-CN'</span>  <span class="comment">// 如果祖先没提供，用默认值</span>
+        },
+        
+        <span class="comment">// 默认值为函数（用于对象/数组）</span>
+        config: {
+            from: <span class="string">'config'</span>,
+            <span class="keyword">default</span>: () => ({ theme: <span class="string">'light'</span> })
+        },
+        
+        <span class="comment">// 重命名（避免命名冲突）</span>
+        appTheme: {
+            from: <span class="string">'theme'</span>  <span class="comment">// 注入theme，但在组件中叫appTheme</span>
+        }
+    }
+}<br>
+
+<span class="comment">// 3. 简写语法（对象+字符串混合）</span>
+{
+    inject: {
+        theme: <span class="string">'theme'</span>,              <span class="comment">// 等同于 { from: 'theme' }</span>
+        locale: {
+            <span class="keyword">default</span>: <span class="string">'zh-CN'</span>      <span class="comment">// from自动推断为'locale'</span>
+        }
+    }
+}
+        </div>
+
+        <advanced-inject></advanced-inject>
+    </div>
+
+    <!-- Demo 8: 最佳实践 -->
+    <div id="app8" class="demo-container">
+        <h2 class="demo-title">🌟 Demo 8: provide/inject 最佳实践</h2>
+        
+        <div class="best-practice">
+            <h4>✅ 推荐做法</h4>
+            <ul>
+                <li><strong>使用对象/Symbol作为key：</strong>避免命名冲突，用 Symbol('theme') 更安全</li>
+                <li><strong>提供方法而非修改数据：</strong>provide方法，让子组件调用，保持单向数据流</li>
+                <li><strong>使用 Vue.observable：</strong>Vue 2.6+ 最佳响应式方案</li>
+                <li><strong>设置默认值：</strong>inject时提供default，增强健壮性</li>
+                <li><strong>添加注释：</strong>说明注入的数据来源和用途</li>
+                <li><strong>适用场景：</strong>主题、权限、多语言、全局配置、组件库内部通信</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <h4>❌ 避免的做法</h4>
+            <p>
+                ❌ <strong>滥用 provide/inject：</strong>父子组件优先用 props/$emit<br>
+                ❌ <strong>注入后直接修改：</strong>子组件不要直接修改注入的数据，应该调用方法<br>
+                ❌ <strong>过度使用：</strong>不是所有数据都要provide，按需使用<br>
+                ❌ <strong>缺少文档：</strong>provide的数据要有清晰的注释说明<br>
+                ❌ <strong>忽略响应式：</strong>需要响应式时要使用正确的方式
+            </p>
+        </div>
+
+        <div class="code-example">
+<span class="comment">// ===== 最佳实践示例 =====</span>
+<br>
+<span class="comment">// 1. 使用 Symbol 避免冲突（推荐）</span>
+<span class="keyword">const</span> ThemeSymbol = Symbol(<span class="string">'theme'</span>)
+<br>
+{
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            [ThemeSymbol]: <span class="keyword">this</span>.theme
+        }
+    }
+}
+<br>
+{
+    inject: {
+        theme: { from: ThemeSymbol, <span class="keyword">default</span>: <span class="string">'light'</span> }
+    }
+}
+<br>
+<span class="comment">// 2. 完整的响应式方案（Vue 2.6+ 推荐）</span>
+{
+    data() {
+        <span class="keyword">return</span> {
+            <span class="comment">// 使用 Vue.observable 创建响应式状态</span>
+            state: Vue.<span class="function">observable</span>({
+                theme: <span class="string">'dark'</span>,
+                locale: <span class="string">'zh-CN'</span>,
+                user: { name: <span class="string">'张三'</span>, role: <span class="string">'admin'</span> }
+            })
+        }
+    },
+    <span class="function">provide</span>() {
+        <span class="keyword">return</span> {
+            <span class="comment">// 提供响应式状态</span>
+            globalState: <span class="keyword">this</span>.state,
+            <span class="comment">// 提供修改方法</span>
+            <span class="function">updateTheme</span>: (theme) => {
+                <span class="keyword">this</span>.state.theme = theme
+            },
+            <span class="function">updateLocale</span>: (locale) => {
+                <span class="keyword">this</span>.state.locale = locale
+            }
+        }
+    }
+}
+<br>
+<span class="comment">// 3. 类型安全的注入（配合 TypeScript）</span>
+<span class="comment">// 在实际项目中，建议定义类型接口</span>
+<span class="keyword">interface</span> InjectedProps {
+    theme: string
+    updateTheme: (theme: string) => <span class="keyword">void</span>
+}
+        </div>
+
+        <div class="analogy-box">
+            <h4>🎯 何时选择 provide/inject？</h4>
+            <p>
+                <strong>✅ 适合使用的场景：</strong><br>
+                • 主题切换（theme provider）<br>
+                • 权限控制（permission provider）<br>
+                • 多语言（i18n provider）<br>
+                • 全局配置（config provider）<br>
+                • 组件库内部通信（el-form / el-form-item）<br>
+                • 祖孙组件通信（4层以上）<br><br>
+                
+                <strong>❌ 不适合的场景：</strong><br>
+                • 父子组件直接通信 → 用 props/$emit<br>
+                • 兄弟组件通信 → 用 Event Bus 或 Vuex<br>
+                • 复杂状态管理 → 用 Vuex<br>
+                • 需要时间旅行调试 → 用 Vuex DevTools<br><br>
+                
+                <strong>💡 记住：provide/inject 是轻量级依赖注入，Vuex 是完整状态管理！</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Demo 2: 基础用法 ====================
+        Vue.component('app-root', {
+            provide: {
+                appName: 'Vue学习平台',
+                version: '2.6.14',
+                author: '张三'
+            },
+            template: `
+                <div style="border: 3px solid #667eea; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #667eea;">📦 App Root（提供数据）</h3>
+                    <p>provide: { appName, version, author }</p>
+                    <middle-layer></middle-layer>
+                </div>
+            `
+        })
+
+        Vue.component('middle-layer', {
+            template: `
+                <div style="border: 2px solid #999; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <h4 style="color: #999;">📂 Middle Layer（中间层，不接收不传递）</h4>
+                    <p>🎉 无需接收props，无需向下传递！</p>
+                    <deep-child></deep-child>
+                </div>
+            `
+        })
+
+        Vue.component('deep-child', {
+            inject: ['appName', 'version', 'author'],
+            template: `
+                <div style="border: 2px solid #28a745; padding: 15px; border-radius: 8px; margin-top: 15px; background: #d4edda;">
+                    <h4 style="color: #28a745;">💉 Deep Child（注入使用）</h4>
+                    <p>inject: ['appName', 'version', 'author']</p>
+                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                        <strong>注入的数据：</strong><br>
+                        应用名称：{{ appName }}<br>
+                        版本号：{{ version }}<br>
+                        作者：{{ author }}
+                    </div>
+                </div>
+            `
+        })
+
+        new Vue({
+            el: '#app2'
+        })
+
+        // ==================== Demo 3: 响应式注入 ====================
+        Vue.component('responsive-app', {
+            data() {
+                return {
+                    count: 0,
+                    message: 'Hello Vue'
+                }
+            },
+            provide() {
+                return {
+                    // 提供整个实例，实现响应式
+                    app: this
+                }
+            },
+            methods: {
+                increment() {
+                    this.count++
+                },
+                updateMessage() {
+                    this.message = 'Updated at ' + new Date().toLocaleTimeString()
+                }
+            },
+            template: `
+                <div style="border: 3px solid #667eea; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #667eea;">📦 App（提供响应式数据）</h3>
+                    <div style="margin: 15px 0;">
+                        <button @click="increment" class="button-primary">count++</button>
+                        <button @click="updateMessage" class="button-primary" style="margin-left: 10px;">更新消息</button>
+                    </div>
+                    <p>当前 count: <strong>{{ count }}</strong></p>
+                    <p>当前 message: <strong>{{ message }}</strong></p>
+                    <responsive-child></responsive-child>
+                </div>
+            `
+        })
+
+        Vue.component('responsive-child', {
+            inject: ['app'],
+            template: `
+                <div style="border: 2px solid #28a745; padding: 15px; border-radius: 8px; margin-top: 15px; background: #d4edda;">
+                    <h4 style="color: #28a745;">💉 子组件（响应式接收）</h4>
+                    <p>inject: ['app']</p>
+                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                        <strong>实时同步的数据：</strong><br>
+                        count: {{ app.count }} ✅ 响应式更新！<br>
+                        message: {{ app.message }} ✅ 响应式更新！
+                    </div>
+                </div>
+            `
+        })
+
+        new Vue({
+            el: '#app3'
+        })
+
+        // ==================== Demo 4: 主题切换 ====================
+        Vue.component('theme-app', {
+            data() {
+                return {
+                    currentTheme: 'light'
+                }
+            },
+            provide() {
+                return {
+                    themeState: this
+                }
+            },
+            methods: {
+                changeTheme(theme) {
+                    this.currentTheme = theme
+                }
+            },
+            template: `
+                <div>
+                    <div class="theme-switch">
+                        <button @click="changeTheme('light')" :style="{ background: '#fff', color: '#333' }">
+                            ☀️ 浅色
+                        </button>
+                        <button @click="changeTheme('dark')" :style="{ background: '#2c3e50', color: '#fff' }">
+                            🌙 深色
+                        </button>
+                        <button @click="changeTheme('blue')" :style="{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff' }">
+                            🎨 蓝紫
+                        </button>
+                    </div>
+                    <theme-container></theme-container>
+                </div>
+            `
+        })
+
+        Vue.component('theme-container', {
+            inject: ['themeState'],
+            computed: {
+                themeClass() {
+                    return 'theme-' + this.themeState.currentTheme
+                }
+            },
+            template: `
+                <div :class="['theme-container', themeClass]">
+                    <h3>🎨 主题容器</h3>
+                    <p>当前主题：{{ themeState.currentTheme }}</p>
+                    <div class="component-box">
+                        <h4>📦 组件1</h4>
+                        <p>我也应用了主题样式</p>
+                    </div>
+                    <theme-deep-child></theme-deep-child>
+                </div>
+            `
+        })
+
+        Vue.component('theme-deep-child', {
+            inject: ['themeState'],
+            template: `
+                <div class="nested-component">
+                    <h4>📦 深层子组件</h4>
+                    <p>我是第3层组件，也能直接获取主题：<strong>{{ themeState.currentTheme }}</strong></p>
+                    <p>✅ 无需props逐层传递！</p>
+                </div>
+            `
+        })
+
+        new Vue({
+            el: '#app4'
+        })
+
+        // ==================== Demo 5: 权限控制 ====================
+        Vue.component('permission-app', {
+            data() {
+                return {
+                    user: {
+                        name: '张三',
+                        role: 'admin'
+                    }
+                }
+            },
+            provide() {
+                return {
+                    userInfo: this.user,
+                    hasPermission: (permission) => {
+                        const permissions = {
+                            admin: ['read', 'write', 'delete'],
+                            user: ['read', 'write'],
+                            guest: ['read']
+                        }
+                        return permissions[this.user.role].includes(permission)
+                    },
+                    switchRole: (role) => {
+                        this.user.role = role
+                    }
+                }
+            },
+            template: `
+                <div style="border: 3px solid #667eea; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #667eea;">🔐 权限系统</h3>
+                    <div style="margin: 15px 0;">
+                        <span>切换角色：</span>
+                        <button @click="user.role = 'admin'" class="permission-badge permission-admin">
+                            Admin
+                        </button>
+                        <button @click="user.role = 'user'" class="permission-badge permission-user">
+                            User
+                        </button>
+                        <button @click="user.role = 'guest'" class="permission-badge permission-guest">
+                            Guest
+                        </button>
+                    </div>
+                    <p>当前用户：<strong>{{ user.name }}</strong> | 角色：<span :class="'permission-badge permission-' + user.role">{{ user.role }}</span></p>
+                    <permission-panel></permission-panel>
+                </div>
+            `
+        })
+
+        Vue.component('permission-panel', {
+            inject: ['userInfo', 'hasPermission'],
+            computed: {
+                canRead() { return this.hasPermission('read') },
+                canWrite() { return this.hasPermission('write') },
+                canDelete() { return this.hasPermission('delete') }
+            },
+            template: `
+                <div style="border: 2px solid #28a745; padding: 15px; border-radius: 8px; margin-top: 15px; background: #d4edda;">
+                    <h4 style="color: #28a745;">💉 功能面板（根据权限显示）</h4>
+                    <div style="margin-top: 10px; padding: 15px; background: white; border-radius: 5px;">
+                        <p style="margin-bottom: 10px;"><strong>当前角色权限：</strong></p>
+                        <button :disabled="!canRead" class="button-primary" style="margin: 5px;">
+                            📖 查看 {{ canRead ? '✅' : '❌' }}
+                        </button>
+                        <button :disabled="!canWrite" class="button-primary" style="margin: 5px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            ✏️ 编辑 {{ canWrite ? '✅' : '❌' }}
+                        </button>
+                        <button :disabled="!canDelete" class="button-primary" style="margin: 5px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            🗑️ 删除 {{ canDelete ? '✅' : '❌' }}
+                        </button>
+                        <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                            💡 试试切换不同角色，看按钮权限变化！
+                        </p>
+                    </div>
+                </div>
+            `
+        })
+
+        new Vue({
+            el: '#app5'
+        })
+
+        // ==================== Demo 6: 表单验证 ====================
+        Vue.component('custom-form', {
+            data() {
+                return {
+                    formData: {
+                        username: '',
+                        email: ''
+                    },
+                    rules: {
+                        username: [
+                            { required: true, message: '用户名必填' },
+                            { min: 3, message: '至少3个字符' }
+                        ],
+                        email: [
+                            { required: true, message: '邮箱必填' },
+                            { pattern: /^.+@.+\..+$/, message: '邮箱格式错误' }
+                        ]
+                    }
+                }
+            },
+            provide() {
+                return {
+                    formInstance: this
+                }
+            },
+            methods: {
+                handleSubmit() {
+                    alert('表单提交：' + JSON.stringify(this.formData))
+                }
+            },
+            template: `
+                <div style="border: 3px solid #667eea; padding: 30px; border-radius: 10px;">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">📝 自定义表单（provide/inject实现）</h3>
+                    
+                    <custom-form-item prop="username" label="用户名">
+                        <input v-model="formData.username" placeholder="请输入用户名">
+                    </custom-form-item>
+                    
+                    <custom-form-item prop="email" label="邮箱">
+                        <input v-model="formData.email" placeholder="请输入邮箱">
+                    </custom-form-item>
+                    
+                    <button @click="handleSubmit" class="button-primary">提交表单</button>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 8px;">
+                        <strong>💡 原理说明：</strong><br>
+                        1. Form 通过 provide 提供 formInstance<br>
+                        2. FormItem 通过 inject 注入 formInstance<br>
+                        3. FormItem 可以访问 rules 和 formData<br>
+                        4. 实现输入即验证（类似 Element UI）
+                    </div>
+                </div>
+            `
+        })
+
+        Vue.component('custom-form-item', {
+            props: ['prop', 'label'],
+            inject: ['formInstance'],
+            data() {
+                return {
+                    errorMessage: ''
+                }
+            },
+            computed: {
+                value() {
+                    return this.formInstance.formData[this.prop]
+                },
+                rules() {
+                    return this.formInstance.rules[this.prop] || []
+                }
+            },
+            watch: {
+                value() {
+                    this.validate()
+                }
+            },
+            methods: {
+                validate() {
+                    for (let rule of this.rules) {
+                        if (rule.required && !this.value) {
+                            this.errorMessage = rule.message
+                            return false
+                        }
+                        if (rule.min && this.value.length < rule.min) {
+                            this.errorMessage = rule.message
+                            return false
+                        }
+                        if (rule.pattern && !rule.pattern.test(this.value)) {
+                            this.errorMessage = rule.message
+                            return false
+                        }
+                    }
+                    this.errorMessage = ''
+                    return true
+                }
+            },
+            template: `
+                <div class="form-group">
+                    <label>{{ label }}</label>
+                    <slot></slot>
+                    <div v-if="errorMessage" class="error-message">❌ {{ errorMessage }}</div>
+                    <div v-else-if="value" class="success-message">✅ 验证通过</div>
+                </div>
+            `
+        })
+
+        new Vue({
+            el: '#app6'
+        })
+
+        // ==================== Demo 7: 高级用法 ====================
+        Vue.component('advanced-inject', {
+            data() {
+                return {
+                    config: {
+                        api: 'https://api.example.com',
+                        timeout: 5000
+                    }
+                }
+            },
+            provide() {
+                return {
+                    theme: 'dark',
+                    locale: 'zh-CN',
+                    config: this.config
+                }
+            },
+            template: `
+                <div style="border: 3px solid #667eea; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #667eea;">📦 Provider（提供多种数据）</h3>
+                    <p>provide: { theme: 'dark', locale: 'zh-CN', config: {...} }</p>
+                    <inject-child></inject-child>
+                </div>
+            `
+        })
+
+        Vue.component('inject-child', {
+            inject: {
+                // 基本用法
+                theme: 'theme',
+                
+                // 设置默认值
+                language: {
+                    from: 'locale',
+                    default: 'en-US'
+                },
+                
+                // 默认值为函数
+                settings: {
+                    from: 'config',
+                    default: () => ({ api: 'default-api' })
+                },
+                
+                // 不存在的key，使用默认值
+                missing: {
+                    from: 'notExist',
+                    default: 'default value'
+                }
+            },
+            template: `
+                <div style="border: 2px solid #28a745; padding: 15px; border-radius: 8px; margin-top: 15px; background: #d4edda;">
+                    <h4 style="color: #28a745;">💉 子组件（高级注入）</h4>
+                    <div style="margin-top: 10px; padding: 15px; background: white; border-radius: 5px; font-family: monospace;">
+                        <div><strong>theme:</strong> {{ theme }}</div>
+                        <div><strong>language (from locale):</strong> {{ language }}</div>
+                        <div><strong>settings (from config):</strong> {{ JSON.stringify(settings) }}</div>
+                        <div><strong>missing (default):</strong> {{ missing }}</div>
+                    </div>
+                </div>
+            `
+        })
+
+        new Vue({
+            el: '#app7'
+        })
+    </script>
+</body>
+</html>

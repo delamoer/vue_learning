@@ -1,0 +1,1349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>组件通信-$emit子传父</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Microsoft YaHei", sans-serif;
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      #root {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #999;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      h2 {
+        color: #764ba2;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-size: 20px;
+        border-left: 4px solid #764ba2;
+        padding-left: 10px;
+      }
+
+      h3 {
+        color: #555;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .example-box {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #764ba2;
+      }
+
+      .example-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .demo-area {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 15px;
+        border: 2px dashed #ddd;
+      }
+
+      .parent-box {
+        background: #fff3e0;
+        padding: 20px;
+        border-radius: 8px;
+        border: 2px solid #ff9800;
+        margin: 10px 0;
+      }
+
+      .child-box {
+        background: #e8f5e9;
+        padding: 15px;
+        border-radius: 5px;
+        border: 2px solid #4caf50;
+        margin: 10px 0;
+      }
+
+      code {
+        background: #ffe6e6;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #e74c3c;
+        font-size: 13px;
+      }
+
+      pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 10px 0;
+      }
+
+      .note {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 4px solid #ffc107;
+        margin: 20px 0;
+      }
+
+      .note-title {
+        font-weight: bold;
+        color: #856404;
+        margin-bottom: 5px;
+      }
+
+      .success-note {
+        background: #d4edda;
+        border-left-color: #28a745;
+      }
+
+      .success-note .note-title {
+        color: #155724;
+      }
+
+      .warning-note {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+      }
+
+      .warning-note .note-title {
+        color: #721c24;
+      }
+
+      .info-note {
+        background: #d1ecf1;
+        border-left-color: #17a2b8;
+      }
+
+      .info-note .note-title {
+        color: #0c5460;
+      }
+
+      hr {
+        margin: 30px 0;
+        border: none;
+        border-top: 2px solid #f0f0f0;
+      }
+
+      button {
+        padding: 8px 16px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+        transition: all 0.3s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+      }
+
+      input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        margin: 5px;
+      }
+
+      .comparison-table {
+        width: 100%;
+        margin: 15px 0;
+        border-collapse: collapse;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      .comparison-table th {
+        background: #764ba2;
+        color: white;
+        font-weight: bold;
+      }
+
+      .comparison-table td {
+        background: white;
+      }
+
+      .comparison-table tr:nth-child(even) td {
+        background: #f8f9fa;
+      }
+
+      .diagram {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        text-align: center;
+        border: 2px solid #ddd;
+      }
+
+      .flow-arrow {
+        font-size: 24px;
+        color: #764ba2;
+        margin: 10px 0;
+      }
+
+      .event-log {
+        background: #2d2d2d;
+        color: #4caf50;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 10px;
+      }
+
+      .event-log-item {
+        margin: 5px 0;
+        padding: 5px;
+        border-left: 3px solid #4caf50;
+        padding-left: 10px;
+      }
+
+      .counter-display {
+        font-size: 48px;
+        font-weight: bold;
+        color: #764ba2;
+        text-align: center;
+        padding: 20px;
+        background: #f0f0f0;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!--
+      ==================== 组件通信：$emit（子传父）完整教程 ====================
+      
+      一、什么是$emit和自定义事件？
+        $emit 是 Vue 提供的实例方法，用于子组件向父组件发送消息（触发事件）。
+        这是实现"子→父"通信的核心机制。
+        
+      ⭐ $emit的简单理解（类比函数回调）：
+        
+        如果说 props 是函数的参数，那么 $emit 就是函数的回调（callback）！
+        
+        对比示例：
+        
+        // 📌 JavaScript回调函数
+        function doSomething(callback) {     // 接收回调函数
+          callback('结果数据');              // 执行回调，传递数据
+        }
+        doSomething((data) => {              // 传入回调函数
+          console.log(data);                 // 处理数据
+        });
+        
+        // 📌 Vue组件的$emit（子传父）
+        // 子组件：触发事件，传递数据
+        this.$emit('some-event', '结果数据');
+        
+        // 父组件：监听事件，处理数据
+        <child-component @some-event="handleEvent"></child-component>
+        methods: {
+          handleEvent(data) {
+            console.log(data);               // 处理数据
+          }
+        }
+        
+        进一步的类比：
+        
+        ┌──────────────────────┬──────────────────────────────────┐
+        │ JavaScript回调       │ Vue $emit                         │
+        ├──────────────────────┼──────────────────────────────────┤
+        │ function(callback)   │ 父组件监听事件 @event-name       │
+        │ callback('数据')     │ 子组件触发事件 $emit('event-name', '数据') │
+        │ 调用者传入回调函数   │ 父组件传入事件处理方法            │
+        │ 被调用者执行回调     │ 子组件触发事件                    │
+        └──────────────────────┴──────────────────────────────────┘
+        
+      二、为什么需要$emit？
+        1. 子组件不能直接修改父组件的数据（单向数据流）
+        2. 子组件需要"通知"父组件发生了什么事情
+        3. 子组件需要向父组件"传递"数据
+        4. 实现父子组件的双向通信
+        
+      三、$emit的语法：
+        
+        基本语法：
+        this.$emit(eventName, ...args)
+        
+        参数说明：
+        - eventName: 事件名称（字符串）
+        - args: 要传递的参数（可以有多个）
+        
+        使用示例：
+        
+        // 子组件触发事件
+        this.$emit('my-event')                    // 不传参数
+        this.$emit('my-event', data)              // 传1个参数
+        this.$emit('my-event', data1, data2)      // 传多个参数
+        
+        // 父组件监听事件
+        <child @my-event="handleEvent"></child>
+        
+        methods: {
+          handleEvent(data) {                     // 接收参数
+            console.log(data)
+          }
+        }
+        
+      四、事件命名规范：
+        
+        1. 推荐使用 kebab-case（短横线命名）：
+           this.$emit('update-count')
+           <child @update-count="..."></child>
+           
+        2. 不推荐 camelCase（驼峰命名）：
+           虽然可以用，但在HTML中要转为短横线
+           
+        3. 自定义事件名永远不会自动转换大小写
+           所以建议统一用小写+短横线
+           
+      五、$emit vs props 对比：
+        
+        props（父→子）：
+        - 父组件"传递数据"给子组件
+        - 类比：函数参数
+        - 数据流向：父 → 子
+        - 子组件只读，不能修改
+        
+        $emit（子→父）：
+        - 子组件"触发事件"通知父组件
+        - 类比：回调函数
+        - 数据流向：子 → 父
+        - 可以传递数据给父组件
+        
+      六、常见使用场景：
+        
+        1. 表单组件：子组件输入，父组件处理
+        2. 列表操作：子组件点击删除，父组件删除数据
+        3. 计数器：子组件改变数值，父组件更新
+        4. 对话框：子组件关闭，父组件隐藏
+        5. 自定义表单控件：配合v-model使用
+        
+      七、$event 特殊变量：
+        
+        在模板中可以使用 $event 获取传递的参数：
+        
+        // 子组件
+        this.$emit('my-event', 100)
+        
+        // 父组件模板
+        <child @my-event="count = $event"></child>
+        // $event 的值就是 100
+        
+        // 如果要传多个参数
+        <child @my-event="handleEvent"></child>
+        methods: {
+          handleEvent(param1, param2) {
+            // 接收多个参数
+          }
+        }
+        
+      八、注意事项：
+        
+        1. 自定义事件不会冒泡
+           - DOM事件会冒泡，但自定义事件不会
+           - 只能被直接父组件监听
+           
+        2. 移除事件监听
+           - 使用 $off 可以移除事件监听
+           - 组件销毁时会自动移除所有监听
+           
+        3. 原生事件 vs 自定义事件
+           - 组件上的 @click 默认是自定义事件
+           - 加 .native 修饰符才是原生DOM事件
+           - <child @click.native="..."></child>
+    -->
+    <div id="root">
+      <h1>📥 组件通信：$emit（子传父）</h1>
+      <p class="subtitle">$emit - 子组件向父组件发送消息</p>
+
+      <!-- ========== 1. $emit基本概念 ========== -->
+      <h2>💡 1. 什么是$emit？</h2>
+      <div class="example-box">
+        <div class="example-title">$emit是子组件向父组件传递消息的通道</div>
+
+        <div class="diagram">
+          <div
+            style="
+              background: #fff3e0;
+              padding: 20px;
+              border-radius: 8px;
+              display: inline-block;
+              border: 3px solid #ff9800;
+            "
+          >
+            <strong style="font-size: 18px">父组件</strong>
+            <div style="margin-top: 10px; color: #666">
+              监听事件：@my-event
+            </div>
+          </div>
+
+          <div class="flow-arrow">⬆️ 通过 $emit 触发事件</div>
+
+          <div
+            style="
+              background: #e8f5e9;
+              padding: 20px;
+              border-radius: 8px;
+              display: inline-block;
+              border: 3px solid #4caf50;
+            "
+          >
+            <strong style="font-size: 18px">子组件</strong>
+            <div style="margin-top: 10px; color: #666">
+              触发事件：this.$emit('my-event', data)
+            </div>
+          </div>
+        </div>
+
+        <pre v-pre>// 子组件：触发自定义事件
+const ChildComponent = {
+  methods: {
+    notifyParent() {
+      this.$emit('my-event', '来自子组件的消息');  // 触发事件，传递数据
+    }
+  },
+  template: `
+    &lt;button @click="notifyParent"&gt;通知父组件&lt;/button&gt;
+  `
+}
+
+// 父组件：监听自定义事件
+&lt;child-component @my-event="handleEvent"&gt;&lt;/child-component&gt;
+
+methods: {
+  handleEvent(message) {
+    console.log(message);  // '来自子组件的消息'
+  }
+}</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <basic-demo></basic-demo>
+        </div>
+      </div>
+
+      <div class="note success-note">
+        <div class="note-title">✅ 核心理解</div>
+        <ul style="margin-left: 20px; margin-top: 8px">
+          <li><strong>子→父：</strong>子组件通过$emit触发事件通知父组件</li>
+          <li><strong>类比：</strong>就像回调函数，子组件"调用"父组件的方法</li>
+          <li><strong>传递数据：</strong>可以把数据作为参数传给父组件</li>
+          <li><strong>配合props：</strong>props下发数据，$emit返回结果</li>
+        </ul>
+      </div>
+
+      <h2>🎯 1.1 简单理解：$emit就是"回调函数"</h2>
+      <div class="example-box">
+        <div class="example-title">⭐ 最简单粗暴的理解方式</div>
+
+        <div class="note info-note">
+          <div class="note-title">💡 一句话理解$emit</div>
+          <p style="margin: 10px 0; font-size: 15px;">
+            <strong>如果props是函数参数，那么$emit就是回调函数！子组件执行回调，父组件处理结果。</strong>
+          </p>
+        </div>
+
+        <h3>对比：回调函数 vs $emit</h3>
+        <pre v-pre>// 📌 JavaScript回调函数
+function fetchData(callback) {        // 接收回调函数
+  const data = '获取的数据';
+  callback(data);                     // 执行回调，传递数据
+}
+
+fetchData((result) => {               // 传入回调函数
+  console.log(result);                // 处理数据
+});
+
+
+// 📌 Vue组件的$emit（原理相同）
+// 子组件：触发事件（相当于执行回调）
+const Child = {
+  methods: {
+    sendData() {
+      const data = '获取的数据';
+      this.$emit('data-ready', data); // 触发事件，传递数据
+    }
+  }
+}
+
+// 父组件：监听事件（相当于传入回调）
+&lt;child @data-ready="handleData"&gt;&lt;/child&gt;
+methods: {
+  handleData(result) {
+    console.log(result);              // 处理数据
+  }
+}</pre>
+
+        <h3>更详细的对比：</h3>
+        <table class="comparison-table">
+          <tr>
+            <th>JavaScript回调</th>
+            <th>Vue $emit</th>
+            <th>说明</th>
+          </tr>
+          <tr>
+            <td><code>function(callback)</code></td>
+            <td><code>@event-name="handler"</code></td>
+            <td>定义回调/监听事件</td>
+          </tr>
+          <tr>
+            <td><code>callback(data)</code></td>
+            <td><code>$emit('event-name', data)</code></td>
+            <td>执行回调/触发事件</td>
+          </tr>
+          <tr>
+            <td>调用方传入回调函数</td>
+            <td>父组件传入事件处理器</td>
+            <td>谁来处理</td>
+          </tr>
+          <tr>
+            <td>被调用方执行回调</td>
+            <td>子组件触发事件</td>
+            <td>谁来触发</td>
+          </tr>
+          <tr>
+            <td>通过参数传递数据</td>
+            <td>通过$emit参数传递数据</td>
+            <td>数据传递</td>
+          </tr>
+        </table>
+
+        <div class="note success-note" style="margin-top: 15px;">
+          <div class="note-title">✅ 这个类比帮助理解：</div>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li><strong>$emit就是"调用回调"：</strong>子组件触发事件就像执行回调函数</li>
+            <li><strong>@监听就是"传入回调"：</strong>父组件监听事件就像传入回调函数</li>
+            <li><strong>数据向上传递：</strong>通过$emit的参数把数据传给父组件</li>
+            <li><strong>父子配合：</strong>props传数据下去，$emit把结果传回来</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- ========== 2. $emit基本用法 ========== -->
+      <h2>📝 2. $emit基本用法</h2>
+      <div class="example-box">
+        <div class="example-title">如何触发和监听自定义事件</div>
+
+        <h3>第一步：子组件触发事件</h3>
+        <pre v-pre>const ChildComponent = {
+  methods: {
+    handleClick() {
+      // 语法：this.$emit('事件名', 参数1, 参数2, ...)
+      this.$emit('my-event', '传递的数据');
+    }
+  },
+  template: `&lt;button @click="handleClick"&gt;触发事件&lt;/button&gt;`
+}</pre>
+
+        <h3>第二步：父组件监听事件</h3>
+        <pre v-pre>// 方式1：直接在模板中处理
+&lt;child-component @my-event="message = $event"&gt;&lt;/child-component&gt;
+
+// 方式2：调用方法处理
+&lt;child-component @my-event="handleEvent"&gt;&lt;/child-component&gt;
+
+methods: {
+  handleEvent(data) {
+    console.log('接收到：', data);
+  }
+}</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <emit-basic-demo></emit-basic-demo>
+        </div>
+      </div>
+
+      <div class="note info-note">
+        <div class="note-title">💡 $event 特殊变量</div>
+        <p style="margin: 10px 0;">
+          在模板中可以使用 <code>$event</code> 来获取 <code>$emit</code> 传递的第一个参数：
+        </p>
+        <pre v-pre>// 子组件
+this.$emit('update-count', 100)
+
+// 父组件模板中
+&lt;child @update-count="count = $event"&gt;&lt;/child&gt;
+// $event 的值就是 100</pre>
+      </div>
+
+      <hr />
+
+      <!-- ========== 3. 传递多个参数 ========== -->
+      <h2>📦 3. 传递多个参数</h2>
+      <div class="example-box">
+        <div class="example-title">$emit可以传递多个参数</div>
+
+        <pre v-pre>// 子组件：传递多个参数
+this.$emit('user-login', username, password, rememberMe)
+
+// 父组件：接收多个参数
+&lt;child @user-login="handleLogin"&gt;&lt;/child&gt;
+
+methods: {
+  handleLogin(username, password, rememberMe) {
+    console.log(username, password, rememberMe)
+  }
+}</pre>
+
+        <h3>传递对象（推荐）</h3>
+        <pre v-pre>// 子组件：传递对象
+this.$emit('user-login', {
+  username: 'admin',
+  password: '123456',
+  rememberMe: true
+})
+
+// 父组件：接收对象
+methods: {
+  handleLogin(userData) {
+    console.log(userData.username)
+    console.log(userData.password)
+  }
+}</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <multi-params-demo></multi-params-demo>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- ========== 4. 实战案例：计数器 ========== -->
+      <h2>🔢 4. 实战案例：计数器组件</h2>
+      <div class="example-box">
+        <div class="example-title">子组件操作，父组件管理数据</div>
+
+        <div class="demo-area">
+          <counter-demo></counter-demo>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- ========== 5. 实战案例：待办事项 ========== -->
+      <h2>✅ 5. 实战案例：待办事项列表</h2>
+      <div class="example-box">
+        <div class="example-title">完整的增删改查操作</div>
+
+        <div class="demo-area">
+          <todo-demo></todo-demo>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- ========== 6. .native修饰符 ========== -->
+      <h2>🖱️ 6. 原生事件 vs 自定义事件</h2>
+      <div class="example-box">
+        <div class="example-title">理解.native修饰符</div>
+
+        <pre v-pre>// ❌ 默认情况：组件上的@click是自定义事件
+&lt;child-component @click="handleClick"&gt;&lt;/child-component&gt;
+// 需要子组件内部 this.$emit('click') 才会触发
+
+// ✅ 使用.native：监听组件根元素的原生DOM事件
+&lt;child-component @click.native="handleClick"&gt;&lt;/child-component&gt;
+// 直接监听组件根元素的点击事件</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <native-demo></native-demo>
+        </div>
+      </div>
+
+      <div class="note warning-note">
+        <div class="note-title">⚠️ 注意区别</div>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li><strong>普通HTML元素：</strong>@click 是原生DOM事件</li>
+          <li><strong>组件标签：</strong>@click 是自定义事件（需要$emit）</li>
+          <li><strong>组件标签 + .native：</strong>@click.native 是原生DOM事件</li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!-- ========== 7. props + $emit 完整流程 ========== -->
+      <h2>🔄 7. props + $emit：完整的双向通信</h2>
+      <div class="example-box">
+        <div class="example-title">组合使用实现父子双向通信</div>
+
+        <div class="diagram">
+          <div style="text-align: left; display: inline-block">
+            <div
+              style="
+                background: #fff3e0;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 5px;
+                border: 2px solid #ff9800;
+              "
+            >
+              <strong>父组件（数据管理者）</strong>
+              <div style="color: #666; font-size: 14px; margin-top: 5px">
+                data: { count: 0 }<br />
+                ⬇️ props传数据下去<br />
+                ⬆️ @event监听事件
+              </div>
+            </div>
+            <div style="text-align: center; color: #28a745; font-size: 14px; margin: 10px 0;">
+              ⬇️ :count="count" (props)<br />
+              ⬆️ @increment="count++" ($emit)
+            </div>
+            <div
+              style="
+                background: #e8f5e9;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 5px;
+                border: 2px solid #4caf50;
+              "
+            >
+              <strong>子组件（UI展示者）</strong>
+              <div style="color: #666; font-size: 14px; margin-top: 5px">
+                props: ['count']<br />
+                ⬇️ 接收props<br />
+                ⬆️ $emit触发事件
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <pre v-pre>// 子组件：接收props，触发事件
+const Counter = {
+  props: ['count'],
+  methods: {
+    increment() {
+      this.$emit('increment');  // 通知父组件增加
+    },
+    decrement() {
+      this.$emit('decrement');  // 通知父组件减少
+    }
+  },
+  template: `
+    &lt;div&gt;
+      &lt;p&gt;当前值：{{ count }}&lt;/p&gt;
+      &lt;button @click="increment"&gt;+1&lt;/button&gt;
+      &lt;button @click="decrement"&gt;-1&lt;/button&gt;
+    &lt;/div&gt;
+  `
+}
+
+// 父组件：管理数据，监听事件
+&lt;counter 
+  :count="count" 
+  @increment="count++" 
+  @decrement="count--"
+&gt;&lt;/counter&gt;
+
+data() {
+  return { count: 0 }
+}</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <props-emit-demo></props-emit-demo>
+        </div>
+      </div>
+
+      <div class="note success-note">
+        <div class="note-title">✅ 最佳实践</div>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li><strong>数据归属：</strong>数据由父组件管理，子组件只负责展示</li>
+          <li><strong>单向数据流：</strong>props向下传，$emit向上传</li>
+          <li><strong>职责分离：</strong>父组件管理状态，子组件处理交互</li>
+          <li><strong>可复用性：</strong>子组件不依赖父组件具体实现，更易复用</li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!-- ========== 8. 总结对比 ========== -->
+      <div class="note success-note">
+        <div class="note-title">📚 本节知识点总结</div>
+
+        <h3 style="margin-top: 10px">核心概念</h3>
+        <table class="comparison-table" style="margin-top: 10px">
+          <tr>
+            <th>对比项</th>
+            <th>props（父→子）</th>
+            <th>$emit（子→父）</th>
+          </tr>
+          <tr>
+            <td>作用</td>
+            <td>父组件向子组件传递数据</td>
+            <td>子组件向父组件发送消息</td>
+          </tr>
+          <tr>
+            <td>类比</td>
+            <td>函数参数</td>
+            <td>回调函数</td>
+          </tr>
+          <tr>
+            <td>数据流向</td>
+            <td>父 → 子（向下）</td>
+            <td>子 → 父（向上）</td>
+          </tr>
+          <tr>
+            <td>子组件定义</td>
+            <td>props: ['value']</td>
+            <td>this.$emit('event-name')</td>
+          </tr>
+          <tr>
+            <td>父组件使用</td>
+            <td>:value="data"</td>
+            <td>@event-name="handler"</td>
+          </tr>
+          <tr>
+            <td>传递数据</td>
+            <td>通过属性传递</td>
+            <td>通过事件参数传递</td>
+          </tr>
+        </table>
+
+        <h3 style="margin-top: 15px">$emit要点</h3>
+        <ol style="margin-left: 20px">
+          <li>基本语法：<code>this.$emit('event-name', param1, param2)</code></li>
+          <li>事件命名：推荐使用 kebab-case（短横线）</li>
+          <li>传递数据：可以传递多个参数，推荐传递对象</li>
+          <li>监听事件：父组件用 <code>@event-name</code> 监听</li>
+          <li>$event变量：在模板中可用 <code>$event</code> 获取第一个参数</li>
+          <li>.native修饰符：监听组件根元素的原生DOM事件</li>
+        </ol>
+
+        <h3 style="margin-top: 15px">完整流程</h3>
+        <pre style="background: #f8f9fa; color: #333;" v-pre>1. 父组件通过 props 传数据给子组件     (:value="data")
+2. 子组件通过 props 接收数据             (props: ['value'])
+3. 子组件触发事件通知父组件             (this.$emit('update'))
+4. 父组件监听事件并处理                 (@update="handleUpdate")</pre>
+
+        <h3 style="margin-top: 15px">下一步学习</h3>
+        <p style="margin-left: 20px; margin-top: 8px">
+          ✅ 你已经掌握了父子组件的双向通信（props + $emit）<br />
+          ✅ 下一节将学习兄弟组件通信（<strong>全局事件总线</strong>）<br />
+          ✅ 以及更高级的通信方式（provide/inject、Vuex等）
+        </p>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      Vue.config.productionTip = false;
+
+      // ========== 1. 基础演示 ==========
+      const BasicDemo = {
+        data() {
+          return {
+            messages: [],
+          };
+        },
+        methods: {
+          handleEvent(message) {
+            this.messages.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+          },
+        },
+        components: {
+          "event-child": {
+            data() {
+              return {
+                clickCount: 0,
+              };
+            },
+            methods: {
+              notifyParent() {
+                this.clickCount++;
+                this.$emit("my-event", `这是第 ${this.clickCount} 次触发事件`);
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>子组件</h4>
+                <button @click="notifyParent">触发事件通知父组件</button>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                  点击次数：{{ clickCount }}
+                </p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件 - 事件日志</h4>
+            <event-child @my-event="handleEvent"></event-child>
+            
+            <div class="event-log" v-if="messages.length > 0">
+              <div v-for="(msg, index) in messages" :key="index" class="event-log-item">
+                {{ msg }}
+              </div>
+            </div>
+            <p v-else style="color: #999; margin-top: 10px;">暂无消息，点击按钮触发事件</p>
+          </div>
+        `,
+      };
+
+      // ========== 2. $emit基本用法 ==========
+      const EmitBasicDemo = {
+        data() {
+          return {
+            receivedData: "",
+          };
+        },
+        methods: {
+          handleEvent(data) {
+            this.receivedData = data;
+          },
+        },
+        components: {
+          "basic-child": {
+            methods: {
+              sendMessage() {
+                this.$emit("data-sent", "来自子组件的数据：" + Date.now());
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>子组件</h4>
+                <button @click="sendMessage">发送数据给父组件</button>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件</h4>
+            <p><strong>接收到的数据：</strong>{{ receivedData || '尚未接收' }}</p>
+            
+            <basic-child @data-sent="handleEvent"></basic-child>
+          </div>
+        `,
+      };
+
+      // ========== 3. 多参数传递 ==========
+      const MultiParamsDemo = {
+        data() {
+          return {
+            loginInfo: null,
+          };
+        },
+        methods: {
+          handleLogin(userData) {
+            this.loginInfo = userData;
+          },
+        },
+        components: {
+          "login-form": {
+            data() {
+              return {
+                username: "",
+                password: "",
+              };
+            },
+            methods: {
+              submitLogin() {
+                if (!this.username || !this.password) {
+                  alert("请输入用户名和密码");
+                  return;
+                }
+                // 传递对象
+                this.$emit("user-login", {
+                  username: this.username,
+                  password: this.password,
+                  timestamp: new Date().toLocaleString(),
+                });
+                // 清空表单
+                this.username = "";
+                this.password = "";
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>登录表单（子组件）</h4>
+                <div>
+                  <input 
+                    v-model="username" 
+                    placeholder="用户名"
+                    @keyup.enter="submitLogin"
+                  />
+                  <input 
+                    v-model="password" 
+                    type="password"
+                    placeholder="密码"
+                    @keyup.enter="submitLogin"
+                  />
+                  <button @click="submitLogin">登录</button>
+                </div>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件 - 登录信息</h4>
+            
+            <login-form @user-login="handleLogin"></login-form>
+            
+            <div v-if="loginInfo" style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 5px;">
+              <h5>接收到的登录信息：</h5>
+              <p>用户名：{{ loginInfo.username }}</p>
+              <p>密码：{{ loginInfo.password }}</p>
+              <p>时间：{{ loginInfo.timestamp }}</p>
+            </div>
+          </div>
+        `,
+      };
+
+      // ========== 4. 计数器案例 ==========
+      const CounterDemo = {
+        data() {
+          return {
+            count: 0,
+          };
+        },
+        components: {
+          "counter-control": {
+            props: ["count"],
+            methods: {
+              increment() {
+                this.$emit("increment");
+              },
+              decrement() {
+                this.$emit("decrement");
+              },
+              reset() {
+                this.$emit("reset");
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>计数器控制（子组件）</h4>
+                <p>当前值：{{ count }}</p>
+                <button @click="increment">+1</button>
+                <button @click="decrement">-1</button>
+                <button @click="reset" style="background: #dc3545;">重置</button>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件 - 管理计数器数据</h4>
+            
+            <div class="counter-display">{{ count }}</div>
+            
+            <counter-control 
+              :count="count"
+              @increment="count++"
+              @decrement="count--"
+              @reset="count = 0"
+            ></counter-control>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+              ✅ 数据由父组件管理，子组件只负责触发事件
+            </p>
+          </div>
+        `,
+      };
+
+      // ========== 5. 待办事项案例 ==========
+      const TodoDemo = {
+        data() {
+          return {
+            todos: [
+              { id: 1, text: "学习Vue基础", done: true },
+              { id: 2, text: "掌握组件通信", done: false },
+              { id: 3, text: "完成项目实战", done: false },
+            ],
+            nextId: 4,
+          };
+        },
+        methods: {
+          addTodo(text) {
+            this.todos.push({
+              id: this.nextId++,
+              text: text,
+              done: false,
+            });
+          },
+          toggleTodo(id) {
+            const todo = this.todos.find((t) => t.id === id);
+            if (todo) todo.done = !todo.done;
+          },
+          deleteTodo(id) {
+            this.todos = this.todos.filter((t) => t.id !== id);
+          },
+        },
+        components: {
+          "todo-input": {
+            data() {
+              return {
+                inputText: "",
+              };
+            },
+            methods: {
+              handleAdd() {
+                if (this.inputText.trim()) {
+                  this.$emit("add-todo", this.inputText);
+                  this.inputText = "";
+                }
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>添加待办（子组件）</h4>
+                <input 
+                  v-model="inputText" 
+                  placeholder="输入待办事项"
+                  @keyup.enter="handleAdd"
+                  style="width: 300px;"
+                />
+                <button @click="handleAdd">添加</button>
+              </div>
+            `,
+          },
+          "todo-item": {
+            props: ["todo"],
+            template: `
+              <div style="
+                padding: 10px; 
+                margin: 5px 0; 
+                background: white; 
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+              ">
+                <div style="display: flex; align-items: center;">
+                  <input 
+                    type="checkbox" 
+                    :checked="todo.done"
+                    @change="$emit('toggle', todo.id)"
+                  />
+                  <span :style="{
+                    marginLeft: '10px',
+                    textDecoration: todo.done ? 'line-through' : 'none',
+                    color: todo.done ? '#999' : '#333'
+                  }">
+                    {{ todo.text }}
+                  </span>
+                </div>
+                <button 
+                  @click="$emit('delete', todo.id)"
+                  style="background: #dc3545; padding: 5px 10px; font-size: 12px;"
+                >
+                  删除
+                </button>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>待办事项列表（父组件）</h4>
+            <p style="color: #666;">
+              总数：{{ todos.length }} | 
+              已完成：{{ todos.filter(t => t.done).length }} | 
+              未完成：{{ todos.filter(t => !t.done).length }}
+            </p>
+            
+            <todo-input @add-todo="addTodo"></todo-input>
+            
+            <div style="margin-top: 15px;">
+              <todo-item
+                v-for="todo in todos"
+                :key="todo.id"
+                :todo="todo"
+                @toggle="toggleTodo"
+                @delete="deleteTodo"
+              ></todo-item>
+            </div>
+          </div>
+        `,
+      };
+
+      // ========== 6. .native修饰符演示 ==========
+      const NativeDemo = {
+        data() {
+          return {
+            customEventCount: 0,
+            nativeEventCount: 0,
+          };
+        },
+        components: {
+          "demo-button": {
+            template: `
+              <button style="margin: 5px;">
+                <slot>点击我</slot>
+              </button>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>原生事件 vs 自定义事件</h4>
+            
+            <div style="margin: 15px 0;">
+              <p><strong>1. 组件上的普通@click（自定义事件）：</strong></p>
+              <demo-button @click="customEventCount++">
+                普通@click
+              </demo-button>
+              <span>触发次数：{{ customEventCount }}</span>
+              <p style="font-size: 12px; color: #dc3545;">
+                ❌ 不会触发（因为子组件没有$emit('click')）
+              </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+              <p><strong>2. 组件上的@click.native（原生事件）：</strong></p>
+              <demo-button @click.native="nativeEventCount++">
+                @click.native
+              </demo-button>
+              <span>触发次数：{{ nativeEventCount }}</span>
+              <p style="font-size: 12px; color: #28a745;">
+                ✅ 可以触发（监听根元素的原生点击）
+              </p>
+            </div>
+          </div>
+        `,
+      };
+
+      // ========== 7. props + $emit 完整演示 ==========
+      const PropsEmitDemo = {
+        data() {
+          return {
+            count: 10,
+          };
+        },
+        components: {
+          "counter-component": {
+            props: ["count"],
+            methods: {
+              add(num) {
+                this.$emit("change", this.count + num);
+              },
+              subtract(num) {
+                this.$emit("change", this.count - num);
+              },
+              multiply(num) {
+                this.$emit("change", this.count * num);
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>计算器（子组件）</h4>
+                <p style="font-size: 24px; font-weight: bold; color: #764ba2;">
+                  当前值：{{ count }}
+                </p>
+                
+                <div style="margin: 10px 0;">
+                  <button @click="add(1)">+1</button>
+                  <button @click="add(5)">+5</button>
+                  <button @click="add(10)">+10</button>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                  <button @click="subtract(1)">-1</button>
+                  <button @click="subtract(5)">-5</button>
+                  <button @click="subtract(10)">-10</button>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                  <button @click="multiply(2)">×2</button>
+                  <button @click="multiply(3)">×3</button>
+                  <button @click="$emit('change', 0)" style="background: #dc3545;">清零</button>
+                </div>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件 - 数据管理</h4>
+            <p>父组件的count：{{ count }}</p>
+            
+            <counter-component 
+              :count="count" 
+              @change="count = $event"
+            ></counter-component>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+              ✅ props向下传递数据，$emit向上传递变更
+            </p>
+          </div>
+        `,
+      };
+
+      // ========== 创建 Vue 根实例 ==========
+      new Vue({
+        el: "#root",
+        components: {
+          "basic-demo": BasicDemo,
+          "emit-basic-demo": EmitBasicDemo,
+          "multi-params-demo": MultiParamsDemo,
+          "counter-demo": CounterDemo,
+          "todo-demo": TodoDemo,
+          "native-demo": NativeDemo,
+          "props-emit-demo": PropsEmitDemo,
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>组件通信-props父传子</title>
+
+    <script type="text/javascript" src="../js/vue.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Microsoft YaHei", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      #root {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #999;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      h2 {
+        color: #667eea;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-size: 20px;
+        border-left: 4px solid #667eea;
+        padding-left: 10px;
+      }
+
+      h3 {
+        color: #555;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .example-box {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #667eea;
+      }
+
+      .example-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .demo-area {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 15px;
+        border: 2px dashed #ddd;
+      }
+
+      .component-demo {
+        padding: 15px;
+        margin: 10px 0;
+        background: #e3f2fd;
+        border-radius: 5px;
+        border-left: 4px solid #2196f3;
+      }
+
+      .parent-box {
+        background: #fff3e0;
+        padding: 20px;
+        border-radius: 8px;
+        border: 2px solid #ff9800;
+        margin: 10px 0;
+      }
+
+      .child-box {
+        background: #e8f5e9;
+        padding: 15px;
+        border-radius: 5px;
+        border: 2px solid #4caf50;
+        margin: 10px 0;
+      }
+
+      code {
+        background: #ffe6e6;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #e74c3c;
+        font-size: 13px;
+      }
+
+      pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 10px 0;
+      }
+
+      .note {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 4px solid #ffc107;
+        margin: 20px 0;
+      }
+
+      .note-title {
+        font-weight: bold;
+        color: #856404;
+        margin-bottom: 5px;
+      }
+
+      .success-note {
+        background: #d4edda;
+        border-left-color: #28a745;
+      }
+
+      .success-note .note-title {
+        color: #155724;
+      }
+
+      .warning-note {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+      }
+
+      .warning-note .note-title {
+        color: #721c24;
+      }
+
+      .info-note {
+        background: #d1ecf1;
+        border-left-color: #17a2b8;
+      }
+
+      .info-note .note-title {
+        color: #0c5460;
+      }
+
+      hr {
+        margin: 30px 0;
+        border: none;
+        border-top: 2px solid #f0f0f0;
+      }
+
+      button {
+        padding: 8px 16px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transition: all 0.3s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        margin: 5px;
+      }
+
+      .comparison-table {
+        width: 100%;
+        margin: 15px 0;
+        border-collapse: collapse;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      .comparison-table th {
+        background: #667eea;
+        color: white;
+        font-weight: bold;
+      }
+
+      .comparison-table td {
+        background: white;
+      }
+
+      .comparison-table tr:nth-child(even) td {
+        background: #f8f9fa;
+      }
+
+      .diagram {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        text-align: center;
+        border: 2px solid #ddd;
+      }
+
+      .flow-arrow {
+        font-size: 24px;
+        color: #667eea;
+        margin: 10px 0;
+      }
+
+      .user-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-card h4 {
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .user-card p {
+        margin: 5px 0;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!--
+      ==================== 组件通信：props（父传子）完整教程 ====================
+      
+      一、什么是props？
+        props（properties的缩写）是组件的自定义属性，用于父组件向子组件传递数据。
+        可以理解为：父组件通过props给子组件传递"参数"，让子组件根据不同参数显示不同内容。
+        
+      ⭐ props的简单理解（类比函数参数）：
+        
+        简单粗暴地讲：
+        ✅ 把子组件当成函数
+        ✅ props就是函数的参数
+        ✅ 父组件调用子组件时，按参数类型传入数据
+        
+        对比示例：
+        
+        // 📌 函数的写法
+        function greet(name, age) {           // 定义参数
+          console.log(`我是${name}，${age}岁`)
+        }
+        greet('张三', 18)                     // 调用函数，传入参数
+        
+        // 📌 组件的写法（props就是参数）
+        const Greet = {
+          props: ['name', 'age'],             // 定义"参数"
+          template: `<p>我是{{ name }}，{{ age }}岁</p>`
+        }
+        // 使用组件，传入"参数"
+        <Greet name="张三" :age="18"></Greet>
+        
+        进一步的类比：
+        
+        ┌──────────────────────┬──────────────────────────────┐
+        │ 函数                 │ 组件                          │
+        ├──────────────────────┼──────────────────────────────┤
+        │ function(name, age)  │ props: ['name', 'age']       │
+        │ 参数类型检查(TS)     │ props: { name: String }      │
+        │ 默认参数值            │ props: { name: {default:'匿名'}}│
+        │ 必填参数             │ props: { name: {required:true}}│
+        │ 调用 greet('张三')   │ <Greet name="张三"></Greet>  │
+        └──────────────────────┴──────────────────────────────┘
+        
+        这个类比帮助理解：
+        1. props就是组件的"入参"
+        2. 父组件"调用"子组件时传入数据
+        3. 子组件根据不同的props"返回"不同的视图
+        
+      二、为什么需要props？
+        1. 组件复用：同一个组件可以接收不同的数据，展示不同的内容
+        2. 数据传递：父组件需要把数据传给子组件使用
+        3. 组件通信：实现父子组件间的数据流动
+        4. 可配置性：让组件更灵活，可以配置各种参数
+        
+      三、props的三种写法：
+        
+        1. 数组写法（简单接收）：
+           props: ['name', 'age']
+           - 只接收，不做任何限制
+           - 适合：快速开发、原型验证
+           
+        2. 对象写法（类型限制）：
+           props: {
+             name: String,
+             age: Number
+           }
+           - 限制数据类型
+           - 适合：需要类型检查的场景
+           
+        3. 完整对象写法（详细配置）：
+           props: {
+             name: {
+               type: String,        // 类型
+               required: true,      // 必填
+               default: '默认值'    // 默认值
+             }
+           }
+           - 可以配置类型、默认值、必填、自定义验证
+           - 适合：生产环境、组件库开发
+           
+      四、props的数据类型：
+        可以是 JavaScript 的任意类型：
+        - String（字符串）
+        - Number（数字）
+        - Boolean（布尔值）
+        - Array（数组）
+        - Object（对象）
+        - Date（日期）
+        - Function（函数）
+        - Symbol（符号）
+        
+      五、props的特点（重要）：
+        
+        1. 单向数据流：
+           - 数据从父组件流向子组件（单向）
+           - 子组件不能直接修改props（会报错警告）
+           - 如果需要修改，应该通过$emit通知父组件修改
+           
+        2. 响应式的：
+           - 父组件的数据变化，子组件会自动更新
+           - 子组件接收的props是响应式的
+           
+        3. 只读的：
+           - 子组件不应该修改props
+           - 如果需要基于props计算，使用computed
+           - 如果需要本地副本，在data中创建副本
+           
+      六、props命名规范：
+        
+        1. 在JavaScript中：使用camelCase（驼峰命名）
+           props: ['userName', 'userAge']
+           
+        2. 在HTML模板中：使用kebab-case（短横线命名）
+           <my-component user-name="张三" user-age="18"></my-component>
+           
+        3. Vue会自动转换：
+           user-name → userName
+           
+      七、传递props的两种方式：
+        
+        1. 静态传递（传字符串）：
+           <child-component name="张三" title="标题"></child-component>
+           
+        2. 动态传递（用v-bind传变量）：
+           <child-component :name="userName" :age="userAge"></child-component>
+           
+        注意：
+        - 不加 : 传的是字符串
+        - 加 : 传的是JavaScript表达式（变量、数字、对象等）
+        
+      八、常见错误和注意事项：
+        
+        1. ❌ 子组件直接修改props：
+           this.propName = newValue;  // 错误！会警告
+           
+        2. ✅ 正确做法：
+           - 方案1：在data中创建副本
+           - 方案2：使用computed计算属性
+           - 方案3：通过$emit通知父组件修改
+           
+        3. ❌ 传数字时忘记加冒号：
+           <child age="18"></child>  // 传的是字符串"18"
+           
+        4. ✅ 正确做法：
+           <child :age="18"></child>  // 传的是数字18
+           
+      九、props验证的意义：
+        1. 提前发现错误：类型不匹配时会有警告
+        2. 代码更健壮：确保组件接收正确的数据
+        3. 作为文档：清晰地说明组件需要什么数据
+        4. 团队协作：让其他人知道如何使用你的组件
+    -->
+    <div id="root">
+      <h1>📤 组件通信：props（父传子）</h1>
+      <p class="subtitle">Props - 父组件向子组件传递数据</p>
+
+      <!-- ========== 1. props基本概念 ========== -->
+      <h2>💡 1. 什么是props？</h2>
+      <div class="example-box">
+        <div class="example-title">props是父组件向子组件传递数据的通道</div>
+
+        <div class="diagram">
+          <div
+            style="
+              background: #fff3e0;
+              padding: 20px;
+              border-radius: 8px;
+              display: inline-block;
+              border: 3px solid #ff9800;
+            "
+          >
+            <strong style="font-size: 18px">父组件</strong>
+            <div style="margin-top: 10px; color: #666">
+              data: { userName: '张三', userAge: 18 }
+            </div>
+          </div>
+
+          <div class="flow-arrow">⬇️ 通过 props 传递</div>
+
+          <div
+            style="
+              background: #e8f5e9;
+              padding: 20px;
+              border-radius: 8px;
+              display: inline-block;
+              border: 3px solid #4caf50;
+            "
+          >
+            <strong style="font-size: 18px">子组件</strong>
+            <div style="margin-top: 10px; color: #666">
+              props: ['userName', 'userAge']
+            </div>
+          </div>
+        </div>
+
+        <pre v-pre>// 父组件模板
+&lt;child-component :user-name="userName" :user-age="userAge"&gt;&lt;/child-component&gt;
+
+// 子组件定义
+const ChildComponent = {
+  props: ['userName', 'userAge'],
+  template: `
+    &lt;div&gt;
+      &lt;p&gt;姓名：{{ userName }}&lt;/p&gt;
+      &lt;p&gt;年龄：{{ userAge }}&lt;/p&gt;
+    &lt;/div&gt;
+  `
+}</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <basic-demo></basic-demo>
+        </div>
+      </div>
+
+      <div class="note success-note">
+        <div class="note-title">✅ 核心理解</div>
+        <ul style="margin-left: 20px; margin-top: 8px">
+          <li><strong>父→子：</strong>数据流是单向的，从父组件流向子组件</li>
+          <li>
+            <strong>类比：</strong>就像函数的参数，父组件调用子组件时传入"参数"
+          </li>
+          <li><strong>响应式：</strong>父组件数据变化，子组件会自动更新</li>
+          <li><strong>只读：</strong>子组件不能直接修改props</li>
+        </ul>
+      </div>
+
+      <h2>🎯 1.1 简单理解：props就是组件的"函数参数"</h2>
+      <div class="example-box">
+        <div class="example-title">⭐ 最简单粗暴的理解方式</div>
+
+        <div class="note info-note">
+          <div class="note-title">💡 一句话理解props</div>
+          <p style="margin: 10px 0; font-size: 15px;">
+            <strong>把子组件当成函数，props就是函数的参数，父组件调用子组件时按参数类型传入数据。</strong>
+          </p>
+        </div>
+
+        <h3>对比：函数 vs 组件</h3>
+        <pre v-pre>// 📌 函数的写法
+function greet(name, age) {           // 定义参数
+  console.log(`我是${name}，${age}岁`)
+}
+greet('张三', 18)                     // 调用函数，传入参数
+
+
+// 📌 组件的写法（props就是参数）
+const Greet = {
+  props: ['name', 'age'],             // 定义"参数"
+  template: `&lt;p&gt;我是{{ name }}，{{ age }}岁&lt;/p&gt;`
+}
+// 使用组件时传入"参数"
+&lt;Greet name="张三" :age="18"&gt;&lt;/Greet&gt;</pre>
+
+        <h3>更详细的对比：</h3>
+        <table class="comparison-table">
+          <tr>
+            <th>函数</th>
+            <th>组件（props）</th>
+            <th>说明</th>
+          </tr>
+          <tr>
+            <td><code>function(name, age)</code></td>
+            <td><code>props: ['name', 'age']</code></td>
+            <td>定义参数/props</td>
+          </tr>
+          <tr>
+            <td>参数类型检查（TypeScript）</td>
+            <td><code>props: { name: String }</code></td>
+            <td>类型限制</td>
+          </tr>
+          <tr>
+            <td><code>function(name = '匿名')</code></td>
+            <td><code>props: { name: {default: '匿名'} }</code></td>
+            <td>默认值</td>
+          </tr>
+          <tr>
+            <td>必填参数（TypeScript）</td>
+            <td><code>props: { name: {required: true} }</code></td>
+            <td>必填验证</td>
+          </tr>
+          <tr>
+            <td><code>greet('张三', 18)</code></td>
+            <td><code>&lt;Greet name="张三" :age="18"&gt;</code></td>
+            <td>调用/使用</td>
+          </tr>
+        </table>
+
+        <div class="note success-note" style="margin-top: 15px;">
+          <div class="note-title">✅ 这个类比帮助理解：</div>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li><strong>props就是组件的"入参"：</strong>定义组件需要接收什么数据</li>
+            <li><strong>父组件"调用"子组件：</strong>在模板中使用子组件标签</li>
+            <li><strong>传入"参数"：</strong>通过属性传递数据给子组件</li>
+            <li><strong>子组件根据参数工作：</strong>根据不同的props显示不同的内容</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- ========== 2. props的三种写法 ========== -->
+      <h2>📝 2. props的三种写法</h2>
+      <div class="example-box">
+        <div class="example-title">从简单到复杂，满足不同场景需求</div>
+
+        <h3>写法1：数组写法（简单接收）</h3>
+        <pre v-pre>props: ['name', 'age', 'gender']
+
+// 特点：
+// ✅ 简单快速
+// ❌ 没有类型检查
+// ❌ 没有默认值
+// 适合：快速开发、原型验证</pre>
+
+        <h3>写法2：对象写法（类型限制）</h3>
+        <pre v-pre>props: {
+  name: String,      // 限制为字符串
+  age: Number,       // 限制为数字
+  gender: String     // 限制为字符串
+}
+
+// 特点：
+// ✅ 有类型检查（类型错误会警告）
+// ❌ 没有默认值
+// ❌ 不能设置必填
+// 适合：需要类型检查的场景</pre>
+
+        <h3>写法3：完整对象写法（详细配置）⭐推荐</h3>
+        <pre v-pre>props: {
+  name: {
+    type: String,                // 类型
+    required: true,              // 必填
+    default: '匿名'              // 默认值（与required互斥）
+  },
+  age: {
+    type: Number,
+    default: 0,
+    validator(value) {           // 自定义验证
+      return value >= 0 && value <= 150
+    }
+  },
+  hobbies: {
+    type: Array,
+    default() {                  // 数组/对象的默认值必须是函数
+      return []
+    }
+  }
+}
+
+// 特点：
+// ✅ 类型检查
+// ✅ 可设置默认值
+// ✅ 可设置必填
+// ✅ 可自定义验证
+// 适合：生产环境、组件库</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <props-types-demo></props-types-demo>
+        </div>
+      </div>
+
+      <div class="note info-note">
+        <div class="note-title">💡 如何选择？</div>
+        <table class="comparison-table" style="margin-top: 10px">
+          <tr>
+            <th>场景</th>
+            <th>推荐写法</th>
+            <th>原因</th>
+          </tr>
+          <tr>
+            <td>学习阶段</td>
+            <td>数组写法</td>
+            <td>简单直观，快速验证</td>
+          </tr>
+          <tr>
+            <td>个人项目</td>
+            <td>对象写法</td>
+            <td>有类型检查，避免低级错误</td>
+          </tr>
+          <tr>
+            <td>团队项目</td>
+            <td>完整对象写法</td>
+            <td>代码更健壮，作为文档使用</td>
+          </tr>
+          <tr>
+            <td>组件库</td>
+            <td>完整对象写法</td>
+            <td>需要严格的类型检查和默认值</td>
+          </tr>
+        </table>
+      </div>
+
+      <hr />
+
+      <!-- ========== 3. 静态传递 vs 动态传递 ========== -->
+      <h2>🔄 3. 静态传递 vs 动态传递</h2>
+      <div class="example-box">
+        <div class="example-title">理解什么时候用冒号(:)</div>
+
+        <h3>静态传递（不加冒号）- 传字符串</h3>
+        <pre v-pre>&lt;!-- 传递的都是字符串 --&gt;
+&lt;child-component 
+  name="张三" 
+  age="18"          &lt;!-- ❌ 这是字符串"18"，不是数字18 --&gt;
+  title="标题"
+&gt;&lt;/child-component&gt;</pre>
+
+        <h3>动态传递（加冒号）- 传JavaScript表达式 ⭐</h3>
+        <pre v-pre>&lt;!-- 使用 v-bind 或 : 传递变量、表达式 --&gt;
+&lt;child-component 
+  :name="userName"        &lt;!-- 传递变量 --&gt;
+  :age="18"               &lt;!-- ✅ 传递数字18 --&gt;
+  :is-active="true"       &lt;!-- 传递布尔值 --&gt;
+  :hobbies="['游泳', '跑步']"  &lt;!-- 传递数组 --&gt;
+  :user="{name: '张三', age: 18}"  &lt;!-- 传递对象 --&gt;
+  :calculate="1 + 2"      &lt;!-- 传递表达式结果：3 --&gt;
+&gt;&lt;/child-component&gt;</pre>
+
+        <table class="comparison-table">
+          <tr>
+            <th>传递方式</th>
+            <th>写法</th>
+            <th>传递的是</th>
+            <th>适用场景</th>
+          </tr>
+          <tr>
+            <td>静态传递</td>
+            <td><code>name="张三"</code></td>
+            <td>字符串"张三"</td>
+            <td>传递固定的字符串</td>
+          </tr>
+          <tr>
+            <td>动态传递</td>
+            <td><code>:name="userName"</code></td>
+            <td>变量userName的值</td>
+            <td>传递变量、数字、布尔值、对象、数组</td>
+          </tr>
+        </table>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <static-dynamic-demo></static-dynamic-demo>
+        </div>
+      </div>
+
+      <div class="note warning-note">
+        <div class="note-title">⚠️ 常见错误</div>
+        <pre v-pre>// ❌ 错误：想传数字18，但忘记加冒号
+&lt;child-component age="18"&gt;&lt;/child-component&gt;
+// 结果：子组件收到的是字符串"18"
+
+// ❌ 错误：想传布尔值true
+&lt;child-component is-active="true"&gt;&lt;/child-component&gt;
+// 结果：子组件收到的是字符串"true"
+
+// ✅ 正确：传数字和布尔值要加冒号
+&lt;child-component :age="18" :is-active="true"&gt;&lt;/child-component&gt;</pre>
+      </div>
+
+      <hr />
+
+      <!-- ========== 4. props命名规范 ========== -->
+      <h2>📛 4. props命名规范</h2>
+      <div class="example-box">
+        <div class="example-title">JavaScript用驼峰，HTML用短横线</div>
+
+        <pre v-pre>// 在子组件的JavaScript中：用 camelCase（驼峰命名）
+props: ['userName', 'userAge', 'isActive']
+
+// 在父组件的HTML模板中：用 kebab-case（短横线命名）
+&lt;child-component 
+  :user-name="name"      &lt;!-- user-name 会自动转为 userName --&gt;
+  :user-age="age"        &lt;!-- user-age 会自动转为 userAge --&gt;
+  :is-active="active"    &lt;!-- is-active 会自动转为 isActive --&gt;
+&gt;&lt;/child-component&gt;
+
+// Vue 会自动进行转换：
+user-name  → userName
+user-age   → userAge
+is-active  → isActive</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <naming-demo></naming-demo>
+        </div>
+      </div>
+
+      <div class="note info-note">
+        <div class="note-title">💡 为什么要这样？</div>
+        <ul style="margin-left: 20px; margin-top: 8px">
+          <li>
+            <strong>JavaScript规范：</strong>JavaScript中推荐用camelCase（驼峰）
+          </li>
+          <li>
+            <strong>HTML规范：</strong>HTML不区分大小写，所以用kebab-case（短横线）
+          </li>
+          <li><strong>自动转换：</strong>Vue会自动在两种命名间转换，开发者无需关心</li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!-- ========== 5. 单向数据流 ========== -->
+      <h2>🚦 5. 单向数据流（重要）</h2>
+      <div class="example-box">
+        <div class="example-title">为什么子组件不能修改props？</div>
+
+        <div class="diagram">
+          <div style="text-align: left; display: inline-block">
+            <div
+              style="
+                background: #fff3e0;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 5px;
+                border: 2px solid #ff9800;
+              "
+            >
+              <strong>父组件</strong>
+              <div style="color: #666; font-size: 14px; margin-top: 5px">
+                data: { count: 0 }
+              </div>
+            </div>
+            <div style="text-align: center; color: #28a745; font-size: 20px">
+              ⬇️ props 单向流动
+            </div>
+            <div
+              style="
+                background: #e8f5e9;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 5px;
+                border: 2px solid #4caf50;
+              "
+            >
+              <strong>子组件</strong>
+              <div style="color: #666; font-size: 14px; margin-top: 5px">
+                props: ['count']
+              </div>
+            </div>
+            <div style="text-align: center; color: #dc3545; font-size: 20px">
+              ⬆️ ❌ 不能直接修改props
+            </div>
+          </div>
+        </div>
+
+        <h3>❌ 错误示范：子组件直接修改props</h3>
+        <pre v-pre>const ChildComponent = {
+  props: ['count'],
+  methods: {
+    increment() {
+      this.count++;  // ❌ 错误！会报警告：Avoid mutating a prop directly
+    }
+  }
+}</pre>
+
+        <h3>✅ 正确方案1：在data中创建副本</h3>
+        <pre v-pre>const ChildComponent = {
+  props: ['count'],
+  data() {
+    return {
+      localCount: this.count  // 创建本地副本
+    }
+  },
+  methods: {
+    increment() {
+      this.localCount++;  // ✅ 修改本地副本
+    }
+  }
+}</pre>
+
+        <h3>✅ 正确方案2：使用computed计算属性</h3>
+        <pre v-pre>const ChildComponent = {
+  props: ['count'],
+  computed: {
+    doubleCount() {
+      return this.count * 2  // ✅ 基于props计算新值
+    }
+  }
+}</pre>
+
+        <h3>✅ 正确方案3：通过$emit通知父组件修改（最佳）</h3>
+        <pre v-pre>// 子组件：不直接修改，而是通知父组件
+const ChildComponent = {
+  props: ['count'],
+  methods: {
+    increment() {
+      this.$emit('update-count', this.count + 1);  // ✅ 通知父组件
+    }
+  }
+}
+
+// 父组件：监听事件并修改数据
+&lt;child-component :count="count" @update-count="count = $event"&gt;&lt;/child-component&gt;</pre>
+
+        <div class="demo-area">
+          <h3>演示效果：</h3>
+          <data-flow-demo></data-flow-demo>
+        </div>
+      </div>
+
+      <div class="note warning-note">
+        <div class="note-title">⚠️ 为什么要单向数据流？</div>
+        <ul style="margin-left: 20px; margin-top: 8px">
+          <li>
+            <strong>数据流清晰：</strong>数据只能从父流向子，出问题容易定位
+          </li>
+          <li>
+            <strong>避免混乱：</strong>如果多个子组件都能修改同一个props，会导致数据混乱
+          </li>
+          <li>
+            <strong>职责分明：</strong>父组件负责管理数据，子组件负责展示数据
+          </li>
+          <li>
+            <strong>便于维护：</strong>数据的变化只发生在父组件，维护更简单
+          </li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!-- ========== 6. props验证详解 ========== -->
+      <h2>✅ 6. props验证详解</h2>
+      <div class="example-box">
+        <div class="example-title">如何对props进行严格验证？</div>
+
+        <pre v-pre>const UserCard = {
+  props: {
+    // 基础类型检查
+    name: String,
+    age: Number,
+    isVip: Boolean,
+    
+    // 多个可能的类型
+    id: [String, Number],
+    
+    // 必填的字符串
+    title: {
+      type: String,
+      required: true
+    },
+    
+    // 带默认值的数字
+    score: {
+      type: Number,
+      default: 0
+    },
+    
+    // 带默认值的对象（必须用函数返回）
+    user: {
+      type: Object,
+      default() {
+        return { name: '游客' }
+      }
+    },
+    
+    // 带默认值的数组（必须用函数返回）
+    hobbies: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    
+    // 自定义验证函数
+    age: {
+      type: Number,
+      validator(value) {
+        return value >= 0 && value <= 150
+      }
+    },
+    
+    // 自定义类型（构造函数）
+    author: Person  // Person 是一个构造函数
+  }
+}</pre>
+
+        <h3>type可以是：</h3>
+        <ul style="margin-left: 20px">
+          <li>String - 字符串</li>
+          <li>Number - 数字</li>
+          <li>Boolean - 布尔值</li>
+          <li>Array - 数组</li>
+          <li>Object - 对象</li>
+          <li>Date - 日期</li>
+          <li>Function - 函数</li>
+          <li>Symbol - 符号</li>
+          <li>自定义构造函数</li>
+        </ul>
+
+        <div class="demo-area">
+          <h3>演示效果（打开控制台查看验证警告）：</h3>
+          <validation-demo></validation-demo>
+        </div>
+      </div>
+
+      <div class="note info-note">
+        <div class="note-title">💡 验证的好处</div>
+        <ul style="margin-left: 20px; margin-top: 8px">
+          <li>✅ <strong>提前发现错误：</strong>类型不对会立即警告</li>
+          <li>✅ <strong>代码即文档：</strong>清楚地说明组件需要什么数据</li>
+          <li>✅ <strong>团队协作：</strong>其他人知道如何正确使用你的组件</li>
+          <li>✅ <strong>健壮性：</strong>确保组件始终接收正确的数据</li>
+        </ul>
+      </div>
+
+      <hr />
+
+      <!-- ========== 7. 实战案例 ========== -->
+      <h2>🎯 7. 实战案例：用户卡片列表</h2>
+      <div class="example-box">
+        <div class="example-title">完整的父子组件通信实战</div>
+
+        <div class="demo-area">
+          <user-list></user-list>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- ========== 8. 总结 ========== -->
+      <div class="note success-note">
+        <div class="note-title">📚 本节知识点总结</div>
+
+        <h3 style="margin-top: 10px">核心概念（必须掌握）</h3>
+        <ul style="margin-left: 20px">
+          <li>
+            <strong>props是什么：</strong>父组件向子组件传递数据的通道
+          </li>
+          <li>
+            <strong>单向数据流：</strong>数据从父流向子，子不能直接修改props
+          </li>
+          <li>
+            <strong>静态vs动态：</strong>不加冒号传字符串，加冒号传JavaScript表达式
+          </li>
+        </ul>
+
+        <h3 style="margin-top: 15px">三种写法</h3>
+        <table class="comparison-table" style="margin-top: 10px">
+          <tr>
+            <th>写法</th>
+            <th>特点</th>
+            <th>适用场景</th>
+          </tr>
+          <tr>
+            <td>数组写法</td>
+            <td>简单快速</td>
+            <td>学习、快速原型</td>
+          </tr>
+          <tr>
+            <td>对象写法</td>
+            <td>类型检查</td>
+            <td>个人项目</td>
+          </tr>
+          <tr>
+            <td>完整对象写法</td>
+            <td>类型+默认值+验证</td>
+            <td>生产环境、团队项目</td>
+          </tr>
+        </table>
+
+        <h3 style="margin-top: 15px">关键要点</h3>
+        <ol style="margin-left: 20px">
+          <li>传数字、布尔值、对象、数组时必须加冒号(:)</li>
+          <li>JavaScript用驼峰，HTML用短横线，Vue自动转换</li>
+          <li>子组件不能直接修改props（单向数据流）</li>
+          <li>需要修改时：创建副本/用computed/通过$emit通知父组件</li>
+          <li>对象和数组的默认值必须用函数返回</li>
+        </ol>
+
+        <h3 style="margin-top: 15px">下一步学习</h3>
+        <p style="margin-left: 20px; margin-top: 8px">
+          ✅ 你已经掌握了父→子的数据传递（props）<br />
+          ✅ 下一节将学习子→父的数据传递（<strong>$emit自定义事件</strong>）<br />
+          ✅ 掌握这两个就能实现完整的父子组件双向通信
+        </p>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      Vue.config.productionTip = false;
+
+      // ========== 1. 基础演示组件 ==========
+      const BasicDemo = {
+        data() {
+          return {
+            userName: "张三",
+            userAge: 18,
+          };
+        },
+        components: {
+          "basic-child": {
+            props: ["userName", "userAge"],
+            template: `
+              <div class="child-box">
+                <h4>子组件接收到的数据：</h4>
+                <p><strong>姓名：</strong>{{ userName }}</p>
+                <p><strong>年龄：</strong>{{ userAge }}</p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件的数据：</h4>
+            <p>userName: {{ userName }}, userAge: {{ userAge }}</p>
+            <button @click="userName = '李四'">修改姓名</button>
+            <button @click="userAge++">年龄+1</button>
+            
+            <basic-child :user-name="userName" :user-age="userAge"></basic-child>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+              ✅ 点击按钮修改父组件数据，子组件会自动更新
+            </p>
+          </div>
+        `,
+      };
+
+      // ========== 2. props三种写法演示 ==========
+      const PropsTypesDemo = {
+        data() {
+          return {
+            name: "王五",
+            age: 25,
+            gender: "男",
+          };
+        },
+        components: {
+          // 写法1：数组写法
+          "array-child": {
+            props: ["name", "age"],
+            template: `
+              <div class="child-box">
+                <h4>数组写法（简单接收）</h4>
+                <p>姓名：{{ name }}</p>
+                <p>年龄：{{ age }}</p>
+              </div>
+            `,
+          },
+          // 写法2：对象写法（类型限制）
+          "object-child": {
+            props: {
+              name: String,
+              age: Number,
+            },
+            template: `
+              <div class="child-box">
+                <h4>对象写法（类型限制）</h4>
+                <p>姓名：{{ name }}（String）</p>
+                <p>年龄：{{ age }}（Number）</p>
+              </div>
+            `,
+          },
+          // 写法3：完整对象写法
+          "full-child": {
+            props: {
+              name: {
+                type: String,
+                required: true,
+              },
+              age: {
+                type: Number,
+                default: 0,
+              },
+              gender: {
+                type: String,
+                default: "未知",
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>完整对象写法（类型+默认值+必填）</h4>
+                <p>姓名：{{ name }}（required）</p>
+                <p>年龄：{{ age }}（default: 0）</p>
+                <p>性别：{{ gender }}（default: '未知'）</p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件数据：name={{ name }}, age={{ age }}, gender={{ gender }}</h4>
+            
+            <array-child :name="name" :age="age"></array-child>
+            <object-child :name="name" :age="age"></object-child>
+            <full-child :name="name" :age="age" :gender="gender"></full-child>
+          </div>
+        `,
+      };
+
+      // ========== 3. 静态vs动态传递演示 ==========
+      const StaticDynamicDemo = {
+        data() {
+          return {
+            dynamicName: "动态传递的名字",
+            dynamicAge: 20,
+          };
+        },
+        components: {
+          "demo-child": {
+            props: ["name", "age", "isActive", "hobbies"],
+            template: `
+              <div class="child-box">
+                <p><strong>name:</strong> {{ name }} (类型：{{ typeof name }})</p>
+                <p><strong>age:</strong> {{ age }} (类型：{{ typeof age }})</p>
+                <p><strong>isActive:</strong> {{ isActive }} (类型：{{ typeof isActive }})</p>
+                <p><strong>hobbies:</strong> {{ hobbies }} (类型：{{ typeof hobbies }})</p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>对比：静态传递 vs 动态传递</h4>
+            
+            <h5>❌ 静态传递（都是字符串）：</h5>
+            <demo-child 
+              name="张三" 
+              age="18" 
+              isActive="true"
+              hobbies="游泳"
+            ></demo-child>
+            
+            <h5>✅ 动态传递（正确的类型）：</h5>
+            <demo-child 
+              :name="dynamicName" 
+              :age="dynamicAge" 
+              :is-active="true"
+              :hobbies="['游泳', '跑步']"
+            ></demo-child>
+            
+            <p style="font-size: 12px; color: #dc3545; margin-top: 10px;">
+              注意：静态传递的age是字符串"18"，动态传递的age是数字20
+            </p>
+          </div>
+        `,
+      };
+
+      // ========== 4. 命名规范演示 ==========
+      const NamingDemo = {
+        data() {
+          return {
+            firstName: "张",
+            lastName: "三",
+            isActive: true,
+          };
+        },
+        components: {
+          "naming-child": {
+            props: ["firstName", "lastName", "isActive"],
+            template: `
+              <div class="child-box">
+                <h4>子组件（JavaScript中用驼峰命名）</h4>
+                <p>props: ['firstName', 'lastName', 'isActive']</p>
+                <p>firstName: {{ firstName }}</p>
+                <p>lastName: {{ lastName }}</p>
+                <p>isActive: {{ isActive }}</p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件（HTML中用短横线命名）</h4>
+            <p>first-name="张" last-name="三" :is-active="true"</p>
+            
+            <naming-child 
+              :first-name="firstName" 
+              :last-name="lastName" 
+              :is-active="isActive"
+            ></naming-child>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+              ✅ Vue会自动转换：first-name → firstName
+            </p>
+          </div>
+        `,
+      };
+
+      // ========== 5. 单向数据流演示 ==========
+      const DataFlowDemo = {
+        data() {
+          return {
+            parentCount: 0,
+          };
+        },
+        methods: {
+          updateCount(newCount) {
+            this.parentCount = newCount;
+          },
+        },
+        components: {
+          "flow-child": {
+            props: ["count"],
+            data() {
+              return {
+                localCount: this.count, // 创建本地副本
+              };
+            },
+            methods: {
+              // ❌ 错误方式：直接修改props
+              wrongWay() {
+                try {
+                  this.count++; // 这会报警告
+                } catch (e) {
+                  alert("错误！不能直接修改props");
+                }
+              },
+              // ✅ 正确方式1：修改本地副本
+              correctWay1() {
+                this.localCount++;
+                alert(`本地副本增加到：${this.localCount}\n但父组件的count仍是：${this.count}`);
+              },
+              // ✅ 正确方式2：通知父组件修改
+              correctWay2() {
+                this.$emit("update-count", this.count + 1);
+              },
+            },
+            template: `
+              <div class="child-box">
+                <h4>子组件</h4>
+                <p>props.count: {{ count }} (来自父组件)</p>
+                <p>localCount: {{ localCount }} (本地副本)</p>
+                
+                <div style="margin-top: 10px;">
+                  <button @click="correctWay1" style="background: #28a745;">
+                    ✅ 修改本地副本
+                  </button>
+                  <button @click="correctWay2" style="background: #28a745;">
+                    ✅ 通知父组件修改
+                  </button>
+                </div>
+                
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                  提示：查看控制台，直接修改props会有警告
+                </p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>父组件</h4>
+            <p>parentCount: {{ parentCount }}</p>
+            <button @click="parentCount++">父组件+1</button>
+            
+            <flow-child 
+              :count="parentCount" 
+              @update-count="updateCount"
+            ></flow-child>
+          </div>
+        `,
+      };
+
+      // ========== 6. props验证演示 ==========
+      const ValidationDemo = {
+        data() {
+          return {
+            validUser: {
+              name: "张三",
+              age: 25,
+              email: "zhang@example.com",
+            },
+            invalidUser: {
+              name: 123, // ❌ 应该是字符串
+              age: "二十五", // ❌ 应该是数字
+              email: "invalid", // ❌ 验证失败
+            },
+          };
+        },
+        components: {
+          "validated-child": {
+            props: {
+              name: {
+                type: String,
+                required: true,
+              },
+              age: {
+                type: Number,
+                validator(value) {
+                  return value >= 0 && value <= 150;
+                },
+              },
+              email: {
+                type: String,
+                validator(value) {
+                  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                },
+              },
+            },
+            template: `
+              <div class="child-box">
+                <p>姓名：{{ name }}</p>
+                <p>年龄：{{ age }}</p>
+                <p>邮箱：{{ email }}</p>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>props验证演示（打开控制台查看警告）</h4>
+            
+            <h5>✅ 传递正确的数据：</h5>
+            <validated-child 
+              :name="validUser.name" 
+              :age="validUser.age"
+              :email="validUser.email"
+            ></validated-child>
+            
+            <h5>❌ 传递错误的数据（会有警告）：</h5>
+            <validated-child 
+              :name="invalidUser.name" 
+              :age="invalidUser.age"
+              :email="invalidUser.email"
+            ></validated-child>
+          </div>
+        `,
+      };
+
+      // ========== 7. 实战案例：用户列表 ==========
+      const UserList = {
+        data() {
+          return {
+            users: [
+              {
+                id: 1,
+                name: "张三",
+                age: 25,
+                gender: "男",
+                hobbies: ["游泳", "跑步"],
+                isVip: true,
+              },
+              {
+                id: 2,
+                name: "李四",
+                age: 30,
+                gender: "女",
+                hobbies: ["阅读", "旅游"],
+                isVip: false,
+              },
+              {
+                id: 3,
+                name: "王五",
+                age: 28,
+                gender: "男",
+                hobbies: ["编程", "健身"],
+                isVip: true,
+              },
+            ],
+          };
+        },
+        methods: {
+          addUser() {
+            const newUser = {
+              id: Date.now(),
+              name: "新用户" + Math.floor(Math.random() * 100),
+              age: Math.floor(Math.random() * 30) + 20,
+              gender: Math.random() > 0.5 ? "男" : "女",
+              hobbies: ["爱好1", "爱好2"],
+              isVip: Math.random() > 0.5,
+            };
+            this.users.push(newUser);
+          },
+          deleteUser(id) {
+            this.users = this.users.filter((user) => user.id !== id);
+          },
+        },
+        components: {
+          "user-card": {
+            props: {
+              user: {
+                type: Object,
+                required: true,
+              },
+            },
+            methods: {
+              handleDelete() {
+                this.$emit("delete", this.user.id);
+              },
+            },
+            template: `
+              <div class="user-card">
+                <h4>
+                  {{ user.name }} 
+                  <span v-if="user.isVip" style="color: #ff9800; font-size: 12px;">
+                    ⭐VIP
+                  </span>
+                </h4>
+                <p><strong>年龄：</strong>{{ user.age }}岁</p>
+                <p><strong>性别：</strong>{{ user.gender }}</p>
+                <p><strong>爱好：</strong>{{ user.hobbies.join(', ') }}</p>
+                <button @click="handleDelete" 
+                        style="background: #dc3545; margin-top: 10px;">
+                  删除
+                </button>
+              </div>
+            `,
+          },
+        },
+        template: `
+          <div class="parent-box">
+            <h4>用户列表（共{{ users.length }}人）</h4>
+            <button @click="addUser">添加用户</button>
+            
+            <div style="display: flex; flex-wrap: wrap; margin-top: 15px;">
+              <user-card 
+                v-for="user in users" 
+                :key="user.id"
+                :user="user"
+                @delete="deleteUser"
+              ></user-card>
+            </div>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 15px;">
+              ✅ 演示了：props传对象、数组、布尔值，以及子组件通过$emit通知父组件删除
+            </p>
+          </div>
+        `,
+      };
+
+      // ========== 创建 Vue 根实例 ==========
+      new Vue({
+        el: "#root",
+        components: {
+          "basic-demo": BasicDemo,
+          "props-types-demo": PropsTypesDemo,
+          "static-dynamic-demo": StaticDynamicDemo,
+          "naming-demo": NamingDemo,
+          "data-flow-demo": DataFlowDemo,
+          "validation-demo": ValidationDemo,
+          "user-list": UserList,
+        },
+      });
+    </script>
+  </body>
+</html>
