@@ -983,24 +983,85 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
 }
         </div>
 
-        <div class="analogy-box">
-            <h4>🎯 何时选择 provide/inject？</h4>
+        <table class="comparison-table" style="margin-top: 30px;">
+            <thead>
+                <tr>
+                    <th>通信场景</th>
+                    <th>组件关系</th>
+                    <th>推荐方案</th>
+                    <th>provide/inject 是否适用</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>父→子</strong>（单层）</td>
+                    <td>直接父子</td>
+                    <td>✅ props</td>
+                    <td>❌ 杀鸡用牛刀</td>
+                </tr>
+                <tr>
+                    <td><strong>子→父</strong>（单层）</td>
+                    <td>直接父子</td>
+                    <td>✅ $emit</td>
+                    <td>❌ 不适合</td>
+                </tr>
+                <tr>
+                    <td><strong>兄弟组件</strong></td>
+                    <td>同级平行</td>
+                    <td>✅ Event Bus / Vuex</td>
+                    <td>❌ 语义不清（要绕父组件）</td>
+                </tr>
+                <tr style="background: #d4edda;">
+                    <td><strong>祖孙跨层级</strong>（4层+）</td>
+                    <td>祖先→后代</td>
+                    <td>✅ <strong>provide/inject</strong></td>
+                    <td>✅ ⭐ 最佳场景！</td>
+                </tr>
+                <tr style="background: #d4edda;">
+                    <td><strong>主题/权限/配置</strong></td>
+                    <td>全局共享</td>
+                    <td>✅ <strong>provide/inject</strong></td>
+                    <td>✅ ⭐ 理想选择！</td>
+                </tr>
+                <tr style="background: #d4edda;">
+                    <td><strong>组件库内部</strong></td>
+                    <td>库组件间</td>
+                    <td>✅ <strong>provide/inject</strong></td>
+                    <td>✅ ⭐ Element UI用法！</td>
+                </tr>
+                <tr>
+                    <td><strong>复杂状态管理</strong></td>
+                    <td>全局多状态</td>
+                    <td>✅ Vuex</td>
+                    <td>⚠️ 可用但不推荐</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="analogy-box" style="margin-top: 30px;">
+            <h4>🎯 provide/inject 的职责定位</h4>
             <p>
-                <strong>✅ 适合使用的场景：</strong><br>
-                • 主题切换（theme provider）<br>
-                • 权限控制（permission provider）<br>
-                • 多语言（i18n provider）<br>
-                • 全局配置（config provider）<br>
-                • 组件库内部通信（el-form / el-form-item）<br>
-                • 祖孙组件通信（4层以上）<br><br>
+                <strong>✅ 核心使命：跨层级依赖注入（祖先→后代）</strong><br><br>
+                
+                <strong>⭐ 最佳应用场景：</strong><br>
+                • 主题切换系统（theme provider）<br>
+                • 权限控制系统（permission provider）<br>
+                • 多语言系统（i18n provider）<br>
+                • 全局配置中心（config provider）<br>
+                • 组件库内部通信（el-form → el-form-item → el-input）<br>
+                • 祖孙组件通信（4层以上，避免 props drilling）<br><br>
                 
                 <strong>❌ 不适合的场景：</strong><br>
-                • 父子组件直接通信 → 用 props/$emit<br>
-                • 兄弟组件通信 → 用 Event Bus 或 Vuex<br>
-                • 复杂状态管理 → 用 Vuex<br>
-                • 需要时间旅行调试 → 用 Vuex DevTools<br><br>
+                • 父子组件直接通信 → 用 <strong>props/$emit</strong>（简单明了）<br>
+                • 兄弟组件平级通信 → 用 <strong>Event Bus</strong>（语义清晰）<br>
+                • 复杂全局状态管理 → 用 <strong>Vuex</strong>（完整方案）<br>
+                • 需要时间旅行调试 → 用 <strong>Vuex DevTools</strong><br><br>
                 
-                <strong>💡 记住：provide/inject 是轻量级依赖注入，Vuex 是完整状态管理！</strong>
+                <strong>💡 记住：</strong><br>
+                • provide/inject = 轻量级依赖注入（类似 Spring @Autowired）<br>
+                • Vuex = 完整状态管理（类似 Redux）<br>
+                • Event Bus = 消息通信（类似消息队列）<br>
+                • 各司其职，不要滥用！
             </p>
         </div>
     </div>
