@@ -32,10 +32,24 @@
 
     <div id="root">
       <h2>vue监视数据变化的原理</h2>
-      <button @click="vueSet">使用Vue.set修改数据</button>
-      <button @click="vueDelete">使用Vue.delete删除数据</button> 
-      <button @click="vuePop">使用Vue.pop删除数组最后一个元素</button>
-      <button @click="vuePush">使用Vue.push添加数组新元素</button>
+      
+      <h3>1. Vue.set / this.$set 用法</h3>
+      <button @click="vueSetGlobal">使用Vue.set修改数据</button>
+      <button @click="vueSetInstance">使用this.$set修改数据</button>
+      
+      <h3>2. Vue.delete / this.$delete 用法</h3>
+      <button @click="vueDeleteGlobal">使用Vue.delete删除数据</button>
+      <button @click="vueDeleteInstance">使用this.$delete删除数据</button>
+      
+      <h3>3. 数组的7个变异方法</h3>
+      <button @click="vuePush">push - 末尾添加</button>
+      <button @click="vuePop">pop - 删除最后</button>
+      <button @click="vueShift">shift - 删除第一个</button>
+      <button @click="vueUnshift">unshift - 开头添加</button>
+      <button @click="vueSplice">splice - 替换</button>
+      <button @click="vueSort">sort - 排序</button>
+      <button @click="vueReverse">reverse - 反转</button>
+      
       <ul>
         <li v-for="(person, index) in persons" :key="person.id">
           {{ person.name }} - {{ person.age }} - {{ person.sex }}
@@ -57,34 +71,65 @@
             ],
           },
           methods: {
-            vueSet() {
-              // vue.set 用于向响应式对象添加一个新的属性，确保新属性同样是响应式的，并且触发视图更新
-              Vue.set(this.persons[0], "age", 25);
+            vueSetGlobal() {
+              // Vue.set 全局方法：用于向响应式对象添加一个新的属性
+              Vue.set(this.persons[0], "address", "北京");
+              console.log("使用Vue.set添加属性address");
             },
-            vueDelete() {
-              // vue.delete 用于从响应式对象中删除一个属性，确保删除操作能够被 Vue 监视到，并触发视图更新
+            vueSetInstance() {
+              // this.$set 实例方法：更常用，功能与Vue.set相同
+              this.$set(this.persons[0], "hobby", "唱歌");
+              console.log("使用this.$set添加属性hobby");
+            },
+            vueDeleteGlobal() {
+              // Vue.delete 全局方法：用于删除响应式对象的属性
               Vue.delete(this.persons[0], "age");
+              console.log("使用Vue.delete删除age属性");
             },
-            vuePop() {
-              // vue.pop 用于从响应式数组中删除最后一个元素，确保删除操作能够被 Vue 监视到，并触发视图更新
-              this.persons.pop();
+            vueDeleteInstance() {
+              // this.$delete 实例方法：更常用，功能与Vue.delete相同
+              this.$delete(this.persons[0], "sex");
+              console.log("使用this.$delete删除sex属性");
             },
             vuePush() {
-              // vue.push 用于向响应式数组中添加一个新元素，确保添加操作能够被 Vue 监视到，并触发视图更新
+              // push：向数组末尾添加元素
               this.persons.push({ id: 5, name: "新成员", age: 22, sex: "男" });
+              console.log("使用push添加元素");
+            },
+            vuePop() {
+              // pop：删除数组最后一个元素
+              this.persons.pop();
+              console.log("使用pop删除最后一个元素");
+            },
+            vueShift() {
+              // shift：删除数组第一个元素
+              this.persons.shift();
+              console.log("使用shift删除第一个元素");
+            },
+            vueUnshift() {
+              // unshift：向数组开头添加元素
+              this.persons.unshift({ id: 0, name: "李四", age: 17, sex: "男" });
+              console.log("使用unshift在开头添加元素");
+            },
+            vueSplice() {
+              // splice：添加/删除/替换数组元素
+              // splice(起始位置, 删除个数, 添加的元素...)
+              this.persons.splice(1, 1, { id: 10, name: "王五", age: 25, sex: "男" });
+              console.log("使用splice替换元素");
+            },
+            vueSort() {
+              // sort：对数组排序
+              this.persons.sort((a, b) => a.age - b.age);
+              console.log("使用sort按年龄排序");
+            },
+            vueReverse() {
+              // reverse：反转数组
+              this.persons.reverse();
+              console.log("使用reverse反转数组");
             }
           },
           mounted() {
-            //测试vue监视数据变化的原理
-            console.log("修改前：", this.persons[0]);
-            this.vueSet();
-            console.log("使用Vue.set修改后：", this.persons[0]);
-            this.vueDelete();
-            console.log("使用Vue.delete删除后：", this.persons[0]);
-            this.vuePop();
-            console.log("使用Vue.pop删除后：", this.persons);
-            this.vuePush();
-            console.log("使用Vue.push添加后：", this.persons);
+            console.log("Vue实例已挂载，可以在控制台查看数据变化");
         }
         });
         v.$mount("#root");

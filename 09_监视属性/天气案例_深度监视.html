@@ -17,6 +17,10 @@
       备注：
           （1）vue自身可以监视对象内部值的改变，但Vue提供的watch默认不监视
           （2）使用watch时根据数据的具体结构，决定是否采用深度监视
+      
+      watch的两种写法：
+          （1）在配置对象中直接写watch选项
+          （2）使用vm.$watch()方法（更灵活，可以动态添加监视）
   -->
   <div id="root">
     <h2>今天天气很{{info}}</h2>
@@ -24,6 +28,11 @@
     <hr>
     <h2>a的值是{{numbers.a}}</h2>
     <button @click="numbers.a++">点我a+1</button>
+    <button @click="numbers.b++">点我b+1</button>
+    <hr>
+    <h3>演示：使用vm.$watch()动态监视c的值</h3>
+    <h2>c的值是{{numbers.c}}</h2>
+    <button @click="numbers.c++">点我c+1</button>
   </div>
   <script type="text/javascript">
     Vue.config.productionTip = false; //阻止vue在启动时产生生产提示
@@ -33,7 +42,8 @@
         isHot: true,
         numbers: {
           a: 1,
-          b: 2
+          b: 2,
+          c: 3
         }
       },
       computed: {
@@ -72,6 +82,21 @@
 
     )
     v.$mount("#root")
+    
+    // 使用vm.$watch()方法监视数据（watch的第二种写法）
+    // 这种方式更灵活，可以在任何时候动态添加监视
+    v.$watch('numbers.c', {
+      immediate: true,  // 立即执行
+      deep: false,      // 是否深度监视
+      handler(newValue, oldValue) {
+        console.log("c的值发生了变化（通过$watch监视）", newValue, oldValue)
+      }
+    })
+    
+    // $watch的简写形式（当不需要配置immediate、deep等选项时）
+    // v.$watch('numbers.c', function(newValue, oldValue) {
+    //   console.log("c的值发生了变化", newValue, oldValue)
+    // })
   </script>
 </body>
 

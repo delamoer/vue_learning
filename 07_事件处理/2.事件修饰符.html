@@ -15,6 +15,32 @@
       height: 50px;
       background-color: skyblue;
     }
+
+    .box1 {
+      padding: 20px;
+      background-color: lightcoral;
+    }
+
+    .box2 {
+      padding: 20px;
+      background-color: lightblue;
+    }
+
+    .box3 {
+      padding: 20px;
+      background-color: lightgreen;
+    }
+
+    .list {
+      width: 200px;
+      height: 200px;
+      background-color: lightyellow;
+      overflow: auto;
+    }
+
+    li {
+      height: 100px;
+    }
   </style>
 </head>
 
@@ -27,21 +53,51 @@
         3.once：事件只触发一次（常用）
         4.capture：使用事件的捕获方式
         5.self：只有event.target是当前操作的元素才触发事件
-        5.passive：事件的默认行为立即执行，无需等待事件回调执行完毕
+        6.passive：事件的默认行为立即执行，无需等待事件回调执行完毕
+        7.修饰符可以连续使用，如：@click.prevent.stop
   -->
   <div id="root">
     <h3>hello, {{name}}, {{age}}</h3>
 
-    <!--prevent：阻止默认事件（常用）-->
-    <a href="http://www.baidu.com" @click.prevent="showInfo">点我提示信息</a>
+    <h4>1. prevent：阻止默认事件（常用）</h4>
+    <a href="http://www.baidu.com" @click.prevent="showInfo">点我提示信息（阻止跳转）</a>
 
-    <!--stop：阻止事件冒泡（常用）-->
+    <h4>2. stop：阻止事件冒泡（常用）</h4>
     <div class="demo1" @click="showInfo">
-      <button @click.stop="showInfo"> 点我提示信息</button>
+      <button @click.stop="showInfo">点我提示信息（不会冒泡到外层div）</button>
     </div>
 
-    <!--once：事件只触发一次-->
-    <button @click.once="showInfo"> 点我提示信息</button>
+    <h4>3. once：事件只触发一次（常用）</h4>
+    <button @click.once="showInfo">点我提示信息（只触发一次）</button>
+
+    <h4>4. capture：使用事件的捕获模式</h4>
+    <div class="box1" @click.capture="showMsg(1)">
+      div1（捕获模式）
+      <div class="box2" @click="showMsg(2)">
+        div2
+      </div>
+    </div>
+    <p style="font-size: 12px; color: #666;">说明：不加capture时，点击div2会先触发div2再触发div1（冒泡）；加了capture后，先触发div1再触发div2（捕获）</p>
+
+    <h4>5. self：只有event.target是当前元素时才触发</h4>
+    <div class="box3" @click.self="showMsg(3)">
+      div3（只有点击div3本身才触发，点击按钮不会触发）
+      <button @click="showMsg(4)">按钮</button>
+    </div>
+
+    <h4>6. passive：事件的默认行为立即执行，无需等待事件回调完毕</h4>
+    <ul @wheel.passive="demo" class="list">
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+      <li>4</li>
+    </ul>
+    <p style="font-size: 12px; color: #666;">说明：passive可以提升滚动性能，不需要等待回调函数执行完毕就立即滚动</p>
+
+    <h4>7. 修饰符可以连续使用</h4>
+    <div class="demo1" @click="showInfo">
+      <a href="http://www.baidu.com" @click.prevent.stop="showInfo">点我（阻止默认事件+阻止冒泡）</a>
+    </div>
 
   </div>
   <script type="text/javascript">
@@ -60,6 +116,16 @@
         showInfo() {
           console.log('aha')
           alert("你好!");
+        },
+        showMsg(msg) {
+          console.log(msg)
+        },
+        demo() {
+          // 模拟耗时操作
+          for (let i = 0; i < 100000; i++) {
+            console.log('#')
+          }
+          console.log('滚动事件触发了')
         }
       },
     }
