@@ -1124,7 +1124,7 @@ new Vue({
         <div class="example-box">
             <div class="example-title">避免在生命周期中踩坑</div>
 
-            <h3>❌ 陷阱 1：在 updated 中修改数据导致死循环</h3>
+            <h3>❌ 陷阱 1：在 updated 中修改数据导致死循环 ⚠️⚠️⚠️ 【极易踩坑】</h3>
             <pre v-pre>// ❌ 错误示例：会导致死循环！
 new Vue({
   data() {
@@ -1136,21 +1136,71 @@ new Vue({
 });</pre>
 
             <div class="error-note">
+                <div class="note-title">⚠️ 实战案例：Table 组件导致页面卡死</div>
+                <pre v-pre>// ❌ 错误示例：Table 组件中的死循环（实际踩坑案例）
+Vue.component('my-table', {
+  data() {
+    return {
+      columns: []  // 响应式数据
+    }
+  },
+  mounted() {
+    this.updateColumns();  // 修改 columns，触发更新
+  },
+  updated() {
+    this.updateColumns();  // ❌ 又修改 columns -> 再次触发 updated -> 无限循环
+  },
+  methods: {
+    updateColumns() {
+      this.columns = [...];  // 修改响应式数据
+    }
+  }
+});
+
+// 结果：页面一直处于"加载中"状态，无法显示任何内容！
+// 浏览器卡死，CPU 占用 100%</pre>
+            </div>
+
+            <div class="error-note">
                 <div class="note-title">如何修复？</div>
-                <pre v-pre>// ✅ 正确做法1：改用 watch
+                <pre v-pre>// ✅ 正确做法1：只在 mounted 中初始化（推荐）
+Vue.component('my-table', {
+  mounted() {
+    this.updateColumns();  // 只初始化一次
+  },
+  // ✅ 删除 updated 钩子！
+  methods: {
+    updateColumns() {
+      this.columns = [...];
+    }
+  }
+});
+
+// ✅ 正确做法2：改用 watch 监听特定数据
 watch: {
-  count() {
-    // 响应式地处理数据变化
+  someData() {  // 只在 someData 变化时执行
+    this.updateColumns();
   }
 }
 
-// ✅ 正确做法2：设置标志位防止重复
+// ✅ 正确做法3：设置条件判断防止重复
 updated() {
-  if (!this.isUpdating) {
-    this.isUpdating = true;
-    // 做一些 DOM 操作
+  if (this.needUpdate) {  // 通过条件控制
+    this.needUpdate = false;
+    this.updateColumns();
   }
 }</pre>
+            </div>
+
+            <div class="error-note" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                <div class="note-title" style="color: #856404;">🚨 重要提醒</div>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>updated 钩子会在任何数据变化后触发</strong>（非常频繁！）</li>
+                    <li><strong>在 updated 中修改 data 数据 = 99% 会造成死循环</strong></li>
+                    <li><strong>症状：页面无响应、Loading 不结束、浏览器卡死</strong></li>
+                    <li><strong>原则：updated 中只做 DOM 读取操作，不要修改数据！</strong></li>
+                    <li>如需响应数据变化，优先使用 <code>watch</code> 或 <code>computed</code></li>
+                </ul>
             </div>
 
             <hr style="margin: 20px 0;" />
@@ -1343,9 +1393,28 @@ mounted() {
                 <li>✅ created：可以访问数据但不能访问 DOM</li>
                 <li>✅ mounted：可以访问 DOM</li>
                 <li>✅ beforeDestroy：一定要清理资源</li>
-                <li>❌ 不要在 updated 中修改数据→死循环</li>
+                <li><strong style="color: #dc3545;">❌ 【最易踩坑】不要在 updated 中修改数据→死循环！页面卡死！</strong></li>
                 <li>❌ 不要忘记清理事件监听→内存泄漏</li>
             </ul>
+
+            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 8px;">
+                <h3 style="color: #856404; margin-top: 0;">🚨 最容易踩坑的错误（必看！）</h3>
+                <div style="background: white; padding: 12px; border-radius: 5px; margin-top: 10px;">
+                    <strong style="color: #dc3545; font-size: 16px;">在 updated 钩子中修改响应式数据 = 死循环</strong>
+                    <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8; color: #333;">
+                        <li>症状：页面无响应、一直"加载中"、浏览器卡死</li>
+                        <li>原因：修改数据 → 触发 updated → 又修改数据 → 无限循环</li>
+                        <li>解决：
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>✅ 只在 <code>mounted</code> 中初始化数据</li>
+                                <li>✅ 使用 <code>watch</code> 监听特定数据变化</li>
+                                <li>✅ updated 中只做 DOM 读取，不修改数据</li>
+                            </ul>
+                        </li>
+                        <li style="color: #dc3545; font-weight: bold; margin-top: 8px;">⚠️ 这个错误在开发组件时极易出现，务必警惕！</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
     </div>

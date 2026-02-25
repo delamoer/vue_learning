@@ -1,0 +1,2579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyUI 组件库 - 演示与文档</title>
+    <script src="../../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .header-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .component-section {
+            margin: 40px 0;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+
+        .component-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .demo-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .demo-title {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .demo-desc {
+            color: #666;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-left: 3px solid #667eea;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .api-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .api-table th, .api-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .api-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 MyUI 组件库</h1>
+        <p class="subtitle">基于 Vue 2 的轻量级 UI 组件库</p>
+
+        <div class="header-box">
+            <h2 style="margin-bottom: 15px;">📚 组件库说明</h2>
+            <p style="font-size: 1.1em; line-height: 1.8;">
+                这是一个从零开始开发的 Vue 组件库，目的是通过实战掌握组件封装、通信、优化等核心技能。
+                每个组件都经过精心设计，API 清晰易用，代码注释详细。
+            </p>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                <strong>🎯 学习目标：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>掌握组件封装的完整流程</li>
+                    <li>理解组件库的设计思想</li>
+                    <li>实践各种组件通信方式</li>
+                    <li>应用性能优化技巧</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="app">
+            <!-- Button 组件演示区域 -->
+            <div class="component-section">
+                <div class="component-title">🔘 Button 按钮</div>
+                
+                <!-- Demo 1: 按钮类型 -->
+                <div class="demo-box">
+                    <div class="demo-title">基础用法 - 按钮类型</div>
+                    <div class="demo-desc">
+                        通过 <code>type</code> 属性设置按钮类型，支持 default、primary、success、warning、danger、info
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button>默认按钮</my-button>
+                        <my-button type="primary">主要按钮</my-button>
+                        <my-button type="success">成功按钮</my-button>
+                        <my-button type="warning">警告按钮</my-button>
+                        <my-button type="danger">危险按钮</my-button>
+                        <my-button type="info">信息按钮</my-button>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-button&gt;默认按钮&lt;/my-button&gt;
+&lt;my-button type="primary"&gt;主要按钮&lt;/my-button&gt;
+&lt;my-button type="success"&gt;成功按钮&lt;/my-button&gt;
+&lt;my-button type="warning"&gt;警告按钮&lt;/my-button&gt;
+&lt;my-button type="danger"&gt;危险按钮&lt;/my-button&gt;
+&lt;my-button type="info"&gt;信息按钮&lt;/my-button&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 2: 按钮尺寸 -->
+                <div class="demo-box">
+                    <div class="demo-title">按钮尺寸</div>
+                    <div class="demo-desc">
+                        通过 <code>size</code> 属性设置按钮尺寸，支持 large、medium、small、mini
+                    </div>
+                    
+                    <div style="padding: 20px; display: flex; align-items: center; gap: 10px;">
+                        <my-button type="primary" size="large">大型按钮</my-button>
+                        <my-button type="primary" size="medium">中等按钮</my-button>
+                        <my-button type="primary" size="small">小型按钮</my-button>
+                        <my-button type="primary" size="mini">迷你按钮</my-button>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-button type="primary" size="large"&gt;大型按钮&lt;/my-button&gt;
+&lt;my-button type="primary" size="medium"&gt;中等按钮&lt;/my-button&gt;
+&lt;my-button type="primary" size="small"&gt;小型按钮&lt;/my-button&gt;
+&lt;my-button type="primary" size="mini"&gt;迷你按钮&lt;/my-button&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 3: 按钮状态 -->
+                <div class="demo-box">
+                    <div class="demo-title">按钮状态</div>
+                    <div class="demo-desc">
+                        支持 <code>disabled</code> 禁用状态、<code>loading</code> 加载状态、<code>plain</code> 朴素按钮、<code>round</code> 圆角按钮
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <my-button type="primary" :disabled="true">禁用按钮</my-button>
+                            <my-button type="primary" :loading="isLoading" @click="handleLoading">
+                                {{ isLoading ? '加载中...' : '点击加载' }}
+                            </my-button>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <my-button type="primary" :plain="true">朴素按钮</my-button>
+                            <my-button type="success" :plain="true">朴素按钮</my-button>
+                            <my-button type="warning" :plain="true">朴素按钮</my-button>
+                        </div>
+                        <div>
+                            <my-button type="primary" :round="true">圆角按钮</my-button>
+                            <my-button type="success" :round="true">圆角按钮</my-button>
+                            <my-button type="danger" :round="true">圆角按钮</my-button>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-button type="primary" :disabled="true"&gt;禁用按钮&lt;/my-button&gt;
+&lt;my-button type="primary" :loading="true"&gt;加载中...&lt;/my-button&gt;
+&lt;my-button type="primary" :plain="true"&gt;朴素按钮&lt;/my-button&gt;
+&lt;my-button type="primary" :round="true"&gt;圆角按钮&lt;/my-button&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 4: 图标按钮 -->
+                <div class="demo-box">
+                    <div class="demo-title">图标按钮</div>
+                    <div class="demo-desc">
+                        通过 <code>icon</code> 属性添加图标，或使用默认插槽自定义内容
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button type="primary" icon="✓">确认</my-button>
+                        <my-button type="danger" icon="✕">删除</my-button>
+                        <my-button type="info" icon="🔍">搜索</my-button>
+                        <my-button type="success" icon="⬆">上传</my-button>
+                        <my-button type="warning" icon="⚠">警告</my-button>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-button type="primary" icon="✓"&gt;确认&lt;/my-button&gt;
+&lt;my-button type="danger" icon="✕"&gt;删除&lt;/my-button&gt;
+&lt;my-button type="info" icon="🔍"&gt;搜索&lt;/my-button&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 5: 按钮组 -->
+                <div class="demo-box">
+                    <div class="demo-title">按钮组</div>
+                    <div class="demo-desc">
+                        使用 <code>my-button-group</code> 组件将多个按钮组合在一起
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button-group>
+                            <my-button type="primary" icon="◀">上一页</my-button>
+                            <my-button type="primary" icon="▶">下一页</my-button>
+                        </my-button-group>
+                        
+                        <my-button-group style="margin-left: 20px;">
+                            <my-button type="info" icon="✎">编辑</my-button>
+                            <my-button type="success" icon="✓">保存</my-button>
+                            <my-button type="danger" icon="✕">取消</my-button>
+                        </my-button-group>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-button-group&gt;
+    &lt;my-button type="primary" icon="◀"&gt;上一页&lt;/my-button&gt;
+    &lt;my-button type="primary" icon="▶"&gt;下一页&lt;/my-button&gt;
+&lt;/my-button-group&gt;
+                    </div>
+                </div>
+
+                <!-- API 文档 -->
+                <div class="demo-box">
+                    <div class="demo-title">📖 API 文档</div>
+                    
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Button Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>type</td>
+                                <td>按钮类型</td>
+                                <td>String</td>
+                                <td>default / primary / success / warning / danger / info</td>
+                                <td>default</td>
+                            </tr>
+                            <tr>
+                                <td>size</td>
+                                <td>按钮尺寸</td>
+                                <td>String</td>
+                                <td>large / medium / small / mini</td>
+                                <td>medium</td>
+                            </tr>
+                            <tr>
+                                <td>plain</td>
+                                <td>是否为朴素按钮</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>round</td>
+                                <td>是否为圆角按钮</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>disabled</td>
+                                <td>是否禁用</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>loading</td>
+                                <td>是否加载中</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>icon</td>
+                                <td>图标内容</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Button Events</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>事件名</th>
+                                <th>说明</th>
+                                <th>回调参数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>click</td>
+                                <td>点击按钮时触发</td>
+                                <td>event: Event</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Button Slots</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>default</td>
+                                <td>按钮的内容</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Input 组件演示区域 -->
+            <div class="component-section">
+                <div class="component-title">📝 Input 输入框</div>
+                
+                <!-- Demo 1: 基础用法 -->
+                <div class="demo-box">
+                    <div class="demo-title">基础用法</div>
+                    <div class="demo-desc">
+                        通过 <code>v-model</code> 绑定输入值
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-input v-model="input1" placeholder="请输入内容"></my-input>
+                        <p style="margin-top: 10px; color: #666;">输入的内容：{{ input1 }}</p>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input v-model="input1" placeholder="请输入内容"&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 2: 输入框尺寸 -->
+                <div class="demo-box">
+                    <div class="demo-title">输入框尺寸</div>
+                    <div class="demo-desc">
+                        通过 <code>size</code> 属性设置输入框尺寸
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <my-input v-model="input2" size="large" placeholder="大型输入框"></my-input>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <my-input v-model="input2" size="medium" placeholder="中等输入框"></my-input>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <my-input v-model="input2" size="small" placeholder="小型输入框"></my-input>
+                        </div>
+                        <div>
+                            <my-input v-model="input2" size="mini" placeholder="迷你输入框"></my-input>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input size="large" placeholder="大型输入框"&gt;&lt;/my-input&gt;
+&lt;my-input size="medium" placeholder="中等输入框"&gt;&lt;/my-input&gt;
+&lt;my-input size="small" placeholder="小型输入框"&gt;&lt;/my-input&gt;
+&lt;my-input size="mini" placeholder="迷你输入框"&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 3: 可清空 -->
+                <div class="demo-box">
+                    <div class="demo-title">可清空</div>
+                    <div class="demo-desc">
+                        使用 <code>clearable</code> 属性启用一键清空功能
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-input v-model="input3" :clearable="true" placeholder="可清空的输入框"></my-input>
+                        <p style="margin-top: 10px; color: #666;">输入内容：{{ input3 }}</p>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input v-model="input3" :clearable="true"&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 4: 密码框 -->
+                <div class="demo-box">
+                    <div class="demo-title">密码框</div>
+                    <div class="demo-desc">
+                        使用 <code>show-password</code> 属性显示密码切换按钮
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-input 
+                            v-model="password" 
+                            type="password" 
+                            :show-password="true" 
+                            placeholder="请输入密码"
+                        ></my-input>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input 
+    type="password" 
+    :show-password="true" 
+    placeholder="请输入密码"
+&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 5: 带图标 -->
+                <div class="demo-box">
+                    <div class="demo-title">带图标的输入框</div>
+                    <div class="demo-desc">
+                        通过 <code>prefix-icon</code> 和 <code>suffix-icon</code> 添加图标
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <my-input 
+                                v-model="input4" 
+                                prefix-icon="🔍" 
+                                placeholder="搜索内容"
+                            ></my-input>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <my-input 
+                                v-model="input5" 
+                                suffix-icon="📅" 
+                                placeholder="选择日期"
+                            ></my-input>
+                        </div>
+                        <div>
+                            <my-input 
+                                v-model="input6" 
+                                prefix-icon="👤" 
+                                suffix-icon="✓" 
+                                placeholder="用户名"
+                            ></my-input>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input prefix-icon="🔍" placeholder="搜索内容"&gt;&lt;/my-input&gt;
+&lt;my-input suffix-icon="📅" placeholder="选择日期"&gt;&lt;/my-input&gt;
+&lt;my-input prefix-icon="👤" suffix-icon="✓"&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 6: 文本域 -->
+                <div class="demo-box">
+                    <div class="demo-title">文本域</div>
+                    <div class="demo-desc">
+                        用于多行文本输入，通过 <code>type="textarea"</code> 设置
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-input 
+                            v-model="textarea" 
+                            type="textarea" 
+                            :rows="4"
+                            placeholder="请输入多行文本"
+                        ></my-input>
+                        <p style="margin-top: 10px; color: #666;">字数：{{ textarea.length }}</p>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input 
+    type="textarea" 
+    :rows="4"
+    placeholder="请输入多行文本"
+&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 7: 字数限制 -->
+                <div class="demo-box">
+                    <div class="demo-title">字数限制</div>
+                    <div class="demo-desc">
+                        使用 <code>maxlength</code> 和 <code>show-word-limit</code> 限制输入长度并显示字数统计
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <my-input 
+                                v-model="input7" 
+                                :maxlength="20" 
+                                :show-word-limit="true"
+                                placeholder="最多输入20个字符"
+                            ></my-input>
+                        </div>
+                        <div>
+                            <my-input 
+                                v-model="textarea2" 
+                                type="textarea"
+                                :rows="3"
+                                :maxlength="100" 
+                                :show-word-limit="true"
+                                placeholder="最多输入100个字符"
+                            ></my-input>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input 
+    :maxlength="20" 
+    :show-word-limit="true"
+&gt;&lt;/my-input&gt;
+
+&lt;my-input 
+    type="textarea"
+    :maxlength="100" 
+    :show-word-limit="true"
+&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 8: 禁用和只读 -->
+                <div class="demo-box">
+                    <div class="demo-title">禁用和只读状态</div>
+                    <div class="demo-desc">
+                        使用 <code>disabled</code> 和 <code>readonly</code> 属性
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <my-input 
+                                v-model="input8" 
+                                :disabled="true"
+                                placeholder="禁用状态"
+                            ></my-input>
+                        </div>
+                        <div>
+                            <my-input 
+                                value="只读状态的内容" 
+                                :readonly="true"
+                            ></my-input>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-input :disabled="true"&gt;&lt;/my-input&gt;
+&lt;my-input :readonly="true"&gt;&lt;/my-input&gt;
+                    </div>
+                </div>
+
+                <!-- API 文档 -->
+                <div class="demo-box">
+                    <div class="demo-title">📖 API 文档</div>
+                    
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Input Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>value / v-model</td>
+                                <td>绑定值</td>
+                                <td>String / Number</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>type</td>
+                                <td>输入框类型</td>
+                                <td>String</td>
+                                <td>text / password / textarea / number 等</td>
+                                <td>text</td>
+                            </tr>
+                            <tr>
+                                <td>size</td>
+                                <td>输入框尺寸</td>
+                                <td>String</td>
+                                <td>large / medium / small / mini</td>
+                                <td>medium</td>
+                            </tr>
+                            <tr>
+                                <td>placeholder</td>
+                                <td>占位文本</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>请输入内容</td>
+                            </tr>
+                            <tr>
+                                <td>clearable</td>
+                                <td>是否可清空</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>show-password</td>
+                                <td>是否显示密码切换按钮</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>disabled</td>
+                                <td>是否禁用</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>readonly</td>
+                                <td>是否只读</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>prefix-icon</td>
+                                <td>前缀图标</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>suffix-icon</td>
+                                <td>后缀图标</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>maxlength</td>
+                                <td>最大输入长度</td>
+                                <td>Number</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>show-word-limit</td>
+                                <td>是否显示字数统计</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>rows</td>
+                                <td>文本域行数</td>
+                                <td>Number</td>
+                                <td>—</td>
+                                <td>2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Input Events</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>事件名</th>
+                                <th>说明</th>
+                                <th>回调参数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>input</td>
+                                <td>输入值改变时触发</td>
+                                <td>value: String</td>
+                            </tr>
+                            <tr>
+                                <td>focus</td>
+                                <td>获得焦点时触发</td>
+                                <td>event: Event</td>
+                            </tr>
+                            <tr>
+                                <td>blur</td>
+                                <td>失去焦点时触发</td>
+                                <td>event: Event</td>
+                            </tr>
+                            <tr>
+                                <td>clear</td>
+                                <td>点击清空按钮时触发</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Input Methods</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>方法名</th>
+                                <th>说明</th>
+                                <th>参数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>focus</td>
+                                <td>使输入框获取焦点</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>blur</td>
+                                <td>使输入框失去焦点</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Card 组件演示区域 -->
+            <div class="component-section">
+                <div class="component-title">🎴 Card 卡片</div>
+                
+                <!-- Demo 1: 基础卡片 -->
+                <div class="demo-box">
+                    <div class="demo-title">基础用法</div>
+                    <div class="demo-desc">
+                        最简单的卡片容器，包含标题、内容和底部
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-card title="卡片标题" subtitle="这是卡片的副标题">
+                            <p>这是卡片的内容区域。</p>
+                            <p>可以放置任何内容。</p>
+                            <template v-slot:footer>
+                                <my-button type="primary" size="small">操作按钮</my-button>
+                                <my-button size="small">取消</my-button>
+                            </template>
+                        </my-card>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-card title="卡片标题" subtitle="副标题"&gt;
+    &lt;p&gt;卡片内容&lt;/p&gt;
+    &lt;template v-slot:footer&gt;
+        &lt;my-button type="primary"&gt;确定&lt;/my-button&gt;
+    &lt;/template&gt;
+&lt;/my-card&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 2: 简单卡片 -->
+                <div class="demo-box">
+                    <div class="demo-title">简单卡片</div>
+                    <div class="demo-desc">
+                        只有内容区域的简单卡片
+                    </div>
+                    
+                    <div style="padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <my-card>
+                            <div style="text-align: center; padding: 20px 0;">
+                                <div style="font-size: 36px; margin-bottom: 10px;">📊</div>
+                                <h3 style="margin: 10px 0; color: #409eff;">统计数据</h3>
+                                <p style="color: #909399; font-size: 14px;">本月访问量</p>
+                                <p style="font-size: 24px; font-weight: bold; color: #303133; margin-top: 10px;">1,234</p>
+                            </div>
+                        </my-card>
+                        
+                        <my-card>
+                            <div style="text-align: center; padding: 20px 0;">
+                                <div style="font-size: 36px; margin-bottom: 10px;">👥</div>
+                                <h3 style="margin: 10px 0; color: #67c23a;">用户总数</h3>
+                                <p style="color: #909399; font-size: 14px;">注册用户</p>
+                                <p style="font-size: 24px; font-weight: bold; color: #303133; margin-top: 10px;">5,678</p>
+                            </div>
+                        </my-card>
+                        
+                        <my-card>
+                            <div style="text-align: center; padding: 20px 0;">
+                                <div style="font-size: 36px; margin-bottom: 10px;">💰</div>
+                                <h3 style="margin: 10px 0; color: #e6a23c;">收入统计</h3>
+                                <p style="color: #909399; font-size: 14px;">本月收入</p>
+                                <p style="font-size: 24px; font-weight: bold; color: #303133; margin-top: 10px;">¥9,012</p>
+                            </div>
+                        </my-card>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-card&gt;
+    &lt;div style="text-align: center;"&gt;
+        &lt;h3&gt;统计数据&lt;/h3&gt;
+        &lt;p&gt;1,234&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/my-card&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 3: 阴影效果 -->
+                <div class="demo-box">
+                    <div class="demo-title">阴影效果</div>
+                    <div class="demo-desc">
+                        通过 <code>shadow</code> 属性设置卡片阴影：always（总是显示）、hover（悬停时显示）、never（从不显示）
+                    </div>
+                    
+                    <div style="padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <my-card title="总是显示" shadow="always">
+                            <p>shadow="always"</p>
+                            <p style="color: #909399; font-size: 13px; margin-top: 5px;">阴影始终显示</p>
+                        </my-card>
+                        
+                        <my-card title="悬停显示" shadow="hover">
+                            <p>shadow="hover"</p>
+                            <p style="color: #909399; font-size: 13px; margin-top: 5px;">鼠标悬停时显示阴影</p>
+                        </my-card>
+                        
+                        <my-card title="从不显示" shadow="never">
+                            <p>shadow="never"</p>
+                            <p style="color: #909399; font-size: 13px; margin-top: 5px;">没有阴影效果</p>
+                        </my-card>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-card shadow="always"&gt;&lt;/my-card&gt;
+&lt;my-card shadow="hover"&gt;&lt;/my-card&gt;
+&lt;my-card shadow="never"&gt;&lt;/my-card&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 4: 自定义头部 -->
+                <div class="demo-box">
+                    <div class="demo-title">自定义头部</div>
+                    <div class="demo-desc">
+                        使用 <code>header</code> 插槽自定义卡片头部
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-card>
+                            <template v-slot:header>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: bold; font-size: 16px;">📋 待办事项</span>
+                                    <my-button type="primary" size="small" icon="+">添加</my-button>
+                                </div>
+                            </template>
+                            <div style="line-height: 2;">
+                                <div>✓ 完成 Vue 组件库开发</div>
+                                <div>⭕ 学习 Vue Router</div>
+                                <div>⭕ 学习 Vuex</div>
+                            </div>
+                        </my-card>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-card&gt;
+    &lt;template v-slot:header&gt;
+        &lt;div style="display: flex; justify-content: space-between;"&gt;
+            &lt;span&gt;标题&lt;/span&gt;
+            &lt;my-button&gt;操作&lt;/my-button&gt;
+        &lt;/div&gt;
+    &lt;/template&gt;
+    &lt;!-- 内容 --&gt;
+&lt;/my-card&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 5: 用户卡片实例 -->
+                <div class="demo-box">
+                    <div class="demo-title">实战案例 - 用户卡片</div>
+                    <div class="demo-desc">
+                        综合运用卡片组件的各种特性
+                    </div>
+                    
+                    <div style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <my-card 
+                            v-for="user in userList" 
+                            :key="user.id"
+                            shadow="hover"
+                            :border="true"
+                        >
+                            <div style="display: flex; gap: 15px;">
+                                <div style="font-size: 48px;">{{ user.avatar }}</div>
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0 0 5px 0;">{{ user.name }}</h3>
+                                    <p style="color: #909399; font-size: 13px; margin: 0 0 10px 0;">{{ user.role }}</p>
+                                    <p style="color: #606266; font-size: 14px; margin: 0;">{{ user.desc }}</p>
+                                </div>
+                            </div>
+                            <template v-slot:footer>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #909399; font-size: 13px;">{{ user.time }}</span>
+                                    <div>
+                                        <my-button type="primary" size="small">查看</my-button>
+                                        <my-button size="small">编辑</my-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </my-card>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-card shadow="hover"&gt;
+    &lt;!-- 用户信息 --&gt;
+    &lt;template v-slot:footer&gt;
+        &lt;my-button&gt;操作&lt;/my-button&gt;
+    &lt;/template&gt;
+&lt;/my-card&gt;
+                    </div>
+                </div>
+
+                <!-- API 文档 -->
+                <div class="demo-box">
+                    <div class="demo-title">📖 API 文档</div>
+                    
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Card Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>title</td>
+                                <td>卡片标题</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>subtitle</td>
+                                <td>卡片副标题</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>shadow</td>
+                                <td>阴影显示时机</td>
+                                <td>String</td>
+                                <td>always / hover / never</td>
+                                <td>always</td>
+                            </tr>
+                            <tr>
+                                <td>border</td>
+                                <td>是否显示边框</td>
+                                <td>Boolean</td>
+                                <td>true / false</td>
+                                <td>true</td>
+                            </tr>
+                            <tr>
+                                <td>body-padding</td>
+                                <td>主体内边距</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>20px</td>
+                            </tr>
+                            <tr>
+                                <td>header-style</td>
+                                <td>头部样式对象</td>
+                                <td>Object</td>
+                                <td>—</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
+                                <td>body-style</td>
+                                <td>主体样式对象</td>
+                                <td>Object</td>
+                                <td>—</td>
+                                <td>{}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Card Slots</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>default</td>
+                                <td>卡片主体内容</td>
+                            </tr>
+                            <tr>
+                                <td>header</td>
+                                <td>卡片头部内容</td>
+                            </tr>
+                            <tr>
+                                <td>footer</td>
+                                <td>卡片底部内容</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Dialog 组件演示区域 -->
+            <div class="component-section">
+                <div class="component-title">💬 Dialog 对话框</div>
+                
+                <!-- Demo 1: 基础用法 -->
+                <div class="demo-box">
+                    <div class="demo-title">基础用法</div>
+                    <div class="demo-desc">
+                        使用 <code>visible.sync</code> 控制对话框的显示与隐藏
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button type="primary" @click="dialogVisible1 = true">打开对话框</my-button>
+                        
+                        <my-dialog
+                            title="这是对话框标题"
+                            :visible.sync="dialogVisible1"
+                            width="30%"
+                            @confirm="handleConfirm1"
+                            @cancel="handleCancel1"
+                        >
+                            <p>这是对话框的内容部分。</p>
+                            <p>可以放置任何内容。</p>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-button @click="dialogVisible = true"&gt;打开&lt;/my-button&gt;
+
+&lt;my-dialog
+    title="标题"
+    :visible.sync="dialogVisible"
+    @confirm="handleConfirm"
+&gt;
+    &lt;p&gt;对话框内容&lt;/p&gt;
+&lt;/my-dialog&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 2: 自定义内容 -->
+                <div class="demo-box">
+                    <div class="demo-title">自定义内容</div>
+                    <div class="demo-desc">
+                        对话框可以包含更复杂的内容
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button type="success" @click="dialogVisible2 = true">查看用户信息</my-button>
+                        
+                        <my-dialog
+                            title="👤 用户信息"
+                            :visible.sync="dialogVisible2"
+                            width="40%"
+                        >
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div style="font-size: 64px;">👨‍💼</div>
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0 0 10px 0;">张三</h3>
+                                    <p style="margin: 5px 0; color: #606266;">
+                                        <strong>职位：</strong>前端工程师
+                                    </p>
+                                    <p style="margin: 5px 0; color: #606266;">
+                                        <strong>邮箱：</strong>zhangsan@example.com
+                                    </p>
+                                    <p style="margin: 5px 0; color: #606266;">
+                                        <strong>电话：</strong>138-0000-0000
+                                    </p>
+                                </div>
+                            </div>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-dialog title="用户信息" :visible.sync="visible"&gt;
+    &lt;!-- 自定义内容 --&gt;
+&lt;/my-dialog&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 3: 自定义底部 -->
+                <div class="demo-box">
+                    <div class="demo-title">自定义底部按钮</div>
+                    <div class="demo-desc">
+                        使用 <code>footer</code> 插槽自定义底部按钮
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button type="warning" @click="dialogVisible3 = true">自定义底部</my-button>
+                        
+                        <my-dialog
+                            title="操作确认"
+                            :visible.sync="dialogVisible3"
+                            width="30%"
+                        >
+                            <p>确定要删除这条记录吗？</p>
+                            <p style="color: #f56c6c; font-size: 13px;">此操作不可恢复</p>
+                            
+                            <template v-slot:footer>
+                                <my-button @click="dialogVisible3 = false">取消</my-button>
+                                <my-button type="warning" @click="handleDelete">删除</my-button>
+                                <my-button type="danger" @click="handleForceDelete">强制删除</my-button>
+                            </template>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-dialog :visible.sync="visible"&gt;
+    &lt;p&gt;内容&lt;/p&gt;
+    &lt;template v-slot:footer&gt;
+        &lt;my-button&gt;自定义&lt;/my-button&gt;
+        &lt;my-button type="danger"&gt;删除&lt;/my-button&gt;
+    &lt;/template&gt;
+&lt;/my-dialog&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 4: 不同尺寸 -->
+                <div class="demo-box">
+                    <div class="demo-title">不同尺寸</div>
+                    <div class="demo-desc">
+                        通过 <code>width</code> 属性设置对话框宽度
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button @click="dialogVisible4a = true">小尺寸（30%）</my-button>
+                        <my-button @click="dialogVisible4b = true">中尺寸（50%）</my-button>
+                        <my-button @click="dialogVisible4c = true">大尺寸（70%）</my-button>
+                        
+                        <my-dialog title="小对话框" :visible.sync="dialogVisible4a" width="30%">
+                            <p>这是一个小尺寸的对话框</p>
+                        </my-dialog>
+                        
+                        <my-dialog title="中对话框" :visible.sync="dialogVisible4b" width="50%">
+                            <p>这是一个中等尺寸的对话框</p>
+                        </my-dialog>
+                        
+                        <my-dialog title="大对话框" :visible.sync="dialogVisible4c" width="70%">
+                            <p>这是一个大尺寸的对话框</p>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-dialog width="30%"&gt;&lt;/my-dialog&gt;
+&lt;my-dialog width="50%"&gt;&lt;/my-dialog&gt;
+&lt;my-dialog width="70%"&gt;&lt;/my-dialog&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 5: 表单对话框 -->
+                <div class="demo-box">
+                    <div class="demo-title">表单对话框</div>
+                    <div class="demo-desc">
+                        在对话框中使用表单组件
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button type="primary" icon="+" @click="dialogVisible5 = true">新建用户</my-button>
+                        
+                        <my-dialog
+                            title="新建用户"
+                            :visible.sync="dialogVisible5"
+                            width="40%"
+                            @confirm="handleCreateUser"
+                        >
+                            <div style="display: flex; flex-direction: column; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #606266;">用户名</label>
+                                    <my-input v-model="formData.username" placeholder="请输入用户名"></my-input>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #606266;">邮箱</label>
+                                    <my-input v-model="formData.email" placeholder="请输入邮箱"></my-input>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #606266;">密码</label>
+                                    <my-input 
+                                        v-model="formData.password" 
+                                        type="password" 
+                                        show-password 
+                                        placeholder="请输入密码"
+                                    ></my-input>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #606266;">个人简介</label>
+                                    <my-input 
+                                        v-model="formData.bio" 
+                                        type="textarea" 
+                                        :rows="3"
+                                        placeholder="请输入个人简介"
+                                    ></my-input>
+                                </div>
+                            </div>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-dialog title="表单" :visible.sync="visible"&gt;
+    &lt;my-input v-model="formData.name"&gt;&lt;/my-input&gt;
+    &lt;my-input v-model="formData.email"&gt;&lt;/my-input&gt;
+&lt;/my-dialog&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 6: 配置选项 -->
+                <div class="demo-box">
+                    <div class="demo-title">配置选项</div>
+                    <div class="demo-desc">
+                        可配置是否显示关闭按钮、点击遮罩是否关闭等
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button @click="dialogVisible6a = true">无关闭按钮</my-button>
+                        <my-button @click="dialogVisible6b = true">点击遮罩不关闭</my-button>
+                        <my-button @click="dialogVisible6c = true">无底部按钮</my-button>
+                        
+                        <my-dialog 
+                            title="无关闭按钮" 
+                            :visible.sync="dialogVisible6a" 
+                            :show-close="false"
+                            width="30%"
+                        >
+                            <p>这个对话框没有关闭按钮</p>
+                            <p>只能通过底部按钮关闭</p>
+                        </my-dialog>
+                        
+                        <my-dialog 
+                            title="点击遮罩不关闭" 
+                            :visible.sync="dialogVisible6b"
+                            :close-on-click-modal="false"
+                            width="30%"
+                        >
+                            <p>点击外部遮罩不会关闭对话框</p>
+                        </my-dialog>
+                        
+                        <my-dialog 
+                            title="无底部按钮" 
+                            :visible.sync="dialogVisible6c"
+                            :show-footer="false"
+                            width="30%"
+                        >
+                            <p>这个对话框没有底部按钮</p>
+                            <p>点击右上角关闭或按 ESC 键关闭</p>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-dialog :show-close="false"&gt;&lt;/my-dialog&gt;
+&lt;my-dialog :close-on-click-modal="false"&gt;&lt;/my-dialog&gt;
+&lt;my-dialog :show-footer="false"&gt;&lt;/my-dialog&gt;
+                    </div>
+                </div>
+
+                <!-- API 文档 -->
+                <div class="demo-box">
+                    <div class="demo-title">📖 API 文档</div>
+                    
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Dialog Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>visible</td>
+                                <td>是否显示（支持 .sync）</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>title</td>
+                                <td>对话框标题</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>提示</td>
+                            </tr>
+                            <tr>
+                                <td>width</td>
+                                <td>对话框宽度</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>50%</td>
+                            </tr>
+                            <tr>
+                                <td>top</td>
+                                <td>距离顶部距离</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>15vh</td>
+                            </tr>
+                            <tr>
+                                <td>show-close</td>
+                                <td>是否显示关闭按钮</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>true</td>
+                            </tr>
+                            <tr>
+                                <td>close-on-click-modal</td>
+                                <td>点击遮罩是否关闭</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>true</td>
+                            </tr>
+                            <tr>
+                                <td>close-on-esc</td>
+                                <td>按下 ESC 是否关闭</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>true</td>
+                            </tr>
+                            <tr>
+                                <td>show-footer</td>
+                                <td>是否显示底部</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>true</td>
+                            </tr>
+                            <tr>
+                                <td>confirm-text</td>
+                                <td>确认按钮文本</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>确定</td>
+                            </tr>
+                            <tr>
+                                <td>cancel-text</td>
+                                <td>取消按钮文本</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>取消</td>
+                            </tr>
+                            <tr>
+                                <td>confirm-type</td>
+                                <td>确认按钮类型</td>
+                                <td>String</td>
+                                <td>Button 的 type</td>
+                                <td>primary</td>
+                            </tr>
+                            <tr>
+                                <td>destroy-on-close</td>
+                                <td>关闭时销毁 DOM</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>false</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Dialog Events</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>事件名</th>
+                                <th>说明</th>
+                                <th>回调参数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>confirm</td>
+                                <td>点击确定按钮时触发</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>cancel</td>
+                                <td>点击取消按钮时触发</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>close</td>
+                                <td>对话框关闭时触发</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Dialog Slots</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>default</td>
+                                <td>对话框内容</td>
+                            </tr>
+                            <tr>
+                                <td>title</td>
+                                <td>对话框标题</td>
+                            </tr>
+                            <tr>
+                                <td>footer</td>
+                                <td>对话框底部</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Form 组件演示区域 -->
+            <div class="component-section">
+                <div class="component-title">📝 Form 表单</div>
+                <div style="padding: 10px 20px; background: #ecf5ff; border-left: 4px solid #409eff; margin-bottom: 20px;">
+                    <strong>💡 组件通信实战：</strong> Form 和 FormItem 通过 <code>$parent/$children</code> 和 <code>provide/inject</code> 进行通信
+                </div>
+                
+                <!-- Demo 1: 基础表单 -->
+                <div class="demo-box">
+                    <div class="demo-title">基础表单</div>
+                    <div class="demo-desc">
+                        包含各种表单控件的基础表单
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-form :model="form1" label-width="100px">
+                            <my-form-item label="用户名">
+                                <my-input v-model="form1.username" placeholder="请输入用户名"></my-input>
+                            </my-form-item>
+                            <my-form-item label="邮箱">
+                                <my-input v-model="form1.email" placeholder="请输入邮箱"></my-input>
+                            </my-form-item>
+                            <my-form-item label="密码">
+                                <my-input v-model="form1.password" type="password" show-password placeholder="请输入密码"></my-input>
+                            </my-form-item>
+                            <my-form-item label="个人简介">
+                                <my-input v-model="form1.bio" type="textarea" :rows="3" placeholder="介绍一下自己"></my-input>
+                            </my-form-item>
+                            <my-form-item>
+                                <my-button type="primary">提交</my-button>
+                                <my-button>取消</my-button>
+                            </my-form-item>
+                        </my-form>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-form :model="formData"&gt;
+    &lt;my-form-item label="用户名"&gt;
+        &lt;my-input v-model="formData.username"&gt;&lt;/my-input&gt;
+    &lt;/my-form-item&gt;
+&lt;/my-form&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 2: 表单验证 -->
+                <div class="demo-box">
+                    <div class="demo-title">表单验证</div>
+                    <div class="demo-desc">
+                        通过 <code>rules</code> 属性定义验证规则，FormItem 通过 <code>$parent</code> 访问这些规则
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-form :model="form2" :rules="rules2" ref="form2" label-width="100px">
+                            <my-form-item label="用户名" prop="username">
+                                <my-input v-model="form2.username" placeholder="3-10个字符"></my-input>
+                            </my-form-item>
+                            <my-form-item label="邮箱" prop="email">
+                                <my-input v-model="form2.email" placeholder="请输入邮箱"></my-input>
+                            </my-form-item>
+                            <my-form-item label="手机号" prop="phone">
+                                <my-input v-model="form2.phone" placeholder="请输入手机号"></my-input>
+                            </my-form-item>
+                            <my-form-item label="密码" prop="password">
+                                <my-input v-model="form2.password" type="password" show-password placeholder="至少6位"></my-input>
+                            </my-form-item>
+                            <my-form-item>
+                                <my-button type="primary" @click="submitForm2">提交</my-button>
+                                <my-button @click="resetForm2">重置</my-button>
+                            </my-form-item>
+                        </my-form>
+                    </div>
+
+                    <div class="code-block">
+data: {
+    form: { username: '', email: '' },
+    rules: {
+        username: [
+            { required: true, message: '请输入用户名' },
+            { min: 3, max: 10, message: '长度3-10字符' }
+        ],
+        email: [
+            { required: true, message: '请输入邮箱' },
+            { type: 'email', message: '邮箱格式不正确' }
+        ]
+    }
+}
+                    </div>
+                </div>
+
+                <!-- Demo 3: 标签位置 -->
+                <div class="demo-box">
+                    <div class="demo-title">标签位置</div>
+                    <div class="demo-desc">
+                        通过 <code>label-position</code> 设置标签位置：left、right、top
+                    </div>
+                    
+                    <div style="padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <my-card title="标签右对齐" shadow="hover">
+                            <my-form :model="form3" label-width="80px" label-position="right">
+                                <my-form-item label="姓名">
+                                    <my-input v-model="form3.name" size="small"></my-input>
+                                </my-form-item>
+                                <my-form-item label="年龄">
+                                    <my-input v-model="form3.age" size="small"></my-input>
+                                </my-form-item>
+                            </my-form>
+                        </my-card>
+                        
+                        <my-card title="标签左对齐" shadow="hover">
+                            <my-form :model="form3" label-width="80px" label-position="left">
+                                <my-form-item label="姓名">
+                                    <my-input v-model="form3.name" size="small"></my-input>
+                                </my-form-item>
+                                <my-form-item label="年龄">
+                                    <my-input v-model="form3.age" size="small"></my-input>
+                                </my-form-item>
+                            </my-form>
+                        </my-card>
+                        
+                        <my-card title="标签在上方" shadow="hover">
+                            <my-form :model="form3" label-position="top">
+                                <my-form-item label="姓名">
+                                    <my-input v-model="form3.name" size="small"></my-input>
+                                </my-form-item>
+                                <my-form-item label="年龄">
+                                    <my-input v-model="form3.age" size="small"></my-input>
+                                </my-form-item>
+                            </my-form>
+                        </my-card>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-form label-position="right"&gt;&lt;/my-form&gt;
+&lt;my-form label-position="left"&gt;&lt;/my-form&gt;
+&lt;my-form label-position="top"&gt;&lt;/my-form&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 4: 实战案例 - 注册表单 -->
+                <div class="demo-box">
+                    <div class="demo-title">实战案例 - 用户注册</div>
+                    <div class="demo-desc">
+                        完整的注册表单，包含所有验证规则
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-button type="primary" @click="dialogRegister = true">打开注册表单</my-button>
+                        
+                        <my-dialog
+                            title="📝 用户注册"
+                            :visible.sync="dialogRegister"
+                            width="500px"
+                            :show-footer="false"
+                        >
+                            <my-form :model="registerForm" :rules="registerRules" ref="registerForm" label-width="90px">
+                                <my-form-item label="用户名" prop="username">
+                                    <my-input 
+                                        v-model="registerForm.username" 
+                                        placeholder="请输入用户名"
+                                        maxlength="20"
+                                        show-word-limit
+                                    ></my-input>
+                                </my-form-item>
+                                
+                                <my-form-item label="邮箱" prop="email">
+                                    <my-input 
+                                        v-model="registerForm.email" 
+                                        placeholder="请输入邮箱"
+                                        prefix-icon="✉️"
+                                    ></my-input>
+                                </my-form-item>
+                                
+                                <my-form-item label="手机号" prop="phone">
+                                    <my-input 
+                                        v-model="registerForm.phone" 
+                                        placeholder="请输入手机号"
+                                        prefix-icon="📱"
+                                    ></my-input>
+                                </my-form-item>
+                                
+                                <my-form-item label="密码" prop="password">
+                                    <my-input 
+                                        v-model="registerForm.password" 
+                                        type="password"
+                                        show-password
+                                        placeholder="请输入密码"
+                                    ></my-input>
+                                </my-form-item>
+                                
+                                <my-form-item label="确认密码" prop="confirmPassword">
+                                    <my-input 
+                                        v-model="registerForm.confirmPassword" 
+                                        type="password"
+                                        show-password
+                                        placeholder="请再次输入密码"
+                                    ></my-input>
+                                </my-form-item>
+                                
+                                <my-form-item label="个人简介" prop="bio">
+                                    <my-input 
+                                        v-model="registerForm.bio" 
+                                        type="textarea"
+                                        :rows="3"
+                                        placeholder="介绍一下自己（选填）"
+                                        maxlength="200"
+                                        show-word-limit
+                                    ></my-input>
+                                </my-form-item>
+                                
+                                <my-form-item>
+                                    <my-button type="primary" @click="submitRegister" style="width: 100%;">
+                                        注 册
+                                    </my-button>
+                                </my-form-item>
+                                
+                                <my-form-item>
+                                    <my-button @click="resetRegister" plain style="width: 100%;">
+                                        重 置
+                                    </my-button>
+                                </my-form-item>
+                            </my-form>
+                        </my-dialog>
+                    </div>
+
+                    <div class="code-block">
+// $children 实战：Form 通过 $children 获取所有 FormItem 进行验证
+this.$refs.form.validate((valid, errors) => {
+    if (valid) {
+        console.log('验证通过');
+    } else {
+        console.log('验证失败', errors);
+    }
+});
+                    </div>
+                </div>
+
+                <!-- API 文档 -->
+                <div class="demo-box">
+                    <div class="demo-title">📖 API 文档</div>
+                    
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Form Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>model</td>
+                                <td>表单数据对象</td>
+                                <td>Object</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>rules</td>
+                                <td>表单验证规则</td>
+                                <td>Object</td>
+                                <td>—</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
+                                <td>label-width</td>
+                                <td>标签宽度</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>80px</td>
+                            </tr>
+                            <tr>
+                                <td>label-position</td>
+                                <td>标签位置</td>
+                                <td>String</td>
+                                <td>left / right / top</td>
+                                <td>right</td>
+                            </tr>
+                            <tr>
+                                <td>size</td>
+                                <td>表单尺寸</td>
+                                <td>String</td>
+                                <td>large / medium / small / mini</td>
+                                <td>medium</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Form Methods（通过 $children 实现）</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>方法名</th>
+                                <th>说明</th>
+                                <th>参数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>validate</td>
+                                <td>验证整个表单（遍历所有 FormItem）</td>
+                                <td>callback(valid, errors)</td>
+                            </tr>
+                            <tr>
+                                <td>validateField</td>
+                                <td>验证指定字段</td>
+                                <td>prop, callback</td>
+                            </tr>
+                            <tr>
+                                <td>resetFields</td>
+                                <td>重置表单（通过 $children 重置）</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>clearValidate</td>
+                                <td>清空验证信息</td>
+                                <td>props（可选）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">FormItem Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>prop</td>
+                                <td>表单域 model 字段（通过 $parent 访问）</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>label</td>
+                                <td>标签文本</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>label-width</td>
+                                <td>标签宽度</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>继承 Form</td>
+                            </tr>
+                            <tr>
+                                <td>required</td>
+                                <td>是否必填</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>error</td>
+                                <td>表单域验证错误信息</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">验证规则</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>规则</th>
+                                <th>说明</th>
+                                <th>示例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>required</td>
+                                <td>必填验证</td>
+                                <td>{ required: true, message: '必填' }</td>
+                            </tr>
+                            <tr>
+                                <td>min / max</td>
+                                <td>长度验证</td>
+                                <td>{ min: 3, max: 10, message: '长度3-10' }</td>
+                            </tr>
+                            <tr>
+                                <td>type: 'email'</td>
+                                <td>邮箱验证</td>
+                                <td>{ type: 'email', message: '邮箱格式' }</td>
+                            </tr>
+                            <tr>
+                                <td>type: 'phone'</td>
+                                <td>手机号验证</td>
+                                <td>{ type: 'phone', message: '手机格式' }</td>
+                            </tr>
+                            <tr>
+                                <td>validator</td>
+                                <td>自定义验证</td>
+                                <td>{ validator: (rule, value) => {...} }</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Table 组件演示区域 -->
+            <div class="component-section">
+                <div class="component-title">📊 Table 表格</div>
+                <div style="padding: 10px 20px; background: #f0f9ff; border-left: 4px solid #67c23a; margin-bottom: 20px;">
+                    <strong>🚀 性能优化：</strong> TableColumn 使用 <code>functional: true</code> 函数式组件，无状态无实例，渲染性能更优
+                </div>
+                
+                <!-- Demo 1: 基础表格 -->
+                <div class="demo-box">
+                    <div class="demo-title">基础表格</div>
+                    <div class="demo-desc">
+                        基础的表格展示用法
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-table :data="tableData1">
+                            <my-table-column prop="id" label="ID" width="80px"></my-table-column>
+                            <my-table-column prop="name" label="姓名" width="120px"></my-table-column>
+                            <my-table-column prop="age" label="年龄" width="80px"></my-table-column>
+                            <my-table-column prop="position" label="职位"></my-table-column>
+                            <my-table-column prop="department" label="部门"></my-table-column>
+                        </my-table>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table :data="tableData"&gt;
+    &lt;my-table-column prop="id" label="ID"&gt;&lt;/my-table-column&gt;
+    &lt;my-table-column prop="name" label="姓名"&gt;&lt;/my-table-column&gt;
+&lt;/my-table&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 2: 斑马纹表格 -->
+                <div class="demo-box">
+                    <div class="demo-title">斑马纹和边框</div>
+                    <div class="demo-desc">
+                        通过 <code>stripe</code> 和 <code>border</code> 属性设置斑马纹和边框
+                    </div>
+                    
+                    <div style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; color: #606266;">斑马纹表格</h4>
+                            <my-table :data="tableData1" stripe>
+                                <my-table-column prop="name" label="姓名" width="100px"></my-table-column>
+                                <my-table-column prop="position" label="职位"></my-table-column>
+                                <my-table-column prop="department" label="部门"></my-table-column>
+                            </my-table>
+                        </div>
+                        
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; color: #606266;">带边框表格</h4>
+                            <my-table :data="tableData1" border>
+                                <my-table-column prop="name" label="姓名" width="100px"></my-table-column>
+                                <my-table-column prop="position" label="职位"></my-table-column>
+                                <my-table-column prop="department" label="部门"></my-table-column>
+                            </my-table>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table :data="data" stripe&gt;&lt;/my-table&gt;
+&lt;my-table :data="data" border&gt;&lt;/my-table&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 3: 对齐方式 -->
+                <div class="demo-box">
+                    <div class="demo-title">对齐方式</div>
+                    <div class="demo-desc">
+                        通过 <code>align</code> 属性设置列的对齐方式
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-table :data="tableData2" border>
+                            <my-table-column prop="product" label="商品名称" align="left"></my-table-column>
+                            <my-table-column prop="price" label="单价" align="center" width="120px"></my-table-column>
+                            <my-table-column prop="quantity" label="数量" align="center" width="100px"></my-table-column>
+                            <my-table-column prop="total" label="总价" align="right" width="120px"></my-table-column>
+                        </my-table>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table-column align="left"&gt;&lt;/my-table-column&gt;
+&lt;my-table-column align="center"&gt;&lt;/my-table-column&gt;
+&lt;my-table-column align="right"&gt;&lt;/my-table-column&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 4: 自定义格式化 -->
+                <div class="demo-box">
+                    <div class="demo-title">自定义列显示</div>
+                    <div class="demo-desc">
+                        使用 <code>formatter</code> 函数自定义列的显示内容
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-table :data="tableData3" stripe border>
+                            <my-table-column prop="name" label="姓名" width="100px"></my-table-column>
+                            <my-table-column 
+                                prop="status" 
+                                label="状态" 
+                                width="100px"
+                                align="center"
+                                :formatter="formatStatus"
+                            ></my-table-column>
+                            <my-table-column 
+                                prop="score" 
+                                label="分数" 
+                                width="100px"
+                                align="center"
+                                :formatter="formatScore"
+                            ></my-table-column>
+                            <my-table-column 
+                                prop="createTime" 
+                                label="创建时间"
+                                :formatter="formatDate"
+                            ></my-table-column>
+                        </my-table>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table-column 
+    prop="status" 
+    :formatter="(row) => row.status ? '✅ 启用' : '❌ 禁用'"
+&gt;&lt;/my-table-column&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 5: 固定表头 -->
+                <div class="demo-box">
+                    <div class="demo-title">固定表头</div>
+                    <div class="demo-desc">
+                        通过 <code>height</code> 属性设置表格高度，实现固定表头
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-table :data="tableData4" height="300px" stripe border>
+                            <my-table-column prop="id" label="ID" width="80px" align="center"></my-table-column>
+                            <my-table-column prop="title" label="标题"></my-table-column>
+                            <my-table-column prop="author" label="作者" width="120px"></my-table-column>
+                            <my-table-column prop="views" label="浏览量" width="100px" align="right"></my-table-column>
+                            <my-table-column prop="date" label="发布日期" width="120px"></my-table-column>
+                        </my-table>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table :data="data" height="300px"&gt;
+    &lt;!-- 列定义 --&gt;
+&lt;/my-table&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 6: 空数据 -->
+                <div class="demo-box">
+                    <div class="demo-title">空数据</div>
+                    <div class="demo-desc">
+                        表格数据为空时的展示
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <my-table :data="[]" empty-text="暂无数据，请稍后再试">
+                            <my-table-column prop="name" label="姓名"></my-table-column>
+                            <my-table-column prop="age" label="年龄"></my-table-column>
+                            <my-table-column prop="address" label="地址"></my-table-column>
+                        </my-table>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table 
+    :data="[]" 
+    empty-text="暂无数据"
+&gt;&lt;/my-table&gt;
+                    </div>
+                </div>
+
+                <!-- Demo 7: 行点击事件 -->
+                <div class="demo-box">
+                    <div class="demo-title">行点击事件</div>
+                    <div class="demo-desc">
+                        监听 <code>row-click</code> 事件处理行点击
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <p style="margin-bottom: 10px; color: #606266;">点击的行：<strong>{{ clickedRow }}</strong></p>
+                        <my-table :data="tableData1" stripe @row-click="handleRowClick">
+                            <my-table-column prop="id" label="ID" width="80px"></my-table-column>
+                            <my-table-column prop="name" label="姓名" width="120px"></my-table-column>
+                            <my-table-column prop="position" label="职位"></my-table-column>
+                        </my-table>
+                    </div>
+
+                    <div class="code-block">
+&lt;my-table @row-click="handleRowClick"&gt;
+    &lt;!-- 列定义 --&gt;
+&lt;/my-table&gt;
+
+methods: {
+    handleRowClick(row, index) {
+        console.log('点击了第', index, '行', row);
+    }
+}
+                    </div>
+                </div>
+
+                <!-- API 文档 -->
+                <div class="demo-box">
+                    <div class="demo-title">📖 API 文档</div>
+                    
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Table Props</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>data</td>
+                                <td>显示的数据</td>
+                                <td>Array</td>
+                                <td>—</td>
+                                <td>[]</td>
+                            </tr>
+                            <tr>
+                                <td>stripe</td>
+                                <td>是否显示斑马纹</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>border</td>
+                                <td>是否显示边框</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>false</td>
+                            </tr>
+                            <tr>
+                                <td>show-header</td>
+                                <td>是否显示表头</td>
+                                <td>Boolean</td>
+                                <td>—</td>
+                                <td>true</td>
+                            </tr>
+                            <tr>
+                                <td>height</td>
+                                <td>表格高度（固定表头）</td>
+                                <td>String / Number</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>empty-text</td>
+                                <td>空数据时显示的文本</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>暂无数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">Table Events</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>事件名</th>
+                                <th>说明</th>
+                                <th>回调参数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>row-click</td>
+                                <td>行被点击时触发</td>
+                                <td>row, index</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin: 20px 0 10px 0; color: #667eea;">TableColumn Props（函数式组件）</h4>
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>类型</th>
+                                <th>可选值</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>prop</td>
+                                <td>对应列内容的字段名</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>label</td>
+                                <td>列名</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>width</td>
+                                <td>列宽度</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>min-width</td>
+                                <td>最小列宽度</td>
+                                <td>String</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>align</td>
+                                <td>对齐方式</td>
+                                <td>String</td>
+                                <td>left / center / right</td>
+                                <td>left</td>
+                            </tr>
+                            <tr>
+                                <td>formatter</td>
+                                <td>格式化函数</td>
+                                <td>Function(row, column)</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 4px solid #409eff;">
+                        <h4 style="margin: 0 0 10px 0; color: #409eff;">💡 函数式组件优化说明</h4>
+                        <p style="margin: 5px 0; color: #606266; line-height: 1.6;">
+                            TableColumn 组件使用了 <code>functional: true</code> 标记为函数式组件：
+                        </p>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #606266; line-height: 1.8;">
+                            <li><strong>无状态：</strong>没有 data、computed、watch</li>
+                            <li><strong>无实例：</strong>没有 this 上下文，无法访问 this.$emit 等</li>
+                            <li><strong>无生命周期：</strong>没有 created、mounted 等钩子</li>
+                            <li><strong>性能更优：</strong>渲染开销更小，适合大量重复渲染的场景</li>
+                            <li><strong>纯配置：</strong>TableColumn 只传递配置信息给 Table</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 组件库完成 -->
+            <div style="text-align: center; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin: 20px;">
+                <h2 style="margin: 0 0 15px 0;">🎉 MyUI 组件库开发完成！</h2>
+                <p style="margin: 0; font-size: 16px; opacity: 0.9;">
+                    已完成 5 个核心组件：Button、Input、Card、Dialog、Form、Table
+                </p>
+                <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.8;">
+                    下一步：使用这些组件构建 VueAdmin 后台管理系统
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入组件 -->
+    <script src="components/Button.js"></script>
+    <script src="components/Input.js"></script>
+    <script src="components/Card.js"></script>
+    <script src="components/Dialog.js"></script>
+    <script src="components/Form.js"></script>
+    <script src="components/Table.js"></script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    // Button 相关
+                    isLoading: false,
+                    
+                    // Input 相关
+                    input1: '',
+                    input2: '',
+                    input3: '',
+                    input4: '',
+                    input5: '',
+                    input6: '',
+                    input7: '',
+                    input8: 'disabled content',
+                    password: '',
+                    textarea: '',
+                    textarea2: '',
+                    
+                    // Card 相关
+                    userList: [
+                        {
+                            id: 1,
+                            name: '张三',
+                            avatar: '👨‍💼',
+                            role: '前端工程师',
+                            desc: '专注于 Vue.js 开发，热爱编程',
+                            time: '2小时前'
+                        },
+                        {
+                            id: 2,
+                            name: '李四',
+                            avatar: '👩‍💻',
+                            role: '全栈工程师',
+                            desc: '精通前后端开发，喜欢挑战',
+                            time: '5小时前'
+                        }
+                    ],
+                    
+                    // Dialog 相关
+                    dialogVisible1: false,
+                    dialogVisible2: false,
+                    dialogVisible3: false,
+                    dialogVisible4a: false,
+                    dialogVisible4b: false,
+                    dialogVisible4c: false,
+                    dialogVisible5: false,
+                    dialogVisible6a: false,
+                    dialogVisible6b: false,
+                    dialogVisible6c: false,
+                    
+                    // 表单数据
+                    formData: {
+                        username: '',
+                        email: '',
+                        password: '',
+                        bio: ''
+                    },
+                    
+                    // Form Demo 1
+                    form1: {
+                        username: '',
+                        email: '',
+                        password: '',
+                        bio: ''
+                    },
+                    
+                    // Form Demo 2
+                    form2: {
+                        username: '',
+                        email: '',
+                        phone: '',
+                        password: ''
+                    },
+                    rules2: {
+                        username: [
+                            { required: true, message: '请输入用户名' },
+                            { min: 3, max: 10, message: '长度在 3 到 10 个字符' }
+                        ],
+                        email: [
+                            { required: true, message: '请输入邮箱地址' },
+                            { type: 'email', message: '请输入正确的邮箱地址' }
+                        ],
+                        phone: [
+                            { required: true, message: '请输入手机号' },
+                            { type: 'phone', message: '请输入正确的手机号' }
+                        ],
+                        password: [
+                            { required: true, message: '请输入密码' },
+                            { min: 6, message: '密码至少 6 位' }
+                        ]
+                    },
+                    
+                    // Form Demo 3
+                    form3: {
+                        name: '',
+                        age: ''
+                    },
+                    
+                    // 注册表单
+                    dialogRegister: false,
+                    registerForm: {
+                        username: '',
+                        email: '',
+                        phone: '',
+                        password: '',
+                        confirmPassword: '',
+                        bio: ''
+                    },
+                    
+                    // Table Demo 1
+                    tableData1: [
+                        { id: 1, name: '张三', age: 28, position: '前端工程师', department: '技术部' },
+                        { id: 2, name: '李四', age: 32, position: '后端工程师', department: '技术部' },
+                        { id: 3, name: '王五', age: 25, position: 'UI设计师', department: '设计部' },
+                        { id: 4, name: '赵六', age: 30, position: '产品经理', department: '产品部' },
+                        { id: 5, name: '钱七', age: 27, position: '测试工程师', department: '质量部' }
+                    ],
+                    
+                    // Table Demo 2
+                    tableData2: [
+                        { product: 'iPhone 14 Pro', price: '¥8999', quantity: 2, total: '¥17998' },
+                        { product: 'MacBook Pro', price: '¥15999', quantity: 1, total: '¥15999' },
+                        { product: 'AirPods Pro', price: '¥1999', quantity: 3, total: '¥5997' },
+                        { product: 'iPad Air', price: '¥4799', quantity: 1, total: '¥4799' }
+                    ],
+                    
+                    // Table Demo 3
+                    tableData3: [
+                        { name: '张三', status: true, score: 95, createTime: '2026-02-25 10:30:00' },
+                        { name: '李四', status: false, score: 78, createTime: '2026-02-24 15:20:00' },
+                        { name: '王五', status: true, score: 88, createTime: '2026-02-23 09:15:00' },
+                        { name: '赵六', status: true, score: 92, createTime: '2026-02-22 14:45:00' }
+                    ],
+                    
+                    // Table Demo 4 - 固定表头
+                    tableData4: [
+                        { id: 1, title: 'Vue.js 3.0 新特性详解', author: '张三', views: 1234, date: '2026-02-25' },
+                        { id: 2, title: 'React Hooks 最佳实践', author: '李四', views: 2345, date: '2026-02-24' },
+                        { id: 3, title: 'TypeScript 高级类型指南', author: '王五', views: 3456, date: '2026-02-23' },
+                        { id: 4, title: 'Webpack 5 配置优化', author: '赵六', views: 4567, date: '2026-02-22' },
+                        { id: 5, title: 'Node.js 性能优化技巧', author: '钱七', views: 5678, date: '2026-02-21' },
+                        { id: 6, title: 'CSS Grid 布局完全指南', author: '张三', views: 6789, date: '2026-02-20' },
+                        { id: 7, title: 'ES2023 新特性一览', author: '李四', views: 7890, date: '2026-02-19' },
+                        { id: 8, title: 'Docker 容器化部署实战', author: '王五', views: 8901, date: '2026-02-18' },
+                        { id: 9, title: 'GraphQL API 设计指南', author: '赵六', views: 9012, date: '2026-02-17' },
+                        { id: 10, title: 'PWA 渐进式Web应用开发', author: '钱七', views: 10123, date: '2026-02-16' },
+                        { id: 11, title: 'Vite 构建工具深度解析', author: '张三', views: 11234, date: '2026-02-15' },
+                        { id: 12, title: 'Jest 单元测试最佳实践', author: '李四', views: 12345, date: '2026-02-14' }
+                    ],
+                    
+                    // Table 行点击
+                    clickedRow: '尚未点击任何行'
+                }
+            },
+            computed: {
+                // 注册表单验证规则（使用 computed 可以访问 this）
+                registerRules() {
+                    return {
+                        username: [
+                            { required: true, message: '请输入用户名' },
+                            { min: 3, max: 20, message: '用户名长度 3-20 个字符' }
+                        ],
+                        email: [
+                            { required: true, message: '请输入邮箱' },
+                            { type: 'email', message: '邮箱格式不正确' }
+                        ],
+                        phone: [
+                            { required: true, message: '请输入手机号' },
+                            { type: 'phone', message: '手机号格式不正确' }
+                        ],
+                        password: [
+                            { required: true, message: '请输入密码' },
+                            { min: 6, max: 20, message: '密码长度 6-20 位' }
+                        ],
+                        confirmPassword: [
+                            { required: true, message: '请再次输入密码' },
+                            { 
+                                validator: (rule, value) => {
+                                    if (value !== this.registerForm.password) {
+                                        return '两次密码输入不一致';
+                                    }
+                                    return '';
+                                }
+                            }
+                        ]
+                    };
+                }
+            },
+            methods: {
+                handleLoading() {
+                    this.isLoading = true;
+                    setTimeout(() => {
+                        this.isLoading = false;
+                    }, 2000);
+                },
+                
+                // Dialog 相关方法
+                handleConfirm1() {
+                    console.log('确认按钮被点击');
+                    alert('确认操作');
+                },
+                
+                handleCancel1() {
+                    console.log('取消按钮被点击');
+                },
+                
+                handleDelete() {
+                    this.dialogVisible3 = false;
+                    alert('删除操作');
+                },
+                
+                handleForceDelete() {
+                    this.dialogVisible3 = false;
+                    alert('强制删除操作');
+                },
+                
+                handleCreateUser() {
+                    console.log('创建用户:', this.formData);
+                    alert('用户创建成功！\n' + JSON.stringify(this.formData, null, 2));
+                    // 重置表单
+                    this.formData = {
+                        username: '',
+                        email: '',
+                        password: '',
+                        bio: ''
+                    };
+                },
+                
+                // Form 相关方法
+                submitForm2() {
+                    this.$refs.form2.validate((valid, errors) => {
+                        if (valid) {
+                            alert('验证通过！\n' + JSON.stringify(this.form2, null, 2));
+                        } else {
+                            alert('验证失败！请检查表单');
+                            console.log('验证错误:', errors);
+                        }
+                    });
+                },
+                
+                resetForm2() {
+                    this.$refs.form2.resetFields();
+                },
+                
+                submitRegister() {
+                    this.$refs.registerForm.validate((valid, errors) => {
+                        if (valid) {
+                            alert('注册成功！\n' + JSON.stringify(this.registerForm, null, 2));
+                            this.dialogRegister = false;
+                            // 重置表单
+                            this.$refs.registerForm.resetFields();
+                        } else {
+                            alert('请检查表单填写是否正确');
+                            console.log('验证错误:', errors);
+                        }
+                    });
+                },
+                
+                resetRegister() {
+                    this.$refs.registerForm.resetFields();
+                },
+                
+                // Table 相关方法
+                formatStatus(row) {
+                    return row.status ? '✅ 启用' : '❌ 禁用';
+                },
+                
+                formatScore(row) {
+                    const score = row.score;
+                    if (score >= 90) return `🏆 ${score} 分（优秀）`;
+                    if (score >= 80) return `👍 ${score} 分（良好）`;
+                    if (score >= 60) return `✔️ ${score} 分（及格）`;
+                    return `❌ ${score} 分（不及格）`;
+                },
+                
+                formatDate(row) {
+                    return row.createTime.split(' ')[0];
+                },
+                
+                handleRowClick(row, index) {
+                    this.clickedRow = `第 ${index + 1} 行 - ${row.name || row.title || JSON.stringify(row)}`;
+                    console.log('点击了行:', row, index);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
