@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue $parent 和 $children 详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .intro-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px 0;
+        }
+
+        .demo-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .demo-description {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 3px solid #764ba2;
+        }
+
+        .demo-app {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            border-left: 4px solid #667eea;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-keyword {
+            color: #c586c0;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .code-attribute {
+            color: #9cdcfe;
+        }
+
+        .tip-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .tip-title {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning-title {
+            color: #e65100;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .error-box {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .error-title {
+            color: #c62828;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success-title {
+            color: #1565c0;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .component-box {
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .component-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .child-component {
+            border: 2px solid #4caf50;
+            background: rgba(76, 175, 80, 0.05);
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .child-title {
+            font-weight: bold;
+            color: #4caf50;
+            margin-bottom: 5px;
+        }
+
+        .access-log {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .log-item {
+            padding: 5px;
+            margin: 2px 0;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .compare-container {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .compare-box {
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .compare-good {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .compare-bad {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .compare-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .badge-info {
+            background: #2196f3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Vue $parent 和 $children 详解</h1>
+        <p class="subtitle">直接访问父组件和子组件实例</p>
+
+        <!-- 核心概念介绍 -->
+        <div class="intro-box">
+            <div class="intro-title">
+                💡 什么是 $parent 和 $children？
+            </div>
+            <p style="font-size: 1.1em; line-height: 1.8;">
+                <span class="highlight">$parent</span> 和 <span class="highlight">$children</span> 是Vue提供的实例属性，
+                允许组件<strong>直接访问父组件实例或子组件实例</strong>，从而调用它们的方法、访问它们的数据。
+            </p>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                <strong>📐 关系：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><code>this.$parent</code> - 访问<strong>父组件实例</strong></li>
+                    <li><code>this.$children</code> - 访问<strong>子组件实例数组</strong></li>
+                    <li><code>this.$root</code> - 访问<strong>根Vue实例</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 基础对比 -->
+        <div class="warning-box">
+            <div class="warning-title">🔍 $parent / $children 对比</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>属性</th>
+                        <th>类型</th>
+                        <th>访问对象</th>
+                        <th>返回值</th>
+                        <th>使用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>$parent</strong></td>
+                        <td>实例属性</td>
+                        <td>父组件实例</td>
+                        <td>Vue实例</td>
+                        <td>子组件访问父组件</td>
+                    </tr>
+                    <tr>
+                        <td><strong>$children</strong></td>
+                        <td>实例属性</td>
+                        <td>所有子组件实例</td>
+                        <td>数组</td>
+                        <td>父组件批量访问子组件</td>
+                    </tr>
+                    <tr>
+                        <td><strong>$root</strong></td>
+                        <td>实例属性</td>
+                        <td>根Vue实例</td>
+                        <td>Vue实例</td>
+                        <td>访问全局数据/方法</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Demo 1: $parent 基础使用 -->
+        <div class="demo-section">
+            <div class="demo-title">👆 Demo 1：$parent 访问父组件</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>理解如何通过 $parent 访问父组件的数据和方法
+            </div>
+
+            <div id="app1" class="demo-app">
+                <h3>👨‍👧 父子组件关系</h3>
+                <parent-component></parent-component>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 核心代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 父组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'parent-component'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="component-box"&gt;
+            &lt;div class="component-title"&gt;👨 父组件&lt;/div&gt;
+            &lt;p&gt;父组件的名字：{{ parentName }}&lt;/p&gt;
+            &lt;p&gt;父组件的计数：{{ count }}&lt;/p&gt;
+            &lt;button @click="incrementParent" class="btn btn-primary"&gt;
+                父组件自增
+            &lt;/button&gt;
+            &lt;hr style="margin: 15px 0;"&gt;
+            &lt;child-component&gt;&lt;/child-component&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            parentName: <span class="code-string">'Parent'</span>,
+            count: <span class="code-number">0</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">incrementParent</span>() {
+            this.count++;
+        },
+        <span class="code-function">greetFromParent</span>() {
+            alert(<span class="code-string">'你好，我是父组件！'</span>);
+        }
+    }
+});
+
+<span class="code-comment">// 子组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'child-component'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="child-component"&gt;
+            &lt;div class="child-title"&gt;👧 子组件&lt;/div&gt;
+            &lt;p&gt;子组件自己的数据：{{ childData }}&lt;/p&gt;
+            
+            &lt;div class="tip-box" style="margin: 10px 0;"&gt;
+                &lt;strong&gt;通过 $parent 访问父组件：&lt;/strong&gt;
+                &lt;p&gt;父组件名字：{{ $parent.parentName }}&lt;/p&gt;
+                &lt;p&gt;父组件计数：{{ $parent.count }}&lt;/p&gt;
+            &lt;/div&gt;
+            
+            &lt;button @click="accessParent" class="btn btn-success"&gt;
+                子组件访问父组件
+            &lt;/button&gt;
+            &lt;button @click="modifyParent" class="btn btn-warning"&gt;
+                子组件修改父组件数据
+            &lt;/button&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            childData: <span class="code-string">'Child Data'</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">accessParent</span>() {
+            <span class="code-comment">// ⭐ 通过 $parent 调用父组件方法</span>
+            this.$parent.<span class="code-function">greetFromParent</span>();
+        },
+        <span class="code-function">modifyParent</span>() {
+            <span class="code-comment">// ⭐ 通过 $parent 修改父组件数据</span>
+            this.$parent.count++;
+        }
+    }
+});
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💡 $parent 使用要点</div>
+                <ul style="margin-left: 20px;">
+                    <li><code>this.$parent</code> 指向<strong>直接父组件</strong>实例</li>
+                    <li>可以访问父组件的 <code>data</code>、<code>methods</code>、<code>computed</code> 等</li>
+                    <li>可以在模板中使用：<code>{{ $parent.someData }}</code></li>
+                    <li>⚠️ 谨慎使用：会造成组件<strong>紧耦合</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 2: $children 基础使用 -->
+        <div class="demo-section">
+            <div class="demo-title">👇 Demo 2：$children 访问子组件</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>理解如何通过 $children 访问和操作子组件
+            </div>
+
+            <div id="app2" class="demo-app">
+                <h3>👨‍👧‍👦 父组件管理多个子组件</h3>
+                <parent-manager></parent-manager>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 核心代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 子组件（计数器）</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'counter-child'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="child-component"&gt;
+            &lt;div class="child-title"&gt;{{ name }}&lt;/div&gt;
+            &lt;p&gt;计数：{{ count }}&lt;/p&gt;
+            &lt;button @click="increment" class="btn btn-success"&gt;+1&lt;/button&gt;
+            &lt;button @click="reset" class="btn btn-danger"&gt;重置&lt;/button&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">props</span>: [<span class="code-string">'name'</span>],
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            count: <span class="code-number">0</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">increment</span>() {
+            this.count++;
+        },
+        <span class="code-function">reset</span>() {
+            this.count = <span class="code-number">0</span>;
+        }
+    }
+});
+
+<span class="code-comment">// 父组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'parent-manager'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="component-box"&gt;
+            &lt;div class="component-title"&gt;👨 父组件（管理器）&lt;/div&gt;
+            
+            &lt;div class="card"&gt;
+                &lt;h4&gt;父组件控制子组件：&lt;/h4&gt;
+                &lt;button @click="incrementAll" class="btn btn-primary"&gt;
+                    所有子组件 +1
+                &lt;/button&gt;
+                &lt;button @click="resetAll" class="btn btn-danger"&gt;
+                    重置所有子组件
+                &lt;/button&gt;
+                &lt;button @click="getTotal" class="btn btn-success"&gt;
+                    获取总计数
+                &lt;/button&gt;
+                &lt;p v-if="totalCount !== null"&gt;
+                    &lt;strong&gt;总计数：{{ totalCount }}&lt;/strong&gt;
+                &lt;/p&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="grid-2"&gt;
+                &lt;counter-child name="子组件A"&gt;&lt;/counter-child&gt;
+                &lt;counter-child name="子组件B"&gt;&lt;/counter-child&gt;
+                &lt;counter-child name="子组件C"&gt;&lt;/counter-child&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            totalCount: <span class="code-keyword">null</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">incrementAll</span>() {
+            <span class="code-comment">// ⭐ 遍历所有子组件，调用它们的方法</span>
+            this.$children.<span class="code-function">forEach</span>(child =&gt; {
+                child.<span class="code-function">increment</span>();
+            });
+        },
+        <span class="code-function">resetAll</span>() {
+            <span class="code-comment">// ⭐ 批量重置子组件</span>
+            this.$children.<span class="code-function">forEach</span>(child =&gt; {
+                child.<span class="code-function">reset</span>();
+            });
+        },
+        <span class="code-function">getTotal</span>() {
+            <span class="code-comment">// ⭐ 获取所有子组件的数据汇总</span>
+            this.totalCount = this.$children
+                .<span class="code-function">reduce</span>((sum, child) =&gt; sum + child.count, <span class="code-number">0</span>);
+        }
+    }
+});
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💡 $children 使用要点</div>
+                <ul style="margin-left: 20px;">
+                    <li><code>this.$children</code> 是一个<strong>数组</strong>，包含所有直接子组件</li>
+                    <li>⚠️ 顺序<strong>不保证</strong>与模板中的顺序一致</li>
+                    <li>⚠️ 不包括<strong>孙子组件</strong>，只有直接子组件</li>
+                    <li>适合批量操作子组件（如统一重置、统一获取数据）</li>
+                    <li><strong>不推荐</strong>用于精确访问特定子组件（用 <code>ref</code> 更好）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 3: $root 访问根实例 -->
+        <div class="demo-section">
+            <div class="demo-title">🏠 Demo 3：$root 访问根实例</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>理解如何通过 $root 访问根 Vue 实例
+            </div>
+
+            <div id="app3" class="demo-app">
+                <h3>🏠 根实例 - 全局数据中心</h3>
+                <div class="card">
+                    <h4>根实例数据：</h4>
+                    <p>全局用户：{{ globalUser }}</p>
+                    <p>全局主题：{{ globalTheme }}</p>
+                    <button @click="changeTheme" class="btn btn-primary">切换主题</button>
+                </div>
+                <nested-component></nested-component>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 核心代码</div>
+                <div class="code-block" v-pre>
+<code-comment">// 嵌套组件（任意深度）</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'nested-component'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="component-box"&gt;
+            &lt;div class="component-title"&gt;📦 嵌套组件&lt;/div&gt;
+            &lt;p&gt;我可以访问根实例数据：&lt;/p&gt;
+            &lt;div class="tip-box"&gt;
+                &lt;p&gt;&lt;strong&gt;全局用户：&lt;/strong&gt;{{ $root.globalUser }}&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;全局主题：&lt;/strong&gt;{{ $root.globalTheme }}&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;button @click="callRootMethod" class="btn btn-success"&gt;
+                调用根实例方法
+            &lt;/button&gt;
+            &lt;deep-nested&gt;&lt;/deep-nested&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">callRootMethod</span>() {
+            <span class="code-comment">// ⭐ 调用根实例方法</span>
+            this.$root.<span class="code-function">showGlobalMessage</span>();
+        }
+    }
+});
+
+<span class="code-comment">// 更深层的嵌套组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'deep-nested'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="child-component"&gt;
+            &lt;div class="child-title"&gt;🎯 深层嵌套组件&lt;/div&gt;
+            &lt;p&gt;无论嵌套多深，都能访问 $root：&lt;/p&gt;
+            &lt;p&gt;{{ $root.globalUser }} 正在使用 {{ $root.globalTheme }} 主题&lt;/p&gt;
+        &lt;/div&gt;
+    `</span>
+});
+
+<span class="code-comment">// 根实例</span>
+<span class="code-keyword">new</span> Vue({
+    <span class="code-attribute">el</span>: <span class="code-string">'#app3'</span>,
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            globalUser: <span class="code-string">'张三'</span>,
+            globalTheme: <span class="code-string">'浅色'</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">changeTheme</span>() {
+            this.globalTheme = this.globalTheme === <span class="code-string">'浅色'</span> 
+                ? <span class="code-string">'深色'</span> 
+                : <span class="code-string">'浅色'</span>;
+        },
+        <span class="code-function">showGlobalMessage</span>() {
+            alert(<span class="code-string">'这是根实例的方法！'</span>);
+        }
+    }
+});
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ $root 使用注意</div>
+                <ul style="margin-left: 20px;">
+                    <li><code>$root</code> 指向<strong>根 Vue 实例</strong>（创建的第一个 Vue 实例）</li>
+                    <li>适合存储<strong>全局配置</strong>、<strong>全局状态</strong></li>
+                    <li>⚠️ <strong>小型应用</strong>可用，<strong>中大型应用</strong>推荐使用 <strong>Vuex</strong></li>
+                    <li>滥用会导致状态管理混乱</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 4: 实战案例 - 表单验证 -->
+        <div class="demo-section">
+            <div class="demo-title">🎯 Demo 4：实战案例 - 表单验证</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>使用 $parent 和 $children 实现表单统一验证
+            </div>
+
+            <div id="app4" class="demo-app">
+                <h3>📝 表单验证系统</h3>
+                <form-container></form-container>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 实战代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 表单输入项组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'form-input'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="card"&gt;
+            &lt;label&gt;{{ label }}：&lt;/label&gt;
+            &lt;input 
+                v-model="value" 
+                :type="type"
+                :placeholder="placeholder"
+                @blur="validate"
+                style="padding: 8px; width: 100%; margin: 5px 0;"
+            &gt;
+            &lt;p v-if="errorMsg" style="color: #f44336; margin: 5px 0;"&gt;
+                ❌ {{ errorMsg }}
+            &lt;/p&gt;
+            &lt;p v-else-if="value" style="color: #4caf50; margin: 5px 0;"&gt;
+                ✅ 验证通过
+            &lt;/p&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">props</span>: {
+        label: String,
+        type: { <span class="code-attribute">type</span>: String, <span class="code-attribute">default</span>: <span class="code-string">'text'</span> },
+        placeholder: String,
+        required: Boolean,
+        pattern: RegExp
+    },
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            value: <span class="code-string">''</span>,
+            errorMsg: <span class="code-string">''</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">validate</span>() {
+            <span class="code-keyword">if</span> (this.required && !this.value) {
+                this.errorMsg = <span class="code-string">'此项为必填'</span>;
+                <span class="code-keyword">return</span> <span class="code-keyword">false</span>;
+            }
+            <span class="code-keyword">if</span> (this.pattern && !this.pattern.<span class="code-function">test</span>(this.value)) {
+                this.errorMsg = <span class="code-string">'格式不正确'</span>;
+                <span class="code-keyword">return</span> <span class="code-keyword">false</span>;
+            }
+            this.errorMsg = <span class="code-string">''</span>;
+            <span class="code-keyword">return</span> <span class="code-keyword">true</span>;
+        },
+        <span class="code-function">getValue</span>() {
+            <span class="code-keyword">return</span> this.value;
+        }
+    }
+});
+
+<span class="code-comment">// 表单容器组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'form-container'</span>, {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="component-box"&gt;
+            &lt;div class="component-title"&gt;📋 用户注册表单&lt;/div&gt;
+            
+            &lt;form-input 
+                label="用户名" 
+                :required="true"
+                placeholder="请输入用户名"
+            &gt;&lt;/form-input&gt;
+            
+            &lt;form-input 
+                label="邮箱" 
+                type="email"
+                :required="true"
+                :pattern="/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/"
+                placeholder="请输入邮箱"
+            &gt;&lt;/form-input&gt;
+            
+            &lt;form-input 
+                label="手机号" 
+                :required="true"
+                :pattern="/^1[3-9]\\d{9}$/"
+                placeholder="请输入手机号"
+            &gt;&lt;/form-input&gt;
+            
+            &lt;div class="card"&gt;
+                &lt;button @click="submitForm" class="btn btn-success"&gt;
+                    提交表单
+                &lt;/button&gt;
+                &lt;button @click="resetForm" class="btn btn-danger"&gt;
+                    重置表单
+                &lt;/button&gt;
+            &lt;/div&gt;
+            
+            &lt;div v-if="submitResult" class="success-box"&gt;
+                &lt;div class="success-title"&gt;✅ 提交成功&lt;/div&gt;
+                &lt;pre&gt;{{ submitResult }}&lt;/pre&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `</span>,
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {
+            submitResult: <span class="code-string">''</span>
+        }
+    },
+    <span class="code-attribute">methods</span>: {
+        <span class="code-function">submitForm</span>() {
+            <span class="code-comment">// ⭐ 使用 $children 批量验证所有表单项</span>
+            <span class="code-keyword">const</span> allValid = this.$children.<span class="code-function">every</span>(child =&gt; {
+                <span class="code-keyword">return</span> child.<span class="code-function">validate</span>();
+            });
+            
+            <span class="code-keyword">if</span> (allValid) {
+                <span class="code-comment">// 收集所有表单项的值</span>
+                <span class="code-keyword">const</span> formData = {};
+                this.$children.<span class="code-function">forEach</span>(child =&gt; {
+                    formData[child.label] = child.<span class="code-function">getValue</span>();
+                });
+                
+                this.submitResult = JSON.<span class="code-function">stringify</span>(formData, <span class="code-keyword">null</span>, <span class="code-number">2</span>);
+            } <span class="code-keyword">else</span> {
+                alert(<span class="code-string">'请正确填写所有必填项'</span>);
+            }
+        },
+        <span class="code-function">resetForm</span>() {
+            <span class="code-comment">// ⭐ 批量重置所有表单项</span>
+            this.$children.<span class="code-function">forEach</span>(child =&gt; {
+                child.value = <span class="code-string">''</span>;
+                child.errorMsg = <span class="code-string">''</span>;
+            });
+            this.submitResult = <span class="code-string">''</span>;
+        }
+    }
+});
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ 这个案例展示了 $children 的实战价值</div>
+                <ul style="margin-left: 20px;">
+                    <li>✅ <strong>批量验证：</strong>父组件统一调用所有子组件的 validate 方法</li>
+                    <li>✅ <strong>数据收集：</strong>遍历子组件获取所有表单值</li>
+                    <li>✅ <strong>批量重置：</strong>统一重置所有子组件状态</li>
+                    <li>✅ <strong>解耦：</strong>子组件独立验证逻辑，父组件只负责协调</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 使用场景总结 -->
+        <div class="tip-box">
+            <div class="tip-title">🎯 适用场景</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>API</th>
+                        <th>适用场景</th>
+                        <th>不适用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>$parent</strong></td>
+                        <td>
+                            • 临时访问父组件方法<br>
+                            • 组件库内部使用<br>
+                            • 紧密关联的父子组件
+                        </td>
+                        <td>
+                            • 跨多级组件通信<br>
+                            • 需要解耦的场景<br>
+                            • 大型应用的业务逻辑
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>$children</strong></td>
+                        <td>
+                            • 批量操作子组件<br>
+                            • 表单统一验证/重置<br>
+                            • 统计子组件状态
+                        </td>
+                        <td>
+                            • 精确访问特定子组件（用 ref）<br>
+                            • 顺序敏感的场景<br>
+                            • 需要访问孙子组件
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>$root</strong></td>
+                        <td>
+                            • 小型应用全局状态<br>
+                            • 全局配置数据<br>
+                            • 全局工具方法
+                        </td>
+                        <td>
+                            • 中大型应用（用 Vuex）<br>
+                            • 复杂状态管理<br>
+                            • 需要调试工具的场景
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 与其他通信方式对比 -->
+        <div class="warning-box">
+            <div class="warning-title">🔀 组件通信方式对比</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>通信方式</th>
+                        <th>优点</th>
+                        <th>缺点</th>
+                        <th>推荐度</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>props / $emit</strong></td>
+                        <td>✅ 解耦、清晰、可维护</td>
+                        <td>❌ 多级传递繁琐</td>
+                        <td><span class="badge badge-success">⭐⭐⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>$parent / $children</strong></td>
+                        <td>✅ 直接、简单</td>
+                        <td>❌ 紧耦合、难测试</td>
+                        <td><span class="badge badge-warning">⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ref</strong></td>
+                        <td>✅ 精确访问、类型安全</td>
+                        <td>❌ 需要手动命名</td>
+                        <td><span class="badge badge-success">⭐⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>provide / inject</strong></td>
+                        <td>✅ 跨级传递</td>
+                        <td>❌ 非响应式（默认）</td>
+                        <td><span class="badge badge-info">⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Event Bus</strong></td>
+                        <td>✅ 任意组件通信</td>
+                        <td>❌ 难追踪、易泄露</td>
+                        <td><span class="badge badge-warning">⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vuex</strong></td>
+                        <td>✅ 集中管理、可调试</td>
+                        <td>❌ 学习成本、模板代码</td>
+                        <td><span class="badge badge-success">⭐⭐⭐⭐⭐</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 最佳实践 -->
+        <div class="error-box">
+            <div class="error-title">❌ 常见误用场景</div>
+            <div class="compare-container">
+                <div class="compare-box compare-bad">
+                    <div class="compare-title">❌ 不推荐</div>
+                    <div class="code-block" v-pre>
+<span class="code-comment">// 业务组件中频繁使用 $parent</span>
+<span class="code-keyword">methods</span>: {
+    <span class="code-function">doSomething</span>() {
+        <span class="code-comment">// ❌ 紧耦合，子组件依赖父组件实现</span>
+        this.$parent.<span class="code-function">updateData</span>();
+        this.$parent.<span class="code-function">fetchList</span>();
+        this.$parent.count++;
+    }
+}
+
+<span class="code-comment">// 依赖 $children 的顺序</span>
+<span class="code-function">getFirstChild</span>() {
+    <span class="code-comment">// ❌ 顺序不保证</span>
+    <span class="code-keyword">return</span> this.$children[<span class="code-number">0</span>];
+}
+                    </div>
+                </div>
+                <div class="compare-box compare-good">
+                    <div class="compare-title">✅ 推荐</div>
+                    <div class="code-block" v-pre>
+<span class="code-comment">// 使用 props / $emit</span>
+<span class="code-keyword">methods</span>: {
+    <span class="code-function">doSomething</span>() {
+        <span class="code-comment">// ✅ 解耦，通过事件通信</span>
+        this.$emit(<span class="code-string">'update-data'</span>);
+        this.$emit(<span class="code-string">'fetch-list'</span>);
+        this.$emit(<span class="code-string">'increment'</span>);
+    }
+}
+
+<span class="code-comment">// 使用 ref 精确访问</span>
+<span class="code-keyword">template</span>: <span class="code-string">`&lt;child ref="firstChild"&gt;&lt;/child&gt;`</span>,
+<span class="code-function">getFirstChild</scan>() {
+    <span class="code-comment">// ✅ 明确、可靠</span>
+    <span class="code-keyword">return</span> this.$refs.firstChild;
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面试题 -->
+        <div class="success-box">
+            <div class="success-title">🎓 面试常考题（5题）</div>
+            
+            <div class="card">
+                <div class="card-title">❓ 问题 1：$parent、$children 和 $root 分别是什么？</div>
+                <p><strong>答案：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>$parent：</strong>指向<strong>直接父组件</strong>的实例</li>
+                    <li><strong>$children：</strong>包含所有<strong>直接子组件</strong>实例的数组</li>
+                    <li><strong>$root：</strong>指向<strong>根 Vue 实例</strong>（最顶层的实例）</li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>注意：</strong>这三个都是<strong>实例属性</strong>，可以直接访问对方的 data、methods 等。</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 2：$children 的顺序是否保证？</div>
+                <p><strong>答案：</strong></p>
+                <p><strong>❌ 不保证！</strong><code>$children</code> 数组的顺序<strong>不保证</strong>与模板中的顺序一致。</p>
+                <p style="margin-top: 10px;"><strong>原因：</strong>Vue 的组件创建和挂载时机可能不同步。</p>
+                <p style="margin-top: 10px;"><strong>解决方案：</strong>如果需要精确访问特定子组件，应使用 <code>ref</code>：</p>
+                <div class="code-block" v-pre>
+<span class="code-comment">// ✅ 推荐：使用 ref</span>
+<span class="code-string">&lt;child-component ref="myChild"&gt;&lt;/child-component&gt;</span>
+
+<span class="code-comment">// 访问</span>
+this.$refs.myChild.<span class="code-function">someMethod</span>();
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 3：为什么不推荐在业务代码中使用 $parent / $children？</div>
+                <p><strong>答案（4个原因）：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li><strong>紧耦合：</strong>子组件依赖父组件的具体实现，难以复用</li>
+                    <li><strong>难维护：</strong>组件结构变化（如插入中间层）会导致代码失效</li>
+                    <li><strong>难测试：</strong>单元测试时需要模拟整个父子层级</li>
+                    <li><strong>不直观：</strong>数据流向不清晰，违背 Vue 的单向数据流理念</li>
+                </ol>
+                <p style="margin-top: 10px;"><strong>推荐替代方案：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>父子通信：<code>props</code> + <code>$emit</code></li>
+                    <li>精确访问：<code>ref</code></li>
+                    <li>跨级通信：<code>provide / inject</code></li>
+                    <li>全局状态：<code>Vuex</code></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 4：$parent / $children 有哪些合理的使用场景？</div>
+                <p><strong>答案：</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>场景</th>
+                            <th>说明</th>
+                            <th>示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>组件库内部</strong></td>
+                            <td>组件库中父子组件紧密关联</td>
+                            <td>Form / FormItem、Menu / MenuItem</td>
+                        </tr>
+                        <tr>
+                            <td><strong>批量操作</strong></td>
+                            <td>父组件统一管理多个子组件</td>
+                            <td>表单统一验证、Tab切换</td>
+                        </tr>
+                        <tr>
+                            <td><strong>通知机制</strong></td>
+                            <td>子组件通知父组件状态变化</td>
+                            <td>Checkbox 通知 CheckboxGroup</td>
+                        </tr>
+                        <tr>
+                            <td><strong>临时快捷访问</strong></td>
+                            <td>开发阶段快速调试</td>
+                            <td>控制台手动调用：vm.$parent</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 10px;"><strong>原则：</strong>仅在<strong>组件紧密协作</strong>且<strong>不需要独立复用</strong>时使用。</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 5：如何选择组件通信方式？</div>
+                <p><strong>答案（决策树）：</strong></p>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; font-family: monospace;">
+<strong>1. 父子组件？</strong>
+   ├─ 是 → 使用 <strong>props / $emit</strong> ✅
+   └─ 否 → 继续
+
+<strong>2. 需要精确访问子组件实例？</strong>
+   ├─ 是 → 使用 <strong>ref</strong> ✅
+   └─ 否 → 继续
+
+<strong>3. 跨多级组件？</strong>
+   ├─ 是 → 使用 <strong>provide / inject</strong> ✅
+   └─ 否 → 继续
+
+<strong>4. 全局状态管理？</strong>
+   ├─ 小应用 → 使用 <strong>$root</strong> 或 <strong>Event Bus</strong>
+   └─ 中大型 → 使用 <strong>Vuex</strong> ✅
+
+<strong>5. 组件库内部通信？</strong>
+   └─ 可考虑 <strong>$parent / $children</strong>（谨慎）
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心总结 -->
+        <div class="intro-box" style="margin-top: 30px;">
+            <div class="intro-title">🎯 核心总结</div>
+            <ol style="font-size: 1.1em; line-height: 2;">
+                <li><strong>$parent：</strong>访问直接父组件实例，可调用其方法和数据</li>
+                <li><strong>$children：</strong>访问所有直接子组件实例（数组，顺序不保证）</li>
+                <li><strong>$root：</strong>访问根 Vue 实例，适合小应用的全局状态</li>
+                <li><strong>使用场景：</strong>组件库内部、批量操作、临时调试</li>
+                <li><strong>不推荐用于：</strong>业务代码中的常规父子通信（用 props/$emit）</li>
+                <li><strong>替代方案：</strong>ref（精确访问）、provide/inject（跨级）、Vuex（全局）</li>
+            </ol>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                <strong>💡 口诀：</strong>
+                <p style="margin: 10px 0;">能用 props/$emit 就不用 $parent/$children</p>
+                <p>能用 ref 就不用 $children[index]</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====== Demo 1: $parent 基础 ======
+        Vue.component('parent-component', {
+            template: `
+                <div class="component-box">
+                    <div class="component-title">👨 父组件</div>
+                    <p>父组件的名字：{{ parentName }}</p>
+                    <p>父组件的计数：{{ count }}</p>
+                    <button @click="incrementParent" class="btn btn-primary">
+                        父组件自增
+                    </button>
+                    <hr style="margin: 15px 0;">
+                    <child-component></child-component>
+                </div>
+            `,
+            data() {
+                return {
+                    parentName: 'Parent',
+                    count: 0
+                }
+            },
+            methods: {
+                incrementParent() {
+                    this.count++;
+                },
+                greetFromParent() {
+                    alert('你好，我是父组件！');
+                }
+            }
+        });
+
+        Vue.component('child-component', {
+            template: `
+                <div class="child-component">
+                    <div class="child-title">👧 子组件</div>
+                    <p>子组件自己的数据：{{ childData }}</p>
+                    
+                    <div class="tip-box" style="margin: 10px 0;">
+                        <strong>通过 $parent 访问父组件：</strong>
+                        <p>父组件名字：{{ $parent.parentName }}</p>
+                        <p>父组件计数：{{ $parent.count }}</p>
+                    </div>
+                    
+                    <button @click="accessParent" class="btn btn-success">
+                        子组件访问父组件
+                    </button>
+                    <button @click="modifyParent" class="btn btn-warning">
+                        子组件修改父组件数据
+                    </button>
+                </div>
+            `,
+            data() {
+                return {
+                    childData: 'Child Data'
+                }
+            },
+            methods: {
+                accessParent() {
+                    this.$parent.greetFromParent();
+                },
+                modifyParent() {
+                    this.$parent.count++;
+                }
+            }
+        });
+
+        new Vue({
+            el: '#app1'
+        });
+
+        // ====== Demo 2: $children 基础 ======
+        Vue.component('counter-child', {
+            template: `
+                <div class="child-component">
+                    <div class="child-title">{{ name }}</div>
+                    <p>计数：{{ count }}</p>
+                    <button @click="increment" class="btn btn-success">+1</button>
+                    <button @click="reset" class="btn btn-danger">重置</button>
+                </div>
+            `,
+            props: ['name'],
+            data() {
+                return {
+                    count: 0
+                }
+            },
+            methods: {
+                increment() {
+                    this.count++;
+                },
+                reset() {
+                    this.count = 0;
+                }
+            }
+        });
+
+        Vue.component('parent-manager', {
+            template: `
+                <div class="component-box">
+                    <div class="component-title">👨 父组件（管理器）</div>
+                    
+                    <div class="card">
+                        <h4>父组件控制子组件：</h4>
+                        <button @click="incrementAll" class="btn btn-primary">
+                            所有子组件 +1
+                        </button>
+                        <button @click="resetAll" class="btn btn-danger">
+                            重置所有子组件
+                        </button>
+                        <button @click="getTotal" class="btn btn-success">
+                            获取总计数
+                        </button>
+                        <p v-if="totalCount !== null">
+                            <strong>总计数：{{ totalCount }}</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <counter-child name="子组件A"></counter-child>
+                        <counter-child name="子组件B"></counter-child>
+                        <counter-child name="子组件C"></counter-child>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    totalCount: null
+                }
+            },
+            methods: {
+                incrementAll() {
+                    this.$children.forEach(child => {
+                        child.increment();
+                    });
+                },
+                resetAll() {
+                    this.$children.forEach(child => {
+                        child.reset();
+                    });
+                },
+                getTotal() {
+                    this.totalCount = this.$children
+                        .reduce((sum, child) => sum + child.count, 0);
+                }
+            }
+        });
+
+        new Vue({
+            el: '#app2'
+        });
+
+        // ====== Demo 3: $root ======
+        Vue.component('nested-component', {
+            template: `
+                <div class="component-box">
+                    <div class="component-title">📦 嵌套组件</div>
+                    <p>我可以访问根实例数据：</p>
+                    <div class="tip-box">
+                        <p><strong>全局用户：</strong>{{ $root.globalUser }}</p>
+                        <p><strong>全局主题：</strong>{{ $root.globalTheme }}</p>
+                    </div>
+                    <button @click="callRootMethod" class="btn btn-success">
+                        调用根实例方法
+                    </button>
+                    <deep-nested></deep-nested>
+                </div>
+            `,
+            methods: {
+                callRootMethod() {
+                    this.$root.showGlobalMessage();
+                }
+            }
+        });
+
+        Vue.component('deep-nested', {
+            template: `
+                <div class="child-component">
+                    <div class="child-title">🎯 深层嵌套组件</div>
+                    <p>无论嵌套多深，都能访问 $root：</p>
+                    <p>{{ $root.globalUser }} 正在使用 {{ $root.globalTheme }} 主题</p>
+                </div>
+            `
+        });
+
+        new Vue({
+            el: '#app3',
+            data() {
+                return {
+                    globalUser: '张三',
+                    globalTheme: '浅色'
+                }
+            },
+            methods: {
+                changeTheme() {
+                    this.globalTheme = this.globalTheme === '浅色' 
+                        ? '深色' 
+                        : '浅色';
+                },
+                showGlobalMessage() {
+                    alert('这是根实例的方法！');
+                }
+            }
+        });
+
+        // ====== Demo 4: 表单验证实战 ======
+        Vue.component('form-input', {
+            template: `
+                <div class="card">
+                    <label>{{ label }}：</label>
+                    <input 
+                        v-model="value" 
+                        :type="type"
+                        :placeholder="placeholder"
+                        @blur="validate"
+                        style="padding: 8px; width: 100%; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px;"
+                    >
+                    <p v-if="errorMsg" style="color: #f44336; margin: 5px 0;">
+                        ❌ {{ errorMsg }}
+                    </p>
+                    <p v-else-if="value" style="color: #4caf50; margin: 5px 0;">
+                        ✅ 验证通过
+                    </p>
+                </div>
+            `,
+            props: {
+                label: String,
+                type: { type: String, default: 'text' },
+                placeholder: String,
+                required: Boolean,
+                pattern: RegExp
+            },
+            data() {
+                return {
+                    value: '',
+                    errorMsg: ''
+                }
+            },
+            methods: {
+                validate() {
+                    if (this.required && !this.value) {
+                        this.errorMsg = '此项为必填';
+                        return false;
+                    }
+                    if (this.pattern && !this.pattern.test(this.value)) {
+                        this.errorMsg = '格式不正确';
+                        return false;
+                    }
+                    this.errorMsg = '';
+                    return true;
+                },
+                getValue() {
+                    return this.value;
+                }
+            }
+        });
+
+        Vue.component('form-container', {
+            template: `
+                <div class="component-box">
+                    <div class="component-title">📋 用户注册表单</div>
+                    
+                    <form-input 
+                        label="用户名" 
+                        :required="true"
+                        placeholder="请输入用户名"
+                    ></form-input>
+                    
+                    <form-input 
+                        label="邮箱" 
+                        type="email"
+                        :required="true"
+                        :pattern="/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/"
+                        placeholder="请输入邮箱"
+                    ></form-input>
+                    
+                    <form-input 
+                        label="手机号" 
+                        :required="true"
+                        :pattern="/^1[3-9]\\d{9}$/"
+                        placeholder="请输入手机号"
+                    ></form-input>
+                    
+                    <div class="card">
+                        <button @click="submitForm" class="btn btn-success">
+                            提交表单
+                        </button>
+                        <button @click="resetForm" class="btn btn-danger">
+                            重置表单
+                        </button>
+                    </div>
+                    
+                    <div v-if="submitResult" class="success-box">
+                        <div class="success-title">✅ 提交成功</div>
+                        <pre>{{ submitResult }}</pre>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    submitResult: ''
+                }
+            },
+            methods: {
+                submitForm() {
+                    const allValid = this.$children.every(child => {
+                        return child.validate();
+                    });
+                    
+                    if (allValid) {
+                        const formData = {};
+                        this.$children.forEach(child => {
+                            formData[child.label] = child.getValue();
+                        });
+                        
+                        this.submitResult = JSON.stringify(formData, null, 2);
+                    } else {
+                        alert('请正确填写所有必填项');
+                    }
+                },
+                resetForm() {
+                    this.$children.forEach(child => {
+                        child.value = '';
+                        child.errorMsg = '';
+                    });
+                    this.submitResult = '';
+                }
+            }
+        });
+
+        new Vue({
+            el: '#app4'
+        });
+    </script>
+</body>
+</html>
