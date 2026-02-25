@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue 函数式组件详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .intro-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .demo-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .demo-title {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .demo-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .demo-app {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            border-left: 4px solid #667eea;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-keyword {
+            color: #c586c0;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .code-attribute {
+            color: #9cdcfe;
+        }
+
+        .tip-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .tip-title {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning-title {
+            color: #e65100;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .error-box {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .error-title {
+            color: #c62828;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success-title {
+            color: #1565c0;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .badge-info {
+            background: #2196f3;
+            color: white;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .item-box {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+
+        .item-box:hover {
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .compare-container {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .compare-box {
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .compare-good {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .compare-bad {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .compare-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .performance-meter {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .performance-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Vue 函数式组件详解</h1>
+        <p class="subtitle">Functional Components - 轻量、高效的组件形态</p>
+
+        <!-- 核心概念介绍 -->
+        <div class="intro-box">
+            <div class="intro-title">
+                💡 什么是函数式组件？
+            </div>
+            <p style="font-size: 1.1em; line-height: 1.8;">
+                函数式组件是<span class="highlight">没有状态（data）、没有实例（this）</span>的组件。
+                它只接收<span class="highlight">props</span>，纯粹地根据 props 渲染输出，类似于 JavaScript 的纯函数。
+            </p>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                <strong>📐 公式：</strong><code style="color: #ffd54f; font-size: 1.1em;">函数式组件 = props ➜ VNode（虚拟DOM）</code>
+            </div>
+        </div>
+
+        <!-- 特点对比 -->
+        <div class="warning-box">
+            <div class="warning-title">🔍 函数式组件 vs 普通组件</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>普通组件</th>
+                        <th>函数式组件</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>data 数据</strong></td>
+                        <td>✅ 有状态（响应式）</td>
+                        <td>❌ 无状态（只接收 props）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>this 实例</strong></td>
+                        <td>✅ 有实例（this）</td>
+                        <td>❌ 无实例（无 this）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>生命周期</strong></td>
+                        <td>✅ 完整的生命周期钩子</td>
+                        <td>❌ 无生命周期钩子</td>
+                    </tr>
+                    <tr>
+                        <td><strong>响应式系统</strong></td>
+                        <td>✅ 参与响应式系统</td>
+                        <td>❌ 不参与（更轻量）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>性能</strong></td>
+                        <td>⭐⭐⭐ 标准</td>
+                        <td>⭐⭐⭐⭐⭐ 更快（少30%+开销）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>使用场景</strong></td>
+                        <td>复杂交互、有状态</td>
+                        <td>纯展示、包装器、列表项</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Demo 1: 基础函数式组件 -->
+        <div class="demo-section">
+            <div class="demo-title">📦 Demo 1：基础函数式组件</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>理解函数式组件的定义方式和基本用法
+            </div>
+
+            <div id="app1" class="demo-app">
+                <h3>📦 函数式组件基础演示</h3>
+                <div class="card">
+                    <h4>标题列表</h4>
+                    <functional-heading level="1" text="一级标题"></functional-heading>
+                    <functional-heading level="2" text="二级标题"></functional-heading>
+                    <functional-heading level="3" text="三级标题"></functional-heading>
+                    
+                    <div style="margin-top: 20px;">
+                        <functional-button type="primary">主要按钮</functional-button>
+                        <functional-button type="success">成功按钮</functional-button>
+                        <functional-button type="danger">危险按钮</functional-button>
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <div class="success-title">✅ 关键代码</div>
+                    <p>打开浏览器控制台，观察函数式组件的渲染输出</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 函数式组件定义</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 方式1：对象式定义（带 functional: true）</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'functional-heading'</span>, {
+    <span class="code-comment">// ⭐ 关键：声明为函数式组件</span>
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    
+    <span class="code-comment">// props 和普通组件一样</span>
+    <span class="code-attribute">props</span>: {
+        level: Number,
+        text: String
+    },
+    
+    <span class="code-comment">// 渲染函数，接收 (h, context) 参数</span>
+    <span class="code-comment">// h: createElement 函数</span>
+    <span class="code-comment">// context: 上下文对象（包含 props、children、slots 等）</span>
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-comment">// 根据 level 渲染不同的标题标签</span>
+        <span class="code-keyword">const</span> tag = <span class="code-string">'h'</span> + context.props.level;
+        
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(tag, context.props.text);
+    }
+});
+
+<span class="code-comment">// 方式2：单文件组件中使用 functional 属性</span>
+<span class="code-comment">// &lt;template functional&gt;</span>
+<span class="code-comment">//   &lt;h1&gt;{{ props.text }}&lt;/h1&gt;</span>
+<span class="code-comment">// &lt;/template&gt;</span>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💡 context 上下文对象</div>
+                <p>函数式组件没有 <code>this</code>，所有数据通过 <code>context</code> 参数访问：</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><code>context.props</code> - 接收的 props</li>
+                    <li><code>context.children</code> - 子节点（VNode 数组）</li>
+                    <li><code>context.slots</code> - 插槽函数</li>
+                    <li><code>context.scopedSlots</code> - 作用域插槽</li>
+                    <li><code>context.data</code> - 传递给组件的整个数据对象</li>
+                    <li><code>context.parent</code> - 父组件实例</li>
+                    <li><code>context.listeners</code> - 事件监听器对象</li>
+                    <li><code>context.injections</code> - 注入的数据</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 2: props 和 children -->
+        <div class="demo-section">
+            <div class="demo-title">🎁 Demo 2：props 和 children 的使用</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>掌握如何在函数式组件中使用 props 和子节点
+            </div>
+
+            <div id="app2" class="demo-app">
+                <h3>🎁 使用 props 和 children</h3>
+                <div class="card">
+                    <h4>卡片包装器（函数式组件）</h4>
+                    <card-wrapper title="用户信息" icon="👤">
+                        <p>姓名：张三</p>
+                        <p>年龄：25岁</p>
+                        <p>职业：前端工程师</p>
+                    </card-wrapper>
+
+                    <card-wrapper title="订单信息" icon="📦">
+                        <p>订单号：2024022500001</p>
+                        <p>金额：¥299</p>
+                        <p>状态：已发货</p>
+                    </card-wrapper>
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-title">💡 观察重点</div>
+                    <p><strong>card-wrapper</strong> 是一个函数式组件，它：</p>
+                    <ul style="margin-left: 20px;">
+                        <li>接收 <code>title</code> 和 <code>icon</code> props</li>
+                        <li>使用 <code>context.children</code> 渲染子内容</li>
+                        <li>无状态、无实例，纯粹的"包装器"角色</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 核心代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 函数式卡片包装器</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'card-wrapper'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    <span class="code-attribute">props</span>: {
+        title: String,
+        icon: String
+    },
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-comment">// 从 context 中解构 props 和 children</span>
+        <span class="code-keyword">const</span> { props, children } = context;
+        
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+            <span class="code-attribute">class</span>: <span class="code-string">'item-box'</span>
+        }, [
+            <span class="code-comment">// 标题栏</span>
+            <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+                <span class="code-attribute">style</span>: {
+                    fontWeight: <span class="code-string">'bold'</span>,
+                    fontSize: <span class="code-string">'1.2em'</span>,
+                    marginBottom: <span class="code-string">'10px'</span>,
+                    color: <span class="code-string">'#667eea'</span>
+                }
+            }, [
+                props.icon + <span class="code-string">' '</span> + props.title
+            ]),
+            
+            <span class="code-comment">// 内容区域（渲染 children）</span>
+            <span class="code-function">h</span>(<span class="code-string">'div'</span>, children)
+        ]);
+    }
+});
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ children 使用要点</div>
+                <ul style="margin-left: 20px;">
+                    <li><code>context.children</code> 是一个 <strong>VNode 数组</strong></li>
+                    <li>可以直接传递给 <code>h()</code> 函数作为子节点</li>
+                    <li>可以遍历、过滤、修改 children</li>
+                    <li>常用于包装器组件（Wrapper Components）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 3: 插槽的使用 -->
+        <div class="demo-section">
+            <div class="demo-title">🎰 Demo 3：插槽在函数式组件中的使用</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>理解函数式组件中如何使用具名插槽和作用域插槽
+            </div>
+
+            <div id="app3" class="demo-app">
+                <h3>🎰 函数式组件的插槽</h3>
+                <div class="card">
+                    <h4>布局组件（函数式）</h4>
+                    <layout-wrapper>
+                        <template v-slot:header>
+                            <div style="background: #667eea; color: white; padding: 10px; text-align: center;">
+                                页面头部
+                            </div>
+                        </template>
+                        
+                        <div style="padding: 20px;">
+                            这是主要内容区域（默认插槽）
+                        </div>
+                        
+                        <template v-slot:footer>
+                            <div style="background: #e0e0e0; padding: 10px; text-align: center;">
+                                页面底部 © 2026
+                            </div>
+                        </template>
+                    </layout-wrapper>
+                </div>
+
+                <div class="card">
+                    <h4>列表项组件（作用域插槽）</h4>
+                    <list-item 
+                        v-for="item in users" 
+                        :key="item.id" 
+                        :item="item"
+                        v-slot="{ item }">
+                        <strong>{{ item.name }}</strong> - {{ item.role }}
+                    </list-item>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 插槽代码实现</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 1. 具名插槽示例</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'layout-wrapper'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-comment">// context.slots() 返回插槽函数对象</span>
+        <span class="code-keyword">const</span> slots = context.<span class="code-function">slots</span>();
+        
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+            <span class="code-attribute">style</span>: { border: <span class="code-string">'2px solid #667eea'</span>, borderRadius: <span class="code-string">'8px'</span> }
+        }, [
+            <span class="code-comment">// 渲染具名插槽</span>
+            slots.header,         <span class="code-comment">// header 插槽</span>
+            slots.default,        <span class="code-comment">// 默认插槽</span>
+            slots.footer          <span class="code-comment">// footer 插槽</span>
+        ]);
+    }
+});
+
+<span class="code-comment">// 2. 作用域插槽示例</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'list-item'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    <span class="code-attribute">props</span>: [<span class="code-string">'item'</span>],
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-comment">// scopedSlots 是作用域插槽对象</span>
+        <span class="code-keyword">const</span> scopedSlots = context.scopedSlots;
+        
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+            <span class="code-attribute">class</span>: <span class="code-string">'item-box'</span>
+        }, [
+            <span class="code-comment">// 调用作用域插槽，传入数据</span>
+            scopedSlots.default
+                ? scopedSlots.<span class="code-function">default</span>({ item: context.props.item })
+                : context.props.item.name
+        ]);
+    }
+});
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💡 插槽使用要点</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>插槽类型</th>
+                            <th>访问方式</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>默认插槽</strong></td>
+                            <td><code>context.slots().default</code></td>
+                            <td>返回 VNode 数组</td>
+                        </tr>
+                        <tr>
+                            <td><strong>具名插槽</strong></td>
+                            <td><code>context.slots().slotName</code></td>
+                            <td>按名称访问</td>
+                        </tr>
+                        <tr>
+                            <td><strong>作用域插槽</strong></td>
+                            <td><code>context.scopedSlots.default(data)</code></td>
+                            <td>函数，可传入数据</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Demo 4: 性能对比 -->
+        <div class="demo-section">
+            <div class="demo-title">⚡ Demo 4：性能对比实验</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>直观感受函数式组件与普通组件的性能差异
+            </div>
+
+            <div id="app4" class="demo-app">
+                <h3>⚡ 渲染性能对比</h3>
+                <div class="card">
+                    <button @click="renderNormal" class="btn btn-primary">渲染1000个普通组件</button>
+                    <button @click="renderFunctional" class="btn btn-success">渲染1000个函数式组件</button>
+                    <button @click="clearItems" class="btn btn-danger">清空</button>
+                </div>
+
+                <div class="card" v-if="normalTime || functionalTime">
+                    <h4>📊 性能对比结果</h4>
+                    <div class="compare-container">
+                        <div class="compare-box">
+                            <div class="compare-title">普通组件</div>
+                            <p><strong>渲染时间：</strong>{{ normalTime }} ms</p>
+                            <div class="performance-meter">
+                                <div class="performance-fill" :style="{ width: normalTime ? '100%' : '0%' }">
+                                    100%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="compare-box compare-good">
+                            <div class="compare-title">函数式组件 ⚡</div>
+                            <p><strong>渲染时间：</strong>{{ functionalTime }} ms</p>
+                            <div class="performance-meter">
+                                <div class="performance-fill" :style="{ width: normalTime ? (functionalTime / normalTime * 100) + '%' : '0%' }">
+                                    {{ normalTime ? Math.round((1 - functionalTime / normalTime) * 100) : 0 }}% 更快
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="success-box" v-if="normalTime && functionalTime">
+                        <div class="success-title">✅ 性能提升</div>
+                        <p style="font-size: 1.2em;">
+                            函数式组件比普通组件快 <strong style="color: #4caf50; font-size: 1.3em;">{{ Math.round((1 - functionalTime / normalTime) * 100) }}%</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <simple-item v-for="item in normalItems" :key="'n' + item" :value="item"></simple-item>
+                        <functional-simple-item v-for="item in functionalItems" :key="'f' + item" :value="item"></functional-simple-item>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 对比代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 普通组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'simple-item'</span>, {
+    <span class="code-attribute">props</span>: [<span class="code-string">'value'</span>],
+    <span class="code-attribute">data</span>() {
+        <span class="code-keyword">return</span> {};  <span class="code-comment">// 有 data（即使为空）</span>
+    },
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="item-box"&gt;
+            Item {{ value }}
+        &lt;/div&gt;
+    `</span>
+});
+
+<span class="code-comment">// 函数式组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'functional-simple-item'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,  <span class="code-comment">// ⭐ 关键区别</span>
+    <span class="code-attribute">props</span>: [<span class="code-string">'value'</span>],
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+            <span class="code-attribute">class</span>: <span class="code-string">'item-box'</span>
+        }, <span class="code-string">'Item '</span> + context.props.value);
+    }
+});
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">📊 为什么函数式组件更快？</div>
+                <ol style="margin-left: 20px;">
+                    <li><strong>无实例开销：</strong>不需要创建组件实例（无 <code>this</code>）</li>
+                    <li><strong>无响应式系统：</strong>不需要初始化响应式数据（无 <code>data</code>）</li>
+                    <li><strong>无生命周期：</strong>不需要调用生命周期钩子</li>
+                    <li><strong>直接渲染：</strong>直接调用 render 函数生成 VNode</li>
+                    <li><strong>更少内存：</strong>减少约 30%-40% 的内存占用</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Demo 5: 实战案例 -->
+        <div class="demo-section">
+            <div class="demo-title">🎯 Demo 5：实战案例 - 智能列表包装器</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>综合运用函数式组件解决实际问题
+            </div>
+
+            <div id="app5" class="demo-app">
+                <h3>🎯 智能列表包装器</h3>
+                <div class="card">
+                    <smart-list :items="products" empty-text="暂无商品">
+                        <template v-slot:item="{ item }">
+                            <div class="item-box">
+                                <h4>{{ item.name }}</h4>
+                                <p>价格：<strong style="color: #f44336;">¥{{ item.price }}</strong></p>
+                                <p>库存：{{ item.stock }} 件</p>
+                                <span class="badge" :class="item.stock > 10 ? 'badge-success' : 'badge-warning'">
+                                    {{ item.stock > 10 ? '充足' : '紧张' }}
+                                </span>
+                            </div>
+                        </template>
+                    </smart-list>
+                </div>
+
+                <div class="card">
+                    <button @click="addProduct" class="btn btn-success">添加商品</button>
+                    <button @click="clearProducts" class="btn btn-danger">清空商品</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 智能列表实现</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 智能列表包装器（函数式组件）</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'smart-list'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    <span class="code-attribute">props</span>: {
+        items: {
+            <span class="code-attribute">type</span>: Array,
+            <span class="code-attribute">default</span>: () =&gt; []
+        },
+        emptyText: {
+            <span class="code-attribute">type</span>: String,
+            <span class="code-attribute">default</span>: <span class="code-string">'暂无数据'</span>
+        }
+    },
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-keyword">const</span> { props, scopedSlots } = context;
+        
+        <span class="code-comment">// 如果没有数据，显示空状态</span>
+        <span class="code-keyword">if</span> (!props.items || props.items.length === <span class="code-number">0</span>) {
+            <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+                <span class="code-attribute">style</span>: {
+                    padding: <span class="code-string">'40px'</span>,
+                    textAlign: <span class="code-string">'center'</span>,
+                    color: <span class="code-string">'#999'</span>,
+                    background: <span class="code-string">'#f5f5f5'</span>,
+                    borderRadius: <span class="code-string">'8px'</span>
+                }
+            }, [
+                <span class="code-function">h</span>(<span class="code-string">'div'</span>, { <span class="code-attribute">style</span>: { fontSize: <span class="code-string">'3em'</span> } }, <span class="code-string">'📭'</span>),
+                <span class="code-function">h</span>(<span class="code-string">'div'</span>, { <span class="code-attribute">style</span>: { marginTop: <span class="code-string">'10px'</span> } }, props.emptyText)
+            ]);
+        }
+        
+        <span class="code-comment">// 有数据时，渲染列表</span>
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, [
+            <span class="code-comment">// 统计信息</span>
+            <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+                <span class="code-attribute">style</span>: {
+                    marginBottom: <span class="code-string">'15px'</span>,
+                    padding: <span class="code-string">'10px'</span>,
+                    background: <span class="code-string">'#e3f2fd'</span>,
+                    borderRadius: <span class="code-string">'5px'</span>
+                }
+            }, <span class="code-string">`共 ${props.items.length} 条数据`</span>),
+            
+            <span class="code-comment">// 渲染每一项</span>
+            props.items.<span class="code-function">map</span>(item =&gt; {
+                <span class="code-keyword">return</span> scopedSlots.item
+                    ? scopedSlots.<span class="code-function">item</span>({ item })
+                    : <span class="code-function">h</span>(<span class="code-string">'div'</span>, JSON.<span class="code-function">stringify</span>(item));
+            })
+        ]);
+    }
+});
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ 这个案例展示了函数式组件的优势</div>
+                <ul style="margin-left: 20px;">
+                    <li>✅ <strong>纯展示逻辑：</strong>根据 props.items 渲染，无需内部状态</li>
+                    <li>✅ <strong>高性能：</strong>列表项很多时，函数式组件显著提升性能</li>
+                    <li>✅ <strong>灵活的插槽：</strong>支持作用域插槽，自定义每项的渲染</li>
+                    <li>✅ <strong>智能空状态：</strong>自动判断并显示空状态提示</li>
+                    <li>✅ <strong>轻量级：</strong>无实例、无响应式，非常轻量</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 使用场景总结 -->
+        <div class="tip-box">
+            <div class="tip-title">🎯 函数式组件的适用场景</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>场景</th>
+                        <th>说明</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>纯展示组件</strong></td>
+                        <td>只根据 props 渲染，无交互</td>
+                        <td>标签、徽章、图标</td>
+                    </tr>
+                    <tr>
+                        <td><strong>包装器组件</strong></td>
+                        <td>为子组件添加样式或结构</td>
+                        <td>卡片容器、布局组件</td>
+                    </tr>
+                    <tr>
+                        <td><strong>列表项组件</strong></td>
+                        <td>在大列表中渲染，需要高性能</td>
+                        <td>表格行、商品卡片</td>
+                    </tr>
+                    <tr>
+                        <td><strong>高阶组件（HOC）</strong></td>
+                        <td>接收组件，返回增强的组件</td>
+                        <td>权限包装、错误边界</td>
+                    </tr>
+                    <tr>
+                        <td><strong>路由视图包装</strong></td>
+                        <td>为路由视图添加过渡动画</td>
+                        <td>keep-alive 包装器</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 何时不应该用 -->
+        <div class="error-box">
+            <div class="error-title">❌ 何时不应该使用函数式组件？</div>
+            <div class="grid-2">
+                <div>
+                    <h4 style="color: #f44336;">不适合的场景</h4>
+                    <ul style="margin-left: 20px;">
+                        <li>需要响应式数据（data）</li>
+                        <li>需要内部状态管理</li>
+                        <li>需要生命周期钩子</li>
+                        <li>需要使用 ref 访问</li>
+                        <li>需要使用 computed 或 watch</li>
+                        <li>需要复杂的事件处理</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: #4caf50;">应该用普通组件</h4>
+                    <ul style="margin-left: 20px;">
+                        <li>表单输入组件</li>
+                        <li>可交互的复杂组件</li>
+                        <li>需要缓存（keep-alive）的组件</li>
+                        <li>需要在组件内发送请求</li>
+                        <li>需要定时器或副作用</li>
+                        <li>业务逻辑复杂的组件</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面试题 -->
+        <div class="warning-box">
+            <div class="warning-title">🎓 面试常考题（5题）</div>
+            
+            <div class="card">
+                <div class="card-title">❓ 问题 1：什么是函数式组件？它有什么特点？</div>
+                <p><strong>答案：</strong></p>
+                <p>函数式组件是<strong>无状态（没有 data）、无实例（没有 this）</strong>的组件。特点包括：</p>
+                <ol style="margin-left: 20px;">
+                    <li><strong>声明方式：</strong>设置 <code>functional: true</code></li>
+                    <li><strong>无状态：</strong>没有 data、computed、watch</li>
+                    <li><strong>无实例：</strong>没有 this，不能使用 this.$emit 等</li>
+                    <li><strong>无生命周期：</strong>没有 created、mounted 等钩子</li>
+                    <li><strong>高性能：</strong>渲染开销比普通组件小 30%-40%</li>
+                    <li><strong>纯函数：</strong>相同的 props 总是产生相同的输出</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 2：函数式组件的 context 参数包含哪些属性？</div>
+                <p><strong>答案：</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>属性</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>context.props</code></td>
+                            <td>接收的 props 对象</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.children</code></td>
+                            <td>VNode 子节点数组</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.slots()</code></td>
+                            <td>插槽函数，返回具名插槽对象</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.scopedSlots</code></td>
+                            <td>作用域插槽对象</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.data</code></td>
+                            <td>传递给组件的完整数据对象</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.parent</code></td>
+                            <td>父组件实例引用</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.listeners</code></td>
+                            <td>事件监听器对象（v-on）</td>
+                        </tr>
+                        <tr>
+                            <td><code>context.injections</code></td>
+                            <td>通过 inject 注入的数据</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 3：函数式组件为什么性能更好？</div>
+                <p><strong>答案（5个原因）：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li><strong>无实例创建开销：</strong>不需要 <code>new Vue()</code> 创建组件实例</li>
+                    <li><strong>无响应式系统：</strong>不需要使用 <code>Object.defineProperty</code> 将 data 转为响应式</li>
+                    <li><strong>无生命周期：</strong>不需要初始化和调用生命周期钩子</li>
+                    <li><strong>无上下文绑定：</strong>不需要绑定 this 上下文</li>
+                    <li><strong>直接渲染：</strong>直接调用 render 函数生成 VNode，跳过很多中间步骤</li>
+                </ol>
+                <p style="margin-top: 15px;"><strong>性能提升：</strong>在大量渲染场景下，性能提升 <strong>30%-40%</strong></p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 4：函数式组件和普通组件如何选择？</div>
+                <p><strong>答案：</strong></p>
+                <div class="grid-2">
+                    <div class="compare-box compare-good">
+                        <div class="compare-title">✅ 用函数式组件</div>
+                        <ul style="margin-left: 20px;">
+                            <li>纯展示组件（只根据 props 渲染）</li>
+                            <li>包装器组件（如布局容器）</li>
+                            <li>列表项组件（大量渲染）</li>
+                            <li>无交互、无状态</li>
+                            <li>性能要求高的场景</li>
+                        </ul>
+                    </div>
+                    <div class="compare-box">
+                        <div class="compare-title">✅ 用普通组件</div>
+                        <ul style="margin-left: 20px;">
+                            <li>需要内部状态（data）</li>
+                            <li>需要生命周期钩子</li>
+                            <li>需要响应式数据</li>
+                            <li>需要使用 ref 访问</li>
+                            <li>业务逻辑复杂</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="margin-top: 15px;"><strong>记忆口诀：</strong>纯展示用函数式，有状态用普通 ✅</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 5：函数式组件可以使用 v-model 吗？</div>
+                <p><strong>答案：</strong></p>
+                <p><strong>❌ 不能直接使用 v-model</strong>，原因如下：</p>
+                <ol style="margin-left: 20px;">
+                    <li><code>v-model</code> 需要组件响应 <code>input</code> 事件并更新 <code>value</code> prop</li>
+                    <li>函数式组件<strong>没有实例</strong>，不能使用 <code>this.$emit()</code></li>
+                    <li>函数式组件<strong>无状态</strong>，不能维护内部 value</li>
+                </ol>
+                <p style="margin-top: 15px;"><strong>替代方案：</strong></p>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 通过 context.listeners 手动监听事件</span>
+<span class="code-function">render</span>(h, context) {
+    <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'input'</span>, {
+        <span class="code-attribute">domProps</span>: {
+            value: context.props.value
+        },
+        <span class="code-attribute">on</span>: {
+            <span class="code-function">input</span>(event) {
+                <span class="code-comment">// 触发父组件的监听器</span>
+                context.listeners.<span class="code-function">input</span>(event.target.value);
+            }
+        }
+    });
+}
+                </div>
+                <p><strong>结论：</strong>需要 v-model 的表单组件应使用<strong>普通组件</strong> ✅</p>
+            </div>
+        </div>
+
+        <!-- 最佳实践 -->
+        <div class="success-box">
+            <div class="success-title">✅ 函数式组件最佳实践</div>
+            
+            <div class="card">
+                <div class="card-title">1️⃣ 优先考虑性能敏感场景</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// ✅ 好的使用场景：大列表的列表项</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'list-item'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    <span class="code-attribute">props</span>: [<span class="code-string">'item'</span>],
+    <span class="code-function">render</span>(h, ctx) {
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, ctx.props.item.name);
+    }
+});
+
+<span class="code-comment">// 在父组件中渲染1000+项</span>
+<span class="code-comment">// &lt;list-item v-for="item in largeList" :key="item.id" :item="item" /&gt;</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">2️⃣ 善用 context.data 继承属性</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 包装器组件时，使用 context.data 继承所有属性和事件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'wrapper'</span>, {
+    <span class="code-attribute">functional</span>: <span class="code-keyword">true</span>,
+    <span class="code-function">render</span>(h, context) {
+        <span class="code-keyword">return</span> <span class="code-function">h</span>(<span class="code-string">'div'</span>, {
+            <span class="code-comment">// 继承父组件传递的所有 class、style、attrs、on 等</span>
+            ...<span class="code-keyword">context</span>.data,
+            <span class="code-attribute">class</span>: [context.data.class, <span class="code-string">'wrapper'</span>]
+        }, context.children);
+    }
+});
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">3️⃣ 命名规范</div>
+                <p>建议在函数式组件名称中体现其特性：</p>
+                <ul style="margin-left: 20px;">
+                    <li><code>functional-xxx</code> - 明确标识为函数式组件</li>
+                    <li>或使用 <code>Pure</code> 前缀：<code>PureListItem</code></li>
+                    <li>文件名：<code>FunctionalButton.vue</code> 或 <code>Button.functional.vue</code></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title">4️⃣ 配合 v-once 进一步优化</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 对于完全静态的内容，结合 v-once 使用</span>
+<span class="code-comment">// &lt;functional-header v-once /&gt;</span>
+
+<span class="code-comment">// 组件只渲染一次，永不更新</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 总结 -->
+        <div class="intro-box" style="margin-top: 30px;">
+            <div class="intro-title">🎯 核心总结</div>
+            <ol style="font-size: 1.1em; line-height: 2;">
+                <li><strong>定义：</strong>函数式组件 = 无状态 + 无实例 + 纯渲染函数</li>
+                <li><strong>声明：</strong>设置 <code>functional: true</code></li>
+                <li><strong>参数：</strong>render(h, context)，通过 context 访问 props/slots/listeners 等</li>
+                <li><strong>性能：</strong>比普通组件快 30%-40%（无实例、无响应式）</li>
+                <li><strong>适用场景：</strong>纯展示、包装器、列表项、高阶组件</li>
+                <li><strong>不适用：</strong>需要状态、生命周期、v-model、复杂交互</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // ====== Demo 1: 基础函数式组件 ======
+        Vue.component('functional-heading', {
+            functional: true,
+            props: {
+                level: Number,
+                text: String
+            },
+            render(h, context) {
+                const tag = 'h' + context.props.level;
+                return h(tag, {
+                    style: {
+                        color: '#667eea',
+                        margin: '10px 0'
+                    }
+                }, context.props.text);
+            }
+        });
+
+        Vue.component('functional-button', {
+            functional: true,
+            props: {
+                type: {
+                    type: String,
+                    default: 'primary'
+                }
+            },
+            render(h, context) {
+                const typeClass = 'btn-' + context.props.type;
+                return h('button', {
+                    class: ['btn', typeClass]
+                }, context.children);
+            }
+        });
+
+        new Vue({
+            el: '#app1'
+        });
+
+        // ====== Demo 2: props 和 children ======
+        Vue.component('card-wrapper', {
+            functional: true,
+            props: {
+                title: String,
+                icon: String
+            },
+            render(h, context) {
+                const { props, children } = context;
+                
+                return h('div', {
+                    class: 'item-box'
+                }, [
+                    h('div', {
+                        style: {
+                            fontWeight: 'bold',
+                            fontSize: '1.2em',
+                            marginBottom: '10px',
+                            color: '#667eea'
+                        }
+                    }, [
+                        props.icon + ' ' + props.title
+                    ]),
+                    h('div', children)
+                ]);
+            }
+        });
+
+        new Vue({
+            el: '#app2'
+        });
+
+        // ====== Demo 3: 插槽使用 ======
+        Vue.component('layout-wrapper', {
+            functional: true,
+            render(h, context) {
+                const slots = context.slots();
+                
+                return h('div', {
+                    style: {
+                        border: '2px solid #667eea',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                    }
+                }, [
+                    slots.header,
+                    slots.default,
+                    slots.footer
+                ]);
+            }
+        });
+
+        Vue.component('list-item', {
+            functional: true,
+            props: ['item'],
+            render(h, context) {
+                const scopedSlots = context.scopedSlots;
+                
+                return h('div', {
+                    class: 'item-box'
+                }, [
+                    scopedSlots.default
+                        ? scopedSlots.default({ item: context.props.item })
+                        : context.props.item.name
+                ]);
+            }
+        });
+
+        new Vue({
+            el: '#app3',
+            data() {
+                return {
+                    users: [
+                        { id: 1, name: '张三', role: '前端工程师' },
+                        { id: 2, name: '李四', role: '后端工程师' },
+                        { id: 3, name: '王五', role: '产品经理' }
+                    ]
+                }
+            }
+        });
+
+        // ====== Demo 4: 性能对比 ======
+        // 普通组件
+        Vue.component('simple-item', {
+            props: ['value'],
+            data() {
+                return {};
+            },
+            template: `
+                <div class="item-box" style="padding: 5px 10px; margin: 2px 0;">
+                    Item {{ value }}
+                </div>
+            `
+        });
+
+        // 函数式组件
+        Vue.component('functional-simple-item', {
+            functional: true,
+            props: ['value'],
+            render(h, context) {
+                return h('div', {
+                    class: 'item-box',
+                    style: {
+                        padding: '5px 10px',
+                        margin: '2px 0'
+                    }
+                }, 'Item ' + context.props.value);
+            }
+        });
+
+        new Vue({
+            el: '#app4',
+            data() {
+                return {
+                    normalItems: [],
+                    functionalItems: [],
+                    normalTime: 0,
+                    functionalTime: 0
+                }
+            },
+            methods: {
+                renderNormal() {
+                    this.clearItems();
+                    const start = performance.now();
+                    
+                    this.$nextTick(() => {
+                        this.normalItems = Array.from({ length: 1000 }, (_, i) => i + 1);
+                        
+                        this.$nextTick(() => {
+                            const end = performance.now();
+                            this.normalTime = Math.round(end - start);
+                            console.log('普通组件渲染时间:', this.normalTime, 'ms');
+                        });
+                    });
+                },
+                renderFunctional() {
+                    this.clearItems();
+                    const start = performance.now();
+                    
+                    this.$nextTick(() => {
+                        this.functionalItems = Array.from({ length: 1000 }, (_, i) => i + 1);
+                        
+                        this.$nextTick(() => {
+                            const end = performance.now();
+                            this.functionalTime = Math.round(end - start);
+                            console.log('函数式组件渲染时间:', this.functionalTime, 'ms');
+                        });
+                    });
+                },
+                clearItems() {
+                    this.normalItems = [];
+                    this.functionalItems = [];
+                }
+            }
+        });
+
+        // ====== Demo 5: 实战案例 ======
+        Vue.component('smart-list', {
+            functional: true,
+            props: {
+                items: {
+                    type: Array,
+                    default: () => []
+                },
+                emptyText: {
+                    type: String,
+                    default: '暂无数据'
+                }
+            },
+            render(h, context) {
+                const { props, scopedSlots } = context;
+                
+                if (!props.items || props.items.length === 0) {
+                    return h('div', {
+                        style: {
+                            padding: '40px',
+                            textAlign: 'center',
+                            color: '#999',
+                            background: '#f5f5f5',
+                            borderRadius: '8px'
+                        }
+                    }, [
+                        h('div', { style: { fontSize: '3em' } }, '📭'),
+                        h('div', { style: { marginTop: '10px' } }, props.emptyText)
+                    ]);
+                }
+                
+                return h('div', [
+                    h('div', {
+                        style: {
+                            marginBottom: '15px',
+                            padding: '10px',
+                            background: '#e3f2fd',
+                            borderRadius: '5px'
+                        }
+                    }, `共 ${props.items.length} 条数据`),
+                    
+                    props.items.map(item => {
+                        return scopedSlots.item
+                            ? scopedSlots.item({ item })
+                            : h('div', JSON.stringify(item));
+                    })
+                ]);
+            }
+        });
+
+        new Vue({
+            el: '#app5',
+            data() {
+                return {
+                    products: [
+                        { id: 1, name: 'MacBook Pro', price: 12999, stock: 15 },
+                        { id: 2, name: 'iPhone 15', price: 5999, stock: 8 },
+                        { id: 3, name: 'AirPods Pro', price: 1999, stock: 20 }
+                    ]
+                }
+            },
+            methods: {
+                addProduct() {
+                    const id = this.products.length + 1;
+                    this.products.push({
+                        id,
+                        name: `产品 ${id}`,
+                        price: Math.floor(Math.random() * 10000) + 1000,
+                        stock: Math.floor(Math.random() * 30) + 1
+                    });
+                },
+                clearProducts() {
+                    this.products = [];
+                }
+            }
+        });
+    </script>
+</body>
+</html>
