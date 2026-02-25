@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue综合实战 - 任务管理系统</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 【知识点10】绑定样式 - CSS基础样式 */
+        #app {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .app-title {
+            text-align: center;
+            color: white;
+            font-size: 42px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .knowledge-tips {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .knowledge-tips h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .knowledge-tips ul {
+            margin-left: 20px;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        /* Header样式 */
+        .todo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .priority-select {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            padding: 12px 30px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .add-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Filter样式 */
+        .todo-filter {
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        /* 【知识点10】绑定样式 - 动态class */
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* List样式 */
+        .todo-list {
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* Item样式 */
+        .todo-item {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .todo-item:hover {
+            background: #f7fafc;
+        }
+
+        /* 【知识点10】绑定样式 - 条件样式 */
+        .todo-item.completed {
+            background: #f0fff4;
+        }
+
+        .todo-item.editing {
+            background: #fffaf0;
+        }
+
+        .priority-badge {
+            width: 8px;
+            height: 40px;
+            border-radius: 4px;
+        }
+
+        .priority-high {
+            background: #f56565;
+        }
+
+        .priority-medium {
+            background: #ed8936;
+        }
+
+        .priority-low {
+            background: #48bb78;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .todo-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .todo-text {
+            font-size: 16px;
+            color: #2d3748;
+            transition: all 0.3s;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #a0aec0;
+        }
+
+        .todo-edit-input {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .todo-meta {
+            font-size: 12px;
+            color: #718096;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .priority-text {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .priority-text.high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .priority-text.medium {
+            background: #feebc8;
+            color: #c05621;
+        }
+
+        .priority-text.low {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #4299e1;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #3182ce;
+        }
+
+        .delete-btn {
+            background: #fc8181;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #f56565;
+        }
+
+        .save-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #cbd5e0;
+            color: #2d3748;
+        }
+
+        /* Footer样式 */
+        .todo-footer {
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .footer-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .footer-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .clear-btn {
+            background: #fc8181;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #f56565;
+        }
+
+        .clear-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        /* 滚动条样式 */
+        .todo-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .todo-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .todo-list::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .todo-item {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1 class="app-title">📝 任务管理系统</h1>
+        
+        <!-- 知识点提示面板 -->
+        <div class="knowledge-tips">
+            <h4>🎯 本项目涵盖的Vue知识点：</h4>
+            <ul>
+                <li><strong>基础语法：</strong>模板语法、数据绑定(v-model)、事件处理(@click、@keyup.enter、修饰符)</li>
+                <li><strong>核心特性：</strong>计算属性(统计)、监视属性(localStorage持久化)、过滤器(时间格式化)</li>
+                <li><strong>渲染相关：</strong>条件渲染(v-if/v-show)、列表渲染(v-for)、列表过滤、绑定样式(动态class/style)</li>
+                <li><strong>高级特性：</strong>生命周期钩子(mounted/beforeDestroy)、自定义指令(v-focus)、插槽(slot)</li>
+                <li><strong>组件通信：</strong>props(父→子)、自定义事件(子→父)、全局事件总线(跨组件)</li>
+            </ul>
+        </div>
+
+        <div class="main-container">
+            <!-- 
+                【知识点15-18】组件化开发
+                - 组件定义与使用
+                - props传递数据
+                - 自定义事件通信
+                - 插槽使用
+            -->
+            <todo-app></todo-app>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 【知识点18】全局事件总线 - 用于跨组件通信
+        // ============================================
+        const eventBus = new Vue();
+
+        // ============================================
+        // 【知识点16】自定义指令 - v-focus自动聚焦
+        // ============================================
+        Vue.directive('focus', {
+            inserted(el) {
+                el.focus();
+            },
+            update(el, binding) {
+                if (binding.value) {
+                    el.focus();
+                }
+            }
+        });
+
+        // ============================================
+        // 【知识点14】过滤器 - 格式化时间
+        // ============================================
+        Vue.filter('formatTime', function(timestamp) {
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        });
+
+        // ============================================
+        // 组件1: TodoHeader - 添加任务的表单
+        // ============================================
+        const TodoHeader = {
+            template: `
+                <div class="todo-header">
+                    <div class="input-wrapper">
+                        <!-- 【知识点3】数据绑定 - v-model双向绑定 -->
+                        <input 
+                            type="text" 
+                            v-model.trim="taskTitle"
+                            @keyup.enter="addTask"
+                            placeholder="输入任务标题，按回车添加..."
+                            class="todo-input"
+                        >
+                        
+                        <!-- 【知识点13】收集表单数据 - select选择优先级 -->
+                        <select v-model="priority" class="priority-select">
+                            <option value="low">低优先级</option>
+                            <option value="medium">中优先级</option>
+                            <option value="high">高优先级</option>
+                        </select>
+                        
+                        <!-- 【知识点7】事件处理 - @click事件 -->
+                        <button 
+                            @click="addTask" 
+                            :disabled="!taskTitle"
+                            class="add-btn"
+                        >
+                            ➕ 添加任务
+                        </button>
+                    </div>
+                    
+                    <!-- 【知识点18】插槽 - 允许父组件自定义额外内容 -->
+                    <slot name="extra-controls"></slot>
+                </div>
+            `,
+            data() {
+                return {
+                    taskTitle: '',
+                    priority: 'medium'
+                }
+            },
+            methods: {
+                // 【知识点7】事件处理 - 添加任务方法
+                addTask() {
+                    if (!this.taskTitle) return;
+                    
+                    const newTask = {
+                        id: Date.now(),
+                        title: this.taskTitle,
+                        completed: false,
+                        priority: this.priority,
+                        createTime: Date.now()
+                    };
+                    
+                    // 【知识点17】自定义事件 - 子组件向父组件传递数据
+                    this.$emit('add-task', newTask);
+                    
+                    // 清空输入
+                    this.taskTitle = '';
+                    this.priority = 'medium';
+                }
+            }
+        };
+
+        // ============================================
+        // 组件2: TodoFilter - 任务筛选器
+        // ============================================
+        const TodoFilter = {
+            template: `
+                <div class="todo-filter">
+                    <div class="filter-buttons">
+                        <!-- 【知识点10】绑定样式 - 动态class -->
+                        <button 
+                            v-for="filter in filters" 
+                            :key="filter.value"
+                            @click="changeFilter(filter.value)"
+                            :class="['filter-btn', {active: currentFilter === filter.value}]"
+                        >
+                            {{ filter.label }} ({{ getCount(filter.value) }})
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <!-- 【知识点8】计算属性 - 全选功能的computed get/set -->
+                            <input 
+                                type="checkbox" 
+                                v-model="allChecked"
+                                style="width: 18px; height: 18px;"
+                            >
+                            <span style="font-size: 14px; color: #4a5568;">全选</span>
+                        </label>
+                    </div>
+                </div>
+            `,
+            // 【知识点16】props - 接收父组件传递的数据
+            props: {
+                currentFilter: {
+                    type: String,
+                    required: true
+                },
+                tasks: {
+                    type: Array,
+                    required: true
+                }
+            },
+            data() {
+                return {
+                    filters: [
+                        { value: 'all', label: '全部' },
+                        { value: 'active', label: '进行中' },
+                        { value: 'completed', label: '已完成' }
+                    ]
+                }
+            },
+            computed: {
+                // 【知识点8】计算属性 - 全选状态（带get和set）
+                allChecked: {
+                    get() {
+                        return this.tasks.length > 0 && this.tasks.every(task => task.completed);
+                    },
+                    set(value) {
+                        // 【知识点18】全局事件总线 - 跨组件通信
+                        eventBus.$emit('toggle-all', value);
+                    }
+                }
+            },
+            methods: {
+                changeFilter(filterValue) {
+                    this.$emit('change-filter', filterValue);
+                },
+                getCount(filterValue) {
+                    if (filterValue === 'all') return this.tasks.length;
+                    if (filterValue === 'active') return this.tasks.filter(t => !t.completed).length;
+                    if (filterValue === 'completed') return this.tasks.filter(t => t.completed).length;
+                }
+            }
+        };
+
+        // ============================================
+        // 组件3: TodoItem - 单个任务项
+        // ============================================
+        const TodoItem = {
+            template: `
+                <div 
+                    :class="['todo-item', {completed: task.completed, editing: isEditing}]"
+                    @dblclick="startEdit"
+                    @click="handleItemClick"
+                >
+                    <!-- 【知识点10】绑定样式 - 优先级颜色条 -->
+                    <div 
+                        class="priority-badge" 
+                        :class="'priority-' + task.priority"
+                    ></div>
+                    
+                    <!-- 【知识点3】数据绑定 - checkbox双向绑定 -->
+                    <input 
+                        type="checkbox" 
+                        v-model="task.completed"
+                        @change="toggleTask"
+                        class="todo-checkbox"
+                    >
+                    
+                    <div class="todo-content">
+                        <!-- 【知识点11】条件渲染 - v-if/v-else切换编辑状态 -->
+                        <div v-if="!isEditing">
+                            <div class="todo-text">{{ task.title }}</div>
+                            <div class="todo-meta">
+                                <span 
+                                    class="priority-text" 
+                                    :class="task.priority"
+                                >
+                                    {{ priorityText }}
+                                </span>
+                                <!-- 【知识点14】过滤器 - 格式化创建时间 -->
+                                <span>创建于: {{ task.createTime | formatTime }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 【知识点16】自定义指令 - v-focus自动聚焦 -->
+                        <input 
+                            v-else
+                            v-model="editTitle"
+                            v-focus="isEditing"
+                            @keyup.enter="saveEdit"
+                            @keyup.esc="cancelEdit"
+                            class="todo-edit-input"
+                        >
+                    </div>
+                    
+                    <div class="todo-actions">
+                        <!-- 【知识点11】条件渲染 - 根据编辑状态显示不同按钮 -->
+                        <template v-if="!isEditing">
+                            <button @click="startEdit" class="action-btn edit-btn">
+                                ✏️ 编辑
+                            </button>
+                            <!-- 【知识点7】事件修饰符 - .stop阻止冒泡 -->
+                            <button @click.stop="deleteTask" class="action-btn delete-btn">
+                                🗑️ 删除
+                            </button>
+                        </template>
+                        <template v-else>
+                            <!-- 【知识点7】事件修饰符 - 使用@mousedown.prevent避免触发输入框blur -->
+                            <button @mousedown.prevent @click="saveEdit" class="action-btn save-btn">
+                                ✅ 保存
+                            </button>
+                            <button @mousedown.prevent @click="cancelEdit" class="action-btn cancel-btn">
+                                ❌ 取消
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            `,
+            // 【知识点16】props - 接收任务数据
+            props: {
+                task: {
+                    type: Object,
+                    required: true
+                }
+            },
+            data() {
+                return {
+                    isEditing: false,
+                    editTitle: ''
+                }
+            },
+            computed: {
+                // 【知识点8】计算属性 - 优先级文本
+                priorityText() {
+                    const map = {
+                        'high': '⚠️ 高优先级',
+                        'medium': '📌 中优先级',
+                        'low': '📋 低优先级'
+                    };
+                    return map[this.task.priority] || '';
+                }
+            },
+            methods: {
+                startEdit() {
+                    if (this.task.completed) return; // 已完成的任务不允许编辑
+                    this.isEditing = true;
+                    this.editTitle = this.task.title;
+                },
+                saveEdit() {
+                    if (!this.isEditing) return; // 已经退出编辑状态，不重复保存
+                    if (this.editTitle.trim()) {
+                        this.$emit('edit-task', this.task.id, this.editTitle.trim());
+                    }
+                    this.isEditing = false;
+                    this.editTitle = '';
+                },
+                cancelEdit() {
+                    this.isEditing = false;
+                    this.editTitle = '';
+                },
+                handleItemClick(e) {
+                    // 点击任务项其他区域（非按钮、非输入框）时，如果正在编辑则保存
+                    if (this.isEditing && e.target.classList.contains('todo-item')) {
+                        this.saveEdit();
+                    }
+                },
+                toggleTask() {
+                    this.$emit('toggle-task', this.task.id);
+                },
+                deleteTask() {
+                    this.$emit('delete-task', this.task.id);
+                }
+            }
+        };
+
+        // ============================================
+        // 组件4: TodoList - 任务列表容器
+        // ============================================
+        const TodoList = {
+            template: `
+                <div class="todo-list">
+                    <!-- 【知识点11】条件渲染 - 空状态提示 -->
+                    <div v-if="filteredTasks.length === 0" class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>{{ emptyMessage }}</p>
+                    </div>
+                    
+                    <!-- 【知识点12】列表渲染 - v-for遍历任务 -->
+                    <todo-item
+                        v-for="task in filteredTasks"
+                        :key="task.id"
+                        :task="task"
+                        @toggle-task="handleToggle"
+                        @edit-task="handleEdit"
+                        @delete-task="handleDelete"
+                    ></todo-item>
+                </div>
+            `,
+            props: {
+                tasks: {
+                    type: Array,
+                    required: true
+                },
+                currentFilter: {
+                    type: String,
+                    required: true
+                }
+            },
+            components: {
+                TodoItem
+            },
+            methods: {
+                // 【知识点17】自定义事件 - 正确转发多参数事件
+                handleToggle(taskId) {
+                    this.$emit('toggle-task', taskId);
+                },
+                handleEdit(taskId, newTitle) {
+                    this.$emit('edit-task', taskId, newTitle);
+                },
+                handleDelete(taskId) {
+                    this.$emit('delete-task', taskId);
+                }
+            },
+            computed: {
+                // 【知识点12】列表过滤 - 根据筛选条件过滤任务
+                filteredTasks() {
+                    switch(this.currentFilter) {
+                        case 'active':
+                            return this.tasks.filter(task => !task.completed);
+                        case 'completed':
+                            return this.tasks.filter(task => task.completed);
+                        default:
+                            return this.tasks;
+                    }
+                },
+                emptyMessage() {
+                    const messages = {
+                        'all': '还没有任务，快添加一个吧！',
+                        'active': '太棒了！没有待办任务',
+                        'completed': '还没有完成任何任务'
+                    };
+                    return messages[this.currentFilter] || '';
+                }
+            }
+        };
+
+        // ============================================
+        // 组件5: TodoFooter - 底部统计和操作
+        // ============================================
+        const TodoFooter = {
+            template: `
+                <div class="todo-footer">
+                    <div class="footer-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ totalCount }}</div>
+                            <div class="stat-label">总任务数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ activeCount }}</div>
+                            <div class="stat-label">待完成</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ completedCount }}</div>
+                            <div class="stat-label">已完成</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ completionRate }}</div>
+                            <div class="stat-label">完成率</div>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-actions">
+                        <button 
+                            @click="clearCompleted"
+                            :disabled="completedCount === 0"
+                            class="footer-btn clear-btn"
+                        >
+                            🧹 清除已完成 ({{ completedCount }})
+                        </button>
+                    </div>
+                </div>
+            `,
+            props: {
+                tasks: {
+                    type: Array,
+                    required: true
+                }
+            },
+            computed: {
+                // 【知识点8】计算属性 - 统计数据
+                totalCount() {
+                    return this.tasks.length;
+                },
+                activeCount() {
+                    return this.tasks.filter(task => !task.completed).length;
+                },
+                completedCount() {
+                    return this.tasks.filter(task => task.completed).length;
+                },
+                completionRate() {
+                    if (this.totalCount === 0) return '0%';
+                    return Math.round((this.completedCount / this.totalCount) * 100) + '%';
+                }
+            },
+            methods: {
+                clearCompleted() {
+                    this.$emit('clear-completed');
+                }
+            }
+        };
+
+        // ============================================
+        // 主组件: TodoApp - 根组件
+        // ============================================
+        const TodoApp = {
+            template: `
+                <div>
+                    <!-- 【知识点18】插槽 - 使用具名插槽 -->
+                    <todo-header @add-task="addTask">
+                        <template #extra-controls>
+                            <div style="margin-top: 10px; font-size: 13px; opacity: 0.9;">
+                                💡 提示：双击任务可编辑 | 按ESC取消编辑 | 数据自动保存到本地
+                            </div>
+                        </template>
+                    </todo-header>
+                    
+                    <todo-filter 
+                        :current-filter="currentFilter"
+                        :tasks="tasks"
+                        @change-filter="currentFilter = $event"
+                    ></todo-filter>
+                    
+                    <todo-list
+                        :tasks="tasks"
+                        :current-filter="currentFilter"
+                        @toggle-task="toggleTask"
+                        @edit-task="editTask"
+                        @delete-task="deleteTask"
+                    ></todo-list>
+                    
+                    <todo-footer
+                        :tasks="tasks"
+                        @clear-completed="clearCompleted"
+                    ></todo-footer>
+                </div>
+            `,
+            components: {
+                TodoHeader,
+                TodoFilter,
+                TodoList,
+                TodoFooter
+            },
+            data() {
+                return {
+                    tasks: [],
+                    currentFilter: 'all'
+                }
+            },
+            // 【知识点17】生命周期钩子 - 组件挂载时读取本地数据
+            mounted() {
+                console.log('✅ 生命周期：mounted - 组件已挂载，读取localStorage数据');
+                
+                // 从localStorage读取任务数据
+                const savedTasks = localStorage.getItem('vue-tasks');
+                if (savedTasks) {
+                    this.tasks = JSON.parse(savedTasks);
+                    console.log(`📦 已恢复 ${this.tasks.length} 个任务`);
+                }
+                
+                // 【知识点18】全局事件总线 - 监听全选事件
+                eventBus.$on('toggle-all', this.toggleAll);
+            },
+            // 【知识点17】生命周期钩子 - 组件销毁前清理
+            beforeDestroy() {
+                console.log('✅ 生命周期：beforeDestroy - 组件即将销毁，移除事件监听');
+                eventBus.$off('toggle-all', this.toggleAll);
+            },
+            methods: {
+                addTask(newTask) {
+                    this.tasks.unshift(newTask); // 新任务添加到最前面
+                    console.log('➕ 添加任务:', newTask.title);
+                },
+                toggleTask(taskId) {
+                    const task = this.tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.completed = !task.completed;
+                        console.log('✔️ 切换任务状态:', task.title, task.completed);
+                    }
+                },
+                editTask(taskId, newTitle) {
+                    const task = this.tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.title = newTitle;
+                        console.log('✏️ 编辑任务:', newTitle);
+                    }
+                },
+                deleteTask(taskId) {
+                    const taskIndex = this.tasks.findIndex(t => t.id === taskId);
+                    if (taskIndex !== -1) {
+                        const taskTitle = this.tasks[taskIndex].title;
+                        this.tasks.splice(taskIndex, 1);
+                        console.log('🗑️ 删除任务:', taskTitle);
+                    }
+                },
+                clearCompleted() {
+                    const beforeCount = this.tasks.length;
+                    this.tasks = this.tasks.filter(task => !task.completed);
+                    const clearedCount = beforeCount - this.tasks.length;
+                    console.log(`🧹 清除了 ${clearedCount} 个已完成任务`);
+                },
+                toggleAll(checked) {
+                    this.tasks.forEach(task => {
+                        task.completed = checked;
+                    });
+                    console.log('📋 全选状态:', checked);
+                }
+            },
+            watch: {
+                // 【知识点9】监视属性 - 深度监视tasks变化，保存到localStorage
+                tasks: {
+                    handler(newTasks) {
+                        localStorage.setItem('vue-tasks', JSON.stringify(newTasks));
+                        console.log('💾 数据已保存到localStorage');
+                    },
+                    deep: true // 深度监视，监视数组内部对象的变化
+                }
+            }
+        };
+
+        // ============================================
+        // 创建Vue根实例
+        // ============================================
+        new Vue({
+            el: '#app',
+            components: {
+                TodoApp
+            },
+            // 【知识点17】生命周期钩子
+            mounted() {
+                console.log('🚀 Vue实例已挂载！');
+                console.log('📚 本项目综合运用了19个知识点，请打开控制台查看详细日志');
+            }
+        });
+    </script>
+</body>
+</html>

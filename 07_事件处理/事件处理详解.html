@@ -1,0 +1,1383 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件处理完整教程</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .demo-title {
+            font-size: 22px;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .demo-desc {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .demo-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        /* 计数器 */
+        .counter {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 36px;
+            font-weight: bold;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        /* 日志面板 */
+        .log-panel {
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .log-time {
+            color: #95a5a6;
+            margin-right: 10px;
+        }
+
+        .log-event {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* 嵌套盒子 */
+        .box-outer {
+            padding: 30px;
+            background: #e74c3c;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+
+        .box-middle {
+            padding: 30px;
+            background: #f39c12;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .box-inner {
+            padding: 30px;
+            background: #2ecc71;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* 输入框 */
+        input[type="text"], input[type="password"] {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 链接 */
+        .demo-link {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .demo-link:hover {
+            background: #2980b9;
+        }
+
+        /* 右键菜单 */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+
+        .menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        /* 编辑模式 */
+        .edit-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .edit-item.editing {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .edit-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .edit-text {
+            flex: 1;
+            font-size: 16px;
+        }
+
+        /* 代码块 */
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            line-height: 1.8;
+        }
+
+        .code-comment {
+            color: #95a5a6;
+        }
+
+        .code-keyword {
+            color: #e74c3c;
+        }
+
+        .code-string {
+            color: #2ecc71;
+        }
+
+        .code-attribute {
+            color: #f39c12;
+        }
+
+        /* 提示框 */
+        .tip-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+            margin: 15px 0;
+        }
+
+        .tip-title {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+
+        .warning-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        /* 表格 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* 按钮组 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* 滚动容器 */
+        .scroll-container {
+            height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .scroll-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>📦 Vue事件处理完整教程</h1>
+        <p class="subtitle">从基础到实战，掌握Vue的事件系统和修饰符</p>
+
+        <!-- ==================== Demo 1: 基础事件绑定 ==================== -->
+        <div class="demo-section">
+            <div class="demo-title">Demo 1: 事件绑定基础</div>
+            <div class="demo-desc">
+                <strong>语法：</strong>v-on:事件名="处理方法" 或 <strong>@事件名="处理方法"</strong><br>
+                <strong>常用事件：</strong>@click, @input, @change, @submit, @keyup等<br>
+                <strong>传参方式：</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>无参数：<code>@click="handleClick"</code></li>
+                    <li>有参数：<code>@click="handleClick(123)"</code></li>
+                    <li>获取事件对象：<code>@click="handleClick($event)"</code></li>
+                </ul>
+            </div>
+            <div class="demo-content">
+                <h4 style="margin-bottom: 15px;">计数器示例</h4>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <span class="counter">{{ count }}</span>
+                </div>
+
+                <div class="btn-group" style="justify-content: center;">
+                    <button @click="increment" class="btn btn-success">➕ +1</button>
+                    <button @click="decrement" class="btn btn-danger">➖ -1</button>
+                    <button @click="addBy(5)" class="btn btn-primary">➕ +5</button>
+                    <button @click="reset" class="btn btn-warning">🔄 重置</button>
+                    <button @click="logEvent($event)" class="btn btn-primary">📋 打印事件对象</button>
+                </div>
+
+                <div class="log-panel">
+                    <div><strong>📋 事件日志</strong></div>
+                    <div v-for="log in eventLogs" :key="log.id" class="log-item">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span class="log-event">{{ log.event }}</span>
+                        <span>{{ log.message }}</span>
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 事件绑定的几种写法</span>
+
+<span class="code-comment">// 1. 完整写法</span>
+&lt;button <span class="code-attribute">v-on:click</span>=<span class="code-string">"increment"</span>&gt;加１&lt;/button&gt;
+
+<span class="code-comment">// 2. 简写（推荐）⭐</span>
+&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"increment"</span>&gt;加１&lt;/button&gt;
+
+<span class="code-comment">// 3. 带参数</span>
+&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"addBy(5)"</span>&gt;加５&lt;/button&gt;
+
+<span class="code-comment">// 4. 获取事件对象</span>
+&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"logEvent($event)"</span>&gt;打印事件对象&lt;/button&gt;
+
+<span class="code-comment">// 5. 内联表达式</span>
+&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"count++"</span>&gt;加１&lt;/button&gt;
+
+<span class="code-comment">// 对应的methods</span>
+methods: {
+    <span class="code-keyword">increment</span>() {
+        <span class="code-keyword">this</span>.count++;
+    },
+    <span class="code-keyword">addBy</span>(num) {
+        <span class="code-keyword">this</span>.count += num;
+    },
+    <span class="code-keyword">logEvent</span>(event) {
+        console.<span class="code-keyword">log</span>(event); <span class="code-comment">// 原生DOM事件对象</span>
+    }
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Demo 2: 事件修饰符 ==================== -->
+        <div class="demo-section">
+            <div class="demo-title">Demo 2: 事件修饰符 ⭐ 重要</div>
+            <div class="demo-desc">
+                <strong>作用：</strong>简化事件处理逻辑，避免在方法中写event.preventDefault()等代码<br>
+                <strong>常用修饰符：</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><code>.stop</code> - 阻止事件冒泡（相当于event.stopPropagation()）</li>
+                    <li><code>.prevent</code> - 阻止默认行为（相当于event.preventDefault()）</li>
+                    <li><code>.capture</code> - 使用事件捕获模式</li>
+                    <li><code>.self</code> - 只当事件在该元素本身触发时才触发回调</li>
+                    <li><code>.once</code> - 事件只触发一次</li>
+                </ul>
+            </div>
+            <div class="demo-content">
+                <h4 style="margin-bottom: 15px;">修饰符演示</h4>
+
+                <!-- .stop 阻止冒泡 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">1. .stop - 阻止事件冒泡</h5>
+                    <div class="box-outer" @click="handleOuterClick">
+                        <div>外层盒子（红色）</div>
+                        <div class="box-middle" @click="handleMiddleClick">
+                            <div>中层盒子（橙色）- 不加.stop</div>
+                            <div class="box-inner" @click.stop="handleInnerClick">
+                                内层盒子（绿色）- 加了.stop<br>
+                                点我只触发内层事件
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- .prevent 阻止默认行为 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">2. .prevent - 阻止默认行为</h5>
+                    <a href="https://cn.vuejs.org" class="demo-link" @click="handleLinkClick">
+                        不加.prevent（会跳转）
+                    </a>
+                    <a href="https://cn.vuejs.org" class="demo-link" @click.prevent="handleLinkClick">
+                        加了.prevent（不会跳转）
+                    </a>
+                </div>
+
+                <!-- .once 只触发一次 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">3. .once - 只触发一次</h5>
+                    <button @click="handleNormalClick" class="btn btn-primary">
+                        普通按钮（可多次点击）{{ normalClickCount }}
+                    </button>
+                    <button @click.once="handleOnceClick" class="btn btn-warning">
+                        .once按钮（只能点击一次）
+                    </button>
+                </div>
+
+                <!-- .self 只在自身触发 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">4. .self - 只在元素本身触发</h5>
+                    <div @click.self="handleSelfClick" 
+                         style="padding: 30px; background: #e3f2fd; border-radius: 8px; cursor: pointer;">
+                        外层div（加了.self，只有点击蓝色区域才触发）
+                        <button @click="handleButtonClick" class="btn btn-primary" style="margin: 10px;">
+                            内部按钮（点我不会触发外层）
+                        </button>
+                    </div>
+                </div>
+
+                <div class="log-panel">
+                    <div><strong>📋 事件触发日志</strong></div>
+                    <div v-for="log in modifierLogs" :key="log.id" class="log-item">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span>{{ log.message }}</span>
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 事件修饰符使用示例</span>
+
+<span class="code-comment">// 1. .stop - 阻止冒泡</span>
+&lt;div <span class="code-attribute">@click</span>=<span class="code-string">"handleOuter"</span>&gt;
+    &lt;div <span class="code-attribute">@click.stop</span>=<span class="code-string">"handleInner"</span>&gt;点我不会触发外层&lt;/div&gt;
+&lt;/div&gt;
+
+<span class="code-comment">// 2. .prevent - 阻止默认行为</span>
+&lt;a <span class="code-attribute">href</span>=<span class="code-string">"https://example.com"</span> <span class="code-attribute">@click.prevent</span>=<span class="code-string">"handleClick"</span>&gt;
+    不会跳转
+&lt;/a&gt;
+
+<span class="code-comment">// 3. .once - 只触发一次</span>
+&lt;button <span class="code-attribute">@click.once</span>=<span class="code-string">"handleClick"</span>&gt;只能点一次&lt;/button&gt;
+
+<span class="code-comment">// 4. .self - 只在自身触发</span>
+&lt;div <span class="code-attribute">@click.self</span>=<span class="code-string">"handleClick"</span>&gt;
+    &lt;button&gt;点我不触发外层&lt;/button&gt;
+&lt;/div&gt;
+
+<span class="code-comment">// 5. .capture - 捕获模式</span>
+&lt;div <span class="code-attribute">@click.capture</span>=<span class="code-string">"handleClick"</span>&gt;捕获阶段触发&lt;/div&gt;
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Demo 3: 修饰符组合使用 ==================== -->
+        <div class="demo-section">
+            <div class="demo-title">Demo 3: 修饰符组合使用 ⭐ 实战常用</div>
+            <div class="demo-desc">
+                <strong>组合语法：</strong>多个修饰符可以链式调用，如：<code>@click.stop.prevent</code><br>
+                <strong>注意：</strong>修饰符的<strong>顺序很重要</strong>，<code>.prevent.stop</code> 和 <code>.stop.prevent</code> 效果不同<br>
+                <strong>应用：</strong>表单提交、链接拦截、模态框等
+            </div>
+            <div class="demo-content">
+                <h4 style="margin-bottom: 15px;">组合修饰符示例</h4>
+
+                <!-- 表单提交 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">1. 表单提交 - @submit.prevent ⭐ 最常用</h5>
+                    <form @submit.prevent="handleSubmit" style="max-width: 500px;">
+                        <div class="form-group">
+                            <label class="form-label">用户名：</label>
+                            <input type="text" v-model="formData.username" class="form-control" placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">密码：</label>
+                            <input type="password" v-model="formData.password" class="form-control" placeholder="请输入密码">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            登录（不会刷新页面）
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 模态框 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">2. 模态框 - @click.self 关闭</h5>
+                    <button @click="showModal = true" class="btn btn-primary">打开模态框</button>
+                    
+                    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+                        <div class="modal-content">
+                            <div class="modal-title">提示</div>
+                            <div class="modal-body">
+                                这是一个模态框。点击外部灰色区域（@click.self）可以关闭。
+                                点击这个白色区域不会关闭。
+                            </div>
+                            <button @click="showModal = false" class="btn btn-primary">关闭</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右键菜单 -->
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">3. 右键菜单 - @contextmenu.prevent</h5>
+                    <div @contextmenu.prevent="showContextMenu"
+                         style="padding: 40px; background: #f0f0f0; border-radius: 8px; text-align: center; cursor: pointer;">
+                        在这里右键点击（不会显示浏览器默认菜单）
+                    </div>
+                    
+                    <div v-if="contextMenu.show" 
+                         class="context-menu" 
+                         :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
+                         @click.stop>
+                        <div class="menu-item" @click="handleMenuAction('复制')">📋 复制</div>
+                        <div class="menu-item" @click="handleMenuAction('粘贴')">📄 粘贴</div>
+                        <div class="menu-item" @click="handleMenuAction('删除')">🗑️ 删除</div>
+                    </div>
+                </div>
+
+                <div class="log-panel">
+                    <div><strong>📋 操作日志</strong></div>
+                    <div v-for="log in combinedLogs" :key="log.id" class="log-item">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span>{{ log.message }}</span>
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 修饰符组合使用</span>
+
+<span class="code-comment">// 1. 表单提交 - 阻止默认刷新行为 ⭐ 最常用</span>
+&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;
+    &lt;input type=<span class="code-string">"text"</span> v-model=<span class="code-string">"username"</span>&gt;
+    &lt;button type=<span class="code-string">"submit"</span>&gt;提交&lt;/button&gt;
+&lt;/form&gt;
+
+<span class="code-comment">// 2. 模态框 - 点击遮罩层关闭</span>
+&lt;div class=<span class="code-string">"modal"</span> <span class="code-attribute">@click.self</span>=<span class="code-string">"closeModal"</span>&gt;
+    &lt;div class=<span class="code-string">"modal-content"</span>&gt;内容&lt;/div&gt;
+&lt;/div&gt;
+
+<span class="code-comment">// 3. 右键菜单 - 阻止默认菜单</span>
+&lt;div <span class="code-attribute">@contextmenu.prevent</span>=<span class="code-string">"showMenu"</span>&gt;右键我&lt;/div&gt;
+
+<span class="code-comment">// 4. 同时阻止冒泡和默认行为</span>
+&lt;a <span class="code-attribute">@click.stop.prevent</span>=<span class="code-string">"handleClick"</span>&gt;链接&lt;/a&gt;
+
+<span class="code-comment">// 5. 滚动事件 - 使用passive提升性能</span>
+&lt;div <span class="code-attribute">@scroll.passive</span>=<span class="code-string">"handleScroll"</span>&gt;&lt;/div&gt;
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Demo 4: 键盘事件修饰符 ==================== -->
+        <div class="demo-section">
+            <div class="demo-title">Demo 4: 键盘事件修饰符 ⭐ 常用</div>
+            <div class="demo-desc">
+                <strong>常用按键别名：</strong>.enter, .tab, .delete, .esc, .space, .up, .down, .left, .right<br>
+                <strong>系统修饰键：</strong>.ctrl, .alt, .shift, .meta（Mac的command键）<br>
+                <strong>应用：</strong>回车提交、ESC关闭、快捷键等
+            </div>
+            <div class="demo-content">
+                <h4 style="margin-bottom: 15px;">键盘事件示例</h4>
+
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">1. 回车发送消息 - @keyup.enter ⭐ 最常用</h5>
+                    <input 
+                        type="text" 
+                        v-model="chatMessage"
+                        @keyup.enter="sendMessage"
+                        placeholder="输入消息后按回车发送..."
+                        style="max-width: 500px;">
+                    <button @click="sendMessage" class="btn btn-primary">发送</button>
+                    
+                    <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                        <div v-for="msg in messages" :key="msg.id" style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                            {{ msg.text }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">2. ESC关闭 - @keyup.esc</h5>
+                    <p style="color: #666; margin-bottom: 10px;">
+                        （打开模态框后，按ESC键关闭）
+                    </p>
+                    <button @click="escModal = true" class="btn btn-primary">打开模态框</button>
+                    
+                    <div v-if="escModal" class="modal-overlay" @click.self="escModal = false">
+                        <div class="modal-content" @keyup.esc="escModal = false" tabindex="0">
+                            <div class="modal-title">按ESC键关闭</div>
+                            <div class="modal-body">
+                                尝试按键盘上的ESC键来关闭这个模态框
+                            </div>
+                            <button @click="escModal = false" class="btn btn-primary">关闭</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">3. 组合键 - Ctrl+Enter</h5>
+                    <textarea 
+                        v-model="comment"
+                        @keyup.ctrl.enter="submitComment"
+                        placeholder="输入评论，按 Ctrl+Enter 提交（Mac用 Command+Enter）"
+                        style="width: 100%; max-width: 500px; min-height: 100px;"></textarea>
+                    <div style="margin-top: 10px; color: #666; font-size: 14px;">
+                        💡 提示：按 <code>Ctrl+Enter</code> (Mac: <code>Command+Enter</code>) 提交
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 10px;">4. 方向键控制 - @keyup.up/down/left/right</h5>
+                    <div style="text-align: center; padding: 30px; background: #f0f0f0; border-radius: 8px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">{{ position.icon }}</div>
+                        <div>位置: {{ position.x }}, {{ position.y }}</div>
+                        <div style="margin-top: 10px; color: #666; font-size: 14px;">
+                            使用方向键↑↓←→ 移动图标
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-panel">
+                    <div><strong>⌨️ 键盘事件日志</strong></div>
+                    <div v-for="log in keyLogs" :key="log.id" class="log-item">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span>{{ log.message }}</span>
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 键盘事件修饰符</span>
+
+<span class="code-comment">// 1. 回车键 - 最常用 ⭐</span>
+&lt;input <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"handleSubmit"</span>&gt;
+
+<span class="code-comment">// 2. ESC键 - 关闭弹窗</span>
+&lt;div <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
+
+<span class="code-comment">// 3. 删除键（Delete和Backspace）</span>
+&lt;input <span class="code-attribute">@keyup.delete</span>=<span class="code-string">"handleDelete"</span>&gt;
+
+<span class="code-comment">// 4. 方向键</span>
+&lt;div <span class="code-attribute">@keyup.up</span>=<span class="code-string">"moveUp"</span>&gt;&lt;/div&gt;
+&lt;div <span class="code-attribute">@keyup.down</span>=<span class="code-string">"moveDown"</span>&gt;&lt;/div&gt;
+&lt;div <span class="code-attribute">@keyup.left</span>=<span class="code-string">"moveLeft"</span>&gt;&lt;/div&gt;
+&lt;div <span class="code-attribute">@keyup.right</span>=<span class="code-string">"moveRight"</span>&gt;&lt;/div&gt;
+
+<span class="code-comment">// 5. 组合键</span>
+&lt;input <span class="code-attribute">@keyup.ctrl.enter</span>=<span class="code-string">"submit"</span>&gt; <span class="code-comment">// Ctrl+Enter</span>
+&lt;input <span class="code-attribute">@keyup.ctrl.s.prevent</span>=<span class="code-string">"save"</span>&gt; <span class="code-comment">// Ctrl+S（阻止默认保存）</span>
+
+<span class="code-comment">// 6. 自定义键码</span>
+&lt;input <span class="code-attribute">@keyup.page-down</span>=<span class="code-string">"handlePageDown"</span>&gt;
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Demo 5: 鼠标事件修饰符 ==================== -->
+        <div class="demo-section">
+            <div class="demo-title">Demo 5: 鼠标事件修饰符</div>
+            <div class="demo-desc">
+                <strong>鼠标按键修饰符：</strong>.left（左键）, .right（右键）, .middle（中键）<br>
+                <strong>应用：</strong>区分左右键点击、自定义右键菜单等
+            </div>
+            <div class="demo-content">
+                <h4 style="margin-bottom: 15px;">鼠标按键区分</h4>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
+                    <div @click.left="handleMouseClick('左键')"
+                         style="padding: 40px; background: #3498db; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🖱️</div>
+                        <div>左键点击我</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">@click.left</div>
+                    </div>
+                    
+                    <div @click.right.prevent="handleMouseClick('右键')"
+                         style="padding: 40px; background: #e74c3c; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🖱️</div>
+                        <div>右键点击我</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">@click.right.prevent</div>
+                    </div>
+                    
+                    <div @click.middle="handleMouseClick('中键')"
+                         style="padding: 40px; background: #2ecc71; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🖱️</div>
+                        <div>中键点击我</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">@click.middle</div>
+                    </div>
+                </div>
+
+                <div class="log-panel" style="max-height: 200px;">
+                    <div><strong>🖱️ 鼠标事件日志</strong></div>
+                    <div v-for="log in mouseLogs" :key="log.id" class="log-item">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span>{{ log.message }}</span>
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 鼠标按键修饰符</span>
+
+<span class="code-comment">// 1. 左键点击</span>
+&lt;div <span class="code-attribute">@click.left</span>=<span class="code-string">"handleLeftClick"</span>&gt;左键&lt;/div&gt;
+
+<span class="code-comment">// 2. 右键点击（通常配合.prevent）</span>
+&lt;div <span class="code-attribute">@click.right.prevent</span>=<span class="code-string">"handleRightClick"</span>&gt;右键&lt;/div&gt;
+
+<span class="code-comment">// 3. 中键点击</span>
+&lt;div <span class="code-attribute">@click.middle</span>=<span class="code-string">"handleMiddleClick"</span>&gt;中键&lt;/div&gt;
+
+<span class="code-comment">// 应用场景：</span>
+<span class="code-comment">// - 左键选择，右键打开菜单</span>
+<span class="code-comment">// - 中键打开新标签页</span>
+<span class="code-comment">// - 自定义快捷操作</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Demo 6: 编辑模式 - mousedown.prevent ==================== -->
+        <div class="demo-section">
+            <div class="demo-title">Demo 6: @mousedown.prevent 模式 ⭐ 任务管理系统应用</div>
+            <div class="demo-desc">
+                <strong>问题场景：</strong>编辑输入框时，点击保存/取消按钮会先触发input的@blur事件，导致逻辑冲突<br>
+                <strong>解决方案：</strong>在按钮上使用 <code>@mousedown.prevent</code> 阻止blur事件触发<br>
+                <strong>实际应用：</strong>任务管理系统的编辑功能（这是修复BUG时使用的技巧）
+            </div>
+            <div class="demo-content">
+                <h4 style="margin-bottom: 15px;">任务编辑示例（任务管理系统实际应用）</h4>
+
+                <div class="warning-box">
+                    <div class="warning-title">🔧 技术要点</div>
+                    <strong>问题：</strong>点击保存按钮时，input的@blur先触发，可能导致状态混乱<br>
+                    <strong>解决：</strong>使用@mousedown.prevent代替@click，阻止blur事件<br>
+                    <strong>原理：</strong>mousedown在blur之前触发，prevent阻止focus transfer
+                </div>
+
+                <div v-for="item in editItems" :key="item.id" 
+                     :class="['edit-item', { editing: item.editing }]">
+                    
+                    <!-- 非编辑模式 -->
+                    <template v-if="!item.editing">
+                        <span class="edit-text">{{ item.title }}</span>
+                        <button @click="startEdit(item)" class="btn btn-primary" style="padding: 8px 16px;">
+                            ✏️ 编辑
+                        </button>
+                    </template>
+
+                    <!-- 编辑模式 -->
+                    <template v-else>
+                        <input 
+                            type="text" 
+                            v-model="item.title"
+                            class="edit-input"
+                            @blur="cancelEdit(item)"
+                            ref="editInput">
+                        
+                        <!-- 注意：这里使用 @mousedown.prevent 而不是 @click -->
+                        <button @mousedown.prevent="saveEdit(item)" 
+                                class="btn btn-success" 
+                                style="padding: 8px 16px;">
+                            💾 保存
+                        </button>
+                        <button @mousedown.prevent="cancelEdit(item)" 
+                                class="btn btn-danger" 
+                                style="padding: 8px 16px;">
+                            ❌ 取消
+                        </button>
+                    </template>
+                </div>
+
+                <div class="log-panel">
+                    <div><strong>📋 编辑操作日志</strong></div>
+                    <div v-for="log in editLogs" :key="log.id" class="log-item">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span>{{ log.message }}</span>
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// ❌ 错误写法：使用@click会导致blur先触发</span>
+&lt;input 
+    type=<span class="code-string">"text"</span> 
+    v-model=<span class="code-string">"title"</span>
+    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>&gt;
+
+<span class="code-comment">// 点击保存按钮时：blur先触发 → 退出编辑 → click晚触发 → 数据丢失</span>
+&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+
+<span class="code-comment">// ✅ 正确写法：使用@mousedown.prevent ⭐ 重要</span>
+&lt;input 
+    type=<span class="code-string">"text"</span> 
+    v-model=<span class="code-string">"title"</span>
+    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>&gt;
+
+<span class="code-comment">// mousedown在blur之前触发，prevent阻止blur</span>
+&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
+
+<span class="code-comment">// 📌 任务管理系统中的实际应用</span>
+<span class="code-comment">// TodoItem组件中的编辑功能就使用了这个技巧</span>
+<span class="code-keyword">&lt;template v-else&gt;</span>
+    &lt;input 
+        type=<span class="code-string">"text"</span> 
+        v-model=<span class="code-string">"editingTitle"</span>
+        <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>
+        ref=<span class="code-string">"editInput"</span>&gt;
+    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
+<span class="code-keyword">&lt;/template&gt;</span>
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-title">💡 事件触发顺序</div>
+                    <strong>使用@click时：</strong><br>
+                    1. mousedown → 2. blur（输入框失焦）→ 3. click<br><br>
+                    <strong>使用@mousedown.prevent时：</strong><br>
+                    1. mousedown（同时阻止后续focus变化）→ 2. 不触发blur → 3. 逻辑正确执行
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 总结 ==================== -->
+        <div class="demo-section" style="border-left-color: #2ecc71;">
+            <div class="demo-title" style="color: #2ecc71;">📚 知识点总结</div>
+            <div class="demo-content">
+                <h3 style="color: #2ecc71; margin-bottom: 20px;">事件修饰符速查表</h3>
+                
+                <table>
+                    <tr>
+                        <th>修饰符</th>
+                        <th>作用</th>
+                        <th>等价代码</th>
+                        <th>应用场景</th>
+                    </tr>
+                    <tr>
+                        <td>.stop</td>
+                        <td>阻止事件冒泡</td>
+                        <td>event.stopPropagation()</td>
+                        <td>嵌套元素点击</td>
+                    </tr>
+                    <tr>
+                        <td>.prevent</td>
+                        <td>阻止默认行为</td>
+                        <td>event.preventDefault()</td>
+                        <td>表单提交、链接跳转</td>
+                    </tr>
+                    <tr>
+                        <td>.capture</td>
+                        <td>捕获模式</td>
+                        <td>addEventListener(事件, 函数, true)</td>
+                        <td>特殊事件处理顺序</td>
+                    </tr>
+                    <tr>
+                        <td>.self</td>
+                        <td>只在自身触发</td>
+                        <td>event.target === event.currentTarget</td>
+                        <td>模态框遮罩层</td>
+                    </tr>
+                    <tr>
+                        <td>.once</td>
+                        <td>只触发一次</td>
+                        <td>手动移除监听器</td>
+                        <td>一次性操作</td>
+                    </tr>
+                    <tr>
+                        <td>.passive</td>
+                        <td>不阻止默认行为</td>
+                        <td>addEventListener(事件, 函数, {passive: true})</td>
+                        <td>滚动性能优化</td>
+                    </tr>
+                </table>
+
+                <h3 style="color: #2ecc71; margin: 30px 0 15px;">⭐ 最常用的修饰符组合</h3>
+                
+                <div class="code-block" v-pre>
+<span class="code-comment">// 1. 表单提交（最常用）⭐⭐⭐⭐⭐</span>
+&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
+
+<span class="code-comment">// 2. 回车发送（聊天、搜索）⭐⭐⭐⭐⭐</span>
+&lt;input <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"sendMessage"</span>&gt;
+
+<span class="code-comment">// 3. ESC关闭（模态框、弹窗）⭐⭐⭐⭐</span>
+&lt;div <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
+
+<span class="code-comment">// 4. 点击遮罩层关闭 ⭐⭐⭐⭐</span>
+&lt;div class=<span class="code-string">"modal"</span> <span class="code-attribute">@click.self</span>=<span class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
+
+<span class="code-comment">// 5. 阻止链接跳转 ⭐⭐⭐</span>
+&lt;a href=<span class="code-string">"#"</span> <span class="code-attribute">@click.prevent</span>=<span class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
+
+<span class="code-comment">// 6. 阻止冒泡 ⭐⭐⭐</span>
+&lt;div @click=<span class="code-string">"handleOuter"</span>&gt;
+    &lt;button <span class="code-attribute">@click.stop</span>=<span class="code-string">"handleInner"</span>&gt;&lt;/button&gt;
+&lt;/div&gt;
+
+<span class="code-comment">// 7. 编辑模式保存按钮（任务管理系统）⭐⭐⭐⭐⭐</span>
+&lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
+&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"save"</span>&gt;保存&lt;/button&gt;
+
+<span class="code-comment">// 8. 右键菜单 ⭐⭐</span>
+&lt;div <span class="code-attribute">@contextmenu.prevent</span>=<span class="code-string">"showMenu"</span>&gt;&lt;/div&gt;
+
+<span class="code-comment">// 9. Ctrl+S保存 ⭐⭐⭐</span>
+&lt;div <span class="code-attribute">@keyup.ctrl.s.prevent</span>=<span class="code-string">"save"</span>&gt;&lt;/div&gt;
+
+<span class="code-comment">// 10. 一次性按钮 ⭐⭐</span>
+&lt;button <span class="code-attribute">@click.once</span>=<span class="code-string">"sendRequest"</span>&gt;提交&lt;/button&gt;
+                </div>
+
+                <h3 style="color: #2ecc71; margin: 30px 0 15px;">🎯 任务管理系统中的实际应用</h3>
+                
+                <div class="code-block" v-pre>
+<span class="code-comment">// 任务管理系统中使用的事件处理技巧</span>
+
+<span class="code-comment">// 1. 添加任务 - 回车提交</span>
+&lt;input 
+    type=<span class="code-string">"text"</span>
+    v-model=<span class="code-string">"newTaskTitle"</span>
+    <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"addTask"</span>
+    placeholder=<span class="code-string">"按回车添加任务"</span>&gt;
+
+<span class="code-comment">// 2. 编辑任务 - mousedown.prevent 模式</span>
+<span class="code-comment">// 这是修复编辑BUG时使用的关键技巧！</span>
+&lt;template v-<span class="code-keyword">if</span>=<span class="code-string">"isEditing"</span>&gt;
+    &lt;input 
+        v-model=<span class="code-string">"editingTitle"</span>
+        <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>
+        <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"saveEdit"</span>
+        <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"cancelEdit"</span>&gt;
+    
+    <span class="code-comment">// 关键：使用mousedown.prevent而不是click</span>
+    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
+&lt;/template&gt;
+
+<span class="code-comment">// 3. 删除任务 - 阻止事件冒泡</span>
+&lt;div @click=<span class="code-string">"selectTask"</span>&gt;
+    &lt;button <span class="code-attribute">@click.stop</span>=<span class="code-string">"deleteTask"</span>&gt;删除&lt;/button&gt;
+&lt;/div&gt;
+
+<span class="code-comment">// 4. 表单提交 - 阻止刷新</span>
+&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;
+    <span class="code-comment">// 表单内容</span>
+&lt;/form&gt;
+                </div>
+
+                <h3 style="color: #2ecc71; margin: 30px 0 15px;">⚠️ 常见错误</h3>
+                
+                <div class="warning-box">
+                    <strong>错误1：修饰符顺序错误</strong>
+                    <div class="code-block" v-pre style="margin-top: 10px;">
+<span class="code-comment">// ❌ 错误：先prevent再stop</span>
+&lt;a <span class="code-attribute">@click.prevent.stop</span>=<span class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
+
+<span class="code-comment">// ✅ 正确：通常先stop再prevent</span>
+&lt;a <span class="code-attribute">@click.stop.prevent</span>=<span class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>错误2：编辑模式使用@click而不是@mousedown.prevent</strong>
+                    <div class="code-block" v-pre style="margin-top: 10px;">
+<span class="code-comment">// ❌ 错误：blur会先触发，导致编辑状态丢失</span>
+&lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
+&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"save"</span>&gt;保存&lt;/button&gt;
+
+<span class="code-comment">// ✅ 正确：使用mousedown.prevent</span>
+&lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
+&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"save"</span>&gt;保存&lt;/button&gt;
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>错误3：忘记在表单上使用 prevent</strong>
+                    <div class="code-block" v-pre style="margin-top: 10px;">
+<span class="code-comment">// ❌ 错误：表单提交会刷新页面</span>
+&lt;form <span class="code-attribute">@submit</span>=<span class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
+
+<span class="code-comment">// ✅ 正确：阻止默认提交行为</span>
+&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                // Demo 1: 计数器
+                count: 0,
+                eventLogs: [],
+                eventLogId: 1,
+                normalClickCount: 0,
+                
+                // Demo 2: 事件修饰符
+                modifierLogs: [],
+                modifierLogId: 1,
+                
+                // Demo 3: 组合修饰符
+                formData: {
+                    username: '',
+                    password: ''
+                },
+                showModal: false,
+                contextMenu: {
+                    show: false,
+                    x: 0,
+                    y: 0
+                },
+                combinedLogs: [],
+                combinedLogId: 1,
+                
+                // Demo 4: 键盘事件
+                chatMessage: '',
+                messages: [],
+                messageId: 1,
+                escModal: false,
+                comment: '',
+                position: {
+                    x: 0,
+                    y: 0,
+                    icon: '😊'
+                },
+                keyLogs: [],
+                keyLogId: 1,
+                
+                // Demo 5: 鼠标事件
+                mouseLogs: [],
+                mouseLogId: 1,
+                
+                // Demo 6: 编辑模式
+                editItems: [
+                    { id: 1, title: '双击编辑任务 1', editing: false },
+                    { id: 2, title: '双击编辑任务 2', editing: false },
+                    { id: 3, title: '双击编辑任务 3', editing: false }
+                ],
+                editLogs: [],
+                editLogId: 1
+            },
+            methods: {
+                // Demo 1: 计数器方法
+                increment() {
+                    this.count++;
+                    this.addEventLog('increment', '点击了加1按钮');
+                },
+                decrement() {
+                    this.count--;
+                    this.addEventLog('decrement', '点击了减1按钮');
+                },
+                addBy(num) {
+                    this.count += num;
+                    this.addEventLog('addBy', `点击了加${num}按钮`);
+                },
+                reset() {
+                    this.count = 0;
+                    this.addEventLog('reset', '点击了重置按钮');
+                },
+                logEvent(event) {
+                    console.log('事件对象:', event);
+                    this.addEventLog('logEvent', `打印了事件对象 ${event.type}`);
+                },
+                addEventLog(event, message) {
+                    this.eventLogs.unshift({
+                        id: this.eventLogId++,
+                        time: new Date().toLocaleTimeString(),
+                        event: event,
+                        message: message
+                    });
+                    if (this.eventLogs.length > 10) this.eventLogs.pop();
+                },
+                
+                // Demo 2: 事件修饰符
+                handleOuterClick() {
+                    this.addModifierLog('外层盒子被点击（红色）');
+                },
+                handleMiddleClick() {
+                    this.addModifierLog('中层盒子被点击（橙色） 会冒泡到外层');
+                },
+                handleInnerClick() {
+                    this.addModifierLog('内层盒子被点击（绿色） 使用了.stop，不会冒泡');
+                },
+                handleLinkClick() {
+                    this.addModifierLog('链接被点击');
+                },
+                handleNormalClick() {
+                    this.normalClickCount++;
+                    this.addModifierLog(`普通按钮被点击 ${this.normalClickCount} 次`);
+                },
+                handleOnceClick() {
+                    this.addModifierLog('.once按钮被点击（只能触发一次）');
+                },
+                handleSelfClick() {
+                    this.addModifierLog('.self - 只有点击蓝色区域才触发');
+                },
+                handleButtonClick() {
+                    this.addModifierLog('内部按钮被点击');
+                },
+                addModifierLog(message) {
+                    this.modifierLogs.unshift({
+                        id: this.modifierLogId++,
+                        time: new Date().toLocaleTimeString(),
+                        message: message
+                    });
+                    if (this.modifierLogs.length > 10) this.modifierLogs.pop();
+                },
+                
+                // Demo 3: 组合修饰符
+                handleSubmit() {
+                    this.addCombinedLog(`表单提交 - 用户： ${this.formData.username}`);
+                },
+                showContextMenu(event) {
+                    this.contextMenu.show = true;
+                    this.contextMenu.x = event.clientX;
+                    this.contextMenu.y = event.clientY;
+                    this.addCombinedLog('显示右键菜单');
+                },
+                handleMenuAction(action) {
+                    this.addCombinedLog(`执行菜单操作: ${action}`);
+                    this.contextMenu.show = false;
+                },
+                addCombinedLog(message) {
+                    this.combinedLogs.unshift({
+                        id: this.combinedLogId++,
+                        time: new Date().toLocaleTimeString(),
+                        message: message
+                    });
+                    if (this.combinedLogs.length > 10) this.combinedLogs.pop();
+                },
+                
+                // Demo 4: 键盘事件
+                sendMessage() {
+                    if (this.chatMessage.trim()) {
+                        this.messages.push({
+                            id: this.messageId++,
+                            text: this.chatMessage
+                        });
+                        this.addKeyLog(`发送消息： ${this.chatMessage}`);
+                        this.chatMessage = '';
+                    }
+                },
+                submitComment() {
+                    if (this.comment.trim()) {
+                        this.addKeyLog(`提交评论: ${this.comment.substring(0, 20)}...`);
+                        this.comment = '';
+                    }
+                },
+                addKeyLog(message) {
+                    this.keyLogs.unshift({
+                        id: this.keyLogId++,
+                        time: new Date().toLocaleTimeString(),
+                        message: message
+                    });
+                    if (this.keyLogs.length > 10) this.keyLogs.pop();
+                },
+                
+                // Demo 5: 鼠标事件
+                handleMouseClick(button) {
+                    this.addMouseLog(`${button}被点击`);
+                },
+                addMouseLog(message) {
+                    this.mouseLogs.unshift({
+                        id: this.mouseLogId++,
+                        time: new Date().toLocaleTimeString(),
+                        message: message
+                    });
+                    if (this.mouseLogs.length > 8) this.mouseLogs.pop();
+                },
+                
+                // Demo 6: 编辑模式
+                startEdit(item) {
+                    item.editing = true;
+                    this.addEditLog(`开始编辑： ${item.title}`);
+                    this.$nextTick(() => {
+                        if (this.$refs.editInput && this.$refs.editInput[0]) {
+                            this.$refs.editInput[0].focus();
+                        }
+                    });
+                },
+                saveEdit(item) {
+                    item.editing = false;
+                    this.addEditLog(`保存编辑: ${item.title}`);
+                },
+                cancelEdit(item) {
+                    item.editing = false;
+                    this.addEditLog(`取消编辑`);
+                },
+                addEditLog(message) {
+                    this.editLogs.unshift({
+                        id: this.editLogId++,
+                        time: new Date().toLocaleTimeString(),
+                        message: message
+                    });
+                    if (this.editLogs.length > 8) this.editLogs.pop();
+                }
+            },
+            mounted() {
+                // 监听全局点击事件，关闭右键菜单
+                document.addEventListener('click', () => {
+                    this.contextMenu.show = false;
+                });
+                
+                // 监听方向键
+                document.addEventListener('keyup', (e) => {
+                    if (e.key === 'ArrowUp') {
+                        this.position.y--;
+                        this.addKeyLog('↑ 向上移动');
+                    } else if (e.key === 'ArrowDown') {
+                        this.position.y++;
+                        this.addKeyLog('↓ 向下移动');
+                    } else if (e.key === 'ArrowLeft') {
+                        this.position.x--;
+                        this.addKeyLog('← 向左移动');
+                    } else if (e.key === 'ArrowRight') {
+                        this.position.x++;
+                        this.addKeyLog('→ 向右移动');
+                    }
+                });
+                
+                // ESC键监听
+                document.addEventListener('keyup', (e) => {
+                    if (e.key === 'Escape' && this.escModal) {
+                        this.escModal = false;
+                        this.addKeyLog('按ESC键关闭模态框');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+
