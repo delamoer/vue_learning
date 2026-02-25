@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue 异步组件详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .intro-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .demo-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .demo-title {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .demo-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .demo-app {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            border-left: 4px solid #667eea;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-keyword {
+            color: #c586c0;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .code-attribute {
+            color: #9cdcfe;
+        }
+
+        .tip-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .tip-title {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning-title {
+            color: #e65100;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .error-box {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .error-title {
+            color: #c62828;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success-title {
+            color: #1565c0;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+
+        .component-box {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .error-message {
+            color: #f44336;
+            font-weight: bold;
+            padding: 15px;
+            background: #ffebee;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            color: #4caf50;
+            font-weight: bold;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: bold;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .badge-info {
+            background: #2196f3;
+            color: white;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #667eea;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -35px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #667eea;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-item {
+            padding: 15px 25px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .flow-arrow {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Vue 异步组件详解</h1>
+        <p class="subtitle">Async Components - 按需加载，性能优化的利器</p>
+
+        <!-- 核心概念介绍 -->
+        <div class="intro-box">
+            <div class="intro-title">
+                💡 什么是异步组件？
+            </div>
+            <p style="font-size: 1.1em; line-height: 1.8;">
+                异步组件是 Vue 允许将组件定义为一个<span class="highlight">工厂函数</span>，该函数<span class="highlight">异步解析组件定义</span>。
+                Vue 只在这个组件需要被渲染的时候才会触发该工厂函数，且会把结果缓存起来供未来重新渲染。
+            </p>
+            <div class="flow-diagram" style="margin-top: 20px;">
+                <div class="flow-item">初始加载（不包含组件）</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">用户触发显示</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">异步加载组件</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">渲染组件</div>
+            </div>
+        </div>
+
+        <!-- 为什么需要异步组件 -->
+        <div class="warning-box">
+            <div class="warning-title">❓ 为什么需要异步组件？</div>
+            <div class="grid-2">
+                <div>
+                    <h4 style="color: #f44336; margin-bottom: 10px;">❌ 不使用异步组件的问题</h4>
+                    <ul style="margin-left: 20px;">
+                        <li>应用启动时加载所有组件</li>
+                        <li>首屏加载时间长（bundle.js 巨大）</li>
+                        <li>用户可能永远不会访问某些页面</li>
+                        <li>浪费带宽和内存</li>
+                        <li>白屏时间长，用户体验差</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: #4caf50; margin-bottom: 10px;">✅ 使用异步组件的优势</h4>
+                    <ul style="margin-left: 20px;">
+                        <li>按需加载，减少初始 bundle 体积</li>
+                        <li>首屏加载速度提升 50%-80%</li>
+                        <li>代码自动分割成多个小文件</li>
+                        <li>用户访问时才加载对应组件</li>
+                        <li>提升性能，节省资源</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tip-box" style="margin-top: 15px;">
+                <strong>实际案例：</strong>某后台管理系统有 50 个页面组件，使用异步加载后：
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>初始 bundle.js：从 3.5MB 降到 500KB（降低 85.7%）</li>
+                    <li>首屏加载时间：从 8 秒降到 1.5 秒</li>
+                    <li>用户访问其他页面时才加载对应的 chunk</li>
+                </ul>
+            </div>
+            <div class="success-box" style="margin-top: 15px;">
+                <div class="success-title">⭐ 学习重点提示</div>
+                <p><strong>如果你是小项目开发者，重点关注：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>✅ <strong>Demo 2 的路由懒加载</strong> - 最常用也最实用（必学）</li>
+                    <li>⏺️ Demo 3-5 的高级配置 - 了解即可（中大型项目才需要）</li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>记住一行代码：</strong><code>component: () => import('./MyComponent.vue')</code></p>
+            </div>
+        </div>
+
+        <!-- Demo 1: 基础异步组件 - 工厂函数方式 -->
+        <div class="demo-section">
+            <div class="demo-title">📦 Demo 1：基础异步组件（工厂函数）</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>理解异步组件的最基本用法 - 使用工厂函数异步返回组件定义
+            </div>
+
+            <div id="app1" class="demo-app">
+                <h3>📦 组件加载演示</h3>
+                <div class="card">
+                    <button @click="showComponent = !showComponent" class="btn btn-primary">
+                        {{ showComponent ? '隐藏组件' : '显示组件' }}
+                    </button>
+                    <div v-if="showComponent" style="margin-top: 20px;">
+                        <async-component></async-component>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-title">💡 操作提示</div>
+                    <ol>
+                        <li>点击按钮，首次显示组件时会看到 1 秒的加载延迟（模拟网络请求）</li>
+                        <li>打开控制台，观察加载日志</li>
+                        <li>再次隐藏/显示组件，会发现立即显示（已缓存）</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 核心代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 异步组件定义：工厂函数方式</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'async-component'</span>, <span class="code-keyword">function</span> (resolve, reject) {
+    <span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-string">'🔄 开始加载组件...'</span>);
+    
+    <span class="code-comment">// 模拟异步加载（实际中是从服务器加载）</span>
+    <span class="code-function">setTimeout</span>(<span class="code-keyword">function</span>() {
+        <span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-string">'✅ 组件加载成功！'</span>);
+        
+        <span class="code-comment">// resolve 传入组件配置对象</span>
+        <span class="code-function">resolve</span>({
+            <span class="code-attribute">template</span>: <span class="code-string">`
+                &lt;div class="component-box"&gt;
+                    &lt;h4&gt;🎉 我是异步加载的组件&lt;/h4&gt;
+                    &lt;p&gt;首次显示时延迟加载，之后被缓存&lt;/p&gt;
+                    &lt;p&gt;加载时间：{{ loadTime }}&lt;/p&gt;
+                &lt;/div&gt;
+            `</span>,
+            <span class="code-keyword">data</span>() {
+                <span class="code-keyword">return</span> {
+                    loadTime: <span class="code-keyword">new</span> <span class="code-function">Date</span>().<span class="code-function">toLocaleTimeString</span>()
+                }
+            }
+        });
+    }, <span class="code-number">1000</span>);
+});
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ 核心要点</div>
+                <ul style="margin-left: 20px;">
+                    <li><strong>工厂函数：</strong>返回一个函数，接收 <code>resolve</code> 和 <code>reject</code> 参数</li>
+                    <li><strong>延迟加载：</strong>只在组件需要渲染时才执行工厂函数</li>
+                    <li><strong>自动缓存：</strong>加载一次后，Vue 会缓存结果</li>
+                    <li><strong>resolve：</strong>加载成功时调用，传入组件配置对象</li>
+                    <li><strong>reject：</strong>加载失败时调用（可选）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 2: Promise 方式 + Loading 状态 -->
+        <div class="demo-section">
+            <div class="demo-title">⏳ Demo 2：Promise 方式 + 加载状态 ⭐ 重点：路由懒加载</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>使用 Promise 定义异步组件，并显示加载中状态
+            </div>
+            <div class="error-box" style="margin-bottom: 20px;">
+                <div class="error-title">🔥 小项目开发者必看！</div>
+                <p><strong>这个Demo中的"路由懒加载"是异步组件最常用也最实用的用法！</strong></p>
+                <p>其他高级配置（loading/error/timeout）在中大型项目才需要，小项目直接跳过即可。</p>
+                <p><strong>记住这一行代码就够了：</strong><code style="background: white; padding: 2px 8px; border-radius: 4px;">component: () => import('./MyComponent.vue')</code></p>
+            </div>
+
+            <div id="app2" class="demo-app">
+                <h3>⏳ Promise 异步加载</h3>
+                <div class="card">
+                    <button @click="showHeavy = !showHeavy" class="btn btn-success">
+                        {{ showHeavy ? '隐藏重型组件' : '加载重型组件' }}
+                    </button>
+                    
+                    <div v-if="showHeavy" style="margin-top: 20px;">
+                        <heavy-component></heavy-component>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">📊 加载性能对比</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>加载方式</th>
+                                <th>初始 bundle 大小</th>
+                                <th>首次加载</th>
+                                <th>再次渲染</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>❌ 同步加载</td>
+                                <td>500KB</td>
+                                <td>500ms</td>
+                                <td>0ms（已在内存）</td>
+                            </tr>
+                            <tr>
+                                <td>✅ 异步加载</td>
+                                <td>50KB</td>
+                                <td>300ms（网络加载）</td>
+                                <td>0ms（已缓存）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 Promise 实现代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 方式1：直接返回 Promise</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'heavy-component'</span>, <span class="code-keyword">function</span>() {
+    <span class="code-keyword">return</span> <span class="code-keyword">new</span> <span class="code-function">Promise</span>(<span class="code-keyword">function</span>(resolve, reject) {
+        <span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-string">'🔄 开始加载重型组件...'</span>);
+        
+        <span class="code-function">setTimeout</span>(<span class="code-keyword">function</span>() {
+            <span class="code-function">resolve</span>({
+                <span class="code-attribute">template</span>: <span class="code-string">`
+                    &lt;div class="component-box"&gt;
+                        &lt;h4&gt;📦 重型组件（2秒加载）&lt;/h4&gt;
+                        &lt;p&gt;这个组件模拟了大型图表库、富文本编辑器等场景&lt;/p&gt;
+                        &lt;div class="success-message"&gt;✅ 加载完成！&lt;/div&gt;
+                        &lt;ul style="margin-left: 20px; margin-top: 10px;"&gt;
+                            &lt;li v-for="item in items" :key="item"&gt;数据项 {{ item }}&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/div&gt;
+                `</span>,
+                <span class="code-keyword">data</span>() {
+                    <span class="code-keyword">return</span> {
+                        items: [<span class="code-number">1</span>, <span class="code-number">2</span>, <span class="code-number">3</span>, <span class="code-number">4</span>, <span class="code-number">5</span>]
+                    }
+                }
+            });
+        }, <span class="code-number">2000</span>);
+    });
+});
+
+<span class="code-comment">// 方式2：动态 import（推荐，配合 webpack）</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'async-webpack'</span>, <span class="code-keyword">function</span>() {
+    <span class="code-keyword">return</span> <span class="code-function">import</span>(<span class="code-string">'./components/MyComponent.vue'</span>)
+});
+
+<span class="code-comment">// 方式3：箭头函数简写</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'simple-async'</span>, () =&gt; <span class="code-function">import</span>(<span class="code-string">'./components/Simple.vue'</span>));
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">🎯 实际开发中的最佳实践</div>
+                <div class="warning-box" style="margin-bottom: 15px;">
+                    <div class="warning-title">⭐ 重点：路由懒加载（最常用也最实用）</div>
+                    <p><strong>小项目必学，大项目必用！</strong>即使只有3-5个页面的项目，也应该使用路由懒加载。</p>
+                    <p>✅ 零成本提升50%+性能 | ✅ 已是行业标准 | ✅ 写法超简单</p>
+                </div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 🔥 路由懒加载 - 【最常用也最实用的异步组件用法】</span>
+<span class="code-comment">// 💡 记住这一行代码，90%的场景都够用了！</span>
+<span class="code-keyword">const</span> router = <span class="code-keyword">new</span> VueRouter({
+    <span class="code-attribute">routes</span>: [
+        {
+            <span class="code-attribute">path</span>: <span class="code-string">'/dashboard'</span>,
+            <span class="code-comment">// 访问 /dashboard 时才加载 Dashboard 组件</span>
+            <span class="code-attribute">component</span>: () =&gt; <span class="code-function">import</span>(<span class="code-string">'./views/Dashboard.vue'</span>)
+        },
+        {
+            <span class="code-attribute">path</span>: <span class="code-string">'/user'</span>,
+            <span class="code-comment">// 添加注释，webpack 会将其打包为 user.chunk.js</span>
+            <span class="code-attribute">component</span>: () =&gt; <span class="code-function">import</span>(<span class="code-comment">/* webpackChunkName: "user" */</span> <span class="code-string">'./views/User.vue'</span>)
+        }
+    ]
+});
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 3: 高级异步组件配置 -->
+        <div class="demo-section">
+            <div class="demo-title">⚙️ Demo 3：高级异步组件配置</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>处理加载状态、错误状态、超时、延迟显示 loading
+            </div>
+
+            <div id="app3" class="demo-app">
+                <h3>⚙️ 带状态处理的异步组件</h3>
+                
+                <div class="grid-2">
+                    <!-- 成功加载 -->
+                    <div class="card">
+                        <h4>✅ 正常加载（1秒）</h4>
+                        <button @click="showSuccess = !showSuccess" class="btn btn-success">
+                            {{ showSuccess ? '隐藏' : '加载' }}
+                        </button>
+                        <div v-if="showSuccess" style="margin-top: 15px;">
+                            <async-success></async-success>
+                        </div>
+                    </div>
+
+                    <!-- 加载失败 -->
+                    <div class="card">
+                        <h4>❌ 加载失败演示</h4>
+                        <button @click="showError = !showError" class="btn btn-danger">
+                            {{ showError ? '隐藏' : '触发错误' }}
+                        </button>
+                        <div v-if="showError" style="margin-top: 15px;">
+                            <async-error></async-error>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>⏱️ 超时演示（3秒超时限制）</h4>
+                    <button @click="showTimeout = !showTimeout" class="btn btn-warning">
+                        {{ showTimeout ? '隐藏' : '加载慢速组件' }}
+                    </button>
+                    <div v-if="showTimeout" style="margin-top: 15px;">
+                        <async-timeout></async-timeout>
+                    </div>
+                </div>
+
+                <div class="warning-box" style="margin-top: 20px;">
+                    <div class="warning-title">📊 组件状态流转</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <strong>1. 初始状态</strong> - 组件未渲染
+                        </div>
+                        <div class="timeline-item">
+                            <strong>2. 加载中（Loading）</strong> - 显示 loading 组件（可延迟 200ms）
+                        </div>
+                        <div class="timeline-item">
+                            <strong>3a. 加载成功</strong> - 显示实际组件
+                        </div>
+                        <div class="timeline-item">
+                            <strong>3b. 加载失败</strong> - 显示 error 组件
+                        </div>
+                        <div class="timeline-item">
+                            <strong>3c. 加载超时</strong> - 显示 error 组件
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 高级配置代码</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 定义 Loading 组件</span>
+<span class="code-keyword">const</span> LoadingComponent = {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div style="text-align: center; padding: 30px;"&gt;
+            &lt;div class="loading-spinner"&gt;&lt;/div&gt;
+            &lt;span class="loading-text"&gt;拼命加载中...&lt;/span&gt;
+        &lt;/div&gt;
+    `</span>
+};
+
+<span class="code-comment">// 定义 Error 组件</span>
+<span class="code-keyword">const</span> ErrorComponent = {
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;div class="error-box"&gt;
+            &lt;div class="error-title"&gt;❌ 组件加载失败&lt;/div&gt;
+            &lt;p&gt;可能的原因：网络错误、文件不存在、服务器错误&lt;/p&gt;
+            &lt;button @click="$emit('retry')" class="btn btn-danger"&gt;重试&lt;/button&gt;
+        &lt;/div&gt;
+    `</span>
+};
+
+<span class="code-comment">// 高级异步组件配置</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'async-advanced'</span>, () =&gt; ({
+    <span class="code-comment">// 需要加载的组件（Promise）</span>
+    <span class="code-attribute">component</span>: <span class="code-keyword">new</span> <span class="code-function">Promise</span>((resolve, reject) =&gt; {
+        <span class="code-function">setTimeout</span>(() =&gt; {
+            <span class="code-function">resolve</span>({
+                <span class="code-attribute">template</span>: <span class="code-string">'&lt;div class="success-message"&gt;✅ 加载成功！&lt;/div&gt;'</span>
+            });
+        }, <span class="code-number">1000</span>);
+    }),
+    
+    <span class="code-comment">// 加载中显示的组件</span>
+    <span class="code-attribute">loading</span>: LoadingComponent,
+    
+    <span class="code-comment">// 加载失败时显示的组件</span>
+    <span class="code-attribute">error</span>: ErrorComponent,
+    
+    <span class="code-comment">// 展示 loading 组件前的延迟时间（默认 200ms）</span>
+    <span class="code-comment">// 💡 如果组件加载很快（&lt;200ms），就不会闪现 loading</span>
+    <span class="code-attribute">delay</span>: <span class="code-number">200</span>,
+    
+    <span class="code-comment">// 最长等待时间，超时则显示 error 组件（默认 Infinity）</span>
+    <span class="code-attribute">timeout</span>: <span class="code-number">3000</span>
+}));
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ 配置参数详解</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                            <th>典型值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>component</strong></td>
+                            <td>Promise</td>
+                            <td>需要加载的组件（必填）</td>
+                            <td>import('./MyComponent.vue')</td>
+                        </tr>
+                        <tr>
+                            <td><strong>loading</strong></td>
+                            <td>Component</td>
+                            <td>加载中显示的组件</td>
+                            <td>LoadingSpinner</td>
+                        </tr>
+                        <tr>
+                            <td><strong>error</strong></td>
+                            <td>Component</td>
+                            <td>加载失败时显示的组件</td>
+                            <td>ErrorMessage</td>
+                        </tr>
+                        <tr>
+                            <td><strong>delay</strong></td>
+                            <td>Number</td>
+                            <td>显示 loading 前的延迟（ms）</td>
+                            <td>200（避免闪烁）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>timeout</strong></td>
+                            <td>Number</td>
+                            <td>超时时间（ms）</td>
+                            <td>3000 或 Infinity</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💡 为什么需要 delay 参数？</div>
+                <p>如果组件加载很快（比如小于 200ms），立即显示 loading 会导致页面闪烁，用户体验差。</p>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 加载场景分析</span>
+<span class="code-comment">// 情况1：加载 150ms（快速）</span>
+<span class="code-keyword">delay</span>: <span class="code-number">200</span>  <span class="code-comment">// 不显示 loading，直接显示组件 ✅ 无闪烁</span>
+
+<span class="code-comment">// 情况2：加载 500ms（较慢）</span>
+<span class="code-keyword">delay</span>: <span class="code-number">200</span>  <span class="code-comment">// 200ms 后显示 loading，300ms 后显示组件 ✅ 有反馈</span>
+
+<span class="code-comment">// 情况3：加载 5000ms（超时）</span>
+<span class="code-keyword">timeout</span>: <span class="code-number">3000</span>  <span class="code-comment">// 3秒后显示 error 组件 ✅ 不会无限等待</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 4: 条件异步加载 -->
+        <div class="demo-section">
+            <div class="demo-title">🎯 Demo 4：条件异步加载（按需加载）</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>根据用户权限、设备类型等条件动态加载不同组件
+            </div>
+
+            <div id="app4" class="demo-app">
+                <h3>🎯 根据用户角色加载组件</h3>
+                
+                <div class="card">
+                    <div class="tabs">
+                        <button 
+                            class="tab" 
+                            :class="{ active: currentRole === 'guest' }"
+                            @click="currentRole = 'guest'">
+                            👤 游客
+                        </button>
+                        <button 
+                            class="tab" 
+                            :class="{ active: currentRole === 'user' }"
+                            @click="currentRole = 'user'">
+                            👨‍💼 普通用户
+                        </button>
+                        <button 
+                            class="tab" 
+                            :class="{ active: currentRole === 'admin' }"
+                            @click="currentRole = 'admin'">
+                            👑 管理员
+                        </button>
+                    </div>
+
+                    <div class="component-box">
+                        <role-dashboard :role="currentRole"></role-dashboard>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-title">💡 加载策略</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>角色</th>
+                                <th>加载内容</th>
+                                <th>延迟</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>👤 游客</td>
+                                <td>简单视图</td>
+                                <td>500ms</td>
+                                <td>无权限，轻量级组件</td>
+                            </tr>
+                            <tr>
+                                <td>👨‍💼 普通用户</td>
+                                <td>标准功能</td>
+                                <td>1000ms</td>
+                                <td>基础功能组件</td>
+                            </tr>
+                            <tr>
+                                <td>👑 管理员</td>
+                                <td>完整后台</td>
+                                <td>1500ms</td>
+                                <td>包含图表、统计等重型组件</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 条件加载实现</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 根据用户角色动态加载组件</span>
+Vue.<span class="code-function">component</span>(<span class="code-string">'role-dashboard'</span>, {
+    <span class="code-attribute">props</span>: [<span class="code-string">'role'</span>],
+    <span class="code-attribute">template</span>: <span class="code-string">`
+        &lt;component :is="asyncComponent"&gt;&lt;/component&gt;
+    `</span>,
+    <span class="code-keyword">computed</span>: {
+        <span class="code-function">asyncComponent</span>() {
+            <span class="code-keyword">const</span> role = <span class="code-keyword">this</span>.role;
+            
+            <span class="code-comment">// 根据角色返回不同的异步组件</span>
+            <span class="code-keyword">if</span> (role === <span class="code-string">'admin'</span>) {
+                <span class="code-keyword">return</span> () =&gt; ({
+                    <span class="code-attribute">component</span>: <span class="code-keyword">new</span> <span class="code-function">Promise</span>((resolve) =&gt; {
+                        <span class="code-function">setTimeout</span>(() =&gt; {
+                            <span class="code-function">resolve</span>({
+                                <span class="code-attribute">template</span>: <span class="code-string">`
+                                    &lt;div&gt;
+                                        &lt;h4&gt;👑 管理员后台&lt;/h4&gt;
+                                        &lt;p&gt;包含：数据统计、用户管理、系统设置...&lt;/p&gt;
+                                    &lt;/div&gt;
+                                `</span>
+                            });
+                        }, <span class="code-number">1500</span>);
+                    }),
+                    <span class="code-attribute">loading</span>: LoadingComponent
+                });
+            } <span class="code-keyword">else if</span> (role === <span class="code-string">'user'</span>) {
+                <span class="code-keyword">return</span> () =&gt; <span class="code-function">import</span>(<span class="code-string">'./components/UserDashboard.vue'</span>);
+            } <span class="code-keyword">else</span> {
+                <span class="code-keyword">return</span> () =&gt; <span class="code-function">import</span>(<span class="code-string">'./components/GuestView.vue'</span>);
+            }
+        }
+    }
+});
+
+<span class="code-comment">// 实际应用：根据设备类型加载不同组件</span>
+<span class="code-keyword">computed</span>: {
+    <span class="code-function">deviceComponent</span>() {
+        <span class="code-keyword">const</span> isMobile = <span class="code-keyword">window</span>.innerWidth &lt; <span class="code-number">768</span>;
+        <span class="code-keyword">return</span> isMobile
+            ? () =&gt; <span class="code-function">import</span>(<span class="code-string">'./components/MobileView.vue'</span>)
+            : () =&gt; <span class="code-function">import</span>(<span class="code-string">'./components/DesktopView.vue'</span>);
+    }
+}
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ 条件加载的实际应用</div>
+                <div class="grid-2">
+                    <div>
+                        <h4>🎯 权限控制</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>管理员：加载完整管理后台</li>
+                            <li>普通用户：加载基础功能</li>
+                            <li>游客：加载公开内容</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>📱 响应式加载</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>移动端：加载轻量级组件</li>
+                            <li>桌面端：加载完整功能</li>
+                            <li>平板：加载适配版本</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>🌐 国际化</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>中文：加载中文组件</li>
+                            <li>英文：加载英文组件</li>
+                            <li>其他：加载对应语言包</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>🎨 主题切换</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>日间模式：加载亮色主题</li>
+                            <li>夜间模式：加载暗色主题</li>
+                            <li>自定义：加载个性化主题</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 5: 预加载和缓存策略 -->
+        <div class="demo-section">
+            <div class="demo-title">🚀 Demo 5：预加载与缓存策略</div>
+            <div class="demo-description">
+                <strong>学习目标：</strong>优化用户体验 - 预加载可能需要的组件，智能缓存策略
+            </div>
+
+            <div id="app5" class="demo-app">
+                <h3>🚀 预加载演示</h3>
+                
+                <div class="card">
+                    <div class="warning-box">
+                        <div class="warning-title">💡 场景说明</div>
+                        <p>用户进入首页后，系统在后台预加载可能访问的页面（如"关于我们"、"产品列表"）</p>
+                        <p>当用户真正点击时，组件已经加载完成，可以立即显示 ⚡</p>
+                    </div>
+
+                    <div class="tabs">
+                        <button 
+                            class="tab" 
+                            :class="{ active: currentTab === 'home' }"
+                            @click="switchTab('home')">
+                            🏠 首页
+                        </button>
+                        <button 
+                            class="tab" 
+                            :class="{ active: currentTab === 'about' }"
+                            @click="switchTab('about')">
+                            📄 关于我们
+                        </button>
+                        <button 
+                            class="tab" 
+                            :class="{ active: currentTab === 'products' }"
+                            @click="switchTab('products')">
+                            📦 产品列表
+                        </button>
+                    </div>
+
+                    <div class="component-box">
+                        <component :is="currentComponent"></component>
+                    </div>
+
+                    <div class="tip-box" style="margin-top: 20px;">
+                        <div class="tip-title">📊 预加载状态</div>
+                        <div v-for="item in preloadStatus" :key="item.name" style="margin: 10px 0;">
+                            <strong>{{ item.name }}:</strong>
+                            <span class="badge" :class="item.class">{{ item.status }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💻 预加载策略实现</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// Vue 实例中实现预加载</span>
+<span class="code-keyword">new</span> <span class="code-function">Vue</span>({
+    <span class="code-attribute">el</span>: <span class="code-string">'#app5'</span>,
+    <span class="code-keyword">data</span>() {
+        <span class="code-keyword">return</span> {
+            currentTab: <span class="code-string">'home'</span>,
+            <span class="code-comment">// 预加载的组件缓存</span>
+            preloadedComponents: {}
+        }
+    },
+    <span class="code-keyword">computed</span>: {
+        <span class="code-function">currentComponent</span>() {
+            <span class="code-comment">// 如果已预加载，直接返回</span>
+            <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.preloadedComponents[<span class="code-keyword">this</span>.currentTab]) {
+                <span class="code-keyword">return</span> <span class="code-keyword">this</span>.preloadedComponents[<span class="code-keyword">this</span>.currentTab];
+            }
+            
+            <span class="code-comment">// 否则按需加载</span>
+            <span class="code-keyword">return</span> () =&gt; <span class="code-keyword">this</span>.<span class="code-function">loadComponent</span>(<span class="code-keyword">this</span>.currentTab);
+        }
+    },
+    <span class="code-keyword">methods</span>: {
+        <span class="code-comment">// 加载组件</span>
+        <span class="code-function">loadComponent</span>(name) {
+            <span class="code-keyword">return</span> <span class="code-keyword">new</span> <span class="code-function">Promise</span>((resolve) =&gt; {
+                <span class="code-function">setTimeout</span>(() =&gt; {
+                    <span class="code-keyword">const</span> component = { <span class="code-comment">/* 组件定义 */</span> };
+                    <span class="code-comment">// 缓存组件</span>
+                    <span class="code-keyword">this</span>.preloadedComponents[name] = component;
+                    <span class="code-function">resolve</span>(component);
+                }, <span class="code-number">1000</span>);
+            });
+        },
+        
+        <span class="code-comment">// 预加载策略：鼠标悬停时预加载</span>
+        <span class="code-function">preloadOnHover</span>(componentName) {
+            <span class="code-keyword">if</span> (!<span class="code-keyword">this</span>.preloadedComponents[componentName]) {
+                <span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-string">`🔄 预加载 ${componentName}...`</span>);
+                <span class="code-keyword">this</span>.<span class="code-function">loadComponent</span>(componentName);
+            }
+        },
+        
+        <span class="code-comment">// 预加载策略：空闲时间预加载</span>
+        <span class="code-function">preloadOnIdle</span>() {
+            <span class="code-keyword">if</span> (<span class="code-string">'requestIdleCallback'</span> <span class="code-keyword">in</span> <span class="code-keyword">window</span>) {
+                <span class="code-keyword">window</span>.<span class="code-function">requestIdleCallback</span>(() =&gt; {
+                    <span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-string">'🕐 浏览器空闲，开始预加载组件...'</span>);
+                    <span class="code-keyword">this</span>.<span class="code-function">loadComponent</span>(<span class="code-string">'about'</span>);
+                    <span class="code-keyword">this</span>.<span class="code-function">loadComponent</span>(<span class="code-string">'products'</span>);
+                });
+            }
+        }
+    },
+    <span class="code-keyword">mounted</span>() {
+        <span class="code-comment">// 页面加载完成后，在空闲时间预加载其他组件</span>
+        <span class="code-keyword">this</span>.<span class="code-function">preloadOnIdle</span>();
+    }
+});
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">✅ 预加载策略对比</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>策略</th>
+                            <th>触发时机</th>
+                            <th>优点</th>
+                            <th>缺点</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>鼠标悬停预加载</strong></td>
+                            <td>用户鼠标悬停在链接上</td>
+                            <td>用户意图明显</td>
+                            <td>可能频繁触发</td>
+                            <td>导航菜单</td>
+                        </tr>
+                        <tr>
+                            <td><strong>空闲时间预加载</strong></td>
+                            <td>浏览器空闲（requestIdleCallback）</td>
+                            <td>不影响主线程</td>
+                            <td>预加载时机不确定</td>
+                            <td>低优先级页面</td>
+                        </tr>
+                        <tr>
+                            <td><strong>可视区域预加载</strong></td>
+                            <td>组件即将进入视口</td>
+                            <td>用户体验好</td>
+                            <td>需要 IntersectionObserver</td>
+                            <td>长页面、无限滚动</td>
+                        </tr>
+                        <tr>
+                            <td><strong>延迟预加载</strong></td>
+                            <td>页面加载后延迟 N 秒</td>
+                            <td>简单易实现</td>
+                            <td>可能浪费资源</td>
+                            <td>高频访问页面</td>
+                        </tr>
+                        <tr>
+                            <td><strong>智能预测预加载</strong></td>
+                            <td>根据用户行为预测</td>
+                            <td>最优体验</td>
+                            <td>复杂，需ML算法</td>
+                            <td>大型应用</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💡 webpack 魔法注释（Magic Comments）</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 1. 指定 chunk 名称</span>
+<span class="code-function">import</span>(<span class="code-comment">/* webpackChunkName: "user-profile" */</span> <span class="code-string">'./UserProfile.vue'</span>)
+
+<span class="code-comment">// 2. 预加载（preload）- 父 chunk 加载时并行加载</span>
+<span class="code-function">import</span>(<span class="code-comment">/* webpackPreload: true */</span> <span class="code-string">'./Critical.vue'</span>)
+
+<span class="code-comment">// 3. 预取（prefetch）- 浏览器空闲时加载</span>
+<span class="code-function">import</span>(<span class="code-comment">/* webpackPrefetch: true */</span> <span class="code-string">'./Future.vue'</span>)
+
+<span class="code-comment">// 4. 组合使用</span>
+<span class="code-function">import</span>(
+    <span class="code-comment">/* webpackChunkName: "admin" */</span>
+    <span class="code-comment">/* webpackPrefetch: true */</span>
+    <span class="code-string">'./AdminPanel.vue'</span>
+)
+                </div>
+            </div>
+        </div>
+
+        <!-- 面试题 -->
+        <div class="error-box">
+            <div class="error-title">🎓 面试常考题（5题）</div>
+            
+            <div class="card">
+                <div class="card-title">❓ 问题 1：异步组件的原理是什么？</div>
+                <p><strong>答案：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li><strong>工厂函数：</strong>Vue 允许将组件定义为一个工厂函数，返回 Promise</li>
+                    <li><strong>延迟解析：</strong>只在组件需要渲染时才调用工厂函数</li>
+                    <li><strong>加载缓存：</strong>加载成功后，Vue 会缓存组件定义，再次渲染时直接使用缓存</li>
+                    <li><strong>代码分割：</strong>配合 webpack 的 import() 语法，自动将组件打包为独立的 chunk</li>
+                    <li><strong>状态管理：</strong>Vue 内部维护组件的加载状态（loading、resolved、rejected）</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 2：异步组件和路由懒加载有什么区别？</div>
+                <p><strong>答案：</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>对比项</th>
+                            <th>异步组件</th>
+                            <th>路由懒加载</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>概念</strong></td>
+                            <td>组件层面的异步加载</td>
+                            <td>路由层面的异步加载</td>
+                        </tr>
+                        <tr>
+                            <td><strong>使用场景</strong></td>
+                            <td>任何组件（模态框、图表、编辑器等）</td>
+                            <td>页面级组件（路由对应的视图）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>触发时机</strong></td>
+                            <td>组件需要渲染时（v-if、动态组件等）</td>
+                            <td>路由切换时</td>
+                        </tr>
+                        <tr>
+                            <td><strong>关系</strong></td>
+                            <td>更底层，路由懒加载是异步组件的应用</td>
+                            <td>基于异步组件实现</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 15px;"><strong>结论：</strong>路由懒加载本质上就是在路由配置中使用异步组件 ✅</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 3：什么时候应该使用异步组件？</div>
+                <p><strong>答案（6 种典型场景）：</strong></p>
+                <div class="grid-2">
+                    <div>
+                        <h4>1️⃣ 大型组件</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>富文本编辑器（TinyMCE、Quill）</li>
+                            <li>图表库（ECharts、D3.js）</li>
+                            <li>地图组件（百度地图、高德地图）</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>2️⃣ 低频使用组件</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>模态框、弹窗</li>
+                            <li>辅助功能（帮助文档、反馈）</li>
+                            <li>设置页面</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>3️⃣ 条件渲染组件</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>权限控制（管理员面板）</li>
+                            <li>AB 测试组件</li>
+                            <li>设备特定组件</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>4️⃣ 路由页面</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>所有路由视图都应懒加载</li>
+                            <li>避免首屏加载所有页面</li>
+                            <li>提升首屏性能</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>5️⃣ 第三方组件</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>视频播放器</li>
+                            <li>PDF 查看器</li>
+                            <li>代码编辑器</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>6️⃣ 用户交互触发</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>点击按钮才显示的内容</li>
+                            <li>Tab 切换的面板</li>
+                            <li>折叠面板内容</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 4：如何优化异步组件的加载体验？</div>
+                <p><strong>答案（5 个优化策略）：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>
+                        <strong>设置 delay 参数（避免闪烁）：</strong>
+                        <div class="code-block" v-pre>
+delay: 200  <span class="code-comment">// 快速加载（&lt;200ms）时不显示 loading</span>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>提供 loading 组件：</strong>显示友好的加载提示（spinner、骨架屏）
+                    </li>
+                    <li>
+                        <strong>提供 error 组件：</strong>加载失败时显示错误信息和重试按钮
+                    </li>
+                    <li>
+                        <strong>设置 timeout：</strong>避免用户无限等待，3-5 秒为宜
+                    </li>
+                    <li>
+                        <strong>预加载策略：</strong>根据用户行为预加载可能需要的组件
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-title">❓ 问题 5：异步组件和 keep-alive 如何配合使用？</div>
+                <p><strong>答案：</strong></p>
+                <div class="code-block" v-pre>
+<span class="code-comment">// keep-alive 包裹异步组件 - 完美配合 ✅</span>
+&lt;keep-alive&gt;
+    &lt;component :is=<span class="code-string">"asyncComponent"</span>&gt;&lt;/component&gt;
+&lt;/keep-alive&gt;
+
+<span class="code-comment">// 效果：</span>
+<span class="code-comment">// 1. 首次访问：异步加载组件（有延迟）</span>
+<span class="code-comment">// 2. 组件加载完成后：被 keep-alive 缓存</span>
+<span class="code-comment">// 3. 再次访问：直接从缓存取，无需重新加载（瞬间显示）</span>
+
+<span class="code-comment">// 实际应用：路由懒加载 + keep-alive</span>
+&lt;keep-alive :include=<span class="code-string">["Dashboard", "UserList"]</span>&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/keep-alive&gt;
+
+<span class="code-comment">// 优势：</span>
+<span class="code-comment">// - 首屏快：异步加载减少初始 bundle</span>
+<span class="code-comment">// - 切换快：keep-alive 缓存组件状态</span>
+<span class="code-comment">// - 体验好：最佳的性能和用户体验</span>
+                </div>
+                <p><strong>结论：</strong>异步组件解决<span class="highlight">首次加载</span>问题，keep-alive 解决<span class="highlight">重复访问</span>问题，两者配合是最佳实践 ⭐</p>
+            </div>
+        </div>
+
+        <!-- 最佳实践 -->
+        <div class="success-box">
+            <div class="success-title">✅ 异步组件最佳实践</div>
+            
+            <div class="card">
+                <div class="card-title">1️⃣ 路由懒加载（必须做）⭐ 最常用也最实用</div>
+                <div class="success-box" style="margin-bottom: 15px;">
+                    <div class="success-title">💡 小项目开发者看这里就够了！</div>
+                    <p>如果只学一个异步组件用法，就学<strong>路由懒加载</strong>！</p>
+                    <p><strong>性价比最高：</strong>学习成本10分钟 ⏱️ | 性能提升50%+ 🚀 | 小项目直接够用 ✅</p>
+                </div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// ❌ 不要这样 - 所有路由一次性加载</span>
+<span class="code-keyword">import</span> Dashboard <span class="code-keyword">from</span> <span class="code-string">'./views/Dashboard.vue'</span>;
+<span class="code-keyword">import</span> User <span class="code-keyword">from</span> <span class="code-string">'./views/User.vue'</span>;
+<span class="code-keyword">import</span> Settings <span class="code-keyword">from</span> <span class="code-string">'./views/Settings.vue'</span>;
+
+<span class="code-comment">// ✅ 应该这样 - 路由懒加载</span>
+<span class="code-keyword">const</span> router = <span class="code-keyword">new</span> VueRouter({
+    <span class="code-attribute">routes</span>: [
+        {
+            <span class="code-attribute">path</span>: <span class="code-string">'/dashboard'</span>,
+            <span class="code-attribute">component</span>: () =&gt; <span class="code-function">import</span>(<span class="code-string">'./views/Dashboard.vue'</span>)
+        },
+        {
+            <span class="code-attribute">path</span>: <span class="code-string">'/user'</span>,
+            <span class="code-attribute">component</span>: () =&gt; <span class="code-function">import</span>(<span class="code-string">'./views/User.vue'</span>)
+        },
+        {
+            <span class="code-attribute">path</span>: <span class="code-string">'/settings'</span>,
+            <span class="code-attribute">component</span>: () =&gt; <span class="code-function">import</span>(<span class="code-string">'./views/Settings.vue'</span>)
+        }
+    ]
+});
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">2️⃣ 合理分组 chunk（避免过度分割）</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 相关组件打包到同一个 chunk</span>
+<span class="code-keyword">const</span> UserProfile = () =&gt; <span class="code-function">import</span>(
+    <span class="code-comment">/* webpackChunkName: "user" */</span> 
+    <span class="code-string">'./components/UserProfile.vue'</span>
+);
+
+<span class="code-keyword">const</span> UserSettings = () =&gt; <span class="code-function">import</span>(
+    <span class="code-comment">/* webpackChunkName: "user" */</span> 
+    <span class="code-string">'./components/UserSettings.vue'</span>
+);
+
+<span class="code-comment">// 结果：两个组件打包到 user.chunk.js</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">3️⃣ 提供完善的加载状态</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 完整的异步组件配置</span>
+<span class="code-keyword">const</span> AsyncComponent = () =&gt; ({
+    <span class="code-attribute">component</span>: <span class="code-function">import</span>(<span class="code-string">'./Heavy.vue'</span>),
+    <span class="code-attribute">loading</span>: LoadingSpinner,      <span class="code-comment">// 加载中</span>
+    <span class="code-attribute">error</span>: ErrorMessage,          <span class="code-comment">// 加载失败</span>
+    <span class="code-attribute">delay</span>: <span class="code-number">200</span>,                    <span class="code-comment">// 避免闪烁</span>
+    <span class="code-attribute">timeout</span>: <span class="code-number">3000</span>                   <span class="code-comment">// 超时时间</span>
+});
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">4️⃣ 结合 keep-alive 使用</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 异步加载 + 缓存 = 最佳性能</span>
+&lt;keep-alive :include=<span class="code-string">["Dashboard"]</span>&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/keep-alive&gt;
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">5️⃣ 使用预加载优化体验</div>
+                <div class="code-block" v-pre>
+<span class="code-comment">// 高频页面使用 prefetch 预取</span>
+<span class="code-keyword">const</span> Dashboard = () =&gt; <span class="code-function">import</span>(
+    <span class="code-comment">/* webpackPrefetch: true */</span> 
+    <span class="code-string">'./views/Dashboard.vue'</span>
+);
+
+<span class="code-comment">// 关键组件使用 preload 预加载</span>
+<span class="code-keyword">const</span> CriticalModal = () =&gt; <span class="code-function">import</span>(
+    <span class="code-comment">/* webpackPreload: true */</span> 
+    <span class="code-string">'./components/CriticalModal.vue'</span>
+);
+                </div>
+            </div>
+        </div>
+
+        <!-- 性能收益 -->
+        <div class="tip-box">
+            <div class="tip-title">📊 性能收益总结</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>优化项</th>
+                        <th>收益</th>
+                        <th>实施难度</th>
+                        <th>推荐指数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>路由懒加载 🔥</strong></td>
+                        <td>首屏性能提升 50%-80%</td>
+                        <td>⭐ 简单</td>
+                        <td>⭐⭐⭐⭐⭐ <span class="badge badge-danger">最实用</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>大型组件异步化</strong></td>
+                        <td>减少 bundle 体积 30%-50%</td>
+                        <td>⭐⭐ 中等</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>条件加载</strong></td>
+                        <td>按需加载，节省带宽</td>
+                        <td>⭐⭐ 中等</td>
+                        <td>⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>预加载策略</strong></td>
+                        <td>用户体验提升 20%-40%</td>
+                        <td>⭐⭐⭐ 复杂</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>配合 keep-alive</strong></td>
+                        <td>切换速度提升 90%+</td>
+                        <td>⭐ 简单</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 总结 -->
+        <div class="intro-box" style="margin-top: 30px;">
+            <div class="intro-title">🎯 核心总结</div>
+            <ol style="font-size: 1.1em; line-height: 2;">
+                <li><strong>异步组件本质：</strong>用工厂函数延迟加载组件，配合 webpack 实现代码分割</li>
+                <li><strong>三种定义方式：</strong>工厂函数 / Promise / 高级配置对象</li>
+                <li><strong>最大收益：</strong>路由懒加载，首屏性能提升 50%-80%</li>
+                <li><strong>完善体验：</strong>提供 loading、error、delay、timeout 配置</li>
+                <li><strong>最佳搭档：</strong>异步组件 + keep-alive = 首次快 + 切换快</li>
+                <li><strong>适用场景：</strong>大型组件、低频组件、条件组件、路由页面</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // ====== Demo 1: 基础异步组件 ======
+        Vue.component('async-component', function (resolve, reject) {
+            console.log('🔄 [Demo1] 开始加载组件...');
+            setTimeout(function() {
+                console.log('✅ [Demo1] 组件加载成功！');
+                resolve({
+                    template: `
+                        <div class="component-box">
+                            <h4>🎉 我是异步加载的组件</h4>
+                            <p>首次显示时延迟 1 秒加载，之后被 Vue 缓存</p>
+                            <p><strong>加载时间：</strong>{{ loadTime }}</p>
+                            <div class="success-message">✅ 组件已就绪</div>
+                        </div>
+                    `,
+                    data() {
+                        return {
+                            loadTime: new Date().toLocaleTimeString()
+                        }
+                    }
+                });
+            }, 1000);
+        });
+
+        new Vue({
+            el: '#app1',
+            data() {
+                return {
+                    showComponent: false
+                }
+            }
+        });
+
+        // ====== Demo 2: Promise 方式 ======
+        Vue.component('heavy-component', function() {
+            return new Promise(function(resolve, reject) {
+                console.log('🔄 [Demo2] 开始加载重型组件...');
+                setTimeout(function() {
+                    console.log('✅ [Demo2] 重型组件加载完成！');
+                    resolve({
+                        template: `
+                            <div class="component-box">
+                                <h4>📦 重型组件（2秒加载）</h4>
+                                <p>这个组件模拟了大型图表库、富文本编辑器等场景</p>
+                                <div class="success-message">✅ 加载完成！</div>
+                                <ul style="margin-left: 20px; margin-top: 10px;">
+                                    <li v-for="item in items" :key="item">数据项 {{ item }}</li>
+                                </ul>
+                                <div style="margin-top: 15px;">
+                                    <span class="badge badge-success">已缓存</span>
+                                    <span class="badge badge-info">下次瞬间显示</span>
+                                </div>
+                            </div>
+                        `,
+                        data() {
+                            return {
+                                items: [1, 2, 3, 4, 5]
+                            }
+                        }
+                    });
+                }, 2000);
+            });
+        });
+
+        new Vue({
+            el: '#app2',
+            data() {
+                return {
+                    showHeavy: false
+                }
+            }
+        });
+
+        // ====== Demo 3: 高级配置 ======
+        // Loading 组件
+        const LoadingComponent = {
+            template: `
+                <div style="text-align: center; padding: 30px;">
+                    <div class="loading-spinner"></div>
+                    <span class="loading-text">拼命加载中...</span>
+                </div>
+            `
+        };
+
+        // Error 组件
+        const ErrorComponent = {
+            template: `
+                <div class="error-box">
+                    <div class="error-title">❌ 组件加载失败</div>
+                    <p>可能的原因：网络错误、文件不存在、服务器错误</p>
+                    <button class="btn btn-danger" @click="reload">🔄 重试</button>
+                </div>
+            `,
+            methods: {
+                reload() {
+                    window.location.reload();
+                }
+            }
+        };
+
+        // 成功加载的异步组件
+        Vue.component('async-success', () => ({
+            component: new Promise((resolve, reject) => {
+                console.log('🔄 [Demo3-Success] 开始加载...');
+                setTimeout(() => {
+                    console.log('✅ [Demo3-Success] 加载成功！');
+                    resolve({
+                        template: `
+                            <div class="success-message">
+                                ✅ 组件加载成功！（1秒）
+                            </div>
+                        `
+                    });
+                }, 1000);
+            }),
+            loading: LoadingComponent,
+            error: ErrorComponent,
+            delay: 200,
+            timeout: 3000
+        }));
+
+        // 加载失败的异步组件
+        Vue.component('async-error', () => ({
+            component: new Promise((resolve, reject) => {
+                console.log('🔄 [Demo3-Error] 开始加载...');
+                setTimeout(() => {
+                    console.log('❌ [Demo3-Error] 加载失败！');
+                    reject(new Error('模拟加载错误'));
+                }, 1000);
+            }),
+            loading: LoadingComponent,
+            error: ErrorComponent,
+            delay: 200,
+            timeout: 3000
+        }));
+
+        // 超时的异步组件
+        Vue.component('async-timeout', () => ({
+            component: new Promise((resolve, reject) => {
+                console.log('🔄 [Demo3-Timeout] 开始加载慢速组件...');
+                // 5秒才加载完成，但 timeout 是 3秒
+                setTimeout(() => {
+                    console.log('⏰ [Demo3-Timeout] 但是已经超时了...');
+                    resolve({
+                        template: `<div class="success-message">加载完成（但已超时）</div>`
+                    });
+                }, 5000);
+            }),
+            loading: LoadingComponent,
+            error: ErrorComponent,
+            delay: 200,
+            timeout: 3000 // 3秒超时
+        }));
+
+        new Vue({
+            el: '#app3',
+            data() {
+                return {
+                    showSuccess: false,
+                    showError: false,
+                    showTimeout: false
+                }
+            }
+        });
+
+        // ====== Demo 4: 条件加载 ======
+        Vue.component('role-dashboard', {
+            props: ['role'],
+            template: `
+                <div>
+                    <component :is="asyncComponent"></component>
+                </div>
+            `,
+            computed: {
+                asyncComponent() {
+                    const role = this.role;
+                    
+                    if (role === 'admin') {
+                        return () => ({
+                            component: new Promise((resolve) => {
+                                console.log('🔄 [Demo4] 加载管理员后台...');
+                                setTimeout(() => {
+                                    resolve({
+                                        template: `
+                                            <div class="card">
+                                                <h4>👑 管理员后台</h4>
+                                                <div class="badge badge-danger">高级权限</div>
+                                                <p style="margin-top: 10px;">包含功能：</p>
+                                                <ul style="margin-left: 20px;">
+                                                    <li>📊 数据统计与分析</li>
+                                                    <li>👥 用户管理</li>
+                                                    <li>⚙️ 系统设置</li>
+                                                    <li>🔐 权限管理</li>
+                                                    <li>📝 日志查看</li>
+                                                </ul>
+                                            </div>
+                                        `
+                                    });
+                                }, 1500);
+                            }),
+                            loading: LoadingComponent
+                        });
+                    } else if (role === 'user') {
+                        return () => ({
+                            component: new Promise((resolve) => {
+                                console.log('🔄 [Demo4] 加载普通用户面板...');
+                                setTimeout(() => {
+                                    resolve({
+                                        template: `
+                                            <div class="card">
+                                                <h4>👨‍💼 普通用户面板</h4>
+                                                <div class="badge badge-success">标准权限</div>
+                                                <p style="margin-top: 10px;">可用功能：</p>
+                                                <ul style="margin-left: 20px;">
+                                                    <li>📝 个人资料</li>
+                                                    <li>📋 我的订单</li>
+                                                    <li>💰 账户余额</li>
+                                                    <li>📧 消息中心</li>
+                                                </ul>
+                                            </div>
+                                        `
+                                    });
+                                }, 1000);
+                            }),
+                            loading: LoadingComponent
+                        });
+                    } else {
+                        return () => ({
+                            component: new Promise((resolve) => {
+                                console.log('🔄 [Demo4] 加载游客视图...');
+                                setTimeout(() => {
+                                    resolve({
+                                        template: `
+                                            <div class="card">
+                                                <h4>👤 游客视图</h4>
+                                                <div class="badge badge-warning">受限权限</div>
+                                                <p style="margin-top: 10px;">您可以：</p>
+                                                <ul style="margin-left: 20px;">
+                                                    <li>👀 浏览公开内容</li>
+                                                    <li>🔍 搜索产品</li>
+                                                </ul>
+                                                <button class="btn btn-primary" style="margin-top: 15px;">
+                                                    登录获取更多功能
+                                                </button>
+                                            </div>
+                                        `
+                                    });
+                                }, 500);
+                            }),
+                            loading: LoadingComponent
+                        });
+                    }
+                }
+            }
+        });
+
+        new Vue({
+            el: '#app4',
+            data() {
+                return {
+                    currentRole: 'guest'
+                }
+            }
+        });
+
+        // ====== Demo 5: 预加载 ======
+        new Vue({
+            el: '#app5',
+            data() {
+                return {
+                    currentTab: 'home',
+                    preloadedComponents: {},
+                    preloadStatus: [
+                        { name: '🏠 首页', status: '已加载', class: 'badge-success' },
+                        { name: '📄 关于我们', status: '预加载中...', class: 'badge-warning' },
+                        { name: '📦 产品列表', status: '预加载中...', class: 'badge-warning' }
+                    ]
+                }
+            },
+            computed: {
+                currentComponent() {
+                    if (this.currentTab === 'home') {
+                        return {
+                            template: `
+                                <div>
+                                    <h4>🏠 首页</h4>
+                                    <p>欢迎来到我们的网站！</p>
+                                    <div class="tip-box">
+                                        <div class="tip-title">💡 提示</div>
+                                        <p>在您浏览首页时，系统正在后台预加载"关于我们"和"产品列表"页面</p>
+                                        <p>当您点击切换时，页面将<strong>立即显示</strong>（已预加载）⚡</p>
+                                    </div>
+                                </div>
+                            `
+                        };
+                    } else if (this.currentTab === 'about') {
+                        return {
+                            template: `
+                                <div>
+                                    <h4>📄 关于我们</h4>
+                                    <p>我们是一家专注于 Vue.js 教育的公司</p>
+                                    <div class="success-message">✅ 该页面已预加载，所以切换瞬间显示</div>
+                                </div>
+                            `
+                        };
+                    } else {
+                        return {
+                            template: `
+                                <div>
+                                    <h4>📦 产品列表</h4>
+                                    <ul style="margin-left: 20px;">
+                                        <li>Vue.js 入门课程</li>
+                                        <li>Vue.js 进阶课程</li>
+                                        <li>Vue.js 实战项目</li>
+                                    </ul>
+                                    <div class="success-message">✅ 该页面已预加载，切换无延迟</div>
+                                </div>
+                            `
+                        };
+                    }
+                }
+            },
+            methods: {
+                switchTab(tab) {
+                    this.currentTab = tab;
+                },
+                preloadOtherPages() {
+                    console.log('🕐 浏览器空闲，开始预加载其他页面...');
+                    setTimeout(() => {
+                        console.log('✅ 预加载完成：关于我们');
+                        this.preloadStatus[1].status = '已预加载';
+                        this.preloadStatus[1].class = 'badge-success';
+                    }, 1000);
+                    setTimeout(() => {
+                        console.log('✅ 预加载完成：产品列表');
+                        this.preloadStatus[2].status = '已预加载';
+                        this.preloadStatus[2].class = 'badge-success';
+                    }, 2000);
+                }
+            },
+            mounted() {
+                // 模拟空闲时间预加载
+                setTimeout(() => {
+                    this.preloadOtherPages();
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
