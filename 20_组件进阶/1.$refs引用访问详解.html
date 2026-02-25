@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$refs 引用访问详解 - Vue 2 组件进阶</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .intro {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .intro h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .intro-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .intro-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .intro-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* Demo区域样式 */
+        .demo-section {
+            margin: 30px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        .demo-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-desc {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            line-height: 1.8;
+        }
+
+        .demo-desc strong {
+            color: #667eea;
+        }
+
+        .demo-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        /* 输入框样式 */
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 日志框样式 */
+        .log-box {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-box .log-title {
+            color: #3498db;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .log-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #95a5a6;
+            font-size: 0.9em;
+        }
+
+        /* 代码块样式 */
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .code-keyword { color: #c678dd; }
+        .code-string { color: #98c379; }
+        .code-function { color: #61afef; }
+        .code-comment { color: #5c6370; font-style: italic; }
+        .code-attribute { color: #d19a66; }
+
+        /* 提示框样式 */
+        .tip-box {
+            background: linear-gradient(135deg, #ffeaa715 0%, #fbda6115 100%);
+            border-left: 4px solid #f39c12;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .tip-box .tip-title {
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ff6b6b15 0%, #ee565615 100%);
+            border-left: 4px solid #e74c3c;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .warning-box .warning-title {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #51cf6615 0%, #43a04715 100%);
+            border-left: 4px solid #27ae60;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .success-box .success-title {
+            color: #27ae60;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Grid布局 */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* 动画输入框 */
+        .fancy-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .fancy-input:focus {
+            outline: none;
+            border-color: #667eea;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 组件卡片 */
+        .component-card {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+        }
+
+        .component-name {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        /* 计数器样式 */
+        .counter-display {
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            color: #667eea;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 视频播放器样式 */
+        .video-player {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .video-display {
+            background: #34495e;
+            height: 200px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .video-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #34495e;
+            border-radius: 10px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>🎯 $refs 引用访问详解</h1>
+        <p class="subtitle">Vue 2 组件进阶 - 掌握组件和DOM的引用访问技巧</p>
+
+        <!-- 知识介绍 -->
+        <div class="intro">
+            <h3>📚 什么是 $refs？</h3>
+            <p style="margin-bottom: 15px;">
+                <strong>$refs</strong> 是 Vue 提供的一个特殊属性，用于<strong>直接访问 DOM 元素或子组件实例</strong>。
+                它提供了一种"非响应式"的方式来操作 DOM 和组件，是 Vue 中为数不多可以直接访问底层的 API。
+            </p>
+
+            <div class="intro-content">
+                <div class="intro-item">
+                    <strong>🎨 访问 DOM 元素</strong>
+                    <p>可以直接获取真实的 DOM 节点，进行原生操作（如 focus、滚动等）</p>
+                </div>
+                <div class="intro-item">
+                    <strong>🔧 访问子组件实例</strong>
+                    <p>可以直接调用子组件的方法、访问子组件的数据</p>
+                </div>
+                <div class="intro-item">
+                    <strong>⚡ 使用场景</strong>
+                    <p>表单聚焦、动画控制、第三方库集成、组件通信等</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 1: 访问DOM元素 -->
+        <div class="demo-section">
+            <div class="demo-title">📝 Demo 1: 访问 DOM 元素</div>
+            <div class="demo-desc">
+                <strong>核心知识：</strong><br>
+                1. 使用 <code>ref="xxx"</code> 给元素添加引用标识<br>
+                2. 通过 <code>this.$refs.xxx</code> 获取 DOM 元素<br>
+                3. 可以调用原生 DOM 方法（如 focus、select、scroll 等）<br>
+                <strong>实战场景：</strong>表单自动聚焦、输入框选中文本、滚动定位
+            </div>
+
+            <div class="demo-content">
+                <h4>示例：输入框焦点控制</h4>
+                
+                <div class="input-group">
+                    <label>用户名：</label>
+                    <input 
+                        type="text" 
+                        ref="usernameInput"
+                        v-model="username"
+                        placeholder="点击下方按钮自动聚焦">
+                </div>
+
+                <div class="input-group">
+                    <label>邮箱：</label>
+                    <input 
+                        type="email" 
+                        ref="emailInput"
+                        v-model="email"
+                        placeholder="可以全选文本">
+                </div>
+
+                <div class="input-group">
+                    <label>留言：</label>
+                    <textarea 
+                        ref="messageInput"
+                        v-model="message"
+                        placeholder="可以获取滚动位置"
+                        rows="4"></textarea>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button @click="focusUsername" class="btn btn-primary">
+                        聚焦到用户名
+                    </button>
+                    <button @click="focusEmail" class="btn btn-success">
+                        聚焦到邮箱
+                    </button>
+                    <button @click="selectEmailText" class="btn btn-info">
+                        选中邮箱文本
+                    </button>
+                    <button @click="getTextareaInfo" class="btn btn-info">
+                        获取文本框信息
+                    </button>
+                    <button @click="clearAll" class="btn btn-danger">
+                        清空所有
+                    </button>
+                </div>
+
+                <div class="log-box" v-if="demo1Logs.length > 0">
+                    <div class="log-title">📋 操作日志</div>
+                    <div class="log-item" v-for="log in demo1Logs" :key="log.id">
+                        <span class="log-time">[{{log.time}}]</span> {{log.message}}
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 1. 在模板中添加 ref 属性</span>
+&lt;input <span class="code-attribute">ref</span>=<span class="code-string">"usernameInput"</span> type=<span class="code-string">"text"</span>&gt;
+
+<span class="code-comment">// 2. 在方法中通过 this.$refs 访问</span>
+<span class="code-function">focusUsername</span>() {
+    <span class="code-comment">// 获取 DOM 元素</span>
+    <span class="code-keyword">const</span> input = <span class="code-keyword">this</span>.$refs.usernameInput;
+    
+    <span class="code-comment">// 调用原生方法</span>
+    input.<span class="code-function">focus</span>();
+    
+    <span class="code-comment">// 也可以访问原生属性</span>
+    console.<span class="code-function">log</span>(input.value, input.scrollHeight);
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 2: 访问子组件实例 -->
+        <div class="demo-section">
+            <div class="demo-title">🔧 Demo 2: 访问子组件实例</div>
+            <div class="demo-desc">
+                <strong>核心知识：</strong><br>
+                1. 给组件添加 <code>ref</code> 属性<br>
+                2. 通过 <code>this.$refs</code> 可以访问子组件的实例<br>
+                3. 可以直接调用子组件的方法、访问子组件的数据<br>
+                <strong>⚠️ 注意：</strong>不推荐直接修改子组件数据，建议通过 props 和事件通信
+            </div>
+
+            <div class="demo-content">
+                <h4>示例：控制子组件（计数器组件）</h4>
+
+                <div class="grid-2">
+                    <div>
+                        <counter-component ref="counter1" title="计数器 A"></counter-component>
+                    </div>
+                    <div>
+                        <counter-component ref="counter2" title="计数器 B"></counter-component>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <button @click="incrementCounter1" class="btn btn-primary">
+                        增加计数器 A
+                    </button>
+                    <button @click="decrementCounter2" class="btn btn-danger">
+                        减少计数器 B
+                    </button>
+                    <button @click="resetBothCounters" class="btn btn-info">
+                        重置所有计数器
+                    </button>
+                    <button @click="getCountersTotal" class="btn btn-success">
+                        获取总和
+                    </button>
+                </div>
+
+                <div class="log-box" v-if="demo2Logs.length > 0">
+                    <div class="log-title">📊 组件操作日志</div>
+                    <div class="log-item" v-for="log in demo2Logs" :key="log.id">
+                        <span class="log-time">[{{log.time}}]</span> {{log.message}}
+                    </div>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// 1. 给组件添加 ref</span>
+&lt;counter-component <span class="code-attribute">ref</span>=<span class="code-string">"counter1"</span>&gt;&lt;/counter-component&gt;
+
+<span class="code-comment">// 2. 通过 $refs 访问子组件实例</span>
+<span class="code-function">incrementCounter1</span>() {
+    <span class="code-comment">// 调用子组件的方法</span>
+    <span class="code-keyword">this</span>.$refs.counter1.<span class="code-function">increment</span>();
+    
+    <span class="code-comment">// 访问子组件的数据</span>
+    <span class="code-keyword">const</span> count = <span class="code-keyword">this</span>.$refs.counter1.count;
+    console.<span class="code-function">log</span>(<span class="code-string">'当前计数：'</span>, count);
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 3: 实战案例 - 视频播放器控制 -->
+        <div class="demo-section">
+            <div class="demo-title">🎬 Demo 3: 实战案例 - 视频播放器控制</div>
+            <div class="demo-desc">
+                <strong>实战场景：</strong>父组件控制视频播放器组件的播放、暂停、快进等功能<br>
+                <strong>技术要点：</strong>通过 $refs 调用子组件方法，实现灵活的组件控制
+            </div>
+
+            <div class="demo-content">
+                <video-player ref="videoPlayer"></video-player>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <button @click="playVideo" class="btn btn-success">▶️ 播放</button>
+                    <button @click="pauseVideo" class="btn btn-primary">⏸️ 暂停</button>
+                    <button @click="stopVideo" class="btn btn-danger">⏹️ 停止</button>
+                    <button @click="seekForward" class="btn btn-info">⏩ 快进10秒</button>
+                    <button @click="seekBackward" class="btn btn-info">⏪ 后退10秒</button>
+                    <button @click="getVideoStatus" class="btn btn-info">📊 获取状态</button>
+                </div>
+
+                <div class="log-box" v-if="demo3Logs.length > 0">
+                    <div class="log-title">🎥 播放器日志</div>
+                    <div class="log-item" v-for="log in demo3Logs" :key="log.id">
+                        <span class="log-time">[{{log.time}}]</span> {{log.message}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo 4: v-for 中的 refs -->
+        <div class="demo-section">
+            <div class="demo-title">📋 Demo 4: v-for 中使用 $refs</div>
+            <div class="demo-desc">
+                <strong>特殊情况：</strong>在 <code>v-for</code> 中使用 ref，<code>$refs.xxx</code> 将是一个数组<br>
+                <strong>注意：</strong>数组的顺序不保证与源数据顺序一致
+            </div>
+
+            <div class="demo-content">
+                <h4>待办事项列表</h4>
+
+                <div class="input-group">
+                    <input 
+                        v-model="newTodo"
+                        @keyup.enter="addTodo"
+                        placeholder="输入待办事项，按回车添加"
+                        class="fancy-input">
+                </div>
+
+                <div class="component-card" 
+                     v-for="(todo, index) in todos" 
+                     :key="todo.id">
+                    <input 
+                        type="text" 
+                        v-model="todo.text"
+                        :ref="'todoInput' + todo.id"
+                        class="fancy-input"
+                        :style="{ textDecoration: todo.done ? 'line-through' : 'none' }">
+                    
+                    <div style="margin-top: 10px;">
+                        <button @click="toggleTodo(todo)" class="btn btn-success">
+                            {{ todo.done ? '✓ 已完成' : '○ 未完成' }}
+                        </button>
+                        <button @click="focusTodo(todo.id)" class="btn btn-primary">
+                            聚焦
+                        </button>
+                        <button @click="selectTodoText(todo.id)" class="btn btn-info">
+                            选中文本
+                        </button>
+                        <button @click="removeTodo(index)" class="btn btn-danger">
+                            删除
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button @click="focusAllInputs" class="btn btn-primary">
+                        遍历所有输入框（查看控制台）
+                    </button>
+                    <button @click="getAllTodoValues" class="btn btn-info">
+                        获取所有文本（查看控制台）
+                    </button>
+                </div>
+
+                <div class="code-block" v-pre>
+<span class="code-comment">// v-for 中使用动态 ref</span>
+&lt;input 
+    v-for=<span class="code-string">"item in items"</span> 
+    <span class="code-attribute">:ref</span>=<span class="code-string">"'input' + item.id"</span>&gt;
+
+<span class="code-comment">// 访问特定的 ref（使用动态ref名）</span>
+<span class="code-function">focusTodo</span>(id) {
+    <span class="code-keyword">const</span> refName = <span class="code-string">'todoInput'</span> + id;
+    <span class="code-keyword">const</span> input = <span class="code-keyword">this</span>.$refs[refName];
+    
+    <span class="code-comment">// 注意：动态ref返回的可能是数组</span>
+    <span class="code-keyword">if</span> (Array.<span class="code-function">isArray</span>(input)) {
+        input[<span class="code-number">0</span>].<span class="code-function">focus</span>();
+    } <span class="code-keyword">else</span> {
+        input.<span class="code-function">focus</span>();
+    }
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- 重要提示 -->
+        <div class="warning-box">
+            <div class="warning-title">⚠️ 使用 $refs 的注意事项</div>
+            <ol>
+                <li><strong>$refs 不是响应式的：</strong>$refs 仅在组件渲染完成后填充，不要在模板或计算属性中使用</li>
+                <li><strong>避免过度使用：</strong>尽量使用 props 和事件进行组件通信，$refs 应该作为"应急方案"</li>
+                <li><strong>在 mounted 之后访问：</strong>确保在 mounted 钩子之后访问 $refs，否则可能为 undefined</li>
+                <li><strong>v-for 中的 refs 是数组：</strong>循环中的 ref 会被收集成数组，访问时要注意</li>
+                <li><strong>不推荐修改子组件数据：</strong>虽然可以直接修改，但会破坏单向数据流</li>
+            </ol>
+        </div>
+
+        <!-- 使用场景 -->
+        <div class="success-box">
+            <div class="success-title">✅ $refs 的最佳使用场景</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>场景</th>
+                        <th>说明</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>表单聚焦</strong></td>
+                        <td>自动聚焦到输入框</td>
+                        <td>登录页面自动聚焦到用户名输入框</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DOM 操作</strong></td>
+                        <td>需要直接操作 DOM 的场景</td>
+                        <td>滚动到指定位置、获取元素尺寸</td>
+                    </tr>
+                    <tr>
+                        <td><strong>第三方库集成</strong></td>
+                        <td>集成需要 DOM 的第三方库</td>
+                        <td>Echarts、Swiper 等需要容器元素</td>
+                    </tr>
+                    <tr>
+                        <td><strong>复杂组件控制</strong></td>
+                        <td>父组件需要精细控制子组件</td>
+                        <td>视频播放器、图表组件的控制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>动画触发</strong></td>
+                        <td>手动触发动画</td>
+                        <td>触发 CSS 动画或 JS 动画</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 最佳实践 -->
+        <div class="tip-box">
+            <div class="tip-title">💡 $refs 最佳实践</div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">✅ 推荐做法</div>
+                    <ul>
+                        <li>用于表单验证和焦点控制</li>
+                        <li>用于集成第三方 DOM 库</li>
+                        <li>用于获取 DOM 元素尺寸和位置</li>
+                        <li>用于调用子组件的公开方法</li>
+                        <li>在 mounted 钩子之后使用</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-title">❌ 避免做法</div>
+                    <ul>
+                        <li>不要在计算属性中使用 $refs</li>
+                        <li>不要在模板中使用 $refs</li>
+                        <li>不要代替 props 和事件通信</li>
+                        <li>不要直接修改子组件的数据</li>
+                        <li>避免在 created 中访问 $refs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对比：$refs vs props/events -->
+        <div class="demo-section">
+            <div class="demo-title">🆚 对比：$refs vs Props/Events</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>$refs</th>
+                        <th>Props / Events</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>数据流向</strong></td>
+                        <td>父 → 子（直接调用）</td>
+                        <td>单向数据流</td>
+                    </tr>
+                    <tr>
+                        <td><strong>响应式</strong></td>
+                        <td>❌ 非响应式</td>
+                        <td>✅ 响应式</td>
+                    </tr>
+                    <tr>
+                        <td><strong>解耦程度</strong></td>
+                        <td>❌ 强耦合</td>
+                        <td>✅ 低耦合</td>
+                    </tr>
+                    <tr>
+                        <td><strong>使用场景</strong></td>
+                        <td>DOM 操作、组件控制</td>
+                        <td>数据传递、事件通知</td>
+                    </tr>
+                    <tr>
+                        <td><strong>可维护性</strong></td>
+                        <td>⚠️ 较差</td>
+                        <td>✅ 较好</td>
+                    </tr>
+                    <tr>
+                        <td><strong>推荐程度</strong></td>
+                        <td>⚠️ 必要时使用</td>
+                        <td>✅ 优先使用</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 计数器子组件
+        Vue.component('counter-component', {
+            props: ['title'],
+            data() {
+                return {
+                    count: 0
+                };
+            },
+            template: `
+                <div class="component-card">
+                    <div class="component-name">{{ title }}</div>
+                    <div class="counter-display">{{ count }}</div>
+                    <div style="text-align: center;">
+                        <button @click="increment" class="btn btn-success">+1</button>
+                        <button @click="decrement" class="btn btn-danger">-1</button>
+                        <button @click="reset" class="btn btn-info">重置</button>
+                    </div>
+                </div>
+            `,
+            methods: {
+                increment() {
+                    this.count++;
+                    this.$emit('change', this.count);
+                },
+                decrement() {
+                    this.count--;
+                    this.$emit('change', this.count);
+                },
+                reset() {
+                    this.count = 0;
+                    this.$emit('change', this.count);
+                },
+                getCount() {
+                    return this.count;
+                }
+            }
+        });
+
+        // 视频播放器子组件
+        Vue.component('video-player', {
+            data() {
+                return {
+                    isPlaying: false,
+                    currentTime: 0,
+                    duration: 180, // 3分钟
+                    timer: null
+                };
+            },
+            template: `
+                <div class="video-player">
+                    <div class="video-display">
+                        <span v-if="isPlaying">▶️ 播放中...</span>
+                        <span v-else>⏸️ 已暂停</span>
+                    </div>
+                    <div class="video-info">
+                        <div>⏱️ 当前时间: {{ formatTime(currentTime) }} / {{ formatTime(duration) }}</div>
+                        <div>📊 进度: {{ progress }}%</div>
+                        <div>▶️ 状态: {{ isPlaying ? '播放中' : '已暂停' }}</div>
+                    </div>
+                </div>
+            `,
+            computed: {
+                progress() {
+                    return Math.round((this.currentTime / this.duration) * 100);
+                }
+            },
+            methods: {
+                play() {
+                    if (!this.isPlaying) {
+                        this.isPlaying = true;
+                        this.timer = setInterval(() => {
+                            if (this.currentTime < this.duration) {
+                                this.currentTime++;
+                            } else {
+                                this.stop();
+                            }
+                        }, 1000);
+                    }
+                },
+                pause() {
+                    this.isPlaying = false;
+                    if (this.timer) {
+                        clearInterval(this.timer);
+                        this.timer = null;
+                    }
+                },
+                stop() {
+                    this.pause();
+                    this.currentTime = 0;
+                },
+                seek(seconds) {
+                    this.currentTime = Math.max(0, Math.min(this.duration, this.currentTime + seconds));
+                },
+                getStatus() {
+                    return {
+                        isPlaying: this.isPlaying,
+                        currentTime: this.currentTime,
+                        duration: this.duration,
+                        progress: this.progress
+                    };
+                },
+                formatTime(seconds) {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            },
+            beforeDestroy() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                }
+            }
+        });
+
+        // 主应用
+        new Vue({
+            el: '#app',
+            data: {
+                // Demo 1
+                username: '',
+                email: 'user@example.com',
+                message: '',
+                demo1Logs: [],
+                demo1LogId: 1,
+
+                // Demo 2
+                demo2Logs: [],
+                demo2LogId: 1,
+
+                // Demo 3
+                demo3Logs: [],
+                demo3LogId: 1,
+
+                // Demo 4
+                todos: [
+                    { id: 1, text: '学习 Vue $refs', done: false },
+                    { id: 2, text: '完成实战练习', done: false },
+                    { id: 3, text: '写学习笔记', done: false }
+                ],
+                newTodo: '',
+                todoIdCounter: 4
+            },
+            mounted() {
+                console.log('✅ 组件已挂载，现在可以安全使用 $refs');
+                console.log('📋 所有可用的 refs:', Object.keys(this.$refs));
+                
+                // 演示：页面加载时自动聚焦到用户名输入框
+                this.$nextTick(() => {
+                    this.$refs.usernameInput.focus();
+                    this.addDemo1Log('页面加载时自动聚焦到用户名输入框');
+                });
+            },
+            methods: {
+                // Demo 1 方法
+                focusUsername() {
+                    this.$refs.usernameInput.focus();
+                    this.addDemo1Log('聚焦到用户名输入框');
+                },
+                focusEmail() {
+                    this.$refs.emailInput.focus();
+                    this.addDemo1Log('聚焦到邮箱输入框');
+                },
+                selectEmailText() {
+                    const input = this.$refs.emailInput;
+                    input.select();
+                    this.addDemo1Log(`选中邮箱文本: "${input.value}"`);
+                },
+                getTextareaInfo() {
+                    const textarea = this.$refs.messageInput;
+                    const info = {
+                        value: textarea.value,
+                        length: textarea.value.length,
+                        scrollHeight: textarea.scrollHeight,
+                        clientHeight: textarea.clientHeight
+                    };
+                    this.addDemo1Log(`文本框信息: 字符数=${info.length}, 滚动高度=${info.scrollHeight}px`);
+                    console.log('📊 文本框详细信息:', info);
+                },
+                clearAll() {
+                    this.username = '';
+                    this.email = '';
+                    this.message = '';
+                    this.addDemo1Log('清空所有输入框');
+                },
+                addDemo1Log(message) {
+                    this.demo1Logs.unshift({
+                        id: this.demo1LogId++,
+                        message: message,
+                        time: new Date().toLocaleTimeString()
+                    });
+                    if (this.demo1Logs.length > 10) {
+                        this.demo1Logs.pop();
+                    }
+                },
+
+                // Demo 2 方法
+                incrementCounter1() {
+                    this.$refs.counter1.increment();
+                    const count = this.$refs.counter1.getCount();
+                    this.addDemo2Log(`调用计数器A的increment()方法，当前值: ${count}`);
+                },
+                decrementCounter2() {
+                    this.$refs.counter2.decrement();
+                    const count = this.$refs.counter2.getCount();
+                    this.addDemo2Log(`调用计数器B的decrement()方法，当前值: ${count}`);
+                },
+                resetBothCounters() {
+                    this.$refs.counter1.reset();
+                    this.$refs.counter2.reset();
+                    this.addDemo2Log('重置所有计数器');
+                },
+                getCountersTotal() {
+                    const count1 = this.$refs.counter1.getCount();
+                    const count2 = this.$refs.counter2.getCount();
+                    const total = count1 + count2;
+                    this.addDemo2Log(`计数器A=${count1}, 计数器B=${count2}, 总和=${total}`);
+                },
+                addDemo2Log(message) {
+                    this.demo2Logs.unshift({
+                        id: this.demo2LogId++,
+                        message: message,
+                        time: new Date().toLocaleTimeString()
+                    });
+                    if (this.demo2Logs.length > 10) {
+                        this.demo2Logs.pop();
+                    }
+                },
+
+                // Demo 3 方法
+                playVideo() {
+                    this.$refs.videoPlayer.play();
+                    this.addDemo3Log('📺 调用播放器的play()方法');
+                },
+                pauseVideo() {
+                    this.$refs.videoPlayer.pause();
+                    this.addDemo3Log('⏸️ 调用播放器的pause()方法');
+                },
+                stopVideo() {
+                    this.$refs.videoPlayer.stop();
+                    this.addDemo3Log('⏹️ 调用播放器的stop()方法');
+                },
+                seekForward() {
+                    this.$refs.videoPlayer.seek(10);
+                    this.addDemo3Log('⏩ 快进10秒');
+                },
+                seekBackward() {
+                    this.$refs.videoPlayer.seek(-10);
+                    this.addDemo3Log('⏪ 后退10秒');
+                },
+                getVideoStatus() {
+                    const status = this.$refs.videoPlayer.getStatus();
+                    this.addDemo3Log(`📊 获取状态: 播放=${status.isPlaying}, 进度=${status.progress}%`);
+                    console.log('🎥 播放器状态:', status);
+                },
+                addDemo3Log(message) {
+                    this.demo3Logs.unshift({
+                        id: this.demo3LogId++,
+                        message: message,
+                        time: new Date().toLocaleTimeString()
+                    });
+                    if (this.demo3Logs.length > 8) {
+                        this.demo3Logs.pop();
+                    }
+                },
+
+                // Demo 4 方法
+                addTodo() {
+                    if (this.newTodo.trim()) {
+                        this.todos.push({
+                            id: this.todoIdCounter++,
+                            text: this.newTodo,
+                            done: false
+                        });
+                        this.newTodo = '';
+                        
+                        // 添加后自动聚焦到新项
+                        this.$nextTick(() => {
+                            const lastId = this.todos[this.todos.length - 1].id;
+                            this.focusTodo(lastId);
+                        });
+                    }
+                },
+                toggleTodo(todo) {
+                    todo.done = !todo.done;
+                },
+                focusTodo(id) {
+                    const refName = 'todoInput' + id;
+                    const input = this.$refs[refName];
+                    
+                    // 动态ref返回的可能是数组
+                    if (Array.isArray(input)) {
+                        input[0].focus();
+                    } else {
+                        input.focus();
+                    }
+                    
+                    console.log(`✅ 聚焦到ID为 ${id} 的输入框`);
+                },
+                selectTodoText(id) {
+                    const refName = 'todoInput' + id;
+                    const input = this.$refs[refName];
+                    
+                    if (Array.isArray(input)) {
+                        input[0].select();
+                    } else {
+                        input.select();
+                    }
+                    
+                    console.log(`✅ 选中ID为 ${id} 的文本`);
+                },
+                removeTodo(index) {
+                    this.todos.splice(index, 1);
+                },
+                focusAllInputs() {
+                    console.log('📋 遍历所有Todo输入框:');
+                    this.todos.forEach(todo => {
+                        const refName = 'todoInput' + todo.id;
+                        const input = this.$refs[refName];
+                        const element = Array.isArray(input) ? input[0] : input;
+                        console.log(`  - ID ${todo.id}: "${element.value}"`);
+                    });
+                },
+                getAllTodoValues() {
+                    console.log('📝 所有Todo文本:');
+                    const values = this.todos.map(todo => {
+                        const refName = 'todoInput' + todo.id;
+                        const input = this.$refs[refName];
+                        const element = Array.isArray(input) ? input[0] : input;
+                        return element.value;
+                    });
+                    console.log(values);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
