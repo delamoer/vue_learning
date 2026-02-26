@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue 过渡与动画完整学习指南</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .demo-box {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .demo-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-content {
+            background: white;
+            padding: 30px;
+            border-radius: 5px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .box {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .note-title {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .warning-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        /* ==================== 过渡效果样式 ==================== */
+
+        /* 1. 基础淡入淡出 */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* 2. 滑动效果 */
+        .slide-enter-active, .slide-leave-active {
+            transition: all 0.5s;
+        }
+        .slide-enter {
+            transform: translateX(-100px);
+            opacity: 0;
+        }
+        .slide-leave-to {
+            transform: translateX(100px);
+            opacity: 0;
+        }
+
+        /* 3. 缩放效果 */
+        .zoom-enter-active, .zoom-leave-active {
+            transition: all 0.3s;
+        }
+        .zoom-enter, .zoom-leave-to {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        /* 4. 弹跳效果 */
+        .bounce-enter-active {
+            animation: bounce-in 0.5s;
+        }
+        .bounce-leave-active {
+            animation: bounce-out 0.5s;
+        }
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        @keyframes bounce-out {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        /* 5. 旋转淡入 */
+        .rotate-enter-active, .rotate-leave-active {
+            transition: all 0.5s;
+        }
+        .rotate-enter, .rotate-leave-to {
+            transform: rotate(180deg) scale(0);
+            opacity: 0;
+        }
+
+        /* 6. 翻转效果 */
+        .flip-enter-active, .flip-leave-active {
+            transition: all 0.5s;
+        }
+        .flip-enter, .flip-leave-to {
+            transform: rotateY(180deg);
+            opacity: 0;
+        }
+
+        /* 列表过渡 */
+        .list-item {
+            display: inline-block;
+            margin: 10px;
+        }
+        .list-enter-active, .list-leave-active {
+            transition: all 0.5s;
+        }
+        .list-enter, .list-leave-to {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .list-move {
+            transition: transform 0.5s;
+        }
+
+        /* 列表卡片样式 */
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .card-content {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .remove-btn {
+            background: #f56c6c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .add-btn {
+            background: #67c23a;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        /* 模态框样式 */
+        .modal-mask {
+            position: fixed;
+            z-index: 9998;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-container {
+            width: 400px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-enter .modal-container, .modal-leave-to .modal-container {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        .modal-header h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+        }
+
+        .modal-body {
+            margin: 20px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-footer button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-footer .primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .modal-footer .default {
+            background: #e0e0e0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>🎬 Vue 过渡与动画</h1>
+        <p class="subtitle">让你的应用动起来 - Transition & Animation</p>
+
+        <!-- ========== 1. 什么是过渡 ========== -->
+        <h2>1. 过渡系统概述</h2>
+        <div class="note">
+            <div class="note-title">💡 什么是过渡？</div>
+            <p>Vue 提供了 <code>&lt;transition&gt;</code> 组件，用于在元素插入、更新或移除时添加过渡效果。</p>
+            <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                <li><strong>CSS 过渡</strong>：使用 transition 属性</li>
+                <li><strong>CSS 动画</strong>：使用 @keyframes 和 animation</li>
+                <li><strong>JavaScript 钩子</strong>：使用 JS 控制动画</li>
+            </ul>
+        </div>
+
+        <!-- ========== 2. 基础用法 ========== -->
+        <h2>2. 基础过渡效果</h2>
+        
+        <!-- Demo 1: 淡入淡出 -->
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 1：淡入淡出（Fade）</div>
+            <div class="demo-content">
+                <button class="btn" @click="show1 = !show1">切换显示</button>
+                <transition name="fade">
+                    <div v-if="show1" class="box">淡入淡出</div>
+                </transition>
+            </div>
+            <div class="code-block">&lt;!-- HTML --&gt;
+&lt;transition name="fade"&gt;
+    &lt;div v-if="show" class="box"&gt;淡入淡出&lt;/div&gt;
+&lt;/transition&gt;
+
+&lt;!-- CSS --&gt;
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to {
+    opacity: 0;
+}</div>
+        </div>
+
+        <!-- Demo 2: 滑动效果 -->
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 2：滑动效果（Slide）</div>
+            <div class="demo-content">
+                <button class="btn" @click="show2 = !show2">切换显示</button>
+                <transition name="slide">
+                    <div v-if="show2" class="box">滑动效果</div>
+                </transition>
+            </div>
+            <div class="code-block">.slide-enter-active, .slide-leave-active {
+    transition: all 0.5s;
+}
+.slide-enter {
+    transform: translateX(-100px);
+    opacity: 0;
+}
+.slide-leave-to {
+    transform: translateX(100px);
+    opacity: 0;
+}</div>
+        </div>
+
+        <!-- Demo 3: 缩放效果 -->
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 3：缩放效果（Zoom）</div>
+            <div class="demo-content">
+                <button class="btn" @click="show3 = !show3">切换显示</button>
+                <transition name="zoom">
+                    <div v-if="show3" class="box">缩放效果</div>
+                </transition>
+            </div>
+            <div class="code-block">.zoom-enter-active, .zoom-leave-active {
+    transition: all 0.3s;
+}
+.zoom-enter, .zoom-leave-to {
+    transform: scale(0);
+    opacity: 0;
+}</div>
+        </div>
+
+        <!-- ========== 3. 过渡的类名 ========== -->
+        <h2>3. 过渡的类名机制</h2>
+        <div class="note">
+            <div class="note-title">📚 6 个过渡类名</div>
+            <p style="margin-bottom: 10px;">Vue 在进入/离开过渡中，会自动添加以下类名（假设 name="fade"）：</p>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: #667eea; color: white;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">类名</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">时机</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>fade-enter</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">进入前</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义进入的开始状态</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>fade-enter-active</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">进入中</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义过渡过程（transition/animation）</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>fade-enter-to</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">进入后</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义进入的结束状态</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>fade-leave</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">离开前</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义离开的开始状态</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>fade-leave-active</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">离开中</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义过渡过程</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>fade-leave-to</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">离开后</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义离开的结束状态</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="code-block" style="margin-top: 15px;">// 过渡执行流程（进入）：
+1. 元素插入前，添加 fade-enter 和 fade-enter-active
+2. 一帧后，移除 fade-enter，添加 fade-enter-to
+3. 过渡完成，移除 fade-enter-active 和 fade-enter-to
+
+// 过渡执行流程（离开）：
+1. 触发离开前，添加 fade-leave 和 fade-leave-active
+2. 一帧后，移除 fade-leave，添加 fade-leave-to
+3. 过渡完成，移除元素和所有类名</div>
+        </div>
+
+        <!-- ========== 4. CSS 动画 ========== -->
+        <h2>4. CSS 动画（Animation）</h2>
+        
+        <!-- Demo 4: 弹跳效果 -->
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 4：弹跳效果（Bounce）</div>
+            <div class="demo-content">
+                <button class="btn" @click="show4 = !show4">切换显示</button>
+                <transition name="bounce">
+                    <div v-if="show4" class="box">弹跳效果</div>
+                </transition>
+            </div>
+            <div class="code-block">.bounce-enter-active {
+    animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+    animation: bounce-out 0.5s;
+}
+
+@keyframes bounce-in {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes bounce-out {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(0); }
+}</div>
+        </div>
+
+        <!-- Demo 5: 旋转 -->
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 5：旋转淡入（Rotate）</div>
+            <div class="demo-content">
+                <button class="btn" @click="show5 = !show5">切换显示</button>
+                <transition name="rotate">
+                    <div v-if="show5" class="box">旋转</div>
+                </transition>
+            </div>
+            <div class="code-block">.rotate-enter-active, .rotate-leave-active {
+    transition: all 0.5s;
+}
+.rotate-enter, .rotate-leave-to {
+    transform: rotate(180deg) scale(0);
+    opacity: 0;
+}</div>
+        </div>
+
+        <!-- Demo 6: 翻转 -->
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 6：翻转效果（Flip）</div>
+            <div class="demo-content">
+                <button class="btn" @click="show6 = !show6">切换显示</button>
+                <transition name="flip">
+                    <div v-if="show6" class="box">翻转</div>
+                </transition>
+            </div>
+            <div class="code-block">.flip-enter-active, .flip-leave-active {
+    transition: all 0.5s;
+}
+.flip-enter, .flip-leave-to {
+    transform: rotateY(180deg);
+    opacity: 0;
+}</div>
+        </div>
+
+        <!-- ========== 5. 初始渲染过渡 ========== -->
+        <h2>5. 初始渲染过渡</h2>
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 7：appear 属性 - 页面加载时也有过渡</div>
+            <div class="note" style="margin-bottom: 15px;">
+                <p>使用 <code>appear</code> 属性可以让元素在初始渲染时也显示过渡效果。</p>
+            </div>
+            <div class="demo-content">
+                <button class="btn" @click="reloadDemo7">重新加载</button>
+                <transition name="bounce" appear v-if="showDemo7">
+                    <div class="box">页面加载时就有动画！</div>
+                </transition>
+            </div>
+            <div class="code-block">&lt;transition name="bounce" appear&gt;
+    &lt;div class="box"&gt;页面加载时就有动画！&lt;/div&gt;
+&lt;/transition&gt;</div>
+        </div>
+
+        <!-- ========== 6. 多元素过渡 ========== -->
+        <h2>6. 多元素过渡</h2>
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 8：切换多个元素（需要 key）</div>
+            <div class="demo-content">
+                <button class="btn" @click="toggleView">切换视图</button>
+                <transition name="fade" mode="out-in">
+                    <div v-if="currentView === 'A'" key="view-a" class="box">视图 A</div>
+                    <div v-else key="view-b" class="box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">视图 B</div>
+                </transition>
+            </div>
+            <div class="warning">
+                <div class="warning-title">⚠️ 注意事项</div>
+                <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+                    <li><strong>必须设置 key</strong>：多个元素切换时需要不同的 key</li>
+                    <li><strong>mode 属性</strong>：
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li><code>in-out</code>：新元素先进入，旧元素后离开</li>
+                            <li><code>out-in</code>：旧元素先离开，新元素后进入（常用）</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="code-block">&lt;transition name="fade" mode="out-in"&gt;
+    &lt;div v-if="view === 'A'" key="a"&gt;视图 A&lt;/div&gt;
+    &lt;div v-else key="b"&gt;视图 B&lt;/div&gt;
+&lt;/transition&gt;</div>
+        </div>
+
+        <!-- ========== 7. 列表过渡 ========== -->
+        <h2>7. 列表过渡（transition-group）</h2>
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 9：列表动画 - 添加、删除、移动</div>
+            <div class="note" style="margin-bottom: 15px;">
+                <p><code>&lt;transition-group&gt;</code> 用于为列表中的每个元素添加过渡效果。</p>
+            </div>
+            <div class="demo-content" style="align-items: flex-start;">
+                <button class="add-btn" @click="addItem">➕ 添加项目</button>
+                <transition-group name="list" tag="div">
+                    <div v-for="item in items" :key="item.id" class="card list-item">
+                        <div class="card-title">{{ item.title }}</div>
+                        <div class="card-content">{{ item.content }}</div>
+                        <button class="remove-btn" @click="removeItem(item.id)">删除</button>
+                    </div>
+                </transition-group>
+            </div>
+            <div class="code-block" v-pre>&lt;!-- HTML --&gt;
+&lt;transition-group name="list" tag="div"&gt;
+    &lt;div v-for="item in items" :key="item.id"&gt;
+        {{ item.title }}
+        &lt;button @click="remove(item.id)"&gt;删除&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/transition-group&gt;
+
+&lt;!-- CSS --&gt;
+.list-enter-active, .list-leave-active {
+    transition: all 0.5s;
+}
+.list-enter, .list-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
+}
+.list-move {  /* 其他元素移动时的过渡 */
+    transition: transform 0.5s;
+}</div>
+            <div class="note" style="margin-top: 15px;">
+                <div class="note-title">💡 关键点</div>
+                <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+                    <li><code>tag</code> 属性指定渲染的容器标签（默认 span）</li>
+                    <li>必须为每个子元素提供唯一的 <code>key</code></li>
+                    <li><code>.list-move</code> 类名控制其他元素移动时的过渡</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ========== 8. JavaScript 钩子 ========== -->
+        <h2>8. JavaScript 钩子</h2>
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 10：使用 JS 控制动画</div>
+            <div class="note" style="margin-bottom: 15px;">
+                <p>可以在过渡的各个阶段触发 JavaScript 钩子函数。</p>
+            </div>
+            <div class="demo-content">
+                <button class="btn" @click="showWithHook = !showWithHook">切换显示（JS 动画）</button>
+                <transition
+                    @before-enter="beforeEnter"
+                    @enter="enter"
+                    @after-enter="afterEnter"
+                    @before-leave="beforeLeave"
+                    @leave="leave"
+                    @after-leave="afterLeave"
+                    :css="false"
+                >
+                    <div v-if="showWithHook" class="box" ref="jsBox">JS 动画</div>
+                </transition>
+            </div>
+            <div class="code-block">&lt;transition
+    @before-enter="beforeEnter"
+    @enter="enter"
+    @after-enter="afterEnter"
+    @before-leave="beforeLeave"
+    @leave="leave"
+    @after-leave="afterLeave"
+    :css="false"  &lt;!-- 跳过 CSS 检测 --&gt;
+&gt;
+    &lt;div v-if="show"&gt;内容&lt;/div&gt;
+&lt;/transition&gt;
+
+methods: {
+    beforeEnter(el) {
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0)';
+    },
+    enter(el, done) {
+        // 强制重绘
+        el.offsetWidth;
+        el.style.transition = 'all 0.5s';
+        el.style.opacity = '1';
+        el.style.transform = 'scale(1)';
+        // 动画完成后调用 done
+        setTimeout(done, 500);
+    },
+    afterEnter(el) {
+        console.log('进入完成');
+    }
+}</div>
+        </div>
+
+        <!-- ========== 9. 实战案例：模态框 ========== -->
+        <h2>9. 实战案例：带过渡的模态框</h2>
+        <div class="demo-box">
+            <div class="demo-title">🎯 Demo 11：Modal 对话框动画</div>
+            <div class="demo-content">
+                <button class="btn" @click="showModal = true">打开模态框</button>
+                
+                <transition name="modal">
+                    <div v-if="showModal" class="modal-mask" @click.self="showModal = false">
+                        <div class="modal-container">
+                            <div class="modal-header">
+                                <h3>这是一个模态框</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>模态框内容，点击遮罩层或取消按钮关闭。</p>
+                                <p>注意背景和内容的过渡效果！</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="default" @click="showModal = false">取消</button>
+                                <button class="primary" @click="showModal = false">确定</button>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+            <div class="code-block">&lt;!-- HTML --&gt;
+&lt;transition name="modal"&gt;
+    &lt;div v-if="show" class="modal-mask" @click.self="close"&gt;
+        &lt;div class="modal-container"&gt;
+            &lt;!-- 内容 --&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/transition&gt;
+
+&lt;!-- CSS --&gt;
+.modal-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s;
+}
+
+.modal-container {
+    transition: all 0.3s;
+}
+
+.modal-enter .modal-container,
+.modal-leave-to .modal-container {
+    transform: scale(0.9);
+    opacity: 0;
+}</div>
+        </div>
+
+        <!-- ========== 10. 性能优化 ========== -->
+        <h2>10. 性能优化建议</h2>
+        <div class="success">
+            <div class="note-title">✅ 最佳实践</div>
+            <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                <li><strong>优先使用 CSS 过渡</strong>：性能更好，浏览器优化</li>
+                <li><strong>避免同时改变多个属性</strong>：影响性能</li>
+                <li><strong>使用 transform 代替 left/top</strong>：GPU 加速</li>
+                <li><strong>合理设置过渡时长</strong>：不要太长（用户等待）</li>
+                <li><strong>列表过渡添加 key</strong>：必须且唯一</li>
+                <li><strong>CSS :css="false"</strong>：纯 JS 动画时禁用 CSS 检测</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <div class="warning-title">⚠️ 常见陷阱</div>
+            <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                <li>❌ 多元素过渡忘记设置 key → 过渡失效</li>
+                <li>❌ transition-group 的子元素没有 key → 报错</li>
+                <li>❌ 同时使用 v-if 和 v-show → v-show 无过渡效果</li>
+                <li>❌ 在列表过渡中使用 display: inline → 移动过渡失效</li>
+                <li>❌ JS 钩子的 enter/leave 忘记调用 done → 过渡卡住</li>
+            </ul>
+        </div>
+
+        <!-- ========== 11. 总结 ========== -->
+        <h2>11. 知识点总结</h2>
+        <div class="note">
+            <div class="note-title">📚 核心要点</div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                <thead>
+                    <tr style="background: #667eea; color: white;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">特性</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">用途</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">关键点</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>&lt;transition&gt;</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">单元素/组件过渡</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">v-if/v-show 触发</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>&lt;transition-group&gt;</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">列表过渡</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">必须有 key</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">CSS 过渡类名</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">定义过渡效果</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">6 个类名</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;">JavaScript 钩子</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">JS 控制动画</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">记得调用 done()</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">mode 属性</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">控制过渡顺序</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">out-in 常用</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;">appear</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">初始渲染过渡</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">首次也有动画</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="success" style="margin-top: 20px;">
+            <div class="note-title">🎯 使用场景</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                <div>
+                    <strong>✨ 适合使用过渡的场景：</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px; line-height: 1.8;">
+                        <li>模态框/对话框显示隐藏</li>
+                        <li>提示消息/通知</li>
+                        <li>下拉菜单</li>
+                        <li>Tab 切换</li>
+                        <li>路由切换</li>
+                        <li>列表项增删</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>🚀 性能优先属性：</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px; line-height: 1.8;">
+                        <li><code>opacity</code> - 透明度</li>
+                        <li><code>transform</code> - 变换</li>
+                        <li><code>scale</code> - 缩放</li>
+                        <li><code>rotate</code> - 旋转</li>
+                        <li><code>translate</code> - 位移</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="note" style="margin-top: 20px; text-align: center; font-size: 18px; padding: 30px;">
+            <strong style="color: #667eea;">🎉 恭喜！你已掌握 Vue 过渡与动画系统</strong>
+            <p style="margin-top: 10px; color: #666; font-size: 14px;">接下来可以为你的组件库添加动画效果了！</p>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                // 基础过渡演示
+                show1: true,
+                show2: true,
+                show3: true,
+                show4: true,
+                show5: true,
+                show6: true,
+                showDemo7: true,
+                
+                // 多元素切换
+                currentView: 'A',
+                
+                // 列表过渡
+                items: [
+                    { id: 1, title: '项目 1', content: '这是第一个项目' },
+                    { id: 2, title: '项目 2', content: '这是第二个项目' },
+                    { id: 3, title: '项目 3', content: '这是第三个项目' }
+                ],
+                nextItemId: 4,
+                
+                // JS 钩子
+                showWithHook: false,
+                
+                // 模态框
+                showModal: false
+            },
+            methods: {
+                // 切换视图
+                toggleView() {
+                    this.currentView = this.currentView === 'A' ? 'B' : 'A';
+                },
+                
+                // 重新加载演示7
+                reloadDemo7() {
+                    this.showDemo7 = false;
+                    this.$nextTick(() => {
+                        this.showDemo7 = true;
+                    });
+                },
+                
+                // 列表操作
+                addItem() {
+                    const id = this.nextItemId++;
+                    this.items.splice(
+                        Math.floor(Math.random() * (this.items.length + 1)),
+                        0,
+                        {
+                            id: id,
+                            title: '项目 ' + id,
+                            content: '这是第 ' + id + ' 个项目'
+                        }
+                    );
+                },
+                removeItem(id) {
+                    const index = this.items.findIndex(item => item.id === id);
+                    if (index > -1) {
+                        this.items.splice(index, 1);
+                    }
+                },
+                
+                // JavaScript 钩子函数
+                beforeEnter(el) {
+                    console.log('beforeEnter: 进入前');
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0) rotate(180deg)';
+                },
+                enter(el, done) {
+                    console.log('enter: 进入中');
+                    // 强制重绘
+                    el.offsetWidth;
+                    el.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    el.style.opacity = '1';
+                    el.style.transform = 'scale(1) rotate(0deg)';
+                    // 动画完成后必须调用 done
+                    setTimeout(done, 500);
+                },
+                afterEnter(el) {
+                    console.log('afterEnter: 进入完成');
+                },
+                beforeLeave(el) {
+                    console.log('beforeLeave: 离开前');
+                },
+                leave(el, done) {
+                    console.log('leave: 离开中');
+                    el.style.transition = 'all 0.5s';
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0) rotate(-180deg)';
+                    setTimeout(done, 500);
+                },
+                afterLeave(el) {
+                    console.log('afterLeave: 离开完成');
+                }
+            },
+            mounted() {
+                console.log('Vue 过渡与动画学习页面已加载');
+            }
+        });
+    </script>
+</body>
+</html>

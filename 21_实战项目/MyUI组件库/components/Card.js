@@ -131,8 +131,18 @@ Vue.component('my-card', {
             box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
         }
 
+        .my-card.is-always-shadow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        .my-card.is-hover-shadow {
+            cursor: pointer;
+        }
+
         .my-card.is-hover-shadow:hover {
-            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
         }
 
         .my-card.is-never-shadow {

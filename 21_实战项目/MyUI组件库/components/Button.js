@@ -141,12 +141,14 @@ Vue.component('my-button-group', {
             box-sizing: border-box;
             outline: none;
             margin: 0;
-            transition: all 0.1s;
+            transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
             font-weight: 500;
             padding: 12px 20px;
             font-size: 14px;
             border-radius: 4px;
             user-select: none;
+            position: relative;
+            overflow: hidden;
         }
 
         .my-button:hover,
@@ -154,10 +156,12 @@ Vue.component('my-button-group', {
             color: #409eff;
             border-color: #c6e2ff;
             background-color: #ecf5ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
         }
 
         .my-button:active {
-            transform: scale(0.98);
+            transform: translateY(0) scale(0.98);
         }
 
         /* ===== 按钮内部元素 ===== */
@@ -194,6 +198,7 @@ Vue.component('my-button-group', {
             background: #66b1ff;
             border-color: #66b1ff;
             color: #fff;
+            box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
         }
 
         /* Success 成功按钮 */
@@ -208,6 +213,7 @@ Vue.component('my-button-group', {
             background: #85ce61;
             border-color: #85ce61;
             color: #fff;
+            box-shadow: 0 4px 12px rgba(103, 194, 58, 0.4);
         }
 
         /* Warning 警告按钮 */
@@ -222,6 +228,7 @@ Vue.component('my-button-group', {
             background: #ebb563;
             border-color: #ebb563;
             color: #fff;
+            box-shadow: 0 4px 12px rgba(230, 162, 60, 0.4);
         }
 
         /* Danger 危险按钮 */
@@ -236,6 +243,7 @@ Vue.component('my-button-group', {
             background: #f78989;
             border-color: #f78989;
             color: #fff;
+            box-shadow: 0 4px 12px rgba(245, 108, 108, 0.4);
         }
 
         /* Info 信息按钮 */

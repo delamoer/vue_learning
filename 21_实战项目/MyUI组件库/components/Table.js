@@ -35,6 +35,10 @@
             emptyText: {
                 type: String,
                 default: '暂无数据'
+            },
+            // 行的 className 函数
+            rowClassName: {
+                type: Function
             }
         },
 
@@ -71,44 +75,34 @@
 
         mounted() {
             // 收集所有 TableColumn 的配置
-            // ⚠️ 注意：只在 mounted 中初始化！
-            // 
-            // ❌ 切勿在 updated 钩子中调用 updateColumns()！
-            // 原因：updateColumns() 会修改 this.columns（响应式数据）
-            //      → 数据变化触发重新渲染
-            //      → 渲染完成触发 updated 钩子
-            //      → updated 又调用 updateColumns()
-            //      → 无限循环 → 页面卡死！
-            // 
-            // ✅ 正确做法：只在组件挂载时初始化一次
-            //   列配置通常是静态的，不需要每次更新都重新收集
-            this.updateColumns();
+            this.$nextTick(() => {
+                this.updateColumns();
+            });
         },
 
         methods: {
-            // 更新列配置
+            // 更新列配置（从 slot 收集）
             updateColumns() {
                 const columns = [];
-                const walk = (children) => {
-                    if (!children) return;
-                    children.forEach(child => {
-                        if (child.componentOptions && child.componentOptions.tag === 'my-table-column') {
-                            const propsData = child.componentOptions.propsData || {};
-                            columns.push({
-                                prop: propsData.prop,
-                                label: propsData.label,
-                                width: propsData.width,
-                                minWidth: propsData.minWidth,
-                                align: propsData.align || 'left',
-                                formatter: propsData.formatter
-                            });
-                        }
-                        if (child.children) {
-                            walk(child.children);
-                        }
-                    });
-                };
-                walk(this.$slots.default);
+                // 从 $slots.default 获取 VNode
+                const slots = this.$slots.default || [];
+                
+                slots.forEach(vnode => {
+                    // 检查是否是 TableColumn 组件实例
+                    if (vnode.componentInstance && vnode.componentInstance.$options.name === 'MyTableColumn') {
+                        const instance = vnode.componentInstance;
+                        columns.push({
+                            prop: instance.prop,
+                            label: instance.label,
+                            width: instance.width,
+                            minWidth: instance.minWidth,
+                            align: instance.align || 'left',
+                            formatter: instance.formatter,
+                            renderCell: instance.renderCell
+                        });
+                    }
+                });
+                
                 this.columns = columns;
             },
 
@@ -117,7 +111,8 @@
                 if (column.formatter && typeof column.formatter === 'function') {
                     return column.formatter(row, column);
                 }
-                return column.prop ? row[column.prop] : '';
+                const value = column.prop ? row[column.prop] : '';
+                return value !== undefined && value !== null ? value : '';
             },
 
             // 行点击事件
@@ -127,9 +122,14 @@
         },
 
         template: `
-            <div class="my-table-container" :style="tableStyle">
-                <table :class="tableClass">
-                    <!-- 表头 -->
+            <div class="my-table-wrapper">
+                <!-- 隐藏的 slot 用于接收列定义 -->
+                <div style="display: none;">
+                    <slot></slot>
+                </div>
+                <div class="my-table-container" :style="tableStyle">
+                    <table :class="tableClass">
+                        <!-- 表头 -->
                     <thead v-if="showHeader">
                         <tr>
                             <th 
@@ -151,6 +151,7 @@
                         <tr 
                             v-for="(row, rowIndex) in data" 
                             :key="rowIndex"
+                            :class="rowClassName ? rowClassName({ row, rowIndex }) : ''"
                             @click="handleRowClick(row, rowIndex)"
                         >
                             <td 
@@ -177,14 +178,14 @@
                     </tbody>
                 </table>
             </div>
+            </div>
         `
     });
 
-    // TableColumn 组件（函数式组件 - 性能优化）
-    // 函数式组件没有实例，没有响应式数据，没有生命周期，渲染开销更小
+    // TableColumn 组件
     Vue.component('my-table-column', {
-        functional: true, // 标记为函数式组件
-
+        name: 'MyTableColumn',
+        
         props: {
             // 对应列内容的字段名
             prop: {
@@ -212,15 +213,16 @@
             // 格式化函数
             formatter: {
                 type: Function
+            },
+            // 自定义渲染函数（返回 VNode）
+            renderCell: {
+                type: Function
             }
         },
 
-        // 函数式组件使用 render 函数
-        // context 包含：props, children, slots, data, parent 等
-        render(h, context) {
-            // 函数式组件本身不渲染任何内容
-            // 只是作为配置传递给 Table 组件
-            return null;
+        render(h) {
+            // 渲染一个隐藏的注释节点，确保组件会被加入到父组件的 $children 中
+            return h('div', { style: { display: 'none' } });
         }
     });
 
@@ -267,12 +269,14 @@
 
         /* 表体 */
         .my-table tbody tr {
-            transition: background-color 0.2s;
+            transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
             cursor: pointer;
         }
 
         .my-table tbody tr:hover {
             background-color: #f5f7fa;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .my-table tbody td {

@@ -421,15 +421,36 @@
         }
 
         /* 错误提示动画 */
-        .my-form-error-enter-active,
+        .my-form-error-enter-active {
+            animation: my-form-shake 0.3s;
+            transition: all 0.3s;
+        }
+
         .my-form-error-leave-active {
             transition: all 0.3s;
         }
 
-        .my-form-error-enter,
+        .my-form-error-enter {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
         .my-form-error-leave-to {
             opacity: 0;
             transform: translateY(-5px);
+        }
+
+        /* 抖动动画 */
+        @keyframes my-form-shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-5px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(5px);
+            }
         }
     `;
     document.head.appendChild(style);

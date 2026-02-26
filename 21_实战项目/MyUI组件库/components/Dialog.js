@@ -288,7 +288,7 @@
         /* 遮罩层淡入淡出动画 */
         .my-dialog-fade-enter-active,
         .my-dialog-fade-leave-active {
-            transition: opacity 0.3s;
+            transition: opacity 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .my-dialog-fade-enter,
@@ -297,15 +297,22 @@
         }
 
         /* 对话框缩放动画 */
-        .my-dialog-zoom-enter-active,
-        .my-dialog-zoom-leave-active {
-            transition: all 0.3s;
+        .my-dialog-zoom-enter-active {
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .my-dialog-zoom-enter,
+        .my-dialog-zoom-leave-active {
+            transition: all 0.25s cubic-bezier(0.755, 0.05, 0.855, 0.06);
+        }
+
+        .my-dialog-zoom-enter {
+            opacity: 0;
+            transform: scale(0.8) translateY(-30px);
+        }
+
         .my-dialog-zoom-leave-to {
             opacity: 0;
-            transform: scale(0.7);
+            transform: scale(0.9);
         }
 
         /* 滚动条美化 */

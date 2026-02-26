@@ -314,7 +314,7 @@ Vue.component('my-input', {
             border: 1px solid #dcdfe6;
             border-radius: 4px;
             box-sizing: border-box;
-            transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
             outline: none;
         }
 
@@ -325,6 +325,7 @@ Vue.component('my-input', {
         .my-input__inner:focus {
             outline: none;
             border-color: #409eff;
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
         }
 
         .my-input__inner::placeholder {
