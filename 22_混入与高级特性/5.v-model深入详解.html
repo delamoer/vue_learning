@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue v-model 深入详解 - 双向绑定原理</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        .intro {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .intro h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .intro ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .intro li {
+            margin: 8px 0;
+        }
+
+        h2 {
+            color: #4facfe;
+            margin-top: 50px;
+            margin-bottom: 25px;
+            font-size: 28px;
+            border-left: 5px solid #4facfe;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .demo-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .demo-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .demo-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            min-height: 150px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #3899e8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+
+        .info-box, .warning-box, .success-box, .danger-box {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-color: #2196f3;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .danger-box {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .keyword { color: #ff79c6; }
+        .string { color: #50fa7b; }
+        .function { color: #8be9fd; }
+        .comment { color: #6272a4; }
+
+        input[type="text"], input[type="number"], input[type="password"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #4facfe;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .radio-item, .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>🔗 v-model 深入详解</h1>
+        <p class="subtitle">双向数据绑定原理 - 理解 Vue 表单的核心</p>
+
+        <div class="intro">
+            <h2>💡 什么是 v-model？</h2>
+            <p><strong>v-model</strong>是 Vue 提供的<strong>双向数据绑定</strong>指令，常用于表单元素，实现数据与UI的自动同步。</p>
+            
+            <h2 style="margin-top: 20px;">🎯 v-model 的本质</h2>
+            <p>v-model 本质上是一个<strong>语法糖</strong>，它在内部为不同的元素使用不同的属性和事件：</p>
+            <ul>
+                <li>✅ <code>&lt;input type="text"&gt;</code>：绑定 <code>value</code> + 监听 <code>input</code> 事件</li>
+                <li>✅ <code>&lt;input type="checkbox"&gt;</code>：绑定 <code>checked</code> + 监听 <code>change</code> 事件</li>
+                <li>✅ <code>&lt;input type="radio"&gt;</code>：绑定 <code>checked</code> + 监听 <code>change</code> 事件</li>
+                <li>✅ <code>&lt;select&gt;</code>：绑定 <code>value</code> + 监听 <code>change</code> 事件</li>
+                <li>✅ <code>&lt;textarea&gt;</code>：绑定 <code>value</code> + 监听 <code>input</code> 事件</li>
+            </ul>
+
+            <h2 style="margin-top: 20px;">📦 v-model 的原理</h2>
+            <pre style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; margin-top: 10px;"><code><span class="comment">// v-model 的语法糖（文本输入框）</span>
+&lt;input v-model=<span class="string">"message"</span>&gt;
+
+<span class="comment">// 等价于</span>
+&lt;input 
+    :value=<span class="string">"message"</span>
+    @input=<span class="string">"message = $event.target.value"</span>
+&gt;</code></pre>
+        </div>
+
+        <!-- v-model vs .sync 对比 -->
+        <h2>🆚 v-model vs .sync - 理解两者关系</h2>
+        <div class="demo-section">
+            <div class="demo-title">💡 你说："v-model 是特定的 sync" 准确吗？</div>
+            
+            <div class="warning-box">
+                <strong>⚠️ 更准确的说法：</strong>
+                <p style="margin-top: 10px; line-height: 2;">
+                    <strong>v-model 和 .sync 是"兄弟"，不是父子关系！</strong><br>
+                    它们都是 <code>props + emit</code> 的语法糖，只是约定不同：<br>
+                    • <strong>v-model</strong> = 表单专用的固定版（value + input）<br>
+                    • <strong>.sync</strong> = 通用版（任意 prop + update:xxx）
+                </p>
+            </div>
+
+            <h3>📊 完整对比表格：</h3>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                        <th style="padding: 15px; text-align: left;">对比维度</th>
+                        <th style="padding: 15px; text-align: left;">v-model</th>
+                        <th style="padding: 15px; text-align: left;">.sync</th>
+                        <th style="padding: 15px; text-align: left;">props + emit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>本质</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">语法糖 ✅</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">语法糖 ✅</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">原始方式 ⚙️</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>prop 名</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><code>value</code>（固定）</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">任意名字</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">任意名字</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>事件名</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><code>input</code>（固定）</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><code>update:xxx</code>（固定格式）</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">任意名字</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>数量限制</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">每个组件只能 1 个</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">可以有多个</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">无限制</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>主要用途</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">📝 表单输入</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">🪟 组件状态</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">所有场景</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>出现时间</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">Vue 1.x（很早）</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">Vue 2.3+（回归）</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">从一开始就有</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>使用频率</strong></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">⭐⭐⭐⭐⭐ 极高</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">⭐⭐⭐⭐⭐ 极高</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">⭐⭐⭐ 中等</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>🔍 三者关系图：</h3>
+            <div style="background: white; padding: 25px; border-radius: 8px; margin: 20px 0; border: 2px solid #4facfe;">
+                <pre style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 0; font-size: 14px; line-height: 1.8;"><code>
+<span style="color: #28a745; font-weight: bold;">props + emit（爷爷 - 最原始的方式）</span>
+    │
+    ├── <span style="color: #4facfe; font-weight: bold;">v-model</span>（大儿子 - 专门为<strong>表单</strong>设计）
+    │   ├── prop 名：必须是 <code>value</code>
+    │   ├── 事件名：必须是 <code>input</code>
+    │   ├── 数量：每个组件只能一个
+    │   └── 用途：Input、Select、Textarea 等表单组件
+    │
+    └── <span style="color: #fa709a; font-weight: bold;">.sync</span>（二儿子 - 通用的<strong>组件状态</strong>同步）
+        ├── prop 名：任意（如 visible、collapsed）
+        ├── 事件名：update:xxx（如 update:visible）
+        ├── 数量：可以有多个
+        └── 用途：Dialog、Drawer、Sidebar 等 UI 组件
+
+<span style="color: #dc3545; font-weight: bold;">// ==================== 代码对比 ====================</span>
+
+<span style="color: #28a745; font-weight: bold;">// 1. v-model（表单专用）</span>
+&lt;custom-input v-model="username"&gt;&lt;/custom-input&gt;
+<span style="color: #6c757d;">// 等价于 ↓</span>
+&lt;custom-input 
+    :value="username"           <span style="color: #6c757d;">← prop 必须叫 value</span>
+    @input="username=$event"    <span style="color: #6c757d;">← 事件必须叫 input</span>
+&gt;&lt;/custom-input&gt;
+
+<span style="color: #fa709a; font-weight: bold;">// 2. .sync（通用双向绑定）</span>
+&lt;dialog :visible.sync="show"&gt;&lt;/dialog&gt;
+<span style="color: #6c757d;">// 等价于 ↓</span>
+&lt;dialog 
+    :visible="show"                    <span style="color: #6c757d;">← prop 名任意</span>
+    @update:visible="show=$event"      <span style="color: #6c757d;">← 事件是 update:xxx</span>
+&gt;&lt;/dialog&gt;
+
+<span style="color: #2196f3; font-weight: bold;">// 3. props + emit（原始方式）</span>
+&lt;my-component 
+    :count="num"
+    @increment="num=$event"
+&gt;&lt;/my-component&gt;
+</code></pre>
+            </div>
+
+            <div class="success-box" style="margin-top: 20px;">
+                <strong>✅ 正确的理解：</strong>
+                <p style="margin-top: 10px; line-height: 2;">
+                    <strong>1. v-model 和 .sync 是平级关系</strong><br>
+                    它们都是 <code>props + emit</code> 的封装，只是约定不同<br>
+                    <br>
+                    <strong>2. 可以这样类比：</strong><br>
+                    • v-model = 专门为<strong>表单输入</strong>设计的"固定版双向绑定"<br>
+                    • .sync = 为<strong>组件状态</strong>设计的"灵活版双向绑定"<br>
+                    <br>
+                    <strong>3. 使用建议：</strong><br>
+                    • 📝 <strong>Input、Select、Textarea</strong> → 用 <code>v-model</code><br>
+                    • 🪟 <strong>Dialog、Drawer、Sidebar</strong> → 用 <code>.sync</code><br>
+                    • 📊 <strong>需要多个属性双向绑定</strong> → 用 <code>.sync</code>（v-model 只能一个）<br>
+                    • 🎯 <strong>复杂的业务逻辑</strong> → 直接用 <code>props + emit</code>
+                </p>
+            </div>
+
+            <div class="info-box" style="margin-top: 20px;">
+                <strong>💡 记忆口诀：</strong>
+                <p style="margin-top: 10px; line-height: 2;">
+                    <strong>爷爷有两个儿子：</strong><br>
+                    • <strong>大儿子 v-model</strong>：专注表单，固定套路（value + input）<br>
+                    • <strong>二儿子 .sync</strong>：通用全能，灵活应变（任意 prop + update:xxx）<br>
+                    • <strong>爷爷 props + emit</strong>：最原始，什么都能干但很啰嗦<br>
+                    <br>
+                    <strong>它们本质上都是一家人，都是双向绑定！</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Demo 1: 原生表单元素 -->
+        <h2>📘 Demo 1: 原生表单元素的 v-model</h2>
+        <div class="demo-section">
+            <div class="demo-title">🎯 text、textarea、checkbox、radio、select</div>
+            
+            <div class="demo-content">
+                <native-form-demo></native-form-demo>
+            </div>
+
+            <div class="code-block">
+<code><span class="comment">// 文本输入框</span>
+&lt;input v-model=<span class="string">"username"</span> placeholder=<span class="string">"用户名"</span>&gt;
+
+<span class="comment">// 多行文本</span>
+&lt;textarea v-model=<span class="string">"message"</span>&gt;&lt;/textarea&gt;
+
+<span class="comment">// 单个复选框（布尔值）</span>
+&lt;input type=<span class="string">"checkbox"</span> v-model=<span class="string">"checked"</span>&gt;
+
+<span class="comment">// 多个复选框（数组）</span>
+&lt;input type=<span class="string">"checkbox"</span> value=<span class="string">"Vue"</span> v-model=<span class="string">"frameworks"</span>&gt;
+&lt;input type=<span class="string">"checkbox"</span> value=<span class="string">"React"</span> v-model=<span class="string">"frameworks"</span>&gt;
+
+<span class="comment">// 单选按钮</span>
+&lt;input type=<span class="string">"radio"</span> value=<span class="string">"male"</span> v-model=<span class="string">"gender"</span>&gt;
+&lt;input type=<span class="string">"radio"</span> value=<span class="string">"female"</span> v-model=<span class="string">"gender"</span>&gt;
+
+<span class="comment">// 下拉选择</span>
+&lt;select v-model=<span class="string">"selected"</span>&gt;
+    &lt;option value=<span class="string">"A"</span>&gt;选项 A&lt;/option&gt;
+    &lt;option value=<span class="string">"B"</span>&gt;选项 B&lt;/option&gt;
+&lt;/select&gt;</code>
+            </div>
+        </div>
+
+        <!-- Demo 2: v-model 的三个修饰符 -->
+        <h2>📘 Demo 2: v-model 的修饰符</h2>
+        <div class="demo-section">
+            <div class="demo-title">🎯 .lazy、.number、.trim</div>
+            
+            <div class="info-box">
+                <strong>💡 三个修饰符：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><code>.lazy</code>：在 <code>change</code> 事件后更新（而不是 <code>input</code>）</li>
+                    <li><code>.number</code>：自动将用户输入转为数值类型</li>
+                    <li><code>.trim</code>：自动去除首尾空格</li>
+                </ul>
+            </div>
+
+            <div class="demo-content">
+                <modifier-demo></modifier-demo>
+            </div>
+
+            <div class="code-block">
+<code><span class="comment">// .lazy - 失去焦点后才更新</span>
+&lt;input v-model.lazy=<span class="string">"msg"</span>&gt;
+
+<span class="comment">// .number - 自动转为数字</span>
+&lt;input v-model.number=<span class="string">"age"</span> type=<span class="string">"number"</span>&gt;
+
+<span class="comment">// .trim - 去除首尾空格</span>
+&lt;input v-model.trim=<span class="string">"name"</span>&gt;
+
+<span class="comment">// 可以组合使用</span>
+&lt;input v-model.lazy.trim=<span class="string">"email"</span>&gt;</code>
+            </div>
+        </div>
+
+        <!-- Demo 3: 组件 v-model -->
+        <h2>📘 Demo 3: 在组件上使用 v-model</h2>
+        <div class="demo-section">
+            <div class="demo-title">🎯 自定义组件实现 v-model</div>
+            
+            <div class="info-box">
+                <strong>💡 组件 v-model 原理：</strong>
+                <pre style="background: rgba(0,0,0,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;"><code>&lt;custom-input v-model=<span class="string">"searchText"</span>&gt;&lt;/custom-input&gt;
+
+<span class="comment">// 等价于</span>
+&lt;custom-input
+    :value=<span class="string">"searchText"</span>
+    @input=<span class="string">"searchText = $event"</span>
+&gt;&lt;/custom-input&gt;</code></pre>
+            </div>
+
+            <div class="demo-content">
+                <div style="margin-bottom: 20px;">
+                    <strong>搜索关键词：</strong><span class="badge">{{ searchText }}</span>
+                </div>
+                <custom-input v-model="searchText" placeholder="输入搜索关键词"></custom-input>
+            </div>
+
+            <div class="code-block">
+<code><span class="comment">// 自定义输入组件</span>
+Vue.component(<span class="string">'custom-input'</span>, {
+    props: {
+        value: { type: String, <span class="keyword">default</span>: <span class="string">''</span> }
+    },
+    template: <span class="string">`
+        &lt;input
+            :value="value"
+            @input="$emit('input', $event.target.value)"
+            class="custom-input"
+        /&gt;
+    `</span>
+});
+
+<span class="comment">// 使用</span>
+&lt;custom-input v-model=<span class="string">"searchText"</span>&gt;&lt;/custom-input&gt;</code>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ 关键要点：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>组件必须接收名为 <code>value</code> 的 prop</li>
+                    <li>组件必须触发名为 <code>input</code> 的事件</li>
+                    <li>事件参数就是新的值</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo 4: model 选项自定义 v-model -->
+        <h2>📘 Demo 4: 自定义 v-model 的 prop 和 event</h2>
+        <div class="demo-section">
+            <div class="demo-title">🎯 使用 model 选项自定义</div>
+            
+            <div class="info-box">
+                <strong>💡 为什么需要自定义？</strong><br>
+                某些组件可能想用 <code>value</code> 属性做其他用途（如 checkbox 的原生值），这时可以通过 <code>model</code> 选项自定义 v-model 的行为。
+            </div>
+
+            <div class="demo-content">
+                <div style="margin-bottom: 20px;">
+                    <strong>同意协议：</strong><span :class="agreed ? 'badge' : 'badge' " :style="{ background: agreed ? '#28a745' : '#6c757d' }">{{ agreed ? '已同意' : '未同意' }}</span>
+                </div>
+                <custom-checkbox v-model="agreed">
+                    我已阅读并同意《用户协议》
+                </custom-checkbox>
+            </div>
+
+            <div class="code-block">
+<code><span class="comment">// 自定义复选框组件</span>
+Vue.component(<span class="string">'custom-checkbox'</span>, {
+    <span class="comment">// 自定义 v-model 的 prop 和 event</span>
+    model: {
+        prop: <span class="string">'checked'</span>,    <span class="comment">// 使用 checked 而不是 value</span>
+        event: <span class="string">'change'</span>     <span class="comment">// 使用 change 而不是 input</span>
+    },
+    props: {
+        checked: { type: Boolean, <span class="keyword">default</span>: <span class="keyword">false</span> }
+    },
+    template: <span class="string">`
+        &lt;label style="cursor: pointer; display: flex; align-items: center; gap: 8px;"&gt;
+            &lt;input 
+                type="checkbox"
+                :checked="checked"
+                @change="$emit('change', $event.target.checked)"
+                style="width: 18px; height: 18px;"
+            /&gt;
+            &lt;slot&gt;&lt;/slot&gt;
+        &lt;/label&gt;
+    `</span>
+});
+
+<span class="comment">// 使用（v-model 会自动使用 checked prop 和 change 事件）</span>
+&lt;custom-checkbox v-model=<span class="string">"agreed"</span>&gt;
+    我已阅读并同意《用户协议》
+&lt;/custom-checkbox&gt;</code>
+            </div>
+        </div>
+
+        <!-- Demo 5: 双向绑定对象属性 -->
+        <h2>📘 Demo 5: 绑定对象属性</h2>
+        <div class="demo-section">
+            <div class="demo-title">🎯 使用 v-model 绑定对象中的属性</div>
+            
+            <div class="demo-content">
+                <object-binding-demo></object-binding-demo>
+            </div>
+
+            <div class="code-block">
+<code>data() {
+    <span class="keyword">return</span> {
+        user: {
+            name: <span class="string">''</span>,
+            age: <span class="string">0</span>,
+            email: <span class="string">''</span>
+        }
+    };
+}
+
+<span class="comment">// 模板中绑定对象属性</span>
+&lt;input v-model=<span class="string">"user.name"</span>&gt;
+&lt;input v-model.number=<span class="string">"user.age"</span> type=<span class="string">"number"</span>&gt;
+&lt;input v-model=<span class="string">"user.email"</span>&gt;</code>
+            </div>
+        </div>
+
+        <!-- Demo 6: 实战 - 完整表单 -->
+        <h2>📘 Demo 6: 实战 - 用户注册表单</h2>
+        <div class="demo-section">
+            <div class="demo-title">🎯 综合应用 v-model</div>
+            
+            <div class="demo-content">
+                <register-form></register-form>
+            </div>
+
+            <div class="code-block">
+<code>Vue.component(<span class="string">'register-form'</span>, {
+    data() {
+        <span class="keyword">return</span> {
+            formData: {
+                username: <span class="string">''</span>,
+                password: <span class="string">''</span>,
+                gender: <span class="string">'male'</span>,
+                hobbies: [],
+                city: <span class="string">''</span>,
+                agree: <span class="keyword">false</span>
+            }
+        };
+    },
+    methods: {
+        <span class="function">submit</span>() {
+            <span class="keyword">if</span> (!<span class="keyword">this</span>.formData.agree) {
+                alert(<span class="string">'请先同意用户协议'</span>);
+                <span class="keyword">return</span>;
+            }
+            console.log(<span class="string">'提交数据：'</span>, <span class="keyword">this</span>.formData);
+            alert(<span class="string">'注册成功！'</span>);
+        }
+    }
+});</code>
+            </div>
+        </div>
+
+        <!-- 总结 -->
+        <h2>📚 知识点总结</h2>
+        <div class="demo-section">
+            <div class="success-box">
+                <h3>✅ v-model 核心要点</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>本质：</strong>是 <code>:value</code> + <code>@input</code> 的语法糖</li>
+                    <li><strong>原生表单：</strong>支持 input、textarea、select、checkbox、radio</li>
+                    <li><strong>修饰符：</strong>.lazy、.number、.trim</li>
+                    <li><strong>组件使用：</strong>需要 <code>value</code> prop 和 <code>input</code> 事件</li>
+                    <li><strong>自定义：</strong>通过 <code>model</code> 选项改变默认行为</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="margin-top: 20px;">
+                <h3>💡 v-model vs .sync</h3>
+                <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #e7f3ff;">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">特性</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">v-model</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">.sync</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">数量限制</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">一个组件只能有一个</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">可以有多个</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">默认 prop</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">value（可自定义）</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">任意 prop 名</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">适用场景</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">表单输入控件</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">组件状态同步</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box" style="margin-top: 20px;">
+                <h3>⚠️ 注意事项</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>v-model 会忽略表单元素的 <code>value</code>、<code>checked</code>、<code>selected</code> 初始值</li>
+                    <li>应该在 data 中声明初始值</li>
+                    <li>在 textarea 中，不要使用插值：<code>&lt;textarea&gt;{{text}}&lt;/textarea&gt;</code> ❌</li>
+                    <li>应该使用 v-model：<code>&lt;textarea v-model="text"&gt;&lt;/textarea&gt;</code> ✅</li>
+                </ul>
+            </div>
+
+            <div class="danger-box" style="margin-top: 20px;">
+                <h3>🔴 与 VueAdmin 项目的联系</h3>
+                <p style="margin-top: 10px;">
+                    在你的 <strong>VueAdmin</strong> 项目中，所有的表单（登录表单、用户编辑表单等）都大量使用了 <code>v-model</code>！<br>
+                    现在你应该清楚它的原理了：本质上就是<strong>属性绑定 + 事件监听</strong>的语法糖。
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 50px; padding: 30px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border-radius: 10px; text-align: center;">
+            <h2 style="color: white; margin-bottom: 15px;">🎓 恭喜完成 v-model 深入学习！</h2>
+            <p style="font-size: 16px; line-height: 1.8;">
+                你已经掌握了双向绑定的核心原理！<br>
+                下一步：学习 $nextTick，理解 Vue 的异步更新机制。
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 组件定义 ====================
+        
+        // Demo 1: 原生表单演示
+        Vue.component('native-form-demo', {
+            data() {
+                return {
+                    username: '',
+                    message: '',
+                    singleCheck: false,
+                    frameworks: [],
+                    gender: 'male',
+                    city: ''
+                };
+            },
+            template: `
+                <div>
+                    <div class="form-group">
+                        <label>文本输入：</label>
+                        <input v-model="username" placeholder="请输入用户名" />
+                        <div style="margin-top: 8px; color: #6c757d;">值: {{ username }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>多行文本：</label>
+                        <textarea v-model="message" rows="3" placeholder="请输入内容"></textarea>
+                        <div style="margin-top: 8px; color: #6c757d;">值: {{ message }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>单个复选框（布尔值）：</label>
+                        <div class="checkbox-item">
+                            <input type="checkbox" v-model="singleCheck" id="single" />
+                            <label for="single">同意条款</label>
+                        </div>
+                        <div style="margin-top: 8px; color: #6c757d;">值: {{ singleCheck }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>多个复选框（数组）：</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" value="Vue" v-model="frameworks" id="vue" />
+                                <label for="vue">Vue</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" value="React" v-model="frameworks" id="react" />
+                                <label for="react">React</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" value="Angular" v-model="frameworks" id="angular" />
+                                <label for="angular">Angular</label>
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; color: #6c757d;">值: {{ frameworks }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>单选按钮：</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" value="male" v-model="gender" id="male" />
+                                <label for="male">男</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" value="female" v-model="gender" id="female" />
+                                <label for="female">女</label>
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; color: #6c757d;">值: {{ gender }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>下拉选择：</label>
+                        <select v-model="city">
+                            <option value="">请选择城市</option>
+                            <option value="beijing">北京</option>
+                            <option value="shanghai">上海</option>
+                            <option value="guangzhou">广州</option>
+                            <option value="shenzhen">深圳</option>
+                        </select>
+                        <div style="margin-top: 8px; color: #6c757d;">值: {{ city }}</div>
+                    </div>
+                </div>
+            `
+        });
+
+        // Demo 2: 修饰符演示
+        Vue.component('modifier-demo', {
+            data() {
+                return {
+                    lazyMsg: '',
+                    age: 0,
+                    name: ''
+                };
+            },
+            template: `
+                <div>
+                    <div class="form-group">
+                        <label>.lazy - 失去焦点后更新（输入时不更新）：</label>
+                        <input v-model.lazy="lazyMsg" placeholder="输入后点击外部" />
+                        <div style="margin-top: 8px; color: #6c757d;">值: "{{ lazyMsg }}"</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>.number - 自动转为数字：</label>
+                        <input v-model.number="age" type="number" placeholder="输入年龄" />
+                        <div style="margin-top: 8px; color: #6c757d;">
+                            值: {{ age }} (类型: {{ typeof age }})
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>.trim - 去除首尾空格：</label>
+                        <input v-model.trim="name" placeholder="输入带空格的文本" />
+                        <div style="margin-top: 8px; color: #6c757d;">值: "{{ name }}"</div>
+                    </div>
+                </div>
+            `
+        });
+
+        // Demo 3: 自定义输入组件
+        Vue.component('custom-input', {
+            props: {
+                value: { type: String, default: '' },
+                placeholder: { type: String, default: '' }
+            },
+            template: `
+                <input
+                    :value="value"
+                    @input="$emit('input', $event.target.value)"
+                    :placeholder="placeholder"
+                    style="width: 100%; padding: 10px; border: 2px solid #4facfe; border-radius: 6px; font-size: 14px;"
+                />
+            `
+        });
+
+        // Demo 4: 自定义复选框
+        Vue.component('custom-checkbox', {
+            model: {
+                prop: 'checked',
+                event: 'change'
+            },
+            props: {
+                checked: { type: Boolean, default: false }
+            },
+            template: `
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 16px;">
+                    <input 
+                        type="checkbox"
+                        :checked="checked"
+                        @change="$emit('change', $event.target.checked)"
+                        style="width: 18px; height: 18px; cursor: pointer;"
+                    />
+                    <slot></slot>
+                </label>
+            `
+        });
+
+        // Demo 5: 对象绑定演示
+        Vue.component('object-binding-demo', {
+            data() {
+                return {
+                    user: {
+                        name: '张三',
+                        age: 25,
+                        email: 'zhangsan@example.com'
+                    }
+                };
+            },
+            template: `
+                <div>
+                    <div style="margin-bottom: 20px;">
+                        <strong>用户对象：</strong>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 10px;">{{ user }}</pre>
+                    </div>
+
+                    <div class="form-group">
+                        <label>姓名：</label>
+                        <input v-model="user.name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>年龄：</label>
+                        <input v-model.number="user.age" type="number" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>邮箱：</label>
+                        <input v-model="user.email" />
+                    </div>
+                </div>
+            `
+        });
+
+        // Demo 6: 注册表单
+        Vue.component('register-form', {
+            data() {
+                return {
+                    formData: {
+                        username: '',
+                        password: '',
+                        gender: 'male',
+                        hobbies: [],
+                        city: '',
+                        agree: false
+                    }
+                };
+            },
+            methods: {
+                submit() {
+                    if (!this.formData.agree) {
+                        alert('请先同意用户协议');
+                        return;
+                    }
+                    console.log('提交数据：', this.formData);
+                    alert('注册成功！查看控制台查看提交的数据。');
+                }
+            },
+            template: `
+                <div style="max-width: 500px;">
+                    <div class="form-group">
+                        <label>用户名：</label>
+                        <input v-model.trim="formData.username" placeholder="请输入用户名" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>密码：</label>
+                        <input v-model="formData.password" type="password" placeholder="请输入密码" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>性别：</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" value="male" v-model="formData.gender" id="reg-male" />
+                                <label for="reg-male">男</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" value="female" v-model="formData.gender" id="reg-female" />
+                                <label for="female">女</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>爱好：</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" value="reading" v-model="formData.hobbies" id="reading" />
+                                <label for="reading">阅读</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" value="sports" v-model="formData.hobbies" id="sports" />
+                                <label for="sports">运动</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" value="music" v-model="formData.hobbies" id="music" />
+                                <label for="music">音乐</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>城市：</label>
+                        <select v-model="formData.city">
+                            <option value="">请选择城市</option>
+                            <option value="beijing">北京</option>
+                            <option value="shanghai">上海</option>
+                            <option value="guangzhou">广州</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" v-model="formData.agree" id="agree" />
+                            <label for="agree">我已阅读并同意《用户协议》</label>
+                        </div>
+                    </div>
+
+                    <button class="btn" @click="submit" style="width: 100%; padding: 12px; font-size: 16px;">
+                        注册
+                    </button>
+                </div>
+            `
+        });
+
+        // ==================== 根实例 ====================
+        new Vue({
+            el: '#app',
+            data: {
+                searchText: '',
+                agreed: false
+            }
+        });
+    </script>
+</body>
+</html>
