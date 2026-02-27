@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
             background: white;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
@@ -141,7 +142,7 @@
 
         .log-item {
             padding: 5px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .log-time {
@@ -181,7 +182,8 @@
         }
 
         /* 输入框 */
-        input[type="text"], input[type="password"] {
+        input[type="text"],
+        input[type="password"] {
             padding: 10px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 5px;
@@ -221,7 +223,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 10px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
         }
 
@@ -242,7 +244,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -255,7 +257,7 @@
             border-radius: 10px;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         .modal-title {
@@ -365,7 +367,8 @@
             margin: 20px 0;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
             border: 1px solid #ddd;
@@ -424,6 +427,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app" class="container">
         <h1>📦 Vue事件处理完整教程</h1>
@@ -444,7 +448,7 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">计数器示例</h4>
-                
+
                 <div style="text-align: center; margin: 30px 0;">
                     <span class="counter">{{ count }}</span>
                 </div>
@@ -467,35 +471,40 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 事件绑定的几种写法</span>
+                    <span class="code-comment">// 事件绑定的几种写法</span>
 
-<span class="code-comment">// 1. 完整写法</span>
-&lt;button <span class="code-attribute">v-on:click</span>=<span class="code-string">"increment"</span>&gt;加１&lt;/button&gt;
+                    <span class="code-comment">// 1. 完整写法</span>
+                    &lt;button <span class="code-attribute">v-on:click</span>=<span
+                        class="code-string">"increment"</span>&gt;加１&lt;/button&gt;<br>
 
-<span class="code-comment">// 2. 简写（推荐）⭐</span>
-&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"increment"</span>&gt;加１&lt;/button&gt;
+                    <span class="code-comment">// 2. 简写（推荐）⭐</span>
+                    &lt;button <span class="code-attribute">@click</span>=<span
+                        class="code-string">"increment"</span>&gt;加１&lt;/button&gt;<br>
 
-<span class="code-comment">// 3. 带参数</span>
-&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"addBy(5)"</span>&gt;加５&lt;/button&gt;
+                    <span class="code-comment">// 3. 带参数</span>
+                    &lt;button <span class="code-attribute">@click</span>=<span
+                        class="code-string">"addBy(5)"</span>&gt;加５&lt;/button&gt;<br>
 
-<span class="code-comment">// 4. 获取事件对象</span>
-&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"logEvent($event)"</span>&gt;打印事件对象&lt;/button&gt;
+                    <span class="code-comment">// 4. 获取事件对象</span>
+                    &lt;button <span class="code-attribute">@click</span>=<span
+                        class="code-string">"logEvent($event)"</span>&gt;打印事件对象&lt;/button&gt;<br>
 
-<span class="code-comment">// 5. 内联表达式</span>
-&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"count++"</span>&gt;加１&lt;/button&gt;
+                    <span class="code-comment">// 5. 内联表达式</span>
+                    &lt;button <span class="code-attribute">@click</span>=<span
+                        class="code-string">"count++"</span>&gt;加１&lt;/button&gt;<br>
 
-<span class="code-comment">// 对应的methods</span>
-methods: {
-    <span class="code-keyword">increment</span>() {
-        <span class="code-keyword">this</span>.count++;
-    },
-    <span class="code-keyword">addBy</span>(num) {
-        <span class="code-keyword">this</span>.count += num;
-    },
-    <span class="code-keyword">logEvent</span>(event) {
-        console.<span class="code-keyword">log</span>(event); <span class="code-comment">// 原生DOM事件对象</span>
-    }
-}
+                    <span class="code-comment">// 对应的methods</span>
+                    methods: {
+                    <span class="code-keyword">increment</span>() {
+                    <span class="code-keyword">this</span>.count++;
+                    },
+                    <span class="code-keyword">addBy</span>(num) {
+                    <span class="code-keyword">this</span>.count += num;
+                    },
+                    <span class="code-keyword">logEvent</span>(event) {
+                    console.<span class="code-keyword">log</span>(event); <span class="code-comment">// 原生DOM事件对象</span>
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -557,8 +566,8 @@ methods: {
                 <!-- .self 只在自身触发 -->
                 <div style="margin-bottom: 30px;">
                     <h5 style="margin-bottom: 10px;">4. .self - 只在元素本身触发</h5>
-                    <div @click.self="handleSelfClick" 
-                         style="padding: 30px; background: #e3f2fd; border-radius: 8px; cursor: pointer;">
+                    <div @click.self="handleSelfClick"
+                        style="padding: 30px; background: #e3f2fd; border-radius: 8px; cursor: pointer;">
                         外层div（加了.self，只有点击蓝色区域才触发）
                         <button @click="handleButtonClick" class="btn btn-primary" style="margin: 10px;">
                             内部按钮（点我不会触发外层）
@@ -575,28 +584,35 @@ methods: {
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 事件修饰符使用示例</span>
+                    <span class="code-comment">// 事件修饰符使用示例</span>
 
-<span class="code-comment">// 1. .stop - 阻止冒泡</span>
-&lt;div <span class="code-attribute">@click</span>=<span class="code-string">"handleOuter"</span>&gt;
-    &lt;div <span class="code-attribute">@click.stop</span>=<span class="code-string">"handleInner"</span>&gt;点我不会触发外层&lt;/div&gt;
-&lt;/div&gt;
+                    <span class="code-comment">// 1. .stop - 阻止冒泡</span><br>
+                    &lt;div <span class="code-attribute">@click</span>=<span
+                        class="code-string">"handleOuter"</span>&gt;
+                    &lt;div <span class="code-attribute">@click.stop</span>=<span
+                        class="code-string">"handleInner"</span>&gt;点我不会触发外层&lt;/div&gt;
+                    &lt;/div&gt;<br>
 
-<span class="code-comment">// 2. .prevent - 阻止默认行为</span>
-&lt;a <span class="code-attribute">href</span>=<span class="code-string">"https://example.com"</span> <span class="code-attribute">@click.prevent</span>=<span class="code-string">"handleClick"</span>&gt;
-    不会跳转
-&lt;/a&gt;
+                    <span class="code-comment">// 2. .prevent - 阻止默认行为</span><br>
+                    &lt;a <span class="code-attribute">href</span>=<span
+                        class="code-string">"https://example.com"</span> <span
+                        class="code-attribute">@click.prevent</span>=<span class="code-string">"handleClick"</span>&gt;
+                    不会跳转
+                    &lt;/a&gt;<br>
 
-<span class="code-comment">// 3. .once - 只触发一次</span>
-&lt;button <span class="code-attribute">@click.once</span>=<span class="code-string">"handleClick"</span>&gt;只能点一次&lt;/button&gt;
+                    <span class="code-comment">// 3. .once - 只触发一次</span><br>
+                    &lt;button <span class="code-attribute">@click.once</span>=<span
+                        class="code-string">"handleClick"</span>&gt;只能点一次&lt;/button&gt;<br>
 
-<span class="code-comment">// 4. .self - 只在自身触发</span>
-&lt;div <span class="code-attribute">@click.self</span>=<span class="code-string">"handleClick"</span>&gt;
-    &lt;button&gt;点我不触发外层&lt;/button&gt;
-&lt;/div&gt;
+                    <span class="code-comment">// 4. .self - 只在自身触发</span><br>
+                    &lt;div <span class="code-attribute">@click.self</span>=<span
+                        class="code-string">"handleClick"</span>&gt;
+                    &lt;button&gt;点我不触发外层&lt;/button&gt;
+                    &lt;/div&gt;<br>
 
-<span class="code-comment">// 5. .capture - 捕获模式</span>
-&lt;div <span class="code-attribute">@click.capture</span>=<span class="code-string">"handleClick"</span>&gt;捕获阶段触发&lt;/div&gt;
+                    <span class="code-comment">// 5. .capture - 捕获模式</span><br>
+                    &lt;div <span class="code-attribute">@click.capture</span>=<span
+                        class="code-string">"handleClick"</span>&gt;捕获阶段触发&lt;/div&gt;
                 </div>
             </div>
         </div>
@@ -606,7 +622,8 @@ methods: {
             <div class="demo-title">Demo 3: 修饰符组合使用 ⭐ 实战常用</div>
             <div class="demo-desc">
                 <strong>组合语法：</strong>多个修饰符可以链式调用，如：<code>@click.stop.prevent</code><br>
-                <strong>注意：</strong>修饰符的<strong>顺序很重要</strong>，<code>.prevent.stop</code> 和 <code>.stop.prevent</code> 效果不同<br>
+                <strong>注意：</strong>修饰符的<strong>顺序很重要</strong>，<code>.prevent.stop</code> 和 <code>.stop.prevent</code>
+                效果不同<br>
                 <strong>应用：</strong>表单提交、链接拦截、模态框等
             </div>
             <div class="demo-content">
@@ -634,7 +651,7 @@ methods: {
                 <div style="margin-bottom: 30px;">
                     <h5 style="margin-bottom: 10px;">2. 模态框 - @click.self 关闭</h5>
                     <button @click="showModal = true" class="btn btn-primary">打开模态框</button>
-                    
+
                     <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
                         <div class="modal-content">
                             <div class="modal-title">提示</div>
@@ -651,14 +668,12 @@ methods: {
                 <div style="margin-bottom: 30px;">
                     <h5 style="margin-bottom: 10px;">3. 右键菜单 - @contextmenu.prevent</h5>
                     <div @contextmenu.prevent="showContextMenu"
-                         style="padding: 40px; background: #f0f0f0; border-radius: 8px; text-align: center; cursor: pointer;">
+                        style="padding: 40px; background: #f0f0f0; border-radius: 8px; text-align: center; cursor: pointer;">
                         在这里右键点击（不会显示浏览器默认菜单）
                     </div>
-                    
-                    <div v-if="contextMenu.show" 
-                         class="context-menu" 
-                         :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
-                         @click.stop>
+
+                    <div v-if="contextMenu.show" class="context-menu"
+                        :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }" @click.stop>
                         <div class="menu-item" @click="handleMenuAction('复制')">📋 复制</div>
                         <div class="menu-item" @click="handleMenuAction('粘贴')">📄 粘贴</div>
                         <div class="menu-item" @click="handleMenuAction('删除')">🗑️ 删除</div>
@@ -674,27 +689,33 @@ methods: {
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 修饰符组合使用</span>
+                    <span class="code-comment">// 修饰符组合使用</span><br>
 
-<span class="code-comment">// 1. 表单提交 - 阻止默认刷新行为 ⭐ 最常用</span>
-&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;
-    &lt;input type=<span class="code-string">"text"</span> v-model=<span class="code-string">"username"</span>&gt;
-    &lt;button type=<span class="code-string">"submit"</span>&gt;提交&lt;/button&gt;
-&lt;/form&gt;
+                    <span class="code-comment">// 1. 表单提交 - 阻止默认刷新行为 ⭐ 最常用</span><br>
+                    &lt;form <span class="code-attribute">@submit.prevent</span>=<span
+                        class="code-string">"handleSubmit"</span>&gt;
+                    &lt;input type=<span class="code-string">"text"</span> v-model=<span
+                        class="code-string">"username"</span>&gt;
+                    &lt;button type=<span class="code-string">"submit"</span>&gt;提交&lt;/button&gt;
+                    &lt;/form&gt;<br>
 
-<span class="code-comment">// 2. 模态框 - 点击遮罩层关闭</span>
-&lt;div class=<span class="code-string">"modal"</span> <span class="code-attribute">@click.self</span>=<span class="code-string">"closeModal"</span>&gt;
-    &lt;div class=<span class="code-string">"modal-content"</span>&gt;内容&lt;/div&gt;
-&lt;/div&gt;
+                    <span class="code-comment">// 2. 模态框 - 点击遮罩层关闭</span><br>
+                    &lt;div class=<span class="code-string">"modal"</span> <span
+                        class="code-attribute">@click.self</span>=<span class="code-string">"closeModal"</span>&gt;
+                    &lt;div class=<span class="code-string">"modal-content"</span>&gt;内容&lt;/div&gt;
+                    &lt;/div&gt;<br>
 
-<span class="code-comment">// 3. 右键菜单 - 阻止默认菜单</span>
-&lt;div <span class="code-attribute">@contextmenu.prevent</span>=<span class="code-string">"showMenu"</span>&gt;右键我&lt;/div&gt;
+                    <span class="code-comment">// 3. 右键菜单 - 阻止默认菜单</span><br>
+                    &lt;div <span class="code-attribute">@contextmenu.prevent</span>=<span
+                        class="code-string">"showMenu"</span>&gt;右键我&lt;/div&gt;<br>
 
-<span class="code-comment">// 4. 同时阻止冒泡和默认行为</span>
-&lt;a <span class="code-attribute">@click.stop.prevent</span>=<span class="code-string">"handleClick"</span>&gt;链接&lt;/a&gt;
+                    <span class="code-comment">// 4. 同时阻止冒泡和默认行为</span><br>
+                    &lt;a <span class="code-attribute">@click.stop.prevent</span>=<span
+                        class="code-string">"handleClick"</span>&gt;链接&lt;/a&gt;<br>
 
-<span class="code-comment">// 5. 滚动事件 - 使用passive提升性能</span>
-&lt;div <span class="code-attribute">@scroll.passive</span>=<span class="code-string">"handleScroll"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 5. 滚动事件 - 使用passive提升性能</span><br>
+                    &lt;div <span class="code-attribute">@scroll.passive</span>=<span
+                        class="code-string">"handleScroll"</span>&gt;&lt;/div&gt;
                 </div>
             </div>
         </div>
@@ -712,16 +733,14 @@ methods: {
 
                 <div style="margin-bottom: 30px;">
                     <h5 style="margin-bottom: 10px;">1. 回车发送消息 - @keyup.enter ⭐ 最常用</h5>
-                    <input 
-                        type="text" 
-                        v-model="chatMessage"
-                        @keyup.enter="sendMessage"
-                        placeholder="输入消息后按回车发送..."
+                    <input type="text" v-model="chatMessage" @keyup.enter="sendMessage" placeholder="输入消息后按回车发送..."
                         style="max-width: 500px;">
                     <button @click="sendMessage" class="btn btn-primary">发送</button>
-                    
-                    <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; max-height: 200px; overflow-y: auto;">
-                        <div v-for="msg in messages" :key="msg.id" style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+
+                    <div
+                        style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                        <div v-for="msg in messages" :key="msg.id"
+                            style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
                             {{ msg.text }}
                         </div>
                     </div>
@@ -733,7 +752,7 @@ methods: {
                         （打开模态框后，按ESC键关闭）
                     </p>
                     <button @click="escModal = true" class="btn btn-primary">打开模态框</button>
-                    
+
                     <div v-if="escModal" class="modal-overlay" @click.self="escModal = false">
                         <div class="modal-content" @keyup.esc="escModal = false" tabindex="0">
                             <div class="modal-title">按ESC键关闭</div>
@@ -747,9 +766,7 @@ methods: {
 
                 <div style="margin-bottom: 30px;">
                     <h5 style="margin-bottom: 10px;">3. 组合键 - Ctrl+Enter</h5>
-                    <textarea 
-                        v-model="comment"
-                        @keyup.ctrl.enter="submitComment"
+                    <textarea v-model="comment" @keyup.ctrl.enter="submitComment"
                         placeholder="输入评论，按 Ctrl+Enter 提交（Mac用 Command+Enter）"
                         style="width: 100%; max-width: 500px; min-height: 100px;"></textarea>
                     <div style="margin-top: 10px; color: #666; font-size: 14px;">
@@ -777,29 +794,39 @@ methods: {
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 键盘事件修饰符</span>
+                    <span class="code-comment">// 键盘事件修饰符</span>
 
-<span class="code-comment">// 1. 回车键 - 最常用 ⭐</span>
-&lt;input <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"handleSubmit"</span>&gt;
+                    <span class="code-comment">// 1. 回车键 - 最常用 ⭐</span>
+                    &lt;input <span class="code-attribute">@keyup.enter</span>=<span
+                        class="code-string">"handleSubmit"</span>&gt;
 
-<span class="code-comment">// 2. ESC键 - 关闭弹窗</span>
-&lt;div <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 2. ESC键 - 关闭弹窗</span>
+                    &lt;div <span class="code-attribute">@keyup.esc</span>=<span
+                        class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
 
-<span class="code-comment">// 3. 删除键（Delete和Backspace）</span>
-&lt;input <span class="code-attribute">@keyup.delete</span>=<span class="code-string">"handleDelete"</span>&gt;
+                    <span class="code-comment">// 3. 删除键（Delete和Backspace）</span>
+                    &lt;input <span class="code-attribute">@keyup.delete</span>=<span
+                        class="code-string">"handleDelete"</span>&gt;
 
-<span class="code-comment">// 4. 方向键</span>
-&lt;div <span class="code-attribute">@keyup.up</span>=<span class="code-string">"moveUp"</span>&gt;&lt;/div&gt;
-&lt;div <span class="code-attribute">@keyup.down</span>=<span class="code-string">"moveDown"</span>&gt;&lt;/div&gt;
-&lt;div <span class="code-attribute">@keyup.left</span>=<span class="code-string">"moveLeft"</span>&gt;&lt;/div&gt;
-&lt;div <span class="code-attribute">@keyup.right</span>=<span class="code-string">"moveRight"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 4. 方向键</span>
+                    &lt;div <span class="code-attribute">@keyup.up</span>=<span
+                        class="code-string">"moveUp"</span>&gt;&lt;/div&gt;
+                    &lt;div <span class="code-attribute">@keyup.down</span>=<span
+                        class="code-string">"moveDown"</span>&gt;&lt;/div&gt;
+                    &lt;div <span class="code-attribute">@keyup.left</span>=<span
+                        class="code-string">"moveLeft"</span>&gt;&lt;/div&gt;
+                    &lt;div <span class="code-attribute">@keyup.right</span>=<span
+                        class="code-string">"moveRight"</span>&gt;&lt;/div&gt;
 
-<span class="code-comment">// 5. 组合键</span>
-&lt;input <span class="code-attribute">@keyup.ctrl.enter</span>=<span class="code-string">"submit"</span>&gt; <span class="code-comment">// Ctrl+Enter</span>
-&lt;input <span class="code-attribute">@keyup.ctrl.s.prevent</span>=<span class="code-string">"save"</span>&gt; <span class="code-comment">// Ctrl+S（阻止默认保存）</span>
+                    <span class="code-comment">// 5. 组合键</span>
+                    &lt;input <span class="code-attribute">@keyup.ctrl.enter</span>=<span
+                        class="code-string">"submit"</span>&gt; <span class="code-comment">// Ctrl+Enter</span>
+                    &lt;input <span class="code-attribute">@keyup.ctrl.s.prevent</span>=<span
+                        class="code-string">"save"</span>&gt; <span class="code-comment">// Ctrl+S（阻止默认保存）</span>
 
-<span class="code-comment">// 6. 自定义键码</span>
-&lt;input <span class="code-attribute">@keyup.page-down</span>=<span class="code-string">"handlePageDown"</span>&gt;
+                    <span class="code-comment">// 6. 自定义键码</span>
+                    &lt;input <span class="code-attribute">@keyup.page-down</span>=<span
+                        class="code-string">"handlePageDown"</span>&gt;
                 </div>
             </div>
         </div>
@@ -816,21 +843,21 @@ methods: {
 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
                     <div @click.left="handleMouseClick('左键')"
-                         style="padding: 40px; background: #3498db; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
+                        style="padding: 40px; background: #3498db; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
                         <div style="font-size: 48px; margin-bottom: 10px;">🖱️</div>
                         <div>左键点击我</div>
                         <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">@click.left</div>
                     </div>
-                    
+
                     <div @click.right.prevent="handleMouseClick('右键')"
-                         style="padding: 40px; background: #e74c3c; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
+                        style="padding: 40px; background: #e74c3c; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
                         <div style="font-size: 48px; margin-bottom: 10px;">🖱️</div>
                         <div>右键点击我</div>
                         <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">@click.right.prevent</div>
                     </div>
-                    
+
                     <div @click.middle="handleMouseClick('中键')"
-                         style="padding: 40px; background: #2ecc71; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
+                        style="padding: 40px; background: #2ecc71; color: white; border-radius: 8px; text-align: center; cursor: pointer;">
                         <div style="font-size: 48px; margin-bottom: 10px;">🖱️</div>
                         <div>中键点击我</div>
                         <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">@click.middle</div>
@@ -846,21 +873,24 @@ methods: {
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 鼠标按键修饰符</span>
+                    <span class="code-comment">// 鼠标按键修饰符</span>
 
-<span class="code-comment">// 1. 左键点击</span>
-&lt;div <span class="code-attribute">@click.left</span>=<span class="code-string">"handleLeftClick"</span>&gt;左键&lt;/div&gt;
+                    <span class="code-comment">// 1. 左键点击</span>
+                    &lt;div <span class="code-attribute">@click.left</span>=<span
+                        class="code-string">"handleLeftClick"</span>&gt;左键&lt;/div&gt;
 
-<span class="code-comment">// 2. 右键点击（通常配合.prevent）</span>
-&lt;div <span class="code-attribute">@click.right.prevent</span>=<span class="code-string">"handleRightClick"</span>&gt;右键&lt;/div&gt;
+                    <span class="code-comment">// 2. 右键点击（通常配合.prevent）</span>
+                    &lt;div <span class="code-attribute">@click.right.prevent</span>=<span
+                        class="code-string">"handleRightClick"</span>&gt;右键&lt;/div&gt;
 
-<span class="code-comment">// 3. 中键点击</span>
-&lt;div <span class="code-attribute">@click.middle</span>=<span class="code-string">"handleMiddleClick"</span>&gt;中键&lt;/div&gt;
+                    <span class="code-comment">// 3. 中键点击</span>
+                    &lt;div <span class="code-attribute">@click.middle</span>=<span
+                        class="code-string">"handleMiddleClick"</span>&gt;中键&lt;/div&gt;
 
-<span class="code-comment">// 应用场景：</span>
-<span class="code-comment">// - 左键选择，右键打开菜单</span>
-<span class="code-comment">// - 中键打开新标签页</span>
-<span class="code-comment">// - 自定义快捷操作</span>
+                    <span class="code-comment">// 应用场景：</span>
+                    <span class="code-comment">// - 左键选择，右键打开菜单</span>
+                    <span class="code-comment">// - 中键打开新标签页</span>
+                    <span class="code-comment">// - 自定义快捷操作</span>
                 </div>
             </div>
         </div>
@@ -883,9 +913,8 @@ methods: {
                     <strong>原理：</strong>mousedown在blur之前触发，prevent阻止focus transfer
                 </div>
 
-                <div v-for="item in editItems" :key="item.id" 
-                     :class="['edit-item', { editing: item.editing }]">
-                    
+                <div v-for="item in editItems" :key="item.id" :class="['edit-item', { editing: item.editing }]">
+
                     <!-- 非编辑模式 -->
                     <template v-if="!item.editing">
                         <span class="edit-text">{{ item.title }}</span>
@@ -896,22 +925,14 @@ methods: {
 
                     <!-- 编辑模式 -->
                     <template v-else>
-                        <input 
-                            type="text" 
-                            v-model="item.title"
-                            class="edit-input"
-                            @blur="cancelEdit(item)"
+                        <input type="text" v-model="item.title" class="edit-input" @blur="cancelEdit(item)"
                             ref="editInput">
-                        
+
                         <!-- 注意：这里使用 @mousedown.prevent 而不是 @click -->
-                        <button @mousedown.prevent="saveEdit(item)" 
-                                class="btn btn-success" 
-                                style="padding: 8px 16px;">
+                        <button @mousedown.prevent="saveEdit(item)" class="btn btn-success" style="padding: 8px 16px;">
                             💾 保存
                         </button>
-                        <button @mousedown.prevent="cancelEdit(item)" 
-                                class="btn btn-danger" 
-                                style="padding: 8px 16px;">
+                        <button @mousedown.prevent="cancelEdit(item)" class="btn btn-danger" style="padding: 8px 16px;">
                             ❌ 取消
                         </button>
                     </template>
@@ -926,36 +947,41 @@ methods: {
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// ❌ 错误写法：使用@click会导致blur先触发</span>
-&lt;input 
-    type=<span class="code-string">"text"</span> 
-    v-model=<span class="code-string">"title"</span>
-    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>&gt;
+                    <span class="code-comment">// ❌ 错误写法：使用@click会导致blur先触发</span>
+                    &lt;input
+                    type=<span class="code-string">"text"</span>
+                    v-model=<span class="code-string">"title"</span>
+                    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>&gt;
 
-<span class="code-comment">// 点击保存按钮时：blur先触发 → 退出编辑 → click晚触发 → 数据丢失</span>
-&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+                    <span class="code-comment">// 点击保存按钮时：blur先触发 → 退出编辑 → click晚触发 → 数据丢失</span>
+                    &lt;button <span class="code-attribute">@click</span>=<span
+                        class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
 
-<span class="code-comment">// ✅ 正确写法：使用@mousedown.prevent ⭐ 重要</span>
-&lt;input 
-    type=<span class="code-string">"text"</span> 
-    v-model=<span class="code-string">"title"</span>
-    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>&gt;
+                    <span class="code-comment">// ✅ 正确写法：使用@mousedown.prevent ⭐ 重要</span>
+                    &lt;input
+                    type=<span class="code-string">"text"</span>
+                    v-model=<span class="code-string">"title"</span>
+                    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>&gt;
 
-<span class="code-comment">// mousedown在blur之前触发，prevent阻止blur</span>
-&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
-&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
+                    <span class="code-comment">// mousedown在blur之前触发，prevent阻止blur</span>
+                    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+                    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
 
-<span class="code-comment">// 📌 任务管理系统中的实际应用</span>
-<span class="code-comment">// TodoItem组件中的编辑功能就使用了这个技巧</span>
-<span class="code-keyword">&lt;template v-else&gt;</span>
-    &lt;input 
-        type=<span class="code-string">"text"</span> 
-        v-model=<span class="code-string">"editingTitle"</span>
-        <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>
-        ref=<span class="code-string">"editInput"</span>&gt;
-    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
-    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
-<span class="code-keyword">&lt;/template&gt;</span>
+                    <span class="code-comment">// 📌 任务管理系统中的实际应用</span>
+                    <span class="code-comment">// TodoItem组件中的编辑功能就使用了这个技巧</span>
+                    <span class="code-keyword">&lt;template v-else&gt;</span>
+                    &lt;input
+                    type=<span class="code-string">"text"</span>
+                    v-model=<span class="code-string">"editingTitle"</span>
+                    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>
+                    ref=<span class="code-string">"editInput"</span>&gt;
+                    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+                    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
+                    <span class="code-keyword">&lt;/template&gt;</span>
                 </div>
 
                 <div class="tip-box">
@@ -973,7 +999,7 @@ methods: {
             <div class="demo-title" style="color: #2ecc71;">📚 知识点总结</div>
             <div class="demo-content">
                 <h3 style="color: #2ecc71; margin-bottom: 20px;">事件修饰符速查表</h3>
-                
+
                 <table>
                     <tr>
                         <th>修饰符</th>
@@ -1020,113 +1046,137 @@ methods: {
                 </table>
 
                 <h3 style="color: #2ecc71; margin: 30px 0 15px;">⭐ 最常用的修饰符组合</h3>
-                
+
                 <div class="code-block" v-pre>
-<span class="code-comment">// 1. 表单提交（最常用）⭐⭐⭐⭐⭐</span>
-&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
+                    <span class="code-comment">// 1. 表单提交（最常用）⭐⭐⭐⭐⭐</span><br>
+                    &lt;form <span class="code-attribute">@submit.prevent</span>=<span
+                        class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;<br>
 
-<span class="code-comment">// 2. 回车发送（聊天、搜索）⭐⭐⭐⭐⭐</span>
-&lt;input <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"sendMessage"</span>&gt;
+                    <span class="code-comment">// 2. 回车发送（聊天、搜索）⭐⭐⭐⭐⭐</span><br>
+                    &lt;input <span class="code-attribute">@keyup.enter</span>=<span
+                        class="code-string">"sendMessage"</span>&gt;<br>
 
-<span class="code-comment">// 3. ESC关闭（模态框、弹窗）⭐⭐⭐⭐</span>
-&lt;div <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 3. ESC关闭（模态框、弹窗）⭐⭐⭐⭐</span><br>
+                    &lt;div <span class="code-attribute">@keyup.esc</span>=<span
+                        class="code-string">"closeModal"</span>&gt;&lt;/div&gt;<br>
 
-<span class="code-comment">// 4. 点击遮罩层关闭 ⭐⭐⭐⭐</span>
-&lt;div class=<span class="code-string">"modal"</span> <span class="code-attribute">@click.self</span>=<span class="code-string">"closeModal"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 4. 点击遮罩层关闭 ⭐⭐⭐⭐</span><br>
+                    &lt;div class=<span class="code-string">"modal"</span> <span
+                        class="code-attribute">@click.self</span>=<span
+                        class="code-string">"closeModal"</span>&gt;&lt;/div&gt;<br>
 
-<span class="code-comment">// 5. 阻止链接跳转 ⭐⭐⭐</span>
-&lt;a href=<span class="code-string">"#"</span> <span class="code-attribute">@click.prevent</span>=<span class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
+                    <span class="code-comment">// 5. 阻止链接跳转 ⭐⭐⭐</span><br>
+                    &lt;a href=<span class="code-string">"#"</span> <span
+                        class="code-attribute">@click.prevent</span>=<span
+                        class="code-string">"handleClick"</span>&gt;&lt;/a&gt;<br>
 
-<span class="code-comment">// 6. 阻止冒泡 ⭐⭐⭐</span>
-&lt;div @click=<span class="code-string">"handleOuter"</span>&gt;
-    &lt;button <span class="code-attribute">@click.stop</span>=<span class="code-string">"handleInner"</span>&gt;&lt;/button&gt;
-&lt;/div&gt;
+                    <span class="code-comment">// 6. 阻止冒泡 ⭐⭐⭐</span><br>
+                    &lt;div @click=<span class="code-string">"handleOuter"</span>&gt;
+                    &lt;button <span class="code-attribute">@click.stop</span>=<span
+                        class="code-string">"handleInner"</span>&gt;&lt;/button&gt;
+                    &lt;/div&gt;<br>
 
-<span class="code-comment">// 7. 编辑模式保存按钮（任务管理系统）⭐⭐⭐⭐⭐</span>
-&lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
-&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"save"</span>&gt;保存&lt;/button&gt;
+                    <span class="code-comment">// 7. 编辑模式保存按钮（任务管理系统）⭐⭐⭐⭐⭐</span><br>
+                    &lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
+                    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"save"</span>&gt;保存&lt;/button&gt;<br>
 
-<span class="code-comment">// 8. 右键菜单 ⭐⭐</span>
-&lt;div <span class="code-attribute">@contextmenu.prevent</span>=<span class="code-string">"showMenu"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 8. 右键菜单 ⭐⭐</span><br>
+                    &lt;div <span class="code-attribute">@contextmenu.prevent</span>=<span
+                        class="code-string">"showMenu"</span>&gt;&lt;/div&gt;<br>
 
-<span class="code-comment">// 9. Ctrl+S保存 ⭐⭐⭐</span>
-&lt;div <span class="code-attribute">@keyup.ctrl.s.prevent</span>=<span class="code-string">"save"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 9. Ctrl+S保存 ⭐⭐⭐</span><br>
+                    &lt;div <span class="code-attribute">@keyup.ctrl.s.prevent</span>=<span
+                        class="code-string">"save"</span>&gt;&lt;/div&gt;<br>
 
-<span class="code-comment">// 10. 一次性按钮 ⭐⭐</span>
-&lt;button <span class="code-attribute">@click.once</span>=<span class="code-string">"sendRequest"</span>&gt;提交&lt;/button&gt;
+                    <span class="code-comment">// 10. 一次性按钮 ⭐⭐</span><br>
+                    &lt;button <span class="code-attribute">@click.once</span>=<span
+                        class="code-string">"sendRequest"</span>&gt;提交&lt;/button&gt;<br>
                 </div>
 
                 <h3 style="color: #2ecc71; margin: 30px 0 15px;">🎯 任务管理系统中的实际应用</h3>
-                
+
                 <div class="code-block" v-pre>
-<span class="code-comment">// 任务管理系统中使用的事件处理技巧</span>
+                    <span class="code-comment">// 任务管理系统中使用的事件处理技巧</span><br>
 
-<span class="code-comment">// 1. 添加任务 - 回车提交</span>
-&lt;input 
-    type=<span class="code-string">"text"</span>
-    v-model=<span class="code-string">"newTaskTitle"</span>
-    <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"addTask"</span>
-    placeholder=<span class="code-string">"按回车添加任务"</span>&gt;
+                    <span class="code-comment">// 1. 添加任务 - 回车提交</span><br>
+                    &lt;input
+                    type=<span class="code-string">"text"</span>
+                    v-model=<span class="code-string">"newTaskTitle"</span>
+                    <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"addTask"</span>
+                    placeholder=<span class="code-string">"按回车添加任务"</span>&gt;<br>
 
-<span class="code-comment">// 2. 编辑任务 - mousedown.prevent 模式</span>
-<span class="code-comment">// 这是修复编辑BUG时使用的关键技巧！</span>
-&lt;template v-<span class="code-keyword">if</span>=<span class="code-string">"isEditing"</span>&gt;
-    &lt;input 
-        v-model=<span class="code-string">"editingTitle"</span>
-        <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>
-        <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"saveEdit"</span>
-        <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"cancelEdit"</span>&gt;
-    
-    <span class="code-comment">// 关键：使用mousedown.prevent而不是click</span>
-    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
-    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;
-&lt;/template&gt;
+                    <span class="code-comment">// 2. 编辑任务 - mousedown.prevent 模式</span><br>
+                    <span class="code-comment">// 这是修复编辑BUG时使用的关键技巧！</span><br>
+                    &lt;template v-<span class="code-keyword">if</span>=<span class="code-string">"isEditing"</span>&gt;<br>
+                    &lt;input
+                    v-model=<span class="code-string">"editingTitle"</span>
+                    <span class="code-attribute">@blur</span>=<span class="code-string">"cancelEdit"</span>
+                    <span class="code-attribute">@keyup.enter</span>=<span class="code-string">"saveEdit"</span>
+                    <span class="code-attribute">@keyup.esc</span>=<span class="code-string">"cancelEdit"</span>&gt;<br>
 
-<span class="code-comment">// 3. 删除任务 - 阻止事件冒泡</span>
-&lt;div @click=<span class="code-string">"selectTask"</span>&gt;
-    &lt;button <span class="code-attribute">@click.stop</span>=<span class="code-string">"deleteTask"</span>&gt;删除&lt;/button&gt;
-&lt;/div&gt;
+                    <span class="code-comment">// 关键：使用mousedown.prevent而不是click</span>
+                    <br>&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"saveEdit"</span>&gt;保存&lt;/button&gt;
+                    &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                        class="code-string">"cancelEdit"</span>&gt;取消&lt;/button&gt;<br>
+                    &lt;/template&gt;<br>
 
-<span class="code-comment">// 4. 表单提交 - 阻止刷新</span>
-&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;
-    <span class="code-comment">// 表单内容</span>
-&lt;/form&gt;
+                    <span class="code-comment">// 3. 删除任务 - 阻止事件冒泡</span><br>
+                    &lt;div @click=<span class="code-string">"selectTask"</span>&gt;
+                    &lt;button <span class="code-attribute">@click.stop</span>=<span
+                        class="code-string">"deleteTask"</span>&gt;删除&lt;/button&gt;
+                    &lt;/div&gt;<br>
+
+                    <span class="code-comment">// 4. 表单提交 - 阻止刷新</span><br>
+                    &lt;form <span class="code-attribute">@submit.prevent</span>=<span
+                        class="code-string">"handleSubmit"</span>&gt;
+                    <span class="code-comment">// 表单内容</span>
+                    &lt;/form&gt;
                 </div>
 
                 <h3 style="color: #2ecc71; margin: 30px 0 15px;">⚠️ 常见错误</h3>
-                
+
                 <div class="warning-box">
                     <strong>错误1：修饰符顺序错误</strong>
                     <div class="code-block" v-pre style="margin-top: 10px;">
-<span class="code-comment">// ❌ 错误：先prevent再stop</span>
-&lt;a <span class="code-attribute">@click.prevent.stop</span>=<span class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
+                        <span class="code-comment">// ❌ 错误：先prevent再stop</span>
+                        &lt;a <span class="code-attribute">@click.prevent.stop</span>=<span
+                            class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
 
-<span class="code-comment">// ✅ 正确：通常先stop再prevent</span>
-&lt;a <span class="code-attribute">@click.stop.prevent</span>=<span class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
+                        <span class="code-comment">// ✅ 正确：通常先stop再prevent</span>
+                        &lt;a <span class="code-attribute">@click.stop.prevent</span>=<span
+                            class="code-string">"handleClick"</span>&gt;&lt;/a&gt;
                     </div>
                 </div>
 
                 <div class="warning-box">
                     <strong>错误2：编辑模式使用@click而不是@mousedown.prevent</strong>
                     <div class="code-block" v-pre style="margin-top: 10px;">
-<span class="code-comment">// ❌ 错误：blur会先触发，导致编辑状态丢失</span>
-&lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
-&lt;button <span class="code-attribute">@click</span>=<span class="code-string">"save"</span>&gt;保存&lt;/button&gt;
+                        <span class="code-comment">// ❌ 错误：blur会先触发，导致编辑状态丢失</span>
+                        &lt;input <span class="code-attribute">@blur</span>=<span
+                            class="code-string">"cancel"</span>&gt;
+                        &lt;button <span class="code-attribute">@click</span>=<span
+                            class="code-string">"save"</span>&gt;保存&lt;/button&gt;
 
-<span class="code-comment">// ✅ 正确：使用mousedown.prevent</span>
-&lt;input <span class="code-attribute">@blur</span>=<span class="code-string">"cancel"</span>&gt;
-&lt;button <span class="code-attribute">@mousedown.prevent</span>=<span class="code-string">"save"</span>&gt;保存&lt;/button&gt;
+                        <span class="code-comment">// ✅ 正确：使用mousedown.prevent</span>
+                        &lt;input <span class="code-attribute">@blur</span>=<span
+                            class="code-string">"cancel"</span>&gt;
+                        &lt;button <span class="code-attribute">@mousedown.prevent</span>=<span
+                            class="code-string">"save"</span>&gt;保存&lt;/button&gt;
                     </div>
                 </div>
 
                 <div class="warning-box">
                     <strong>错误3：忘记在表单上使用 prevent</strong>
                     <div class="code-block" v-pre style="margin-top: 10px;">
-<span class="code-comment">// ❌ 错误：表单提交会刷新页面</span>
-&lt;form <span class="code-attribute">@submit</span>=<span class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
+                        <span class="code-comment">// ❌ 错误：表单提交会刷新页面</span>
+                        &lt;form <span class="code-attribute">@submit</span>=<span
+                            class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
 
-<span class="code-comment">// ✅ 正确：阻止默认提交行为</span>
-&lt;form <span class="code-attribute">@submit.prevent</span>=<span class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
+                        <span class="code-comment">// ✅ 正确：阻止默认提交行为</span>
+                        &lt;form <span class="code-attribute">@submit.prevent</span>=<span
+                            class="code-string">"handleSubmit"</span>&gt;&lt;/form&gt;
                     </div>
                 </div>
             </div>
@@ -1142,11 +1192,11 @@ methods: {
                 eventLogs: [],
                 eventLogId: 1,
                 normalClickCount: 0,
-                
+
                 // Demo 2: 事件修饰符
                 modifierLogs: [],
                 modifierLogId: 1,
-                
+
                 // Demo 3: 组合修饰符
                 formData: {
                     username: '',
@@ -1160,7 +1210,7 @@ methods: {
                 },
                 combinedLogs: [],
                 combinedLogId: 1,
-                
+
                 // Demo 4: 键盘事件
                 chatMessage: '',
                 messages: [],
@@ -1174,11 +1224,11 @@ methods: {
                 },
                 keyLogs: [],
                 keyLogId: 1,
-                
+
                 // Demo 5: 鼠标事件
                 mouseLogs: [],
                 mouseLogId: 1,
-                
+
                 // Demo 6: 编辑模式
                 editItems: [
                     { id: 1, title: '双击编辑任务 1', editing: false },
@@ -1219,7 +1269,7 @@ methods: {
                     });
                     if (this.eventLogs.length > 10) this.eventLogs.pop();
                 },
-                
+
                 // Demo 2: 事件修饰符
                 handleOuterClick() {
                     this.addModifierLog('外层盒子被点击（红色）');
@@ -1254,7 +1304,7 @@ methods: {
                     });
                     if (this.modifierLogs.length > 10) this.modifierLogs.pop();
                 },
-                
+
                 // Demo 3: 组合修饰符
                 handleSubmit() {
                     this.addCombinedLog(`表单提交 - 用户： ${this.formData.username}`);
@@ -1277,7 +1327,7 @@ methods: {
                     });
                     if (this.combinedLogs.length > 10) this.combinedLogs.pop();
                 },
-                
+
                 // Demo 4: 键盘事件
                 sendMessage() {
                     if (this.chatMessage.trim()) {
@@ -1303,7 +1353,7 @@ methods: {
                     });
                     if (this.keyLogs.length > 10) this.keyLogs.pop();
                 },
-                
+
                 // Demo 5: 鼠标事件
                 handleMouseClick(button) {
                     this.addMouseLog(`${button}被点击`);
@@ -1316,7 +1366,7 @@ methods: {
                     });
                     if (this.mouseLogs.length > 8) this.mouseLogs.pop();
                 },
-                
+
                 // Demo 6: 编辑模式
                 startEdit(item) {
                     item.editing = true;
@@ -1349,7 +1399,7 @@ methods: {
                 document.addEventListener('click', () => {
                     this.contextMenu.show = false;
                 });
-                
+
                 // 监听方向键
                 document.addEventListener('keyup', (e) => {
                     if (e.key === 'ArrowUp') {
@@ -1366,7 +1416,7 @@ methods: {
                         this.addKeyLog('→ 向右移动');
                     }
                 });
-                
+
                 // ESC键监听
                 document.addEventListener('keyup', (e) => {
                     if (e.key === 'Escape' && this.escModal) {
@@ -1378,6 +1428,5 @@ methods: {
         });
     </script>
 </body>
+
 </html>
-
-
