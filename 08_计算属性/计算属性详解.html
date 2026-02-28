@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
             background: white;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
@@ -321,7 +322,8 @@
             margin: 20px 0;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
             border: 1px solid #ddd;
@@ -363,6 +365,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app" class="container">
         <h1>📊 Vue计算属性完整教程</h1>
@@ -395,16 +398,17 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 在模板中使用（不需要括号）</span>
-{{ fullName }}
+                    <span class="code-comment">// 在模板中使用（不需要括号）</span>
+                    {{ fullName }}<br>
 
-<span class="code-comment">// 定义计算属性</span>
-<span class="code-keyword">computed</span>: {
-    <span class="code-function">fullName</span>() {
-        <span class="code-comment">// 依赖firstName和lastName</span>
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.firstName + <span class="code-string">' '</span> + <span class="code-keyword">this</span>.lastName;
-    }
-}
+                    <span class="code-comment">// 定义计算属性</span>
+                    <span class="code-keyword">computed</span>: {
+                    <span class="code-function">fullName</span>() {
+                    <span class="code-comment">// 依赖firstName和lastName</span>
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.firstName + <span
+                        class="code-string">' '</span> + <span class="code-keyword">this</span>.lastName;
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -419,7 +423,7 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">任务统计示例</h4>
-                
+
                 <!-- 统计卡片 -->
                 <div class="stats">
                     <div class="stat-card">
@@ -442,14 +446,8 @@
 
                 <!-- 任务列表 -->
                 <div class="task-list">
-                    <div 
-                        v-for="task in tasks" 
-                        :key="task.id"
-                        :class="['task-item', { completed: task.completed }]">
-                        <input 
-                            type="checkbox" 
-                            v-model="task.completed"
-                            class="task-checkbox">
+                    <div v-for="task in tasks" :key="task.id" :class="['task-item', { completed: task.completed }]">
+                        <input type="checkbox" v-model="task.completed" class="task-checkbox">
                         <span class="task-text">{{ task.title }}</span>
                     </div>
                 </div>
@@ -462,30 +460,35 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 任务管理系统中实际使用的计算属性</span>
-<span class="code-keyword">computed</span>: {
-    <span class="code-comment">// 1. 总任务数</span>
-    <span class="code-function">totalTasks</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.length;
-    },
-    
-    <span class="code-comment">// 2. 已完成任务数</span>
-    <span class="code-function">completedTasks</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => t.completed).length;
-    },
-    
-    <span class="code-comment">// 3. 进行中任务数</span>
-    <span class="code-function">activeTasks</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => !t.completed).length;
-    },
-    
-    <span class="code-comment">// 4. 完成率</span>
-    <span class="code-function">completionRate</span>() {
-        <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.totalTasks === 0) <span class="code-keyword">return</span> <span class="code-string">'0%'</span>;
-        <span class="code-keyword">const</span> rate = Math.<span class="code-function">round</span>((<span class="code-keyword">this</span>.completedTasks / <span class="code-keyword">this</span>.totalTasks) * 100);
-        <span class="code-keyword">return</span> rate + <span class="code-string">'%'</span>;
-    }
-}
+                    <span class="code-comment">// 任务管理系统中实际使用的计算属性</span><br>
+                    <span class="code-keyword">computed</span>: {<br>
+                    <span class="code-comment">// 1. 总任务数</span><br>
+                    <span class="code-function">totalTasks</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.length;
+                    },<br>
+
+                    <span class="code-comment">// 2. 已完成任务数</span><br>
+                    <span class="code-function">completedTasks</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span
+                        class="code-function">filter</span>(t => t.completed).length;
+                    },<br>
+
+                    <span class="code-comment">// 3. 进行中任务数</span><br>
+                    <span class="code-function">activeTasks</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span
+                        class="code-function">filter</span>(t => !t.completed).length;
+                    },<br>
+
+                    <span class="code-comment">// 4. 完成率</span><br>
+                    <span class="code-function">completionRate</span>() {
+                    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.totalTasks === 0) <span
+                        class="code-keyword">return</span> <span class="code-string">'0%'</span>;
+                    <span class="code-keyword">const</span> rate = Math.<span class="code-function">round</span>((<span
+                        class="code-keyword">this</span>.completedTasks / <span
+                        class="code-keyword">this</span>.totalTasks) * 100);
+                    <span class="code-keyword">return</span> rate + <span class="code-string">'%'</span>;
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -500,13 +503,10 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">任务筛选示例</h4>
-                
+
                 <!-- 筛选按钮 -->
                 <div class="btn-group">
-                    <button 
-                        v-for="filter in filters" 
-                        :key="filter.value"
-                        @click="currentFilter = filter.value"
+                    <button v-for="filter in filters" :key="filter.value" @click="currentFilter = filter.value"
                         :class="['filter-btn', { active: currentFilter === filter.value }]">
                         {{ filter.label }} ({{ getFilterCount(filter.value) }})
                     </button>
@@ -514,22 +514,14 @@
 
                 <!-- 搜索框 -->
                 <div class="search-box">
-                    <input 
-                        type="text" 
-                        v-model="searchKeyword" 
-                        placeholder="搜索任务标题...">
+                    <input type="text" v-model="searchKeyword" placeholder="搜索任务标题...">
                 </div>
 
                 <!-- 过滤后的任务列表 -->
                 <div class="task-list">
-                    <div 
-                        v-for="task in filteredTasks" 
-                        :key="task.id"
+                    <div v-for="task in filteredTasks" :key="task.id"
                         :class="['task-item', { completed: task.completed }]">
-                        <input 
-                            type="checkbox" 
-                            v-model="task.completed"
-                            class="task-checkbox">
+                        <input type="checkbox" v-model="task.completed" class="task-checkbox">
                         <span class="task-text">{{ task.title }}</span>
                     </div>
                     <div v-if="filteredTasks.length === 0" style="text-align: center; padding: 20px; color: #999;">
@@ -538,28 +530,32 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 过滤计算属性 - 任务管理系统实际使用</span>
-<span class="code-keyword">computed</span>: {
-    <span class="code-function">filteredTasks</span>() {
-        <span class="code-comment">// 第一步：根据完成状态筛选</span>
-        <span class="code-keyword">let</span> result = <span class="code-keyword">this</span>.tasks;
-        
-        <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.currentFilter === <span class="code-string">'active'</span>) {
-            result = result.<span class="code-function">filter</span>(t => !t.completed);
-        } <span class="code-keyword">else if</span> (<span class="code-keyword">this</span>.currentFilter === <span class="code-string">'completed'</span>) {
-            result = result.<span class="code-function">filter</span>(t => t.completed);
-        }
-        
-        <span class="code-comment">// 第二步：根据搜索关键词过滤</span>
-        <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.searchKeyword) {
-            result = result.<span class="code-function">filter</span>(t => 
-                t.title.<span class="code-function">toLowerCase</span>().<span class="code-function">includes</span>(<span class="code-keyword">this</span>.searchKeyword.<span class="code-function">toLowerCase</span>())
-            );
-        }
-        
-        <span class="code-keyword">return</span> result;
-    }
-}
+                    <span class="code-comment">// 过滤计算属性 - 任务管理系统实际使用</span><br>
+                    <span class="code-keyword">computed</span>: {<br>
+                    <span class="code-function">filteredTasks</span>() {<br>
+                    <span class="code-comment">// 第一步：根据完成状态筛选</span><br>
+                    <span class="code-keyword">let</span> result = <span class="code-keyword">this</span>.tasks;<br>
+
+                    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.currentFilter === <span
+                        class="code-string">'active'</span>) {<br>
+                    result = result.<span class="code-function">filter</span>(t => !t.completed);<br>
+                    } <span class="code-keyword">else if</span> (<span class="code-keyword">this</span>.currentFilter
+                    === <span class="code-string">'completed'</span>) {
+                    result = result.<span class="code-function">filter</span>(t => t.completed);
+                    }<br>
+
+                    <span class="code-comment">// 第二步：根据搜索关键词过滤</span><br>
+                    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.searchKeyword) {
+                    result = result.<span class="code-function">filter</span>(t =>
+                    t.title.<span class="code-function">toLowerCase</span>().<span
+                        class="code-function">includes</span>(<span class="code-keyword">this</span>.searchKeyword.<span
+                        class="code-function">toLowerCase</span>())
+                    );
+                    }
+
+                    <span class="code-keyword">return</span> result;
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -575,16 +571,13 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">全选功能示例</h4>
-                
+
                 <!-- 全选复选框 -->
                 <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                        <input 
-                            type="checkbox" 
-                            v-model="allChecked"
-                            style="width: 20px; height: 20px;">
+                        <input type="checkbox" v-model="allChecked" style="width: 20px; height: 20px;">
                         <strong style="font-size: 16px;">
-                            全选 / 全不选 
+                            全选 / 全不选
                             <span style="color: #666; font-weight: normal;">
                                 (已选: {{ completedTasks }} / {{ totalTasks }})
                             </span>
@@ -594,42 +587,38 @@
 
                 <!-- 任务列表 -->
                 <div class="task-list">
-                    <div 
-                        v-for="task in tasks" 
-                        :key="task.id"
-                        :class="['task-item', { completed: task.completed }]">
-                        <input 
-                            type="checkbox" 
-                            v-model="task.completed"
-                            class="task-checkbox">
+                    <div v-for="task in tasks" :key="task.id" :class="['task-item', { completed: task.completed }]">
+                        <input type="checkbox" v-model="task.completed" class="task-checkbox">
                         <span class="task-text">{{ task.title }}</span>
                     </div>
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 双向计算属性 - 全选功能实现</span>
-<span class="code-keyword">computed</span>: {
-    <span class="code-function">allChecked</span>: {
-        <span class="code-comment">// get：读取allChecked时调用</span>
-        <span class="code-comment">// 当所有任务都完成时返回true，否则返回false</span>
-        <span class="code-function">get</span>() {
-            <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.length > 0 && 
-                   <span class="code-keyword">this</span>.tasks.<span class="code-function">every</span>(task => task.completed);
-        },
-        
-        <span class="code-comment">// set：修改allChecked时调用（勾选全选框时）</span>
-        <span class="code-comment">// value是新的值（true或false）</span>
-        <span class="code-function">set</span>(value) {
-            <span class="code-comment">// 将所有任务的completed设置为value</span>
-            <span class="code-keyword">this</span>.tasks.<span class="code-function">forEach</span>(task => {
-                task.completed = value;
-            });
-        }
-    }
-}
+                    <span class="code-comment">// 双向计算属性 - 全选功能实现</span><br>
+                    <span class="code-keyword">computed</span>: {<br>
+                    <span class="code-function">allChecked</span>: {<br>
+                    <span class="code-comment">// get：读取allChecked时调用</span>
+                    <span class="code-comment">// 当所有任务都完成时返回true，否则返回false</span><br>
+                    <span class="code-function">get</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.length > 0 &&
+                    <span class="code-keyword">this</span>.tasks.<span class="code-function">every</span>(task =>
+                    task.completed);
+                    },<br>
 
-<span class="code-comment">// 模板中使用（就像普通的data属性）</span>
-&lt;input type=<span class="code-string">"checkbox"</span> v-model=<span class="code-string">"allChecked"</span>&gt;
+                    <span class="code-comment">// set：修改allChecked时调用（勾选全选框时）</span>
+                    <span class="code-comment">// value是新的值（true或false）</span><br>
+                    <span class="code-function">set</span>(value) {<br>
+                    <span class="code-comment">// 将所有任务的completed设置为value</span><br>
+                    <span class="code-keyword">this</span>.tasks.<span class="code-function">forEach</span>(task => {
+                    task.completed = value;
+                    });
+                    }
+                    }
+                    }<br>
+
+                    <span class="code-comment">// 模板中使用（就像普通的data属性）</span><br>
+                    &lt;input type=<span class="code-string">"checkbox"</span> v-model=<span
+                        class="code-string">"allChecked"</span>&gt;
                 </div>
 
                 <div class="tip-box">
@@ -657,17 +646,11 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">购物车示例</h4>
-                
+
                 <!-- 商品列表 -->
                 <div class="task-list">
-                    <div 
-                        v-for="item in cartItems" 
-                        :key="item.id"
-                        class="task-item">
-                        <input 
-                            type="checkbox" 
-                            v-model="item.selected"
-                            class="task-checkbox">
+                    <div v-for="item in cartItems" :key="item.id" class="task-item">
+                        <input type="checkbox" v-model="item.selected" class="task-checkbox">
                         <span class="task-text">{{ item.name }}</span>
                         <span class="task-price">¥{{ item.price }}</span>
                     </div>
@@ -696,33 +679,37 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                <div
+                    style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
                     <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">应付金额：</div>
                     <div style="font-size: 32px; font-weight: bold;">¥{{ totalPrice }}</div>
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 依赖链计算属性示例</span>
-<span class="code-keyword">computed</span>: {
-    <span class="code-comment">// 第一层：过滤出已选商品</span>
-    <span class="code-function">selectedItems</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.cartItems.<span class="code-function">filter</span>(item => item.selected);
-    },
-    
-    <span class="code-comment">// 第二层：计算小计（依赖selectedItems）</span>
-    <span class="code-function">subtotal</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.selectedItems.<span class="code-function">reduce</span>((sum, item) => sum + item.price, 0);
-    },
-    
-    <span class="code-comment">// 第三层：计算总价（依赖subtotal + 运费）</span>
-    <span class="code-function">totalPrice</span>() {
-        <span class="code-keyword">const</span> shipping = <span class="code-keyword">this</span>.subtotal > 0 ? 10 : 0; <span class="code-comment">// 运费</span>
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.subtotal + shipping;
-    }
-}
+                    <span class="code-comment">// 依赖链计算属性示例</span><br>
+                    <span class="code-keyword">computed</span>: {<br>
+                    <span class="code-comment">// 第一层：过滤出已选商品</span><br>
+                    <span class="code-function">selectedItems</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.cartItems.<span
+                        class="code-function">filter</span>(item => item.selected);
+                    },<br>
 
-<span class="code-comment">// 依赖链：cartItems → selectedItems → subtotal → totalPrice</span>
-<span class="code-comment">// 修改任何一个源数据，整个链条都会自动更新！</span>
+                    <span class="code-comment">// 第二层：计算小计（依赖selectedItems）</span><br>
+                    <span class="code-function">subtotal</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.selectedItems.<span
+                        class="code-function">reduce</span>((sum, item) => sum + item.price, 0);
+                    },<br>
+
+                    <span class="code-comment">// 第三层：计算总价（依赖subtotal + 运费）</span><br>
+                    <span class="code-function">totalPrice</span>() {
+                    <span class="code-keyword">const</span> shipping = <span class="code-keyword">this</span>.subtotal >
+                    0 ? 10 : 0; <span class="code-comment">// 运费</span>
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.subtotal + shipping;
+                    }
+                    }<br>
+
+                    <span class="code-comment">// 依赖链：cartItems → selectedItems → subtotal → totalPrice</span>
+                    <span class="code-comment">// 修改任何一个源数据，整个链条都会自动更新！</span>
                 </div>
             </div>
         </div>
@@ -737,7 +724,7 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">性能对比测试</h4>
-                
+
                 <div class="performance-box">
                     <strong>测试说明：</strong>下面两行显示相同内容，但实现方式不同：<br>
                     - 第一行使用<strong>computed</strong>（有缓存）<br>
@@ -755,11 +742,7 @@
                 </div>
 
                 <div>
-                    <input 
-                        type="text" 
-                        v-model="message" 
-                        placeholder="输入文字测试..."
-                        style="width: 100%; max-width: 400px;">
+                    <input type="text" v-model="message" placeholder="输入文字测试..." style="width: 100%; max-width: 400px;">
                 </div>
 
                 <div class="tip-box" style="margin-top: 20px;">
@@ -775,21 +758,27 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// ❌ 不推荐：使用methods（无缓存）</span>
-methods: {
-    <span class="code-function">reversedMessage</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.message.<span class="code-function">split</span>(<span class="code-string">''</span>).<span class="code-function">reverse</span>().<span class="code-function">join</span>(<span class="code-string">''</span>);
-    }
-}
-<span class="code-comment">// 模板中：{{ reversedMessage() }}  ← 每次都执行</span>
+                    <span class="code-comment">// ❌ 不推荐：使用methods（无缓存）</span><br>
+                    methods: {
+                    <span class="code-function">reversedMessage</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.message.<span
+                        class="code-function">split</span>(<span class="code-string">''</span>).<span
+                        class="code-function">reverse</span>().<span class="code-function">join</span>(<span
+                        class="code-string">''</span>);
+                    }
+                    }<br>
+                    <span class="code-comment">// 模板中：{{ reversedMessage() }} ← 每次都执行</span><br>
 
-<span class="code-comment">// ✅ 推荐：使用computed（有缓存）</span>
-computed: {
-    <span class="code-function">reversedMessage</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.message.<span class="code-function">split</span>(<span class="code-string">''</span>).<span class="code-function">reverse</span>().<span class="code-function">join</span>(<span class="code-string">''</span>);
-    }
-}
-<span class="code-comment">// 模板中：{{ reversedMessage }}  ← 有缓存，效率高</span>
+                    <span class="code-comment">// ✅ 推荐：使用computed（有缓存）</span><br>
+                    computed: {
+                    <span class="code-function">reversedMessage</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.message.<span
+                        class="code-function">split</span>(<span class="code-string">''</span>).<span
+                        class="code-function">reverse</span>().<span class="code-function">join</span>(<span
+                        class="code-string">''</span>);
+                    }
+                    }<br>
+                    <span class="code-comment">// 模板中：{{ reversedMessage }} ← 有缓存，效率高</span>
                 </div>
             </div>
         </div>
@@ -799,7 +788,7 @@ computed: {
             <div class="demo-title" style="color: #e74c3c;">📚 知识点总结</div>
             <div class="demo-content">
                 <h3 style="color: #e74c3c; margin-bottom: 20px;">计算属性 vs Methods vs Watch 对比</h3>
-                
+
                 <table>
                     <tr>
                         <th>特性</th>
@@ -883,44 +872,60 @@ computed: {
 
                 <h3 style="color: #e74c3c; margin: 30px 0 15px;">🎯 任务管理系统中的应用</h3>
                 <div class="code-block" v-pre>
-<span class="code-comment">// 任务管理系统中实际使用的7个计算属性：</span>
+                    <span class="code-comment">// 任务管理系统中实际使用的7个计算属性：</span><br>
 
-<span class="code-comment">// 1. 统计类 - 总数</span>
-totalTasks() { <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.length; }
+                    <span class="code-comment">// 1. 统计类 - 总数</span><br>
+                    totalTasks() { <span class="code-keyword">return</span> <span
+                        class="code-keyword">this</span>.tasks.length; }<br>
 
-<span class="code-comment">// 2. 统计类 - 已完成数</span>
-completedTasks() { <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => t.completed).length; }
+                    <span class="code-comment">// 2. 统计类 - 已完成数</span><br>
+                    completedTasks() { <span class="code-keyword">return</span> <span
+                        class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t =>
+                    t.completed).length; }<br>
 
-<span class="code-comment">// 3. 统计类 - 进行中数量</span>
-activeTasks() { <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => !t.completed).length; }
+                    <span class="code-comment">// 3. 统计类 - 进行中数量</span><br>
+                    activeTasks() { <span class="code-keyword">return</span> <span
+                        class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t =>
+                    !t.completed).length; }<br>
 
-<span class="code-comment">// 4. 统计类 - 完成率</span>
-completionRate() { 
-    <span class="code-keyword">return</span> Math.<span class="code-function">round</span>((<span class="code-keyword">this</span>.completedTasks / <span class="code-keyword">this</span>.totalTasks) * 100) + <span class="code-string">'%'</span>;
-}
+                    <span class="code-comment">// 4. 统计类 - 完成率</span><br>
+                    completionRate() {
+                    <span class="code-keyword">return</span> Math.<span class="code-function">round</span>((<span
+                        class="code-keyword">this</span>.completedTasks / <span
+                        class="code-keyword">this</span>.totalTasks) * 100) + <span class="code-string">'%'</span>;
+                    }<br>
 
-<span class="code-comment">// 5. 过滤类 - 筛选任务列表</span>
-filteredTasks() {
-    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.filter === <span class="code-string">'active'</span>) <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => !t.completed);
-    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.filter === <span class="code-string">'completed'</span>) <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => t.completed);
-    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks;
-}
+                    <span class="code-comment">// 5. 过滤类 - 筛选任务列表</span><br>
+                    filteredTasks() {
+                    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.filter === <span
+                        class="code-string">'active'</span>) <span class="code-keyword">return</span> <span
+                        class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t =>
+                    !t.completed);
+                    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.filter === <span
+                        class="code-string">'completed'</span>) <span class="code-keyword">return</span> <span
+                        class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t =>
+                    t.completed);
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks;
+                    }<br>
 
-<span class="code-comment">// 6. 格式化类 - 优先级文本</span>
-priorityText() {
-    <span class="code-keyword">const</span> map = { high: <span class="code-string">'高'</span>, medium: <span class="code-string">'中'</span>, low: <span class="code-string">'低'</span> };
-    <span class="code-keyword">return</span> map[<span class="code-keyword">this</span>.priority];
-}
+                    <span class="code-comment">// 6. 格式化类 - 优先级文本</span><br>
+                    priorityText() {
+                    <span class="code-keyword">const</span> map = { high: <span class="code-string">'高'</span>, medium:
+                    <span class="code-string">'中'</span>, low: <span class="code-string">'低'</span> };
+                    <span class="code-keyword">return</span> map[<span class="code-keyword">this</span>.priority];
+                    }<br>
 
-<span class="code-comment">// 7. 双向计算属性 - 全选状态（get/set）</span>
-allChecked: {
-    <span class="code-function">get</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">every</span>(t => t.completed);
-    },
-    <span class="code-function">set</span>(value) {
-        <span class="code-keyword">this</span>.tasks.<span class="code-function">forEach</span>(t => t.completed = value);
-    }
-}
+                    <span class="code-comment">// 7. 双向计算属性 - 全选状态（get/set）</span><br>
+                    allChecked: {
+                    <span class="code-function">get</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span
+                        class="code-function">every</span>(t => t.completed);
+                    },
+                    <span class="code-function">set</span>(value) {
+                    <span class="code-keyword">this</span>.tasks.<span class="code-function">forEach</span>(t =>
+                    t.completed = value);
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -933,7 +938,7 @@ allChecked: {
                 // Demo 1: 姓名拼接
                 firstName: '张',
                 lastName: '三',
-                
+
                 // Demo 2 & 3 & 4: 任务列表
                 tasks: [
                     { id: 1, title: '学习Vue计算属性', completed: false },
@@ -943,7 +948,7 @@ allChecked: {
                     { id: 5, title: '对比computed和methods', completed: false }
                 ],
                 taskIdCounter: 6,
-                
+
                 // Demo 3: 筛选
                 currentFilter: 'all',
                 filters: [
@@ -952,14 +957,14 @@ allChecked: {
                     { value: 'completed', label: '已完成' }
                 ],
                 searchKeyword: '',
-                
+
                 // Demo 5: 购物车
                 cartItems: [
                     { id: 1, name: 'Vue2教程', price: 99, selected: true },
                     { id: 2, name: 'React教程', price: 129, selected: false },
                     { id: 3, name: 'Angular教程', price: 149, selected: true }
                 ],
-                
+
                 // Demo 6: 性能对比
                 message: 'Hello Vue'
             },
@@ -968,7 +973,7 @@ allChecked: {
                 fullName() {
                     return this.firstName + ' ' + this.lastName;
                 },
-                
+
                 // Demo 2: 统计类计算属性
                 totalTasks() {
                     return this.tasks.length;
@@ -984,28 +989,28 @@ allChecked: {
                     const rate = Math.round((this.completedTasks / this.totalTasks) * 100);
                     return rate + '%';
                 },
-                
+
                 // Demo 3: 过滤类计算属性
                 filteredTasks() {
                     let result = this.tasks;
-                    
+
                     // 根据状态筛选
                     if (this.currentFilter === 'active') {
                         result = result.filter(t => !t.completed);
                     } else if (this.currentFilter === 'completed') {
                         result = result.filter(t => t.completed);
                     }
-                    
+
                     // 根据关键词搜索
                     if (this.searchKeyword) {
-                        result = result.filter(t => 
+                        result = result.filter(t =>
                             t.title.toLowerCase().includes(this.searchKeyword.toLowerCase())
                         );
                     }
-                    
+
                     return result;
                 },
-                
+
                 // Demo 4: get/set 双向计算属性
                 allChecked: {
                     get() {
@@ -1020,7 +1025,7 @@ allChecked: {
                 allCompleted() {
                     return this.allChecked;
                 },
-                
+
                 // Demo 5: 依赖链计算属性
                 selectedItems() {
                     return this.cartItems.filter(item => item.selected);
@@ -1032,7 +1037,7 @@ allChecked: {
                     const shipping = this.subtotal > 0 ? 10 : 0;
                     return this.subtotal + shipping;
                 },
-                
+
                 // Demo 6: 性能对比 - computed版本
                 reversedMessageComputed() {
                     console.log('✅ computed 被调用');
@@ -1051,14 +1056,14 @@ allChecked: {
                 toggleAllTasks() {
                     this.allChecked = !this.allChecked;
                 },
-                
+
                 // Demo 3: 获取筛选数量
                 getFilterCount(filterValue) {
                     if (filterValue === 'all') return this.tasks.length;
                     if (filterValue === 'active') return this.activeTasks;
                     if (filterValue === 'completed') return this.completedTasks;
                 },
-                
+
                 // Demo 6: 性能对比 - methods版本
                 reversedMessageMethod() {
                     console.log('❌ methods 被调用');
@@ -1068,4 +1073,5 @@ allChecked: {
         });
     </script>
 </body>
+
 </html>
