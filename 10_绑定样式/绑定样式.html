@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +25,7 @@
             background: white;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
@@ -326,6 +327,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app" class="container">
         <h1>📚 Vue样式绑定完全指南</h1>
@@ -354,15 +356,18 @@
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML</span>
-&lt;div <span class="code-attr">class</span>=<span class="code-string">"basic"</span> <span class="code-attr">:class</span>=<span class="code-string">"mood"</span>&gt;{{ moodText }}&lt;/div&gt;
+                    <span class="code-comment">// HTML</span>
+                    &lt;div <span class="code-attr">class</span>=<span class="code-string">"basic"</span> <span
+                        class="code-attr">:class</span>=<span class="code-string">"mood"</span>&gt;{{ moodText
+                    }}&lt;/div&gt;
 
-<span class="code-comment">// JavaScript</span>
-data() {
-    <span class="code-keyword">return</span> {
-        <span class="code-attr">mood</span>: <span class="code-string">'normal'</span>  <span class="code-comment">// 变量值直接作为类名</span>
-    }
-}
+                    <span class="code-comment">// JavaScript</span>
+                    data() {
+                    <span class="code-keyword">return</span> {
+                    <span class="code-attr">mood</span>: <span class="code-string">'normal'</span> <span
+                        class="code-comment">// 变量值直接作为类名</span>
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -376,9 +381,7 @@ data() {
                 <strong>特点：</strong>数组中可以包含字符串、变量、三元表达式、对象
             </div>
             <div class="demo-content">
-                <button 
-                    class="btn" 
-                    :class="[btnType, btnSize, isDisabled ? 'btn-disabled' : '']"
+                <button class="btn" :class="[btnType, btnSize, isDisabled ? 'btn-disabled' : '']"
                     @click="handleBtnClick">
                     {{ btnText }}
                 </button>
@@ -396,17 +399,18 @@ data() {
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML - 数组中可以混合使用字符串、变量、三元表达式</span>
-&lt;button <span class="code-attr">:class</span>=<span class="code-string">"[btnType, btnSize, isDisabled ? 'btn-disabled' : '']"</span>&gt;&lt;/button&gt;
+                    <span class="code-comment">// HTML - 数组中可以混合使用字符串、变量、三元表达式</span>
+                    &lt;button <span class="code-attr">:class</span>=<span class="code-string">"[btnType, btnSize,
+                        isDisabled ? 'btn-disabled' : '']"</span>&gt;&lt;/button&gt;
 
-<span class="code-comment">// JavaScript</span>
-data() {
-    <span class="code-keyword">return</span> {
-        <span class="code-attr">btnType</span>: <span class="code-string">'btn-primary'</span>,
-        <span class="code-attr">btnSize</span>: <span class="code-string">''</span>,
-        <span class="code-attr">isDisabled</span>: <span class="code-keyword">false</span>
-    }
-}
+                    <span class="code-comment">// JavaScript</span>
+                    data() {
+                    <span class="code-keyword">return</span> {
+                    <span class="code-attr">btnType</span>: <span class="code-string">'btn-primary'</span>,
+                    <span class="code-attr">btnSize</span>: <span class="code-string">''</span>,
+                    <span class="code-attr">isDisabled</span>: <span class="code-keyword">false</span>
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -421,31 +425,19 @@ data() {
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 10px;">任务列表示例（类似任务管理系统）</h4>
-                
-                <div 
-                    v-for="task in tasks" 
-                    :key="task.id"
-                    :class="['task-item', { 
+
+                <div v-for="task in tasks" :key="task.id" :class="['task-item', { 
                         completed: task.completed, 
                         urgent: task.urgent,
                         editing: task.editing 
-                    }]"
-                    @click="toggleTask(task.id)">
-                    <input 
-                        type="checkbox" 
-                        :checked="task.completed"
-                        @click.stop
-                        class="task-checkbox">
+                    }]" @click="toggleTask(task.id)">
+                    <input type="checkbox" :checked="task.completed" @click.stop class="task-checkbox">
                     <span class="task-text">{{ task.title }}</span>
-                    <button 
-                        @click.stop="toggleUrgent(task.id)" 
-                        class="control-btn"
+                    <button @click.stop="toggleUrgent(task.id)" class="control-btn"
                         style="padding: 5px 10px; font-size: 12px;">
                         {{ task.urgent ? '取消紧急' : '标记紧急' }}
                     </button>
-                    <button 
-                        @click.stop="toggleEdit(task.id)" 
-                        class="control-btn"
+                    <button @click.stop="toggleEdit(task.id)" class="control-btn"
                         style="padding: 5px 10px; font-size: 12px;">
                         {{ task.editing ? '完成编辑' : '编辑' }}
                     </button>
@@ -457,27 +449,28 @@ data() {
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML - 对象写法：key是类名，value是布尔值条件</span>
-&lt;div <span class="code-attr">:class</span>=<span class="code-string">"['task-item', { 
-    completed: task.completed,    <span class="code-comment">// task.completed为true时应用completed类</span>
-    urgent: task.urgent,          <span class="code-comment">// task.urgent为true时应用urgent类</span>
-    editing: task.editing         <span class="code-comment">// task.editing为true时应用editing类</span>
-}]"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// HTML - 对象写法：key是类名，value是布尔值条件</span>
+                    &lt;div <span class="code-attr">:class</span>=<span class="code-string">"['task-item', {
+                        completed: task.completed, <span class="code-comment">// task.completed为true时应用completed类</span>
+                        urgent: task.urgent, <span class="code-comment">// task.urgent为true时应用urgent类</span>
+                        editing: task.editing <span class="code-comment">// task.editing为true时应用editing类</span>
+                        }]"</span>&gt;&lt;/div&gt;
 
-<span class="code-comment">// 可以简写为（如果只有动态类名）：</span>
-&lt;div <span class="code-attr">:class</span>=<span class="code-string">"{ 
-    completed: task.completed, 
-    urgent: task.urgent 
-}"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 可以简写为（如果只有动态类名）：</span>
+                    &lt;div <span class="code-attr">:class</span>=<span class="code-string">"{
+                        completed: task.completed,
+                        urgent: task.urgent
+                        }"</span>&gt;&lt;/div&gt;
 
-<span class="code-comment">// JavaScript</span>
-data() {
-    <span class="code-keyword">return</span> {
-        <span class="code-attr">tasks</span>: [
-            { id: 1, title: <span class="code-string">'学习Vue'</span>, completed: <span class="code-keyword">false</span>, urgent: <span class="code-keyword">true</span> }
-        ]
-    }
-}
+                    <span class="code-comment">// JavaScript</span>
+                    data() {
+                    <span class="code-keyword">return</span> {
+                    <span class="code-attr">tasks</span>: [
+                    { id: 1, title: <span class="code-string">'学习Vue'</span>, completed: <span
+                        class="code-keyword">false</span>, urgent: <span class="code-keyword">true</span> }
+                    ]
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -491,28 +484,27 @@ data() {
             </div>
             <div class="demo-content">
                 <div>
-                    <span 
-                        v-for="tab in tabs" 
-                        :key="tab.value"
+                    <span v-for="tab in tabs" :key="tab.value"
                         :class="['tag', { active: currentTab === tab.value, inactive: currentTab !== tab.value }]"
                         @click="currentTab = tab.value">
                         {{ tab.label }}
                     </span>
                 </div>
-                
+
                 <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
                     当前选中：<strong>{{ currentTabLabel }}</strong>
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML - 关键：currentTab === tab.value 判断是否为当前激活项</span>
-&lt;span <span class="code-attr">:class</span>=<span class="code-string">"['tag', { 
-    active: currentTab === tab.value,      <span class="code-comment">// 当前选中时应用active类</span>
-    inactive: currentTab !== tab.value     <span class="code-comment">// 未选中时应用inactive类</span>
-}]"</span>&gt;&lt;/span&gt;
+                    <span class="code-comment">// HTML - 关键：currentTab === tab.value 判断是否为当前激活项</span>
+                    &lt;span <span class="code-attr">:class</span>=<span class="code-string">"['tag', {
+                        active: currentTab === tab.value, <span class="code-comment">// 当前选中时应用active类</span>
+                        inactive: currentTab !== tab.value <span class="code-comment">// 未选中时应用inactive类</span>
+                        }]"</span>&gt;&lt;/span&gt;
 
-<span class="code-comment">// 这和任务管理系统中的筛选器是一样的原理：</span>
-&lt;button <span class="code-attr">:class</span>=<span class="code-string">"['filter-btn', { active: currentFilter === 'all' }]"</span>&gt;全部&lt;/button&gt;
+                    <span class="code-comment">// 这和任务管理系统中的筛选器是一样的原理：</span>
+                    &lt;button <span class="code-attr">:class</span>=<span class="code-string">"['filter-btn', { active:
+                        currentFilter === 'all' }]"</span>&gt;全部&lt;/button&gt;
                 </div>
             </div>
         </div>
@@ -541,35 +533,36 @@ data() {
                 <div style="margin-top: 15px;">
                     <label>字体大小：{{ fontSize }}px</label>
                     <input type="range" v-model="fontSize" min="12" max="48">
-                    
+
                     <div style="margin-top: 10px;">
                         <label>文字颜色：</label>
                         <input type="color" v-model="textColor" style="margin: 0 10px;">
-                        
+
                         <label>背景颜色：</label>
                         <input type="color" v-model="bgColor" style="margin: 0 10px;">
                     </div>
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML - style对象写法</span>
-&lt;div <span class="code-attr">:style</span>=<span class="code-string">"{ 
-    fontSize: fontSize + 'px',        <span class="code-comment">// 注意要加单位</span>
-    color: textColor,                 <span class="code-comment">// 颜色值</span>
-    backgroundColor: bgColor          <span class="code-comment">// 驼峰式命名</span>
-}"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// HTML - style对象写法</span>
+                    &lt;div <span class="code-attr">:style</span>=<span class="code-string">"{
+                        fontSize: fontSize + 'px', <span class="code-comment">// 注意要加单位</span>
+                        color: textColor, <span class="code-comment">// 颜色值</span>
+                        backgroundColor: bgColor <span class="code-comment">// 驼峰式命名</span>
+                        }"</span>&gt;&lt;/div&gt;
 
-<span class="code-comment">// 也可以写成：</span>
-&lt;div <span class="code-attr">:style</span>=<span class="code-string">"styleObject"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 也可以写成：</span>
+                    &lt;div <span class="code-attr">:style</span>=<span
+                        class="code-string">"styleObject"</span>&gt;&lt;/div&gt;
 
-data() {
-    <span class="code-keyword">return</span> {
-        <span class="code-attr">styleObject</span>: {
-            fontSize: <span class="code-string">'20px'</span>,
-            color: <span class="code-string">'red'</span>
-        }
-    }
-}
+                    data() {
+                    <span class="code-keyword">return</span> {
+                    <span class="code-attr">styleObject</span>: {
+                    fontSize: <span class="code-string">'20px'</span>,
+                    color: <span class="code-string">'red'</span>
+                    }
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -583,14 +576,11 @@ data() {
             </div>
             <div class="demo-content">
                 <div class="progress-bar">
-                    <div 
-                        class="progress-fill"
-                        :class="{
+                    <div class="progress-fill" :class="{
                             'progress-low': progress < 30,
                             'progress-medium': progress >= 30 && progress < 70,
                             'progress-high': progress >= 70
-                        }"
-                        :style="{ width: progress + '%' }">
+                        }" :style="{ width: progress + '%' }">
                         {{ progress }}%
                     </div>
                 </div>
@@ -609,15 +599,17 @@ data() {
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML - 组合使用class和style</span>
-&lt;div 
-    <span class="code-attr">:class</span>=<span class="code-string">"{
-        'progress-low': progress &lt; 30,           <span class="code-comment">// &lt;30%显示红色</span>
-        'progress-medium': progress &gt;= 30 && progress &lt; 70,  <span class="code-comment">// 30-70%橙色</span>
-        'progress-high': progress &gt;= 70          <span class="code-comment">// &gt;=70%绿色</span>
-    }"</span>
-    <span class="code-attr">:style</span>=<span class="code-string">"{ width: progress + '%' }"</span>&gt;    <span class="code-comment">// 动态宽度</span>
-&lt;/div&gt;
+                    <span class="code-comment">// HTML - 组合使用class和style</span>
+                    &lt;div
+                    <span class="code-attr">:class</span>=<span class="code-string">"{
+                        'progress-low': progress &lt; 30, <span class="code-comment">// &lt;30%显示红色</span>
+                        'progress-medium': progress &gt;= 30 && progress &lt; 70, <span class="code-comment">//
+                            30-70%橙色</span>
+                        'progress-high': progress &gt;= 70 <span class="code-comment">// &gt;=70%绿色</span>
+                        }"</span>
+                    <span class="code-attr">:style</span>=<span class="code-string">"{ width: progress + '%'
+                        }"</span>&gt; <span class="code-comment">// 动态宽度</span>
+                    &lt;/div&gt;
                 </div>
             </div>
         </div>
@@ -630,14 +622,10 @@ data() {
                 <strong>技巧：</strong>多种状态的组合判断
             </div>
             <div class="demo-content">
-                <div 
-                    v-for="card in cards" 
-                    :key="card.id"
-                    :class="['card', { 
+                <div v-for="card in cards" :key="card.id" :class="['card', { 
                         selected: card.id === selectedCard,
                         disabled: card.disabled 
-                    }]"
-                    @click="selectCard(card)">
+                    }]" @click="selectCard(card)">
                     <h4>{{ card.title }}</h4>
                     <p style="color: #666; margin-top: 5px;">{{ card.desc }}</p>
                     <span v-if="card.id === selectedCard" style="color: #3498db; font-weight: bold;">✓ 已选择</span>
@@ -652,16 +640,16 @@ data() {
                 </div>
 
                 <div class="code-block">
-<span class="code-comment">// HTML - 多状态判断</span>
-&lt;div 
-    <span class="code-attr">:class</span>=<span class="code-string">"['card', { 
-        selected: card.id === selectedCard,    <span class="code-comment">// 选中状态</span>
-        disabled: card.disabled                <span class="code-comment">// 禁用状态</span>
-    }]"</span>
-    <span class="code-attr">@click</span>=<span class="code-string">"selectCard(card)"</span>&gt;
-&lt;/div&gt;
+                    <span class="code-comment">// HTML - 多状态判断</span>
+                    &lt;div
+                    <span class="code-attr">:class</span>=<span class="code-string">"['card', {
+                        selected: card.id === selectedCard, <span class="code-comment">// 选中状态</span>
+                        disabled: card.disabled <span class="code-comment">// 禁用状态</span>
+                        }]"</span>
+                    <span class="code-attr">@click</span>=<span class="code-string">"selectCard(card)"</span>&gt;
+                    &lt;/div&gt;
 
-<span class="code-comment">// 这样写可以根据不同条件同时应用多个类</span>
+                    <span class="code-comment">// 这样写可以根据不同条件同时应用多个类</span>
                 </div>
             </div>
         </div>
@@ -671,7 +659,7 @@ data() {
             <div class="demo-title" style="color: #e74c3c;">📖 知识点总结</div>
             <div class="demo-content">
                 <h3 style="color: #e74c3c; margin-bottom: 15px;">Class 绑定三种方式对比</h3>
-                
+
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                     <tr style="background: #ecf0f1;">
                         <th style="padding: 10px; border: 1px solid #bdc3c7; text-align: left;">写法</th>
@@ -687,13 +675,15 @@ data() {
                     </tr>
                     <tr style="background: #f9f9f9;">
                         <td style="padding: 10px; border: 1px solid #bdc3c7;"><strong>数组</strong></td>
-                        <td style="padding: 10px; border: 1px solid #bdc3c7;"><code>:class="[class1, class2]"</code></td>
+                        <td style="padding: 10px; border: 1px solid #bdc3c7;"><code>:class="[class1, class2]"</code>
+                        </td>
                         <td style="padding: 10px; border: 1px solid #bdc3c7;">需要同时应用多个类</td>
                         <td style="padding: 10px; border: 1px solid #bdc3c7;">⭐⭐⭐</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border: 1px solid #bdc3c7;"><strong>对象 ⭐</strong></td>
-                        <td style="padding: 10px; border: 1px solid #bdc3c7;"><code>:class="{ active: isActive }"</code></td>
+                        <td style="padding: 10px; border: 1px solid #bdc3c7;"><code>:class="{ active: isActive }"</code>
+                        </td>
                         <td style="padding: 10px; border: 1px solid #bdc3c7;">根据条件决定是否应用类</td>
                         <td style="padding: 10px; border: 1px solid #bdc3c7;">⭐⭐⭐⭐⭐ <strong>最常用！</strong></td>
                     </tr>
@@ -715,19 +705,24 @@ data() {
                 </ul>
 
                 <div class="code-block" style="margin-top: 20px;">
-<span class="code-comment">// 任务管理系统中的真实用法：</span>
+                    <span class="code-comment">// 任务管理系统中的真实用法：</span>
 
-<span class="code-comment">// 1. 筛选按钮</span>
-&lt;button <span class="code-attr">:class</span>=<span class="code-string">"['filter-btn', { active: currentFilter === 'all' }]"</span>&gt;全部&lt;/button&gt;
+                    <span class="code-comment">// 1. 筛选按钮</span>
+                    &lt;button <span class="code-attr">:class</span>=<span class="code-string">"['filter-btn', { active:
+                        currentFilter === 'all' }]"</span>&gt;全部&lt;/button&gt;
 
-<span class="code-comment">// 2. 任务项状态</span>
-&lt;div <span class="code-attr">:class</span>=<span class="code-string">"['todo-item', { completed: task.completed, editing: isEditing }]"</span>&gt;&lt;/div&gt;
+                    <span class="code-comment">// 2. 任务项状态</span>
+                    &lt;div <span class="code-attr">:class</span>=<span class="code-string">"['todo-item', { completed:
+                        task.completed, editing: isEditing }]"</span>&gt;&lt;/div&gt;
 
-<span class="code-comment">// 3. 优先级颜色</span>
-&lt;div <span class="code-attr">:class</span>=<span class="code-string">"'priority-' + task.priority"</span>&gt;&lt;/div&gt;  <span class="code-comment">// 'priority-high'</span>
+                    <span class="code-comment">// 3. 优先级颜色</span>
+                    &lt;div <span class="code-attr">:class</span>=<span class="code-string">"'priority-' +
+                        task.priority"</span>&gt;&lt;/div&gt; <span class="code-comment">// 'priority-high'</span>
 
-<span class="code-comment">// 4. 标签状态</span>
-&lt;span <span class="code-attr">:class</span>=<span class="code-string">"['priority-text', task.priority]"</span>&gt;&lt;/span&gt;  <span class="code-comment">// class="priority-text high"</span>
+                    <span class="code-comment">// 4. 标签状态</span>
+                    &lt;span <span class="code-attr">:class</span>=<span class="code-string">"['priority-text',
+                        task.priority]"</span>&gt;&lt;/span&gt; <span class="code-comment">// class="priority-text
+                        high"</span>
                 </div>
             </div>
         </div>
@@ -739,13 +734,13 @@ data() {
             data: {
                 // Demo 1: 字符串写法
                 mood: 'normal',
-                
+
                 // Demo 2: 数组写法
                 btnType: 'btn-primary',
                 btnSize: '',
                 isDisabled: false,
                 btnText: '点击我',
-                
+
                 // Demo 3: 对象写法 - 任务列表
                 tasks: [
                     { id: 1, title: '学习Vue样式绑定', completed: false, urgent: true, editing: false },
@@ -753,7 +748,7 @@ data() {
                     { id: 3, title: '复习计算属性', completed: false, urgent: false, editing: false }
                 ],
                 taskIdCounter: 4,
-                
+
                 // Demo 4: 标签切换
                 tabs: [
                     { value: 'all', label: '全部' },
@@ -761,17 +756,17 @@ data() {
                     { value: 'completed', label: '已完成' }
                 ],
                 currentTab: 'all',
-                
+
                 // Demo 5: Style对象
                 fontSize: 24,
                 textColor: '#3498db',
                 bgColor: '#ecf0f1',
-                
+
                 // Demo 6: 进度条
                 progress: 0,
                 isAutoProgress: false,
                 progressTimer: null,
-                
+
                 // Demo 7: 卡片选择
                 cards: [
                     { id: 1, title: '选项 A', desc: '这是第一个选项', disabled: false },
@@ -800,14 +795,14 @@ data() {
                     const moods = ['happy', 'sad', 'normal'];
                     this.mood = moods[Math.floor(Math.random() * 3)];
                 },
-                
+
                 // Demo 2
                 handleBtnClick() {
                     if (!this.isDisabled) {
                         alert('按钮被点击了！');
                     }
                 },
-                
+
                 // Demo 3
                 toggleTask(id) {
                     const task = this.tasks.find(t => t.id === id);
@@ -839,7 +834,7 @@ data() {
                 clearCompleted() {
                     this.tasks = this.tasks.filter(t => !t.completed);
                 },
-                
+
                 // Demo 6
                 autoProgress() {
                     if (this.isAutoProgress) {
@@ -856,7 +851,7 @@ data() {
                         }, 50);
                     }
                 },
-                
+
                 // Demo 7
                 selectCard(card) {
                     if (!card.disabled) {
@@ -872,4 +867,5 @@ data() {
         });
     </script>
 </body>
+
 </html>

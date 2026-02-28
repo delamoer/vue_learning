@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
             background: white;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
@@ -114,7 +115,7 @@
             border-radius: 15px;
             text-align: center;
             transition: all 0.5s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .weather-card.hot {
@@ -139,7 +140,7 @@
 
         .weather-detail {
             font-size: 16px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* 日志面板 */
@@ -157,7 +158,7 @@
 
         .log-item {
             padding: 5px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .log-time {
@@ -170,7 +171,9 @@
         }
 
         /* 输入框样式 */
-        input[type="text"], input[type="number"], textarea {
+        input[type="text"],
+        input[type="number"],
+        textarea {
             padding: 10px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 5px;
@@ -181,7 +184,8 @@
             transition: all 0.3s;
         }
 
-        input:focus, textarea:focus {
+        input:focus,
+        textarea:focus {
             outline: none;
             border-color: #ff6b6b;
             box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
@@ -289,8 +293,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 对比表格 */
@@ -300,7 +309,8 @@
             margin: 20px 0;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
             border: 1px solid #ddd;
@@ -387,7 +397,7 @@
             padding: 8px 0;
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .storage-key {
@@ -401,6 +411,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app" class="container">
         <h1>👁️ Vue监视属性完整教程</h1>
@@ -421,7 +432,7 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">天气切换示例</h4>
-                
+
                 <div :class="['weather-card', isHot ? 'hot' : 'cold']">
                     <div class="weather-icon">{{ isHot ? '☀️' : '❄️' }}</div>
                     <div class="weather-text">今天天气很{{ isHot ? '炎热' : '寒冷' }}</div>
@@ -447,23 +458,24 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 监视属性的基本用法</span>
-<span class="code-keyword">data</span>: {
-    isHot: <span class="code-keyword">true</span>
-},
-<span class="code-keyword">watch</span>: {
-    <span class="code-comment">// 监视isHot属性</span>
-    <span class="code-function">isHot</span>(newValue, oldValue) {
-        console.<span class="code-function">log</span>(<span class="code-string">'isHot由'</span>, oldValue, <span class="code-string">'变成了'</span>, newValue);
-        
-        <span class="code-comment">// 可以在这里执行任何操作</span>
-        <span class="code-keyword">if</span> (newValue) {
-            console.<span class="code-function">log</span>(<span class="code-string">'天气变热了，打开空调'</span>);
-        } <span class="code-keyword">else</span> {
-            console.<span class="code-function">log</span>(<span class="code-string">'天气变冷了，打开暖气'</span>);
-        }
-    }
-}
+                    <span class="code-comment">// 监视属性的基本用法</span><br>
+                    <span class="code-keyword">data</span>: {
+                    isHot: <span class="code-keyword">true</span>
+                    },<br>
+                    <span class="code-keyword">watch</span>: {<br>
+                    <span class="code-comment">// 监视isHot属性</span><br>
+                    <span class="code-function">isHot</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">'isHot由'</span>, oldValue,
+                    <span class="code-string">'变成了'</span>, newValue);<br>
+
+                    <span class="code-comment">// 可以在这里执行任何操作</span><br>
+                    <span class="code-keyword">if</span> (newValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">'天气变热了，打开空调'</span>);
+                    } <span class="code-keyword">else</span> {
+                    console.<span class="code-function">log</span>(<span class="code-string">'天气变冷了，打开暖气'</span>);
+                    }
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -478,7 +490,7 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">用户信息编辑</h4>
-                
+
                 <div style="margin: 20px 0;">
                     <div style="margin-bottom: 15px;">
                         <label><strong>姓名：</strong></label>
@@ -499,29 +511,31 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 监视对象的某个属性</span>
-<span class="code-keyword">data</span>: {
-    person: {
-        name: <span class="code-string">'张三'</span>,
-        age: 18
-    }
-},
-<span class="code-keyword">watch</span>: {
-    <span class="code-comment">// 方式1：监视对象的属性（使用引号）</span>
-    <span class="code-string">'person.name'</span>(newValue, oldValue) {
-        console.<span class="code-function">log</span>(<span class="code-string">'姓名由'</span>, oldValue, <span class="code-string">'改为'</span>, newValue);
-    },
-    
-    <span class="code-comment">// 方式2：同时监视多个属性</span>
-    <span class="code-string">'person.age'</span>(newValue, oldValue) {
-        console.<span class="code-function">log</span>(<span class="code-string">'年龄由'</span>, oldValue, <span class="code-string">'改为'</span>, newValue);
-        
-        <span class="code-comment">// 可以执行验证逻辑</span>
-        <span class="code-keyword">if</span> (newValue < 0 || newValue > 150) {
-            alert(<span class="code-string">'年龄输入不合法！'</span>);
-        }
-    }
-}
+                    <span class="code-comment">// 监视对象的某个属性</span><br>
+                    <span class="code-keyword">data</span>: {
+                    person: {
+                    name: <span class="code-string">'张三'</span>,
+                    age: 18
+                    }
+                    },<br>
+                    <span class="code-keyword">watch</span>: {<br>
+                    <span class="code-comment">// 方式1：监视对象的属性（使用引号）</span><br>
+                    <span class="code-string">'person.name'</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">'姓名由'</span>, oldValue,
+                    <span class="code-string">'改为'</span>, newValue);
+                    },<br>
+
+                    <span class="code-comment">// 方式2：同时监视多个属性</span><br>
+                    <span class="code-string">'person.age'</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">'年龄由'</span>, oldValue,
+                    <span class="code-string">'改为'</span>, newValue);
+
+                    <span class="code-comment">// 可以执行验证逻辑</span>
+                    <span class="code-keyword">if</span> (newValue < 0 || newValue> 150) {
+                        alert(<span class="code-string">'年龄输入不合法！'</span>);
+                        }
+                        }
+                        }
                 </div>
             </div>
         </div>
@@ -536,20 +550,12 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">任务管理 + 自动保存</h4>
-                
+
                 <div class="task-list">
-                    <div 
-                        v-for="task in localTasks" 
-                        :key="task.id"
+                    <div v-for="task in localTasks" :key="task.id"
                         :class="['task-item', { completed: task.completed }]">
-                        <input 
-                            type="checkbox" 
-                            v-model="task.completed"
-                            class="task-checkbox">
-                        <input 
-                            type="text" 
-                            v-model="task.title"
-                            class="task-text"
+                        <input type="checkbox" v-model="task.completed" class="task-checkbox">
+                        <input type="text" v-model="task.title" class="task-text"
                             style="border: none; background: transparent; max-width: none;">
                         <button @click="removeTask(task.id)" class="btn btn-primary" style="padding: 5px 15px;">
                             删除
@@ -579,39 +585,44 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// ❌ 错误示例：无法监视到对象内部变化</span>
-<span class="code-keyword">watch</span>: {
-    tasks(newValue) {
-        <span class="code-comment">// 只有tasks被重新赋值时才会触发</span>
-        <span class="code-comment">// 修改tasks[0].completed不会触发！</span>
-        localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-    }
-}
+                    <span class="code-comment">// ❌ 错误示例：无法监视到对象内部变化</span><br>
+                    <span class="code-keyword">watch</span>: {
+                    tasks(newValue) {
+                    <span class="code-comment">// 只有tasks被重新赋值时才会触发</span>
+                    <span class="code-comment">// 修改tasks[0].completed不会触发！</span>
+                    localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>,
+                    JSON.<span class="code-function">stringify</span>(newValue));
+                    }
+                    }<br>
 
-<span class="code-comment">// ✅ 正确示例：使用deep深度监视</span>
-<span class="code-keyword">watch</span>: {
-    tasks: {
-        <span class="code-comment">// handler: 处理函数</span>
-        <span class="code-function">handler</span>(newValue) {
-            console.<span class="code-function">log</span>(<span class="code-string">'任务数据变化，保存到localStorage'</span>);
-            localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-        },
-        <span class="code-comment">// deep: 开启深度监视</span>
-        deep: <span class="code-keyword">true</span>
-    }
-}
+                    <span class="code-comment">// ✅ 正确示例：使用deep深度监视</span><br>
+                    <span class="code-keyword">watch</span>: {<br>
+                    tasks: {<br>
+                    <span class="code-comment">// handler: 处理函数</span><br>
+                    <span class="code-function">handler</span>(newValue) {
+                    console.<span class="code-function">log</span>(<span
+                        class="code-string">'任务数据变化，保存到localStorage'</span>);<br>
+                    localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>,
+                    JSON.<span class="code-function">stringify</span>(newValue));
+                    },<br>
+                    <span class="code-comment">// deep: 开启深度监视</span><br>
+                    deep: <span class="code-keyword">true</span>
+                    }
+                    }<br>
 
-<span class="code-comment">// 📌 任务管理系统实际使用</span>
-<span class="code-keyword">watch</span>: {
-    tasks: {
-        <span class="code-function">handler</span>(newValue) {
-            <span class="code-comment">// 任何任务的增删改都会触发这里</span>
-            <span class="code-comment">// 实现自动保存到localStorage</span>
-            localStorage.<span class="code-function">setItem</span>(<span class="code-string">'vue_tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-        },
-        deep: <span class="code-keyword">true</span>
-    }
-}
+                    <span class="code-comment">// 📌 任务管理系统实际使用</span><br>
+                    <span class="code-keyword">watch</span>: {
+                    tasks: {
+                    <span class="code-function">handler</span>(newValue) {
+                    <span class="code-comment">// 任何任务的增删改都会触发这里</span>
+                    <span class="code-comment">// 实现自动保存到localStorage</span>
+                    localStorage.<span class="code-function">setItem</span>(<span
+                        class="code-string">'vue_tasks'</span>, JSON.<span
+                        class="code-function">stringify</span>(newValue));
+                    },
+                    deep: <span class="code-keyword">true</span>
+                    }
+                    }
                 </div>
 
                 <div class="warning-box">
@@ -634,12 +645,9 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">搜索功能示例</h4>
-                
+
                 <div>
-                    <input 
-                        type="text" 
-                        v-model="searchQuery" 
-                        placeholder="输入用户名搜索（尝试输入: vue, react）"
+                    <input type="text" v-model="searchQuery" placeholder="输入用户名搜索（尝试输入: vue, react）"
                         style="max-width: 500px;">
                 </div>
 
@@ -651,8 +659,8 @@
                     <div v-else>
                         <div><strong>搜索结果：</strong></div>
                         <div v-if="searchResults.length > 0">
-                            <div v-for="user in searchResults" :key="user.id" 
-                                 style="padding: 10px; margin: 5px 0; background: white; border-radius: 5px;">
+                            <div v-for="user in searchResults" :key="user.id"
+                                style="padding: 10px; margin: 5px 0; background: white; border-radius: 5px;">
                                 {{ user.name }} - {{ user.email }}
                             </div>
                         </div>
@@ -670,29 +678,29 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// immediate的使用</span>
-<span class="code-keyword">data</span>: {
-    searchQuery: <span class="code-string">''</span>,
-    searchResults: []
-},
-<span class="code-keyword">watch</span>: {
-    searchQuery: {
-        <span class="code-function">handler</span>(newValue) {
-            <span class="code-comment">// 执行搜索</span>
-            <span class="code-keyword">this</span>.<span class="code-function">performSearch</span>(newValue);
-        },
-        <span class="code-comment">// immediate: true → 页面加载时立即执行一次</span>
-        immediate: <span class="code-keyword">true</span>
-    }
-}
+                    <span class="code-comment">// immediate的使用</span><br>
+                    <span class="code-keyword">data</span>: {
+                    searchQuery: <span class="code-string">''</span>,
+                    searchResults: []
+                    },
+                    <span class="code-keyword">watch</span>: {
+                    searchQuery: {
+                    <span class="code-function">handler</span>(newValue) {<br>
+                    <span class="code-comment">// 执行搜索</span><br>
+                    <span class="code-keyword">this</span>.<span class="code-function">performSearch</span>(newValue);
+                    },<br>
+                    <span class="code-comment">// immediate: true → 页面加载时立即执行一次</span><br>
+                    immediate: <span class="code-keyword">true</span>
+                    }
+                    }<br>
 
-<span class="code-comment">// 如果没有immediate，页面首次加载时handler不会执行</span>
-<span class="code-comment">// 只有在searchQuery改变时才会执行</span>
+                    <span class="code-comment">// 如果没有immediate，页面首次加载时handler不会执行</span><br>
+                    <span class="code-comment">// 只有在searchQuery改变时才会执行</span><br>
 
-<span class="code-comment">// 实际应用场景：</span>
-<span class="code-comment">// 1. 从URL参数中读取搜索词，需要立即搜索</span>
-<span class="code-comment">// 2. 根据路由参数立即加载数据</span>
-<span class="code-comment">// 3. 初始化时根据配置执行操作</span>
+                    <span class="code-comment">// 实际应用场景：</span><br>
+                    <span class="code-comment">// 1. 从URL参数中读取搜索词，需要立即搜索</span><br>
+                    <span class="code-comment">// 2. 根据路由参数立即加载数据</span><br>
+                    <span class="code-comment">// 3. 初始化时根据配置执行操作</span>
                 </div>
             </div>
         </div>
@@ -707,11 +715,9 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">文本分析工具</h4>
-                
+
                 <div>
-                    <textarea 
-                        v-model="textContent" 
-                        placeholder="输入文字进行分析..."
+                    <textarea v-model="textContent" placeholder="输入文字进行分析..."
                         style="width: 100%; max-width: 600px;"></textarea>
                 </div>
 
@@ -739,36 +745,37 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// 监视计算属性</span>
-<span class="code-keyword">data</span>: {
-    textContent: <span class="code-string">''</span>
-},
-<span class="code-keyword">computed</span>: {
-    <span class="code-comment">// 计算总字符数</span>
-    <span class="code-function">totalChars</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.textContent.length;
-    },
-    <span class="code-comment">// 计算单词数</span>
-    <span class="code-function">wordCount</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.textContent.<span class="code-function">split</span>(/\s+/).<span class="code-function">filter</span>(w => w).length;
-    }
-},
-<span class="code-keyword">watch</span>: {
-    <span class="code-comment">// 监视计算属性totalChars</span>
-    <span class="code-function">totalChars</span>(newValue, oldValue) {
-        console.<span class="code-function">log</span>(<span class="code-string">`字符数从 ${oldValue} 变为 ${newValue}`</span>);
-        
-        <span class="code-comment">// 可以在这里执行副作用操作</span>
-        <span class="code-keyword">if</span> (newValue > 100) {
-            console.<span class="code-function">log</span>(<span class="code-string">'警告：字符数超过100！'</span>);
-        }
-    },
-    
-    <span class="code-comment">// 也可以监视多个计算属性</span>
-    <span class="code-function">wordCount</span>(newValue) {
-        console.<span class="code-function">log</span>(<span class="code-string">`单词数变为${newValue}`</span>);
-    }
-}
+                    <span class="code-comment">// 监视计算属性</span><br>
+                    <span class="code-keyword">data</span>: {textContent: <span class="code-string">''</span>},<br>
+                    <span class="code-keyword">computed</span>: {
+                    <span class="code-comment">// 计算总字符数</span><br>
+                    <span class="code-function">totalChars</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.textContent.length;
+                    },
+                    <span class="code-comment">// 计算单词数</span><br>
+                    <span class="code-function">wordCount</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.textContent.<span
+                        class="code-function">split</span>(/\s+/).<span class="code-function">filter</span>(w =>
+                    w).length;
+                    }
+                    },<br>
+                    <span class="code-keyword">watch</span>: {
+                    <span class="code-comment">// 监视计算属性totalChars</span><br>
+                    <span class="code-function">totalChars</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">`字符数从 ${oldValue} 变为
+                        ${newValue}`</span>);<br>
+
+                    <span class="code-comment">// 可以在这里执行副作用操作</span><br>
+                    <span class="code-keyword">if</span> (newValue > 100) {
+                    console.<span class="code-function">log</span>(<span class="code-string">'警告：字符数超过100！'</span>);
+                    }
+                    },<br>
+
+                    <span class="code-comment">// 也可以监视多个计算属性</span><br>
+                    <span class="code-function">wordCount</span>(newValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">`单词数变为${newValue}`</span>);
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -783,7 +790,7 @@
             </div>
             <div class="demo-content">
                 <h4 style="margin-bottom: 15px;">对比表格</h4>
-                
+
                 <table>
                     <tr>
                         <th>特性</th>
@@ -823,7 +830,7 @@
                 </table>
 
                 <h4 style="margin-top: 30px; margin-bottom: 15px;">使用选择</h4>
-                
+
                 <div class="tip-box">
                     <div class="tip-title">✅ 使用 Computed 的场景：</div>
                     1. 需要<strong>根据已有数据计算新数据</strong>（如：总价、过滤列表）<br>
@@ -841,38 +848,44 @@
                 </div>
 
                 <div class="code-block" v-pre>
-<span class="code-comment">// ✅ 使用Computed：计算派生数据</span>
-computed: {
-    <span class="code-function">fullName</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.firstName + <span class="code-string">' '</span> + <span class="code-keyword">this</span>.lastName;
-    },
-    <span class="code-function">filteredTasks</span>() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span class="code-function">filter</span>(t => t.completed);
-    }
-}
+                    <span class="code-comment">// ✅ 使用Computed：计算派生数据</span><br>
+                    computed: {
+                    <span class="code-function">fullName</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.firstName + <span
+                        class="code-string">' '</span> + <span class="code-keyword">this</span>.lastName;
+                    },
+                    <span class="code-function">filteredTasks</span>() {
+                    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.tasks.<span
+                        class="code-function">filter</span>(t => t.completed);
+                    }
+                    }<br>
 
-<span class="code-comment">// ✅ 使用Watch：执行副作用</span>
-watch: {
-    <span class="code-comment">// 数据变化时保存到localStorage</span>
-    tasks: {
-        <span class="code-function">handler</span>(newValue) {
-            localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-        },
-        deep: <span class="code-keyword">true</span>
-    },
-    
-    <span class="code-comment">// 搜索词变化时发送API请求</span>
-    <span class="code-function">searchKeyword</span>(newValue) {
-        <span class="code-keyword">this</span>.<span class="code-function">fetchSearchResults</span>(newValue);
-    }
-}
+                    <span class="code-comment">// ✅ 使用Watch：执行副作用</span><br>
+                    watch: {<br>
+                    <span class="code-comment">// 数据变化时保存到localStorage</span><br>
+                    tasks: {
+                    <span class="code-function">handler</span>(newValue) {
+                    localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>,
+                    JSON.<span class="code-function">stringify</span>(newValue));
+                    },
+                    deep: <span class="code-keyword">true</span>
+                    },<br>
 
-<span class="code-comment">// ❌ 不要用Watch做计算（应该用Computed）</span>
-watch: {
-    firstName() {
-        <span class="code-keyword">this</span>.fullName = <span class="code-keyword">this</span>.firstName + <span class="code-string">' '</span> + <span class="code-keyword">this</span>.lastName; <span class="code-comment">// ❌ 错误</span>
-    }
-}
+                    <span class="code-comment">// 搜索词变化时发送API请求</span><br>
+                    <span class="code-function">searchKeyword</span>(newValue) {
+                    <span class="code-keyword">this</span>.<span
+                        class="code-function">fetchSearchResults</span>(newValue);
+                    }
+                    }<br>
+
+                    <span class="code-comment">// ❌ 不要用Watch做计算（应该用Computed）</span><br>
+                    watch: {
+                    firstName() {
+                    <span class="code-keyword">this</span>.fullName = <span class="code-keyword">this</span>.firstName +
+                    <span class="code-string">' '</span> + <span class="code-keyword">this</span>.lastName; <span
+                        class="code-comment">// ❌ 错误</span>
+                    }
+                    }
                 </div>
             </div>
         </div>
@@ -882,144 +895,162 @@ watch: {
             <div class="demo-title" style="color: #4caf50;">📚 知识点总结</div>
             <div class="demo-content">
                 <h3 style="color: #4caf50; margin-bottom: 20px;">Watch 完整配置选项</h3>
-                
-                <div class="code-block" v-pre>
-<span class="code-keyword">watch</span>: {
-    <span class="code-comment">// 方式1：简写（只有handler）</span>
-    <span class="code-function">message</span>(newValue, oldValue) {
-        console.<span class="code-function">log</span>(newValue, oldValue);
-    },
-    
-    <span class="code-comment">// 方式2：完整写法</span>
-    tasks: {
-        <span class="code-comment">// handler: 处理函数</span>
-        <span class="code-function">handler</span>(newValue, oldValue) {
-            <span class="code-comment">// 数据变化时的处理逻辑</span>
-        },
-        
-        <span class="code-comment">// deep: 深度监视（监视对象内部变化）</span>
-        deep: <span class="code-keyword">true</span>,
-        
-        <span class="code-comment">// immediate: 立即执行（页面加载时就执行一次）</span>
-        immediate: <span class="code-keyword">true</span>
-    },
-    
-    <span class="code-comment">// 方式3：监视对象的属性</span>
-    <span class="code-string">'user.name'</span>(newValue, oldValue) {
-        console.<span class="code-function">log</span>(<span class="code-string">'用户名改变'</span>);
-    }
-}
 
-<span class="code-comment">// 方式4：使用$watch动态添加监视</span>
-<span class="code-keyword">this</span>.$watch(<span class="code-string">'message'</span>, <span class="code-keyword">function</span>(newValue, oldValue) {
-    console.<span class="code-function">log</span>(newValue);
-}, {
-    deep: <span class="code-keyword">true</span>,
-    immediate: <span class="code-keyword">true</span>
-});
+                <div class="code-block" v-pre>
+                    <span class="code-keyword">watch</span>: {<br>
+                    <span class="code-comment">// 方式1：简写（只有handler）</span><br>
+                    <span class="code-function">message</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(newValue, oldValue);
+                    },<br>
+
+                    <span class="code-comment">// 方式2：完整写法</span><br>
+                    tasks: {
+                    <span class="code-comment">// handler: 处理函数</span><br>
+                    <span class="code-function">handler</span>(newValue, oldValue) {
+                    <span class="code-comment">// 数据变化时的处理逻辑</span>
+                    },<br>
+
+                    <span class="code-comment">// deep: 深度监视（监视对象内部变化）</span><br>
+                    deep: <span class="code-keyword">true</span>,<br>
+
+                    <span class="code-comment">// immediate: 立即执行（页面加载时就执行一次）</span><br>
+                    immediate: <span class="code-keyword">true</span>
+                    },<br>
+
+                    <span class="code-comment">// 方式3：监视对象的属性</span><br>
+                    <span class="code-string">'user.name'</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(<span class="code-string">'用户名改变'</span>);
+                    }
+                    }<br>
+
+                    <span class="code-comment">// 方式4：使用$watch动态添加监视</span><br>
+                    <span class="code-keyword">this</span>.$watch(<span class="code-string">'message'</span>, <span
+                        class="code-keyword">function</span>(newValue, oldValue) {
+                    console.<span class="code-function">log</span>(newValue);
+                    }, {
+                    deep: <span class="code-keyword">true</span>,
+                    immediate: <span class="code-keyword">true</span>
+                    });
                 </div>
 
                 <h3 style="color: #4caf50; margin: 30px 0 15px;">🎯 任务管理系统中的实际应用</h3>
-                
-                <div class="code-block" v-pre>
-<span class="code-comment">// 任务管理系统中最重要的watch应用</span>
-<span class="code-keyword">watch</span>: {
-    <span class="code-comment">// 监视tasks数组的深度变化，自动保存到localStorage</span>
-    tasks: {
-        <span class="code-function">handler</span>(newValue) {
-            <span class="code-comment">// 任何任务的增删改都会触发这里</span>
-            <span class="code-comment">// 包括：</span>
-            <span class="code-comment">// - 添加新任务</span>
-            <span class="code-comment">// - 删除任务</span>
-            <span class="code-comment">// - 修改任务标题</span>
-            <span class="code-comment">// - 切换完成状态</span>
-            <span class="code-comment">// - 修改优先级</span>
-            
-            <span class="code-comment">// 保存到localStorage实现持久化</span>
-            localStorage.<span class="code-function">setItem</span>(<span class="code-string">'vue_tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-            console.<span class="code-function">log</span>(<span class="code-string">'任务数据已自动保存'</span>);
-        },
-        
-        <span class="code-comment">// deep: true 是关键！</span>
-        <span class="code-comment">// 没有deep，修改tasks[0].completed不会触发handler</span>
-        deep: <span class="code-keyword">true</span>
-    }
-},
 
-<span class="code-comment">// 在created中从localStorage恢复数据</span>
-<span class="code-function">created</span>() {
-    <span class="code-keyword">const</span> savedTasks = localStorage.<span class="code-function">getItem</span>(<span class="code-string">'vue_tasks'</span>);
-    <span class="code-keyword">if</span> (savedTasks) {
-        <span class="code-keyword">this</span>.tasks = JSON.<span class="code-function">parse</span>(savedTasks);
-    }
-}
+                <div class="code-block" v-pre>
+                    <span class="code-comment">// 任务管理系统中最重要的watch应用</span><br>
+                    <span class="code-keyword">watch</span>: {<br>
+                    <span class="code-comment">// 监视tasks数组的深度变化，自动保存到localStorage</span><br>
+                    tasks: {
+                    <span class="code-function">handler</span>(newValue) {<br>
+                    <span class="code-comment">// 任何任务的增删改都会触发这里</span>
+                    <span class="code-comment">// 包括：</span>
+                    <span class="code-comment">// - 添加新任务</span>
+                    <span class="code-comment">// - 删除任务</span>
+                    <span class="code-comment">// - 修改任务标题</span>
+                    <span class="code-comment">// - 切换完成状态</span>
+                    <span class="code-comment">// - 修改优先级</span><br>
+
+                    <span class="code-comment">// 保存到localStorage实现持久化</span><br>
+                    localStorage.<span class="code-function">setItem</span>(<span
+                        class="code-string">'vue_tasks'</span>, JSON.<span
+                        class="code-function">stringify</span>(newValue));
+                    console.<span class="code-function">log</span>(<span class="code-string">'任务数据已自动保存'</span>);
+                    },<br>
+
+                    <span class="code-comment">// deep: true 是关键！</span>
+                    <span class="code-comment">// 没有deep，修改tasks[0].completed不会触发handler</span><br>
+                    deep: <span class="code-keyword">true</span>
+                    }
+                    },<br>
+
+                    <span class="code-comment">// 在created中从localStorage恢复数据</span><br>
+                    <span class="code-function">created</span>() {
+                    <span class="code-keyword">const</span> savedTasks = localStorage.<span
+                        class="code-function">getItem</span>(<span class="code-string">'vue_tasks'</span>);
+                    <span class="code-keyword">if</span> (savedTasks) {
+                    <span class="code-keyword">this</span>.tasks = JSON.<span
+                        class="code-function">parse</span>(savedTasks);
+                    }
+                    }
                 </div>
 
                 <h3 style="color: #4caf50; margin: 30px 0 15px;">⚠️ 常见错误</h3>
-                
+
                 <div class="warning-box">
                     <strong>错误1：忘记使用deep监视对象</strong><br>
                     <div class="code-block" v-pre style="margin-top: 10px;">
-<span class="code-comment">// ❌ 错误：无法监视到tasks[0].completed的变化</span>
-watch: {
-    tasks(newValue) {
-        localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-    }
-}
+                        <span class="code-comment">// ❌ 错误：无法监视到tasks[0].completed的变化</span><br>
+                        watch: {
+                        tasks(newValue) {
+                        localStorage.<span class="code-function">setItem</span>(<span
+                            class="code-string">'tasks'</span>, JSON.<span
+                            class="code-function">stringify</span>(newValue));
+                        }
+                        }<br>
 
-<span class="code-comment">// ✅ 正确：使用deep</span>
-watch: {
-    tasks: {
-        handler(newValue) {
-            localStorage.<span class="code-function">setItem</span>(<span class="code-string">'tasks'</span>, JSON.<span class="code-function">stringify</span>(newValue));
-        },
-        deep: <span class="code-keyword">true</span>  <span class="code-comment">// 必须加这个！</span>
-    }
-}
+                        <span class="code-comment">// ✅ 正确：使用deep</span><br>
+                        watch: {
+                        tasks: {
+                        handler(newValue) {
+                        localStorage.<span class="code-function">setItem</span>(<span
+                            class="code-string">'tasks'</span>, JSON.<span
+                            class="code-function">stringify</span>(newValue));
+                        },<br>
+                        deep: <span class="code-keyword">true</span> <span class="code-comment">// 必须加这个！</span>
+                        }
+                        }
                     </div>
                 </div>
 
                 <div class="warning-box">
                     <strong>错误2：在computed中使用watch的逻辑</strong><br>
                     <div class="code-block" v-pre style="margin-top: 10px;">
-<span class="code-comment">// ❌ 错误：用watch计算fullName</span>
-watch: {
-    firstName() {
-        <span class="code-keyword">this</span>.fullName = <span class="code-keyword">this</span>.firstName + <span class="code-keyword">this</span>.lastName;
-    },
-    lastName() {
-        <span class="code-keyword">this</span>.fullName = <span class="code-keyword">this</span>.firstName + <span class="code-keyword">this</span>.lastName;
-    }
-}
+                        <span class="code-comment">// ❌ 错误：用watch计算fullName</span><br>
+                        watch: {<br>
+                        firstName() {
+                        <span class="code-keyword">this</span>.fullName = <span
+                            class="code-keyword">this</span>.firstName + <span
+                            class="code-keyword">this</span>.lastName;
+                        },<br>
+                        lastName() {
+                        <span class="code-keyword">this</span>.fullName = <span
+                            class="code-keyword">this</span>.firstName + <span
+                            class="code-keyword">this</span>.lastName;
+                        }
+                        }<br>
 
-<span class="code-comment">// ✅ 正确：使用computed</span>
-computed: {
-    fullName() {
-        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.firstName + <span class="code-keyword">this</span>.lastName;
-    }
-}
+                        <span class="code-comment">// ✅ 正确：使用computed</span><br>
+                        computed: {
+                        fullName() {
+                        <span class="code-keyword">return</span> <span class="code-keyword">this</span>.firstName +
+                        <span class="code-keyword">this</span>.lastName;
+                        }
+                        }
                     </div>
                 </div>
 
                 <div class="warning-box">
                     <strong>错误3：在handler中执行耗时操作不加防抖</strong><br>
                     <div class="code-block" v-pre style="margin-top: 10px;">
-<span class="code-comment">// ❌ 错误：每次输入都发送请求</span>
-watch: {
-    searchKeyword(newValue) {
-        <span class="code-keyword">this</span>.<span class="code-function">fetchResults</span>(newValue); <span class="code-comment">// 输入"hello"会发送5次请求！</span>
-    }
-}
+                        <span class="code-comment">// ❌ 错误：每次输入都发送请求</span><br>
+                        watch: {
+                        searchKeyword(newValue) {
+                        <span class="code-keyword">this</span>.<span
+                            class="code-function">fetchResults</span>(newValue); <span class="code-comment">//
+                            输入"hello"会发送5次请求！</span>
+                        }
+                        }<br>
 
-<span class="code-comment">// ✅ 正确：使用防抖</span>
-watch: {
-    searchKeyword(newValue) {
-        <span class="code-function">clearTimeout</span>(<span class="code-keyword">this</span>.timer);
-        <span class="code-keyword">this</span>.timer = <span class="code-function">setTimeout</span>(() => {
-            <span class="code-keyword">this</span>.<span class="code-function">fetchResults</span>(newValue);
-        }, 300); <span class="code-comment">// 300ms后才发送请求</span>
-    }
-}
+                        <span class="code-comment">// ✅ 正确：使用防抖</span><br>
+                        watch: {
+                        searchKeyword(newValue) {
+                        <span class="code-function">clearTimeout</span>(<span class="code-keyword">this</span>.timer);
+                        <span class="code-keyword">this</span>.timer = <span class="code-function">setTimeout</span>(()
+                        => {
+                        <span class="code-keyword">this</span>.<span
+                            class="code-function">fetchResults</span>(newValue);
+                        }, 300); <span class="code-comment">// 300ms后才发送请求</span>
+                        }
+                        }
                     </div>
                 </div>
             </div>
@@ -1034,7 +1065,7 @@ watch: {
                 isHot: true,
                 logs: [],
                 logId: 1,
-                
+
                 // Demo 2: 监视对象属性
                 person: {
                     name: '张三',
@@ -1042,19 +1073,19 @@ watch: {
                 },
                 personLogs: [],
                 personLogId: 1,
-                
+
                 // Demo 3: 深度监视
                 localTasks: [],
                 localTaskId: 1,
                 saveCount: 0,
                 lastSaveTime: '',
-                
+
                 // Demo 4: 搜索功能
                 searchQuery: '',
                 searchResults: [],
                 isSearching: false,
                 searchTimer: null,
-                
+
                 // Demo 5: 文本分析
                 textContent: '',
                 statsLogs: [],
@@ -1085,7 +1116,7 @@ watch: {
                         message: message
                     });
                 },
-                
+
                 // Demo 2: 监视对象属性
                 'person.name'(newValue, oldValue) {
                     const time = new Date().toLocaleTimeString();
@@ -1103,7 +1134,7 @@ watch: {
                         message: `年龄由${oldValue} 改为 ${newValue}`
                     });
                 },
-                
+
                 // Demo 3: 深度监视 - 自动保存 ⭐ 重要
                 localTasks: {
                     handler(newValue) {
@@ -1114,14 +1145,14 @@ watch: {
                     },
                     deep: true  // 必须开启深度监视！
                 },
-                
+
                 // Demo 4: 搜索功能（immediate立即执行）
                 searchQuery: {
                     handler(newValue) {
                         // 模拟搜索API调用（带防抖）
                         clearTimeout(this.searchTimer);
                         this.isSearching = true;
-                        
+
                         this.searchTimer = setTimeout(() => {
                             // 模拟API调用
                             this.performSearch(newValue);
@@ -1129,7 +1160,7 @@ watch: {
                     },
                     immediate: true  // 页面加载时立即执行一次
                 },
-                
+
                 // Demo 5: 监视计算属性
                 totalChars(newValue, oldValue) {
                     if (oldValue === 0 && newValue === 0) return;  // 忽略初始化
@@ -1171,7 +1202,7 @@ watch: {
                     this.saveCount = 0;
                     this.lastSaveTime = '';
                 },
-                
+
                 // Demo 4: 执行搜索
                 performSearch(keyword) {
                     // 模拟用户数据
@@ -1181,16 +1212,16 @@ watch: {
                         { id: 3, name: 'Angular Expert', email: 'angular@example.com' },
                         { id: 4, name: 'Vue Master', email: 'vuemaster@example.com' }
                     ];
-                    
+
                     // 过滤结果
                     if (keyword) {
-                        this.searchResults = allUsers.filter(user => 
+                        this.searchResults = allUsers.filter(user =>
                             user.name.toLowerCase().includes(keyword.toLowerCase())
                         );
                     } else {
-                        this.searchResults = [];
+                        this.searchResults = allUsers;
                     }
-                    
+
                     this.isSearching = false;
                 }
             },
@@ -1213,5 +1244,5 @@ watch: {
         });
     </script>
 </body>
-</html>
 
+</html>
