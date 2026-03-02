@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>24-1 · 单文件组件 SFC 概念与脚手架入门</title>
+  <script src="../js/vue.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh; color: #e2e8f0; padding: 20px;
+    }
+    .page-header {
+      text-align: center; padding: 40px 20px 30px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(16,185,129,0.15));
+      border-radius: 16px; margin-bottom: 30px;
+      border: 1px solid rgba(99,102,241,0.3);
+    }
+    .page-header h1 { font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
+    .page-header p  { color: #94a3b8; font-size: 1rem; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin: 4px 4px 0;
+    }
+    .badge-green  { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-purple { background: rgba(139,92,246,0.2); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .badge-blue   { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-orange { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-red    { background: rgba(239,68,68,0.2);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(580px, 1fr)); gap: 24px; max-width: 1400px; margin: 0 auto; }
+    .demo-card {
+      background: rgba(255,255,255,0.04); border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+    }
+    .demo-card-header {
+      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .demo-card-header h3 { font-size: 1rem; color: #e2e8f0; flex: 1; }
+    .demo-card-body { padding: 20px; }
+
+    /* 代码块 */
+    .code-block {
+      background: #0d1117; border-radius: 8px; padding: 16px;
+      font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.82rem;
+      line-height: 1.6; overflow-x: auto; margin: 10px 0;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .code-block .comment { color: #6e7681; }
+    .code-block .keyword { color: #ff7b72; }
+    .code-block .string  { color: #a5d6ff; }
+    .code-block .tag     { color: #7ee787; }
+    .code-block .attr    { color: #ffa657; }
+    .code-block .value   { color: #79c0ff; }
+    .code-block .fn      { color: #d2a8ff; }
+    .code-block .number  { color: #79c0ff; }
+
+    /* 对比表 */
+    .compare-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+    .compare-table th {
+      background: rgba(99,102,241,0.2); color: #a78bfa;
+      padding: 10px 14px; text-align: left; font-weight: 600;
+    }
+    .compare-table td {
+      padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: #cbd5e1; vertical-align: top;
+    }
+    .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .check  { color: #34d399; font-weight: 700; }
+    .cross  { color: #f87171; font-weight: 700; }
+    .warn   { color: #fbbf24; font-weight: 700; }
+
+    /* 步骤卡片 */
+    .step-list { list-style: none; }
+    .step-list li {
+      display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start;
+    }
+    .step-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content h4 { color: #e2e8f0; font-size: 0.9rem; margin-bottom: 4px; }
+    .step-content p  { color: #94a3b8; font-size: 0.82rem; line-height: 1.5; }
+
+    /* 目录树 */
+    .dir-tree {
+      background: #0d1117; border-radius: 8px; padding: 14px 18px;
+      font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.83rem;
+      line-height: 2; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .dir-tree .dir  { color: #60a5fa; }
+    .dir-tree .file { color: #a5d6ff; }
+    .dir-tree .note { color: #6e7681; margin-left: 6px; }
+    .dir-tree .entry { color: #fbbf24; }
+    .dir-tree .config{ color: #34d399; }
+    .dir-tree .vue  { color: #a78bfa; }
+
+    /* 痛点卡片 */
+    .pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+    .pain-card {
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .pain-card h4 { color: #f87171; font-size: 0.85rem; margin-bottom: 6px; }
+    .pain-card p  { color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+    .gain-card {
+      background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .gain-card h4 { color: #34d399; font-size: 0.85rem; margin-bottom: 6px; }
+    .gain-card p  { color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+
+    /* SFC 三块高亮展示 */
+    .sfc-block { border-radius: 8px; margin: 8px 0; overflow: hidden; }
+    .sfc-block-header {
+      padding: 8px 14px; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 1px; display: flex; align-items: center; gap: 8px;
+    }
+    .sfc-template .sfc-block-header { background: rgba(52,211,153,0.2); color: #34d399; }
+    .sfc-script   .sfc-block-header { background: rgba(250,189,47,0.2);  color: #fbbf24; }
+    .sfc-style    .sfc-block-header { background: rgba(96,165,250,0.2);  color: #60a5fa; }
+    .sfc-template .code-block { border-top: none; border-radius: 0 0 8px 8px; }
+    .sfc-script   .code-block { border-top: none; border-radius: 0 0 8px 8px; }
+    .sfc-style    .code-block { border-top: none; border-radius: 0 0 8px 8px; }
+
+    /* 工具对比 */
+    .tool-card {
+      background: rgba(255,255,255,0.03); border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1); padding: 16px; margin: 8px 0;
+    }
+    .tool-card h4 { font-size: 0.95rem; margin-bottom: 8px; }
+    .tool-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+    /* 面试速答 */
+    .qa-list { list-style: none; }
+    .qa-list li {
+      padding: 12px 14px; margin-bottom: 8px;
+      background: rgba(255,255,255,0.03); border-radius: 8px;
+      border-left: 3px solid #6366f1;
+    }
+    .qa-q { color: #a78bfa; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .qa-a { color: #94a3b8; font-size: 0.82rem; line-height: 1.6; }
+    .qa-a code { background: rgba(99,102,241,0.2); padding: 1px 5px; border-radius: 3px; color: #c4b5fd; font-size: 0.8rem; }
+
+    /* 练习任务 */
+    .task-block {
+      background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 10px; padding: 16px;
+    }
+    .task-block h4 { color: #34d399; margin-bottom: 10px; font-size: 0.9rem; }
+    .task-block ol { padding-left: 20px; color: #94a3b8; font-size: 0.85rem; line-height: 1.9; }
+    .task-block ol li strong { color: #a78bfa; }
+
+    /* 命令行展示 */
+    .cmd-block {
+      background: #000; border-radius: 8px; padding: 14px 16px;
+      font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.83rem;
+      line-height: 1.8; border: 1px solid rgba(255,255,255,0.12); margin: 8px 0;
+    }
+    .cmd-block .prompt { color: #34d399; user-select: none; }
+    .cmd-block .cmd    { color: #e2e8f0; }
+    .cmd-block .out    { color: #6e7681; }
+    .cmd-block .hl     { color: #fbbf24; }
+
+    /* 提示框 */
+    .tip {
+      padding: 10px 14px; border-radius: 8px; margin: 10px 0;
+      font-size: 0.83rem; line-height: 1.6;
+    }
+    .tip-blue   { background: rgba(59,130,246,0.1);  border-left: 3px solid #60a5fa; color: #93c5fd; }
+    .tip-yellow { background: rgba(245,158,11,0.1);  border-left: 3px solid #fbbf24; color: #fde68a; }
+    .tip-green  { background: rgba(16,185,129,0.1);  border-left: 3px solid #34d399; color: #6ee7b7; }
+    .tip-purple { background: rgba(139,92,246,0.1);  border-left: 3px solid #a78bfa; color: #c4b5fd; }
+
+    /* 章节标题 */
+    .section-title {
+      font-size: 0.75rem; font-weight: 700; color: #6366f1;
+      text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
+    }
+
+    h3 { font-size: 0.9rem; }
+    p  { font-size: 0.85rem; line-height: 1.7; color: #94a3b8; margin: 6px 0; }
+    .mt { margin-top: 12px; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>单文件组件 SFC 与脚手架入门</h1>
+  <p>从 HTML + CDN 迈向工程化 Vue 开发</p>
+  <div style="margin-top:12px">
+    <span class="badge badge-green">SFC .vue</span>
+    <span class="badge badge-purple">Vue CLI</span>
+    <span class="badge badge-blue">Vite</span>
+    <span class="badge badge-orange">工程化</span>
+    <span class="badge badge-red">scoped CSS</span>
+  </div>
+</div>
+
+<div class="demo-grid">
+
+  <!-- ==================== Demo 1：为什么需要 SFC ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-red">Demo 1</span>
+      <h3>为什么需要单文件组件？</h3>
+    </div>
+    <div class="demo-card-body">
+      <div class="section-title">CDN 写法的局限性</div>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <h4>❌ 样式污染</h4>
+          <p>所有组件共享全局 CSS，大项目极易产生样式冲突，只能靠命名约定规避。</p>
+        </div>
+        <div class="pain-card">
+          <h4>❌ 模板字符串难维护</h4>
+          <p>template 写在 JS 字符串里，没有高亮、没有自动补全，嵌套结构一眼看不清。</p>
+        </div>
+        <div class="pain-card">
+          <h4>❌ 没有模块系统</h4>
+          <p>无法 <code>import/export</code>，组件只能挂全局变量，大项目命名冲突难以追踪。</p>
+        </div>
+        <div class="pain-card">
+          <h4>❌ 无法使用预处理器</h4>
+          <p>SCSS / TypeScript / JSX 统统无法直接使用，工程能力受限。</p>
+        </div>
+      </div>
+
+      <div class="section-title mt">SFC 解决了什么</div>
+      <div class="pain-grid">
+        <div class="gain-card">
+          <h4>✅ scoped CSS</h4>
+          <p>每个 <code>&lt;style scoped&gt;</code> 只作用于当前组件，彻底解决样式污染。</p>
+        </div>
+        <div class="gain-card">
+          <h4>✅ 模板有编辑器支持</h4>
+          <p>Volar / Vetur 插件提供语法高亮、Emmet、类型提示，开发体验飞跃。</p>
+        </div>
+        <div class="gain-card">
+          <h4>✅ 真正的模块化</h4>
+          <p>每个 <code>.vue</code> 是独立模块，<code>import</code> 按需引用，Tree-Shaking 自动生效。</p>
+        </div>
+        <div class="gain-card">
+          <h4>✅ 预处理器随意用</h4>
+          <p>一个属性切换：<code>&lt;script setup lang="ts"&gt;</code> 或 <code>&lt;style lang="scss"&gt;</code>。</p>
+        </div>
+      </div>
+
+      <div class="tip tip-blue mt">
+        💡 SFC 本质上是一种约定：把一个组件的 <strong>模板、逻辑、样式</strong> 写在同一个 <code>.vue</code> 文件里，由构建工具（Vite/Webpack）在编译时拆分处理。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 2：.vue 文件结构解析 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-purple">Demo 2</span>
+      <h3>.vue 文件的三个核心块</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="sfc-block sfc-template">
+        <div class="sfc-block-header">▶ &lt;template&gt; 模板块</div>
+        <div class="code-block"><span class="tag">&lt;template&gt;</span>
+  <span class="comment">&lt;!-- 有且只有一个根元素（Vue 2 要求；Vue 3 已取消限制）--&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"user-card"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2&gt;</span>{{ user.name }}<span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span>年龄：{{ user.age }}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"handleClick"</span><span class="tag">&gt;</span>点我<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span></div>
+      </div>
+
+      <div class="sfc-block sfc-script">
+        <div class="sfc-block-header">▶ &lt;script&gt; 逻辑块</div>
+        <div class="code-block"><span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="fn">name</span>: <span class="string">'UserCard'</span>,         <span class="comment">// 组件名</span>
+  <span class="fn">props</span>: {
+    <span class="fn">userId</span>: Number            <span class="comment">// 外部传入的 prop</span>
+  },
+  <span class="fn">data</span>() {
+    <span class="keyword">return</span> {
+      user: { name: <span class="string">'Alice'</span>, age: <span class="number">25</span> }
+    }
+  },
+  <span class="fn">methods</span>: {
+    <span class="fn">handleClick</span>() {
+      <span class="keyword">this</span>.<span class="fn">$emit</span>(<span class="string">'select'</span>, <span class="keyword">this</span>.user)
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></div>
+      </div>
+
+      <div class="sfc-block sfc-style">
+        <div class="sfc-block-header">▶ &lt;style scoped&gt; 样式块</div>
+        <div class="code-block"><span class="tag">&lt;style</span> <span class="attr">scoped</span><span class="tag">&gt;</span>
+<span class="comment">/* scoped：编译后自动加属性选择器，样式只作用于本组件 */</span>
+<span class="fn">.user-card</span> {
+  <span class="attr">background</span>: <span class="string">#fff</span>;
+  <span class="attr">border-radius</span>: <span class="string">8px</span>;
+  <span class="attr">padding</span>: <span class="string">16px</span>;
+}
+<span class="fn">h2</span> { <span class="attr">color</span>: <span class="string">#333</span>; }     <span class="comment">/* 仅限本组件内的 h2 */</span>
+<span class="tag">&lt;/style&gt;</span></div>
+      </div>
+
+      <div class="tip tip-yellow mt">
+        ⚠️ Vue 2 的 <code>&lt;template&gt;</code> 里必须有且只有一个根元素；Vue 3 支持多根节点（Fragment）。
+      </div>
+      <div class="tip tip-purple">
+        💎 <strong>scoped 原理</strong>：编译后给元素加唯一属性如 <code>data-v-7ba5bd90</code>，CSS 选择器自动变为 <code>.user-card[data-v-7ba5bd90]</code>，从根上隔离样式。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 3：脚手架选择 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-blue">Demo 3</span>
+      <h3>脚手架选型：Vue CLI vs Vite</h3>
+    </div>
+    <div class="demo-card-body">
+      <div class="section-title">工具对比</div>
+      <table class="compare-table">
+        <thead>
+          <tr><th>对比项</th><th>Vue CLI（Webpack）</th><th>Vite</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>底层打包工具</td>
+            <td>Webpack 5</td>
+            <td>Rollup + 原生 ESM</td>
+          </tr>
+          <tr>
+            <td>冷启动速度</td>
+            <td class="warn">⏳ 数秒~数十秒</td>
+            <td class="check">⚡ 毫秒级</td>
+          </tr>
+          <tr>
+            <td>热更新（HMR）</td>
+            <td class="warn">⚠️ 项目大后变慢</td>
+            <td class="check">✅ 始终极快</td>
+          </tr>
+          <tr>
+            <td>Vue 2 支持</td>
+            <td class="check">✅ 官方支持</td>
+            <td class="warn">⚠️ 需插件（@vitejs/plugin-vue2）</td>
+          </tr>
+          <tr>
+            <td>Vue 3 支持</td>
+            <td class="check">✅ 支持</td>
+            <td class="check">✅ 官方推荐</td>
+          </tr>
+          <tr>
+            <td>配置灵活度</td>
+            <td>非常丰富（vue.config.js）</td>
+            <td>简洁（vite.config.js）</td>
+          </tr>
+          <tr>
+            <td>社区地位</td>
+            <td>成熟稳定，大量企业用</td>
+            <td>现代项目首选，趋势</td>
+          </tr>
+          <tr>
+            <td>学习本课程建议</td>
+            <td class="warn">了解即可</td>
+            <td class="check">✅ 主要使用</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip tip-green mt">
+        🎯 <strong>本课程策略</strong>：用 <code>Vite + Vue 2</code> 搭建学习环境，兼顾启动速度快 + 与已学内容衔接。待后续学 Vue 3 时直接切换 <code>@vitejs/plugin-vue</code> 即可，几乎零成本迁移。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 4：Vite 创建项目 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-green">Demo 4</span>
+      <h3>动手创建第一个 Vite + Vue 2 项目</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="section-title">前置检查</div>
+      <div class="cmd-block">
+        <div><span class="prompt">$ </span><span class="cmd">node -v</span></div>
+        <div><span class="out">v18.x.x &nbsp;&nbsp;# 需要 Node.js 16+</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">npm -v</span></div>
+        <div><span class="out">9.x.x</span></div>
+      </div>
+
+      <div class="section-title mt">方案 A：Vite 官方模板（Vue 3，推荐新项目）</div>
+      <div class="cmd-block">
+        <div><span class="prompt">$ </span><span class="cmd">npm create vite@latest my-vue-app -- --template vue</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">cd my-vue-app</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">npm install</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">npm run dev</span></div>
+        <div><span class="out">&nbsp;</span></div>
+        <div><span class="hl">  VITE v5.x.x  ready in 300 ms</span></div>
+        <div><span class="out">  ➜  Local:   http://localhost:5173/</span></div>
+      </div>
+
+      <div class="section-title mt">方案 B：配合本课程（Vite + Vue 2）</div>
+      <div class="cmd-block">
+        <div><span class="prompt">$ </span><span class="cmd">npm create vite@latest vue2-sfc-demo -- --template vanilla</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">cd vue2-sfc-demo</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">npm install vue@2 @vitejs/plugin-vue2</span></div>
+      </div>
+      <p>然后修改 <code>vite.config.js</code>：</p>
+      <div class="code-block"><span class="keyword">import</span> { defineConfig } <span class="keyword">from</span> <span class="string">'vite'</span>
+<span class="keyword">import</span> vue2 <span class="keyword">from</span> <span class="string">'@vitejs/plugin-vue2'</span>
+
+<span class="keyword">export default</span> defineConfig({
+  plugins: [<span class="fn">vue2</span>()]
+})</div>
+      <p>将 <code>main.js</code> 改为：</p>
+      <div class="code-block"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>
+<span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span>
+
+<span class="keyword">new</span> <span class="fn">Vue</span>({
+  <span class="fn">render</span>: h <span class="keyword">=&gt;</span> <span class="fn">h</span>(App)
+}).<span class="fn">$mount</span>(<span class="string">'#app'</span>)</div>
+
+      <div class="tip tip-blue mt">
+        💡 Vue CLI 方式（了解）：<code>npm install -g @vue/cli</code> → <code>vue create my-app</code> → 选 Vue 2 预设。步骤更多但配套 GUI 工具（vue ui）更直观。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 5：项目目录结构 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-orange">Demo 5</span>
+      <h3>Vite + Vue 2 项目目录结构解析</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="section-title">初始化后的目录结构</div>
+      <div class="dir-tree">
+        <div><span class="dir">vue2-sfc-demo/</span></div>
+        <div>&nbsp;├── <span class="config">vite.config.js</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># Vite 配置，注册 vue2 插件</span></div>
+        <div>&nbsp;├── <span class="config">package.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 依赖声明，scripts 入口</span></div>
+        <div>&nbsp;├── <span class="file">index.html</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 应用入口 HTML（只有一个）</span></div>
+        <div>&nbsp;├── <span class="dir">public/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 静态资源，原样复制到 dist</span></div>
+        <div>&nbsp;└── <span class="dir">src/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="entry">main.js</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># JS 入口，创建 Vue 实例</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="vue">App.vue</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 根组件</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="dir">components/</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 通用子组件</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="vue">Header.vue</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="vue">UserCard.vue</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="dir">views/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 页面级组件（接 Router 用）</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="vue">Home.vue</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="vue">About.vue</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="dir">assets/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># 图片、字体等资源</span></div>
+      </div>
+
+      <div class="section-title mt">关键文件说明</div>
+      <ul class="step-list">
+        <li>
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>index.html — 单页应用的唯一 HTML</h4>
+            <p>只有一个 <code>&lt;div id="app"&gt;</code>，Vue 接管整个页面渲染，路由切换不刷新页面。</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>main.js — Vue 实例挂载点</h4>
+            <p><code>new Vue({ render: h => h(App) }).$mount('#app')</code> 把根组件渲染进页面。</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <h4>App.vue — 组件树的根</h4>
+            <p>所有页面组件都是 App 的子孙，Router 的 <code>&lt;router-view&gt;</code> 也放在这里。</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <div class="step-content">
+            <h4>components/ vs views/</h4>
+            <p><code>components/</code> 放可复用组件（按钮、卡片等）；<code>views/</code> 放页面组件（与路由一一对应）。这是通行约定，并非强制。</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="section-title mt">组件引用方式（SFC 中）</div>
+      <div class="code-block"><span class="tag">&lt;script&gt;</span>
+<span class="keyword">import</span> UserCard <span class="keyword">from</span> <span class="string">'./components/UserCard.vue'</span>
+
+<span class="keyword">export default</span> {
+  <span class="fn">components</span>: { UserCard }  <span class="comment">// 局部注册，只在本组件可用</span>
+}
+<span class="tag">&lt;/script&gt;</span></div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 6：面试速答 + 练习 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-red">Demo 6</span>
+      <h3>面试速答 + 练习任务</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="section-title">高频面试题</div>
+      <ul class="qa-list">
+        <li>
+          <div class="qa-q">Q：什么是单文件组件（SFC）？</div>
+          <div class="qa-a">一个以 <code>.vue</code> 为扩展名的文件，包含三个块：<code>&lt;template&gt;</code>（模板）、<code>&lt;script&gt;</code>（逻辑）、<code>&lt;style&gt;</code>（样式）。由 vue-loader / @vitejs/plugin-vue 在构建时解析，浏览器本身不能直接运行 .vue 文件。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：scoped CSS 的实现原理是什么？</div>
+          <div class="qa-a">编译时给组件内所有 DOM 元素加一个唯一 hash 属性（如 <code>data-v-abc123</code>），同时把 <code>&lt;style scoped&gt;</code> 中的选择器自动追加属性选择器（如 <code>.title[data-v-abc123]</code>），从而将样式作用域锁定到当前组件。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：Vue CLI 与 Vite 的核心区别？</div>
+          <div class="qa-a">Vue CLI 基于 Webpack，开发服务器需打包全部模块后启动，冷启动慢；Vite 利用浏览器原生 ES Module，按需编译，冷启动极快。生产构建 Vite 使用 Rollup，体积更小。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：为什么 Vue 2 的模板只能有一个根元素？</div>
+          <div class="qa-a">Vue 2 的 <code>render</code> 函数只能返回单个 VNode 根节点，多个根节点无法表示。Vue 3 通过引入 Fragment（虚拟根节点）解决了这个限制。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：<code>components/</code> 和 <code>views/</code> 的区别？</div>
+          <div class="qa-a"><code>views/</code> 对应路由页面，每个视图通常是一个路由的展示入口；<code>components/</code> 存放跨页面复用的通用 UI 组件。这是社区约定，框架本身不做区分。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：<code>&lt;script setup&gt;</code> 是什么？</div>
+          <div class="qa-a">Vue 3.2 引入的语法糖，写在 <code>&lt;script setup&gt;</code> 内的代码等价于 Composition API 的 <code>setup()</code> 函数，省去 <code>export default</code>，变量和函数自动暴露给模板，更简洁。（Vue 2 不支持，但要了解趋势。）</div>
+        </li>
+      </ul>
+
+      <div class="section-title mt">练习任务</div>
+      <div class="task-block">
+        <h4>🎯 本节完成后请动手：</h4>
+        <ol>
+          <li><strong>环境搭建</strong>：按 Demo 4 的步骤创建 <code>vue2-sfc-demo</code> 项目，成功跑起 <code>npm run dev</code></li>
+          <li><strong>第一个 SFC</strong>：在 <code>components/</code> 下新建 <code>HelloCard.vue</code>，包含完整的三个块（template / script / style scoped）</li>
+          <li><strong>父子通信</strong>：让 <code>App.vue</code> 传一个 prop（如 <code>username</code>）给 <code>HelloCard</code>，组件内展示并用 scoped 样式美化</li>
+          <li><strong>验证 scoped</strong>：在 <code>App.vue</code> 和 <code>HelloCard.vue</code> 中分别写同名 CSS 类（如 <code>.title</code>），观察不会互相干扰</li>
+          <li><strong>扩展思考</strong>：尝试用 <code>&lt;style lang="scss"&gt;</code>，先安装 <code>npm install -D sass</code>，看看是否开箱即用</li>
+        </ol>
+      </div>
+
+      <div class="tip tip-purple mt">
+        🚀 完成以上练习后，你就具备了在脚手架项目中编写 Vue 2 单文件组件的基础能力。下一节将在此基础上深入学习 SFC 中的<strong>组件通信实践</strong>，并对之前 CDN 时代的通信方式做迁移对比。
+      </div>
+    </div>
+  </div>
+
+</div><!-- /demo-grid -->
+
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  24-1 · 单文件组件 SFC 概念与脚手架入门 &nbsp;|&nbsp; Vue Learning Path Phase 3
+</div>
+
+</body>
+</html>

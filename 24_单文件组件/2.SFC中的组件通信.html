@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>24-2 · SFC 中的组件通信</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      min-height: 100vh; color: #e2e8f0; padding: 20px;
+    }
+    .page-header {
+      text-align: center; padding: 40px 20px 30px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(6,182,212,0.12));
+      border-radius: 16px; margin-bottom: 30px;
+      border: 1px solid rgba(139,92,246,0.3);
+    }
+    .page-header h1 { font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
+    .page-header p  { color: #94a3b8; font-size: 1rem; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin: 4px 4px 0;
+    }
+    .badge-green  { background: rgba(16,185,129,0.2);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-purple { background: rgba(139,92,246,0.2);  color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .badge-blue   { background: rgba(59,130,246,0.2);  color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-orange { background: rgba(245,158,11,0.2);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-cyan   { background: rgba(6,182,212,0.2);   color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); }
+    .badge-red    { background: rgba(239,68,68,0.2);   color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(580px, 1fr)); gap: 24px; max-width: 1400px; margin: 0 auto; }
+    .demo-card {
+      background: rgba(255,255,255,0.04); border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+    }
+    .demo-card-header {
+      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .demo-card-header h3 { font-size: 1rem; color: #e2e8f0; flex: 1; }
+    .demo-card-body { padding: 20px; }
+
+    /* 代码块 */
+    .code-block {
+      background: #0d1117; border-radius: 8px; padding: 16px;
+      font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.82rem;
+      line-height: 1.65; overflow-x: auto; margin: 8px 0;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .c  { color: #6e7681; }   /* comment */
+    .k  { color: #ff7b72; }   /* keyword */
+    .s  { color: #a5d6ff; }   /* string */
+    .t  { color: #7ee787; }   /* tag */
+    .a  { color: #ffa657; }   /* attr */
+    .v  { color: #79c0ff; }   /* value/number */
+    .f  { color: #d2a8ff; }   /* function */
+    .p  { color: #e2e8f0; }   /* plain */
+
+    /* 双列对比 */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+    .split-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+      padding: 4px 10px; border-radius: 4px 4px 0 0; text-align: center;
+    }
+    .label-old { background: rgba(239,68,68,0.15);  color: #f87171; }
+    .label-new { background: rgba(16,185,129,0.15); color: #34d399; }
+    .split-block .code-block { border-radius: 0 0 8px 8px; border-top: none; margin: 0; }
+
+    /* 流程图 */
+    .flow {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin: 14px 0; flex-wrap: wrap;
+    }
+    .flow-node {
+      padding: 10px 16px; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 600; text-align: center; min-width: 90px;
+    }
+    .flow-arrow {
+      color: #475569; font-size: 1rem; padding: 0 4px;
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 0.72rem; color: #94a3b8; white-space: nowrap;
+    }
+    .fn-parent { background: rgba(99,102,241,0.2); color: #a78bfa; border: 1px solid rgba(99,102,241,0.4); }
+    .fn-child  { background: rgba(6,182,212,0.2);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.4); }
+    .fn-bus    { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+    .fn-any    { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+
+    /* 提示框 */
+    .tip {
+      padding: 10px 14px; border-radius: 8px; margin: 10px 0;
+      font-size: 0.83rem; line-height: 1.6;
+    }
+    .tip-blue   { background: rgba(59,130,246,0.1);  border-left: 3px solid #60a5fa; color: #93c5fd; }
+    .tip-yellow { background: rgba(245,158,11,0.1);  border-left: 3px solid #fbbf24; color: #fde68a; }
+    .tip-green  { background: rgba(16,185,129,0.1);  border-left: 3px solid #34d399; color: #6ee7b7; }
+    .tip-purple { background: rgba(139,92,246,0.1);  border-left: 3px solid #a78bfa; color: #c4b5fd; }
+    .tip-red    { background: rgba(239,68,68,0.1);   border-left: 3px solid #f87171; color: #fca5a5; }
+
+    /* 面试速答 */
+    .qa-list { list-style: none; }
+    .qa-list li {
+      padding: 12px 14px; margin-bottom: 8px;
+      background: rgba(255,255,255,0.03); border-radius: 8px;
+      border-left: 3px solid #6366f1;
+    }
+    .qa-q { color: #a78bfa; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .qa-a { color: #94a3b8; font-size: 0.82rem; line-height: 1.6; }
+    .qa-a code { background: rgba(99,102,241,0.2); padding: 1px 5px; border-radius: 3px; color: #c4b5fd; font-size: 0.8rem; }
+
+    /* 练习任务 */
+    .task-block {
+      background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 10px; padding: 16px;
+    }
+    .task-block h4 { color: #34d399; margin-bottom: 10px; font-size: 0.9rem; }
+    .task-block ol { padding-left: 20px; color: #94a3b8; font-size: 0.85rem; line-height: 1.9; }
+    .task-block ol li strong { color: #a78bfa; }
+
+    /* 通信方式总览表 */
+    .overview-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin: 10px 0; }
+    .overview-table th {
+      background: rgba(99,102,241,0.2); color: #a78bfa;
+      padding: 10px 12px; text-align: left; font-weight: 600;
+    }
+    .overview-table td {
+      padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: #cbd5e1; vertical-align: middle;
+    }
+    .overview-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .section-title {
+      font-size: 0.75rem; font-weight: 700; color: #6366f1;
+      text-transform: uppercase; letter-spacing: 1.5px; margin: 14px 0 8px;
+    }
+    p  { font-size: 0.85rem; line-height: 1.7; color: #94a3b8; margin: 6px 0; }
+    h3 { font-size: 0.9rem; }
+
+    /* SFC 块颜色 */
+    .sfc-t { color: #34d399; }
+    .sfc-s { color: #fbbf24; }
+    .sfc-c { color: #60a5fa; }
+
+    /* 文件标签 */
+    .file-tab {
+      display: inline-block; padding: 3px 10px; border-radius: 4px;
+      font-size: 0.75rem; font-family: 'Consolas', monospace;
+      margin-bottom: 4px;
+    }
+    .file-parent { background: rgba(99,102,241,0.2); color: #a78bfa; }
+    .file-child  { background: rgba(6,182,212,0.2);  color: #22d3ee; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>SFC 中的组件通信</h1>
+  <p>在脚手架项目中掌握 Vue 2 全部通信方式</p>
+  <div style="margin-top:12px">
+    <span class="badge badge-purple">props</span>
+    <span class="badge badge-cyan">$emit</span>
+    <span class="badge badge-green">v-model</span>
+    <span class="badge badge-orange">provide/inject</span>
+    <span class="badge badge-blue">$refs</span>
+    <span class="badge badge-red">Event Bus</span>
+  </div>
+</div>
+
+<div class="demo-grid">
+
+  <!-- ==================== Demo 1：通信方式全景 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-purple">Demo 1</span>
+      <h3>六种通信方式全景速览</h3>
+    </div>
+    <div class="demo-card-body">
+      <table class="overview-table">
+        <thead>
+          <tr><th>方式</th><th>方向</th><th>适用场景</th><th>Vue 2 状态</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>props</code></td>
+            <td>父 → 子</td>
+            <td>传递配置、数据</td>
+            <td><span class="badge badge-green">✅ 推荐</span></td>
+          </tr>
+          <tr>
+            <td><code>$emit</code></td>
+            <td>子 → 父</td>
+            <td>子组件向父汇报事件</td>
+            <td><span class="badge badge-green">✅ 推荐</span></td>
+          </tr>
+          <tr>
+            <td><code>v-model</code></td>
+            <td>父 ↔ 子</td>
+            <td>表单组件双向绑定</td>
+            <td><span class="badge badge-green">✅ 推荐</span></td>
+          </tr>
+          <tr>
+            <td><code>provide/inject</code></td>
+            <td>祖先 → 后代</td>
+            <td>深层组件传值，避免 prop drilling</td>
+            <td><span class="badge badge-blue">⚠️ 谨慎</span></td>
+          </tr>
+          <tr>
+            <td><code>$refs</code></td>
+            <td>父 → 子（直接调用）</td>
+            <td>访问子组件实例/DOM</td>
+            <td><span class="badge badge-orange">⚠️ 少用</span></td>
+          </tr>
+          <tr>
+            <td>Event Bus</td>
+            <td>任意 ↔ 任意</td>
+            <td>非父子组件通信（小型项目）</td>
+            <td><span class="badge badge-red">⚠️ 慎用</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip tip-purple">
+        💎 <strong>SFC 与 CDN 的核心差别</strong>：通信 API（props / $emit 等）完全相同，区别在于<strong>文件组织方式</strong>——每个组件是独立 <code>.vue</code> 文件，通过 <code>import</code> 引入，不再需要全局注册。
+      </div>
+
+      <!-- 通信方向图 -->
+      <div class="section-title">父子通信流向</div>
+      <div class="flow">
+        <div class="flow-node fn-parent">Parent.vue</div>
+        <div class="flow-arrow">
+          <span>——props——▶</span>
+          <span style="margin-top:4px">◀——$emit——</span>
+        </div>
+        <div class="flow-node fn-child">Child.vue</div>
+      </div>
+      <div class="flow" style="margin-top:4px">
+        <div class="flow-node fn-any">Ancestor.vue</div>
+        <div class="flow-arrow"><span>——provide/inject——▶</span></div>
+        <div class="flow-node fn-any">DeepChild.vue</div>
+      </div>
+      <div class="flow" style="margin-top:4px">
+        <div class="flow-node fn-bus">ComponentA.vue</div>
+        <div class="flow-arrow"><span>——EventBus.$emit——▶</span></div>
+        <div class="flow-node fn-bus">ComponentB.vue</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 2：props / $emit ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-cyan">Demo 2</span>
+      <h3>props + $emit：标准父子通信</h3>
+    </div>
+    <div class="demo-card-body">
+      <p>CDN 与 SFC 写法对比——API 完全一样，只是文件结构不同：</p>
+
+      <div class="split" style="margin-top:12px">
+        <div class="split-block">
+          <div class="split-label label-old">CDN 写法（单文件 HTML）</div>
+          <div class="code-block"><span class="c">// 直接在 components 选项里写</span>
+Vue.component(<span class="s">'my-list'</span>, {
+  <span class="f">template</span>: <span class="s">`&lt;ul&gt;...&lt;/ul&gt;`</span>,
+  <span class="f">props</span>: [<span class="s">'items'</span>]
+})</div>
+        </div>
+        <div class="split-block">
+          <div class="split-label label-new">SFC 写法（.vue 文件）</div>
+          <div class="code-block"><span class="c">// MyList.vue</span>
+<span class="k">export default</span> {
+  <span class="f">name</span>: <span class="s">'MyList'</span>,
+  <span class="f">props</span>: [<span class="s">'items'</span>]
+}
+<span class="c">// 在父组件 import 后局部注册</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">子组件完整示例（CounterBox.vue）</div>
+      <div class="file-tab file-child">src/components/CounterBox.vue</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"box"</span><span class="t">&gt;</span>
+    <span class="t">&lt;p&gt;</span>{{ label }}：{{ count }}<span class="t">&lt;/p&gt;</span>
+    <span class="t">&lt;button</span> <span class="a">@click</span>=<span class="s">"add"</span><span class="t">&gt;</span>+1<span class="t">&lt;/button&gt;</span>
+    <span class="t">&lt;button</span> <span class="a">@click</span>=<span class="s">"reset"</span><span class="t">&gt;</span>重置<span class="t">&lt;/button&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;script&gt;</span>
+<span class="k">export default</span> {
+  <span class="f">props</span>: {
+    <span class="f">label</span>: { <span class="f">type</span>: String, <span class="v">default</span>: <span class="s">'计数'</span> },   <span class="c">// 带类型校验</span>
+    <span class="f">step</span>:  { <span class="f">type</span>: Number, <span class="v">default</span>: <span class="v">1</span>    }    <span class="c">// 带默认值</span>
+  },
+  <span class="f">data</span>() { <span class="k">return</span> { count: <span class="v">0</span> } },
+  <span class="f">methods</span>: {
+    <span class="f">add</span>()   { <span class="k">this</span>.count += <span class="k">this</span>.step; <span class="k">this</span>.<span class="f">$emit</span>(<span class="s">'change'</span>, <span class="k">this</span>.count) },
+    <span class="f">reset</span>() { <span class="k">this</span>.count = <span class="v">0</span>;           <span class="k">this</span>.<span class="f">$emit</span>(<span class="s">'reset'</span>)           }
+  }
+}
+<span class="t">&lt;/script&gt;</span></div>
+
+      <div class="section-title">父组件使用</div>
+      <div class="file-tab file-parent">src/App.vue（节选）</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="c">&lt;!-- 传 props，监听 $emit 事件 --&gt;</span>
+  <span class="t">&lt;CounterBox</span>
+    <span class="a">label</span>=<span class="s">"购物车数量"</span>
+    <span class="a">:step</span>=<span class="s">"2"</span>
+    <span class="a">@change</span>=<span class="s">"onCountChange"</span>
+    <span class="a">@reset</span>=<span class="s">"onReset"</span>
+  <span class="t">/&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;script&gt;</span>
+<span class="k">import</span> CounterBox <span class="k">from</span> <span class="s">'./components/CounterBox.vue'</span>
+<span class="k">export default</span> {
+  <span class="f">components</span>: { CounterBox },
+  <span class="f">methods</span>: {
+    <span class="f">onCountChange</span>(val) { console.<span class="f">log</span>(<span class="s">'新value:'</span>, val) },
+    <span class="f">onReset</span>()          { console.<span class="f">log</span>(<span class="s">'已重置'</span>) }
+  }
+}
+<span class="t">&lt;/script&gt;</span></div>
+
+      <div class="tip tip-yellow">
+        ⚠️ <strong>Props 单向数据流</strong>：子组件永远不要直接修改 prop（如 <code>this.label = 'x'</code>）。如需修改，用 <code>$emit</code> 通知父组件，由父来更新数据。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 3：v-model 组件 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-green">Demo 3</span>
+      <h3>自定义组件的 v-model</h3>
+    </div>
+    <div class="demo-card-body">
+      <p>让自己写的组件也能用 <code>v-model</code>，本质是 <code>:value</code> + <code>@input</code> 的语法糖。</p>
+
+      <div class="section-title">v-model 拆解</div>
+      <div class="code-block"><span class="c">&lt;!-- 这两种写法完全等价 --&gt;</span>
+<span class="t">&lt;MyInput</span> <span class="a">v-model</span>=<span class="s">"searchText"</span> <span class="t">/&gt;</span>
+
+<span class="t">&lt;MyInput</span>
+  <span class="a">:value</span>=<span class="s">"searchText"</span>
+  <span class="a">@input</span>=<span class="s">"searchText = $event"</span>
+<span class="t">/&gt;</span></div>
+
+      <div class="section-title">实现支持 v-model 的输入组件（MyInput.vue）</div>
+      <div class="file-tab file-child">src/components/MyInput.vue</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"input-wrap"</span><span class="t">&gt;</span>
+    <span class="t">&lt;input</span>
+      <span class="a">:value</span>=<span class="s">"value"</span>            <span class="c">&lt;!-- ① 接收父传来的值 --&gt;</span>
+      <span class="a">@input</span>=<span class="s">"$emit('input', $event.target.value)"</span>  <span class="c">&lt;!-- ② 修改时通知父 --&gt;</span>
+      <span class="a">v-bind</span>=<span class="s">"$attrs"</span>          <span class="c">&lt;!-- 透传 placeholder 等原生属性 --&gt;</span>
+    <span class="t">/&gt;</span>
+    <span class="t">&lt;span</span> <span class="a">v-if</span>=<span class="s">"value"</span> <span class="a">@click</span>=<span class="s">"$emit('input', '')"</span><span class="t">&gt;</span>✕<span class="t">&lt;/span&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;script&gt;</span>
+<span class="k">export default</span> {
+  <span class="c">// 关键：声明接收 value prop，不要用 inheritAttrs 自动绑定到根元素</span>
+  <span class="f">inheritAttrs</span>: <span class="k">false</span>,
+  <span class="f">props</span>: { <span class="f">value</span>: String }
+}
+<span class="t">&lt;/script&gt;</span></div>
+
+      <div class="section-title">父组件使用</div>
+      <div class="code-block"><span class="t">&lt;MyInput</span> <span class="a">v-model</span>=<span class="s">"keyword"</span> <span class="a">placeholder</span>=<span class="s">"搜索..."</span> <span class="t">/&gt;</span>
+<span class="c">&lt;!-- placeholder 通过 $attrs 透传给原生 input --&gt;</span></div>
+
+      <div class="section-title">model 选项：自定义 prop 和 event 名</div>
+      <div class="code-block"><span class="k">export default</span> {
+  <span class="c">// 默认 v-model = :value + @input</span>
+  <span class="c">// 用 model 选项可以自定义：</span>
+  <span class="f">model</span>: {
+    <span class="f">prop</span>:  <span class="s">'checked'</span>,   <span class="c">// 将 :checked 作为绑定值</span>
+    <span class="f">event</span>: <span class="s">'change'</span>    <span class="c">// 将 @change 作为更新事件</span>
+  },
+  <span class="f">props</span>: { <span class="f">checked</span>: Boolean }
+  <span class="c">// 适用于自定义 checkbox/switch 组件</span>
+}</div>
+
+      <div class="tip tip-blue">
+        💡 Vue 3 把 <code>v-model</code> 升级了：默认绑定变成 <code>modelValue</code> + <code>update:modelValue</code>，并支持多个 <code>v-model</code>（如 <code>v-model:title</code>）。学 Vue 2 时理解原理，到 Vue 3 迁移很自然。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 4：provide / inject ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-orange">Demo 4</span>
+      <h3>provide / inject：跨层级传值</h3>
+    </div>
+    <div class="demo-card-body">
+      <p>解决 <strong>prop drilling</strong>（多层 props 层层透传）的问题，祖先直接把数据注入到任意后代。</p>
+
+      <div class="section-title">场景：主题色需要传给 3 级以下的按钮组件</div>
+      <div class="code-block"><span class="c">// ❌ prop drilling 的痛苦</span>
+<span class="t">&lt;App</span> <span class="a">:theme</span>=<span class="s">"theme"</span><span class="t">&gt;</span>
+  <span class="t">&lt;Layout</span> <span class="a">:theme</span>=<span class="s">"theme"</span><span class="t">&gt;</span>  <span class="c">&lt;!-- Layout 自己不用，只是转发 --&gt;</span>
+    <span class="t">&lt;Sidebar</span> <span class="a">:theme</span>=<span class="s">"theme"</span><span class="t">&gt;</span>  <span class="c">&lt;!-- Sidebar 自己不用，只是转发 --&gt;</span>
+      <span class="t">&lt;NavButton</span> <span class="a">:theme</span>=<span class="s">"theme"</span> <span class="t">/&gt;</span>  <span class="c">&lt;!-- 真正用的地方 --&gt;</span>
+    <span class="t">&lt;/Sidebar&gt;</span>
+  <span class="t">&lt;/Layout&gt;</span>
+<span class="t">&lt;/App&gt;</span></div>
+
+      <div class="section-title">provide — 祖先提供</div>
+      <div class="file-tab file-parent">App.vue（或任意祖先组件）</div>
+      <div class="code-block"><span class="k">export default</span> {
+  <span class="f">data</span>() { <span class="k">return</span> { theme: <span class="s">'dark'</span> } },
+
+  <span class="c">// ✅ 方式一：对象形式（静态值，不响应式）</span>
+  <span class="f">provide</span>: {
+    <span class="f">appTheme</span>: <span class="s">'dark'</span>
+  },
+
+  <span class="c">// ✅ 方式二：函数形式（可访问 this，但仍非响应式）</span>
+  <span class="f">provide</span>() {
+    <span class="k">return</span> {
+      <span class="f">appTheme</span>: <span class="k">this</span>.theme,         <span class="c">// 取当时的值，后续不更新</span>
+      <span class="f">themeObj</span>: <span class="k">this</span>.$data          <span class="c">// 传对象引用可实现响应式（技巧）</span>
+    }
+  }
+}</div>
+
+      <div class="section-title">inject — 后代注入</div>
+      <div class="file-tab file-child">NavButton.vue（任意深度后代）</div>
+      <div class="code-block"><span class="k">export default</span> {
+  <span class="c">// 简写：直接注入，变量名与 provide 的 key 一致</span>
+  <span class="f">inject</span>: [<span class="s">'appTheme'</span>],
+
+  <span class="c">// 完整写法：设置别名和默认值</span>
+  <span class="f">inject</span>: {
+    <span class="f">theme</span>: {
+      <span class="k">from</span>: <span class="s">'appTheme'</span>,    <span class="c">// 注入源的 key</span>
+      <span class="v">default</span>: <span class="s">'light'</span>   <span class="c">// 祖先没有提供时的默认值</span>
+    }
+  }
+  <span class="c">// 模板中直接用 {{ theme }}</span>
+}</div>
+
+      <div class="tip tip-yellow">
+        ⚠️ <strong>Vue 2 的 provide/inject 默认不是响应式的</strong>。如需响应式，可传入 <code>Vue.observable()</code> 包装的对象，或改用 Vuex。Vue 3 中 <code>provide</code> 可配合 <code>ref/reactive</code> 实现响应式。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 5：$refs + Event Bus ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-blue">Demo 5</span>
+      <h3>$refs 与 Event Bus</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="section-title">$refs：直接访问子组件实例</div>
+      <div class="file-tab file-parent">父组件</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="c">&lt;!-- 给子组件打标记 --&gt;</span>
+  <span class="t">&lt;VideoPlayer</span> <span class="a">ref</span>=<span class="s">"player"</span> <span class="t">/&gt;</span>
+  <span class="t">&lt;button</span> <span class="a">@click</span>=<span class="s">"$refs.player.play()"</span><span class="t">&gt;</span>播放<span class="t">&lt;/button&gt;</span>
+  <span class="t">&lt;button</span> <span class="a">@click</span>=<span class="s">"$refs.player.pause()"</span><span class="t">&gt;</span>暂停<span class="t">&lt;/button&gt;</span>
+
+  <span class="c">&lt;!-- ref 也可以绑在原生 DOM 上 --&gt;</span>
+  <span class="t">&lt;input</span> <span class="a">ref</span>=<span class="s">"searchInput"</span> <span class="t">/&gt;</span>
+  <span class="t">&lt;button</span> <span class="a">@click</span>=<span class="s">"$refs.searchInput.focus()"</span><span class="t">&gt;</span>聚焦<span class="t">&lt;/button&gt;</span>
+<span class="t">&lt;/template&gt;</span></div>
+
+      <div class="tip tip-red" style="margin:10px 0">
+        ⚠️ <code>$refs</code> 只在 <code>mounted</code> 后可用；<code>v-if</code> 条件为 false 时 <code>$refs.xxx</code> 是 <code>undefined</code>。<strong>不要在 <code>created</code> 里用。</strong>
+      </div>
+
+      <div class="section-title">Event Bus：非父子组件通信</div>
+      <div class="file-tab file-child">src/event-bus.js（新建）</div>
+      <div class="code-block"><span class="k">import</span> Vue <span class="k">from</span> <span class="s">'vue'</span>
+<span class="c">// 空 Vue 实例作为全局事件总线</span>
+<span class="k">export const</span> EventBus = <span class="k">new</span> Vue()</div>
+
+      <div class="file-tab file-child" style="margin-top:10px">ComponentA.vue（发送方）</div>
+      <div class="code-block"><span class="k">import</span> { EventBus } <span class="k">from</span> <span class="s">'../event-bus.js'</span>
+
+<span class="f">methods</span>: {
+  <span class="f">notifyAll</span>() {
+    EventBus.<span class="f">$emit</span>(<span class="s">'user-login'</span>, { name: <span class="s">'Alice'</span> })
+  }
+}</div>
+
+      <div class="file-tab file-child" style="margin-top:10px">ComponentB.vue（接收方）</div>
+      <div class="code-block"><span class="k">import</span> { EventBus } <span class="k">from</span> <span class="s">'../event-bus.js'</span>
+
+<span class="f">mounted</span>() {
+  EventBus.<span class="f">$on</span>(<span class="s">'user-login'</span>, this.<span class="f">handleLogin</span>)
+},
+<span class="f">beforeDestroy</span>() {
+  <span class="c">// ⚠️ 必须在销毁前解绑，否则内存泄漏！</span>
+  EventBus.<span class="f">$off</span>(<span class="s">'user-login'</span>, this.<span class="f">handleLogin</span>)
+},
+<span class="f">methods</span>: {
+  <span class="f">handleLogin</span>(user) { console.<span class="f">log</span>(<span class="s">'收到登录:'</span>, user) }
+}</div>
+
+      <div class="tip tip-green">
+        🎯 Event Bus 适合小型项目快速通信。项目稍大就应换 <strong>Vuex</strong>（官方状态管理）——它有明确的数据流和 DevTools 支持，Event Bus 的事件链路难以追踪。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 6：面试速答 + 练习 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-red">Demo 6</span>
+      <h3>面试速答 + 练习任务</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="section-title">高频面试题</div>
+      <ul class="qa-list">
+        <li>
+          <div class="qa-q">Q：Vue 2 父子组件通信有哪些方式？</div>
+          <div class="qa-a">① <code>props</code> 父传子；② <code>$emit</code> 子传父；③ <code>v-model</code>（<code>:value</code> + <code>@input</code>）；④ <code>$refs</code> 父直接访问子实例；⑤ <code>$parent/$children</code>（不推荐，耦合强）。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：为什么不能直接修改 props？</div>
+          <div class="qa-a">Vue 的单向数据流原则：数据由父流向子，子组件修改 prop 不会影响父的数据源，却可能让数据流难以追踪。正确做法是通过 <code>$emit</code> 通知父组件，由父来决定是否更新。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：<code>v-model</code> 在组件上的原理？</div>
+          <div class="qa-a"><code>&lt;MyInput v-model="x"&gt;</code> 等价于 <code>&lt;MyInput :value="x" @input="x = $event"&gt;</code>。子组件通过 <code>props: { value }</code> 接收，通过 <code>$emit('input', newVal)</code> 更新。可用 <code>model</code> 选项自定义 prop 和 event 名。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：provide/inject 为什么不推荐大量使用？</div>
+          <div class="qa-a">① Vue 2 中默认非响应式，数据更新不会自动同步；② 数据来源不透明，组件间隐式耦合，难以维护；③ 大量共享状态应使用 Vuex，数据流清晰可追踪。<code>provide/inject</code> 适合组件库内部使用。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：Event Bus 使用时有什么注意事项？</div>
+          <div class="qa-a">必须在 <code>beforeDestroy</code> 中调用 <code>EventBus.$off</code> 解绑事件，否则组件销毁后监听仍然存在，导致内存泄漏和重复触发。解绑时要传入<strong>相同的函数引用</strong>（不能用匿名函数）。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：SFC 中如何做到局部注册 vs 全局注册？</div>
+          <div class="qa-a">局部：在 <code>components: { MyComp }</code> 中声明，只在当前组件可用；全局：在 <code>main.js</code> 中 <code>Vue.component('MyComp', MyComp)</code>，整个应用可用但打包体积不能按需优化。推荐局部注册。</div>
+        </li>
+      </ul>
+
+      <div class="section-title" style="margin-top:16px">练习任务（在 vue2-sfc-demo 项目中完成）</div>
+      <div class="task-block">
+        <h4>🎯 动手练习：</h4>
+        <ol>
+          <li><strong>props 校验</strong>：创建 <code>UserAvatar.vue</code>，接收 <code>src</code>（String，必填）和 <code>size</code>（Number，默认 40），在模板中渲染一个圆形头像</li>
+          <li><strong>$emit 通信</strong>：创建 <code>DeleteBtn.vue</code>，点击时弹出确认对话框，确认后 <code>$emit('confirm')</code>，父组件监听并执行删除逻辑</li>
+          <li><strong>v-model 组件</strong>：创建 <code>StarRating.vue</code>（5颗星评分），用 <code>v-model</code> 双向绑定当前评分，父组件实时显示"当前评分：x 星"</li>
+          <li><strong>provide/inject</strong>：在 <code>App.vue</code> 中 provide 一个 <code>currentUser</code> 对象，在 3 层嵌套的最内层组件中用 inject 取到并显示用户名</li>
+          <li><strong>Event Bus</strong>：创建两个同级组件 <code>NotifySender.vue</code> 和 <code>NotifyReceiver.vue</code>，前者点击按钮发送通知，后者展示通知列表，并在 <code>beforeDestroy</code> 时正确解绑</li>
+        </ol>
+      </div>
+
+      <div class="tip tip-purple" style="margin-top:12px">
+        🚀 完成以上练习后，你对 SFC 中组件通信的掌握就和实际项目开发持平了。下一节将深入 <strong>scoped CSS 进阶用法</strong>（深度选择器 <code>::v-deep</code>、CSS Modules、动态样式技巧），这是实际项目中解决样式问题的关键。
+      </div>
+    </div>
+  </div>
+
+</div><!-- /demo-grid -->
+
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  24-2 · SFC 中的组件通信 &nbsp;|&nbsp; Vue Learning Path Phase 3
+</div>
+
+</body>
+</html>

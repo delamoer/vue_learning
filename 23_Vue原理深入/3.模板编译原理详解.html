@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 2 模板编译原理详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            padding: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 28px;
+            font-size: 17px;
+        }
+        .intro {
+            background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            line-height: 1.9;
+            margin-bottom: 30px;
+        }
+        .intro h2 { color: #fff; margin-bottom: 8px; }
+        h2 {
+            margin-top: 38px;
+            margin-bottom: 16px;
+            border-left: 5px solid #7c3aed;
+            padding-left: 12px;
+            color: #5b21b6;
+            font-size: 28px;
+        }
+        .section {
+            background: #faf5ff;
+            border: 2px solid #e9d5ff;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 16px 0;
+        }
+        .title {
+            font-size: 18px;
+            color: #111827;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        @media (max-width: 980px) {
+            .flow { grid-template-columns: 1fr; }
+        }
+        .flow-item {
+            background: #fff;
+            border: 1px solid #ddd6fe;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 90px;
+        }
+        .box-info, .box-warn, .box-ok {
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+        .box-info { background: #eef2ff; border-color: #6366f1; }
+        .box-warn { background: #fffbeb; border-color: #f59e0b; }
+        .box-ok { background: #ecfdf5; border-color: #16a34a; }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: white;
+            background: #7c3aed;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn:hover { background: #6d28d9; }
+        .btn-2 { background: #06b6d4; }
+        .btn-2:hover { background: #0891b2; }
+        .btn-3 { background: #16a34a; }
+        .btn-3:hover { background: #15803d; }
+        .code {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            border-radius: 10px;
+            padding: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre;
+        }
+        .log {
+            background: #111827;
+            color: #bbf7d0;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            min-height: 90px;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .demo-box {
+            background: #fff;
+            border: 1px solid #ddd6fe;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        input[type='text'] {
+            width: 100%;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        input[type='text']:focus { outline: none; border-color: #7c3aed; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>🧩 23.3 模板编译原理详解</h1>
+        <p class="subtitle">从 <code>template</code> 到 <code>render</code>：Parse → Optimize → Generate</p>
+
+        <div class="intro">
+            <h2>🎯 本节目标</h2>
+            <ul style="margin-left: 20px;">
+                <li>搞清楚 template 为什么不能直接渲染</li>
+                <li>理解编译三阶段：解析、优化、代码生成</li>
+                <li>能解释“运行时版 vs 完整版（含编译器）”</li>
+            </ul>
+        </div>
+
+        <h2>🗺️ 编译总流程</h2>
+        <div class="section">
+            <div class="flow">
+                <div class="flow-item"><strong>1. Parse</strong><br>把模板字符串解析为 AST（抽象语法树）</div>
+                <div class="flow-item"><strong>2. Optimize</strong><br>标记静态节点，减少重复 patch</div>
+                <div class="flow-item"><strong>3. Generate</strong><br>把 AST 生成为 render 函数字符串</div>
+                <div class="flow-item"><strong>4. Render</strong><br>执行 render 返回 VNode，再 patch 到 DOM</div>
+            </div>
+            <div class="box-info">一句话：模板是“写给人看的”，render 是“写给引擎跑的”。</div>
+        </div>
+
+        <h2>📘 Demo 1：模板到 AST（简化示意）</h2>
+        <div class="section">
+            <div class="title">输入模板，观察简化 AST</div>
+            <input type="text" v-model="templateInput" placeholder="例如：<div><span>{{msg}}</span></div>" />
+            <button class="btn" @click="runParseDemo">生成 AST</button>
+            <button class="btn btn-2" @click="clear('parseLog')">清空</button>
+            <div class="log">{{ parseLog }}</div>
+        </div>
+
+        <h2>📘 Demo 2：AST 到 render 代码（简化示意）</h2>
+        <div class="section">
+            <div class="title">常见 render 结构：_c / _v / _s</div>
+            <button class="btn" @click="runGenerateDemo">生成 render 代码</button>
+            <div class="code">{{ renderCode }}</div>
+            <div class="box-info">
+                <strong>符号说明：</strong>
+                <br><code>_c</code> 创建元素 VNode，<code>_v</code> 创建文本 VNode，<code>_s</code> 把变量转字符串。
+            </div>
+        </div>
+
+        <h2>📘 Demo 3：静态节点优化（为什么快）</h2>
+        <div class="section">
+            <div class="title">模拟“静态节点跳过”策略</div>
+            <div class="demo-box">
+                <div>动态计数：{{ count }}</div>
+                <div>静态文案：我是静态节点（理论上可被标记为 static）</div>
+                <button class="btn btn-3" @click="count++">count + 1</button>
+                <button class="btn" @click="runOptimizeDemo">查看优化说明</button>
+            </div>
+            <div class="log">{{ optimizeLog }}</div>
+        </div>
+
+        <h2>📘 Demo 4：运行时版 vs 完整版</h2>
+        <div class="section">
+            <div class="title">为什么有些项目里不能写 template 字符串？</div>
+            <div class="box-warn">
+                运行时版（runtime-only）不带编译器：需要你提前把模板编译成 render（通常由构建工具完成）。
+                <br>完整版（runtime + compiler）可以在浏览器里把 template 编译成 render，但包体积更大。
+            </div>
+            <div class="code">// runtime-only（常见于脚手架生产构建）
+new Vue({
+  render: h => h(App)
+})
+
+// runtime + compiler（可直接写 template）
+new Vue({
+  template: '<App/>'
+})</div>
+        </div>
+
+        <h2>📘 Demo 5：常见坑与排查</h2>
+        <div class="section">
+            <ul style="margin-left: 20px; line-height: 1.9;">
+                <li>模板根节点必须唯一（Vue 2）</li>
+                <li>不要在模板里写过重表达式，复杂逻辑放到 <code>computed</code></li>
+                <li>避免把会变化的数据写死进静态结构，影响优化收益</li>
+                <li>列表渲染配合稳定 <code>key</code>，让 Diff 更高效</li>
+            </ul>
+        </div>
+
+        <h2>📘 Demo 6：面试高频问答 + 练习</h2>
+        <div class="section">
+            <ul style="margin-left: 20px; line-height: 1.9;">
+                <li><strong>Q1：</strong>template 到页面经历了什么？<br>答：template → AST → render 函数 → VNode → patch 到真实 DOM。</li>
+                <li><strong>Q2：</strong>静态节点优化做了什么？<br>答：标记静态子树，后续更新跳过，减少不必要 patch。</li>
+                <li><strong>Q3：</strong>为什么有 runtime-only？<br>答：减小体积、提升运行时性能，编译前移到构建阶段。</li>
+            </ul>
+            <div class="box-ok">下一步建议学习 23.4 生命周期深入：把“编译/渲染时机”与“生命周期钩子”串起来。</div>
+        </div>
+
+        <h2>🧪 练习任务（40-60 分钟）</h2>
+        <div class="section">
+            <ol style="margin-left: 20px; line-height: 1.9;">
+                <li>写一个模板，手动画出对应 AST（元素节点/文本节点/插值）。</li>
+                <li>把一个简单模板手写成 render 形式（用 <code>_c/_v/_s</code> 思路）。</li>
+                <li>对一个列表页面标注哪些节点可视为静态节点，解释为什么。</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    templateInput: '<div><span>{{msg}}</span></div>',
+                    parseLog: '点击“生成 AST”查看输出...',
+                    renderCode: "_c('div', [_c('span', [_v(_s(msg))])])",
+                    count: 0,
+                    optimizeLog: '点击“查看优化说明”查看输出...'
+                };
+            },
+            methods: {
+                clear(field) {
+                    this[field] = '已清空。';
+                },
+                runParseDemo() {
+                    const input = this.templateInput || '';
+                    const ast = {
+                        type: 'Element',
+                        tag: 'div',
+                        children: [
+                            {
+                                type: 'Element',
+                                tag: 'span',
+                                children: [
+                                    { type: 'Expression', content: 'msg' }
+                                ]
+                            }
+                        ],
+                        source: input
+                    };
+                    this.parseLog = JSON.stringify(ast, null, 2);
+                },
+                runGenerateDemo() {
+                    this.renderCode = "_c('div', [_c('span', [_v(_s(msg))])])";
+                },
+                runOptimizeDemo() {
+                    const lines = [];
+                    lines.push('更新前：');
+                    lines.push('- 节点A：动态 count 文本（需要重新计算）');
+                    lines.push('- 节点B：静态文案（可跳过）');
+                    lines.push('');
+                    lines.push('更新 count 后：');
+                    lines.push('- patch 主要命中节点A');
+                    lines.push('- 节点B 因 static 标记可复用并跳过比对');
+                    lines.push('');
+                    lines.push('结论：静态提升 + 跳过 patch = 更少开销');
+                    this.optimizeLog = lines.join('\n');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

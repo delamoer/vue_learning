@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 2 虚拟DOM与Diff详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            padding: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+        h1 {
+            text-align: center;
+            color: #111827;
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 28px;
+            font-size: 17px;
+        }
+        .intro {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            line-height: 1.9;
+            margin-bottom: 30px;
+        }
+        .intro h2 { color: #fff; margin-bottom: 8px; }
+        h2 {
+            margin-top: 38px;
+            margin-bottom: 16px;
+            border-left: 5px solid #0ea5e9;
+            padding-left: 12px;
+            color: #0369a1;
+            font-size: 28px;
+        }
+        h3 { color: #334155; margin-bottom: 10px; }
+        .section {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 16px 0;
+        }
+        .title {
+            font-size: 18px;
+            color: #0f172a;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        @media (max-width: 920px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: white;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .box-info, .box-warn, .box-ok {
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+        .box-info { background: #eff6ff; border-color: #2563eb; }
+        .box-warn { background: #fffbeb; border-color: #f59e0b; }
+        .box-ok { background: #ecfdf5; border-color: #16a34a; }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: white;
+            background: #0ea5e9;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn:hover { background: #0284c7; }
+        .btn-2 { background: #6366f1; }
+        .btn-2:hover { background: #4f46e5; }
+        .btn-3 { background: #16a34a; }
+        .btn-3:hover { background: #15803d; }
+        .code {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            border-radius: 10px;
+            padding: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .log {
+            background: #111827;
+            color: #bbf7d0;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            min-height: 90px;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .list-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+            background: #fff;
+        }
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>🌲 23.2 虚拟 DOM 与 Diff 详解</h1>
+        <p class="subtitle">理解 <code>VNode</code>、<code>patch</code>、<code>key</code>，回答“Vue 为什么快？”</p>
+
+        <div class="intro">
+            <h2>🎯 本节目标</h2>
+            <ul style="margin-left: 20px;">
+                <li>理解什么是虚拟 DOM（VNode）以及它存在的意义</li>
+                <li>掌握 Vue 2 Diff 的关键策略（同层比较、key 复用）</li>
+                <li>会解释 key 的最佳实践与常见坑</li>
+            </ul>
+        </div>
+
+        <h2>🗺️ 学习地图</h2>
+        <div class="section">
+            <div class="grid">
+                <div class="card">Demo 1：虚拟 DOM 是什么（对象结构）</div>
+                <div class="card">Demo 2：patch 流程（旧树 vs 新树）</div>
+                <div class="card">Demo 3：key 的作用（复用与移动）</div>
+                <div class="card">Demo 4：错误 key（index）带来的问题</div>
+                <div class="card">Demo 5：Diff 规则速记</div>
+                <div class="card">Demo 6：面试高频问答 + 练习</div>
+            </div>
+        </div>
+
+        <h2>📘 Demo 1：虚拟 DOM 是什么</h2>
+        <div class="section">
+            <div class="title">真实 DOM 太重，先在 JS 里构建轻量 VNode</div>
+            <div class="code">// 一个简化 VNode
+{
+  tag: 'li',
+  key: 'u_1',
+  data: { class: 'row' },
+  children: [
+    { tag: undefined, text: '张三' }
+  ]
+}</div>
+            <div class="box-info">核心：Vue 先生成“新旧两棵 VNode 树”，再 diff，最后只把“差异”打到真实 DOM。</div>
+        </div>
+
+        <h2>📘 Demo 2：patch 流程（可视化）</h2>
+        <div class="section">
+            <div class="title">点击按钮模拟 patch 步骤</div>
+            <button class="btn" @click="runPatchDemo">运行 patch 模拟</button>
+            <button class="btn btn-2" @click="clear('patchLog')">清空日志</button>
+            <div class="log">{{ patchLog }}</div>
+        </div>
+
+        <h2>📘 Demo 3：key 的作用（正确）</h2>
+        <div class="section">
+            <div class="title">使用稳定 key，Diff 能正确复用与移动节点</div>
+            <button class="btn" @click="shuffleUsers">打乱顺序</button>
+            <div class="list-box">
+                <div class="item" v-for="user in users" :key="user.id">
+                    <span>{{ user.name }}</span>
+                    <span class="tag">key: {{ user.id }}</span>
+                </div>
+            </div>
+            <div class="box-ok">当 key 稳定时，Vue 更可能执行“移动节点”而不是“销毁重建”。</div>
+        </div>
+
+        <h2>📘 Demo 4：index 作为 key 的风险</h2>
+        <div class="section">
+            <div class="title">错误示例：index key 导致状态错位</div>
+            <button class="btn btn-2" @click="insertTop">头部插入一项</button>
+            <div class="list-box">
+                <div class="item" v-for="(task, idx) in tasks" :key="idx">
+                    <span>{{ idx }}. {{ task.title }}</span>
+                    <span class="tag">key: index</span>
+                </div>
+            </div>
+            <div class="box-warn">当在头部插入时，后续项 index 全变，旧节点可能被错误复用，输入框/组件内部状态容易错位。</div>
+        </div>
+
+        <h2>📘 Demo 5：Diff 规则速记</h2>
+        <div class="section">
+            <div class="code">Vue 2 Diff 关键点（面试可直接说）：
+1) 同层比较，不做跨层级暴力比对（降低复杂度）
+2) 先比较节点类型（tag / key），不同则直接替换
+3) 列表更新依赖 key，key 稳定可提升复用率
+4) 通过 patch 仅更新必要 DOM，而非整棵重建</div>
+            <div class="box-info">理解方式：Diff 的目标不是“找最优编辑距离”，而是“在工程可接受复杂度下尽量快”。</div>
+        </div>
+
+        <h2>📘 Demo 6：面试高频问答 + 自测</h2>
+        <div class="section">
+            <ul style="margin-left: 20px; line-height: 1.9;">
+                <li><strong>Q1：</strong>为什么需要虚拟 DOM？<br>答：把直接 DOM 操作抽象成 JS 对象比较，减少不必要真实 DOM 变更，便于跨平台渲染。</li>
+                <li><strong>Q2：</strong>Diff 一定比直接操作 DOM 快吗？<br>答：不绝对；小规模手写精准 DOM 可能更快，但框架场景下 Diff 提供稳定工程收益。</li>
+                <li><strong>Q3：</strong>key 为什么重要？<br>答：key 决定节点身份，影响复用与移动策略；不稳定 key 会导致性能与状态问题。</li>
+            </ul>
+            <div class="box-ok">学完本页后，建议立即进入 23.3（模板编译）或先做 30 分钟手写 patch 小练习。</div>
+        </div>
+
+        <h2>🧪 练习任务（45-60 分钟）</h2>
+        <div class="section">
+            <ol style="margin-left: 20px; line-height: 1.9;">
+                <li>写一个数组列表，分别用 <code>id</code> 与 <code>index</code> 作为 key，对比插入头部时表现。</li>
+                <li>实现一个“简化 patch 函数”：比较两个对象树，输出要做的操作（替换/更新文本/移动）。</li>
+                <li>总结一段 60 秒口述答案：虚拟 DOM、Diff、key 各是什么、为什么重要。</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    patchLog: '点击“运行 patch 模拟”查看流程... ',
+                    users: [
+                        { id: 'u1', name: '张三' },
+                        { id: 'u2', name: '李四' },
+                        { id: 'u3', name: '王五' }
+                    ],
+                    tasks: [
+                        { title: '学习响应式原理' },
+                        { title: '学习虚拟DOM' },
+                        { title: '学习Diff算法' }
+                    ]
+                };
+            },
+            methods: {
+                clear(field) {
+                    this[field] = '已清空。';
+                },
+                runPatchDemo() {
+                    const oldTree = {
+                        tag: 'ul',
+                        children: [
+                            { tag: 'li', key: 'a', text: 'A' },
+                            { tag: 'li', key: 'b', text: 'B' },
+                            { tag: 'li', key: 'c', text: 'C' }
+                        ]
+                    };
+                    const newTree = {
+                        tag: 'ul',
+                        children: [
+                            { tag: 'li', key: 'b', text: 'B' },
+                            { tag: 'li', key: 'a', text: 'A*' },
+                            { tag: 'li', key: 'd', text: 'D' }
+                        ]
+                    };
+                    const lines = [];
+                    lines.push('1) 先比较根节点 tag：ul vs ul => 继续对子节点 diff');
+                    lines.push('2) 子节点 key 对比：');
+                    lines.push('   - key=b：旧位置1 -> 新位置0（移动）');
+                    lines.push('   - key=a：旧位置0 -> 新位置1（移动 + 文本更新 A -> A*）');
+                    lines.push('   - key=c：旧有新无（删除）');
+                    lines.push('   - key=d：新有旧无（新增）');
+                    lines.push('3) 生成最小必要 DOM 操作并执行 patch');
+                    lines.push('结论：不是整棵重建，而是“移动/更新/增删”组合。');
+                    this.patchLog = lines.join('\n');
+
+                    if (JSON.stringify(oldTree) && JSON.stringify(newTree)) {
+                        // 占位，避免未使用变量提示（教育示例）
+                    }
+                },
+                shuffleUsers() {
+                    const arr = [...this.users];
+                    for (let index = arr.length - 1; index > 0; index--) {
+                        const randomIndex = Math.floor(Math.random() * (index + 1));
+                        [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
+                    }
+                    this.users = arr;
+                },
+                insertTop() {
+                    this.tasks.unshift({ title: '新任务_' + Date.now().toString().slice(-4) });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

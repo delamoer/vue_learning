@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 2 实例化过程详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            padding: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+        h1 { text-align: center; color: #111827; font-size: 36px; margin-bottom: 8px; }
+        .subtitle { text-align: center; color: #6b7280; margin-bottom: 28px; font-size: 17px; }
+        .intro {
+            background: linear-gradient(135deg, #2563eb 0%, #14b8a6 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            line-height: 1.9;
+            margin-bottom: 30px;
+        }
+        .intro h2 { color: #fff; margin-bottom: 8px; }
+        h2 {
+            margin-top: 36px;
+            margin-bottom: 16px;
+            border-left: 5px solid #2563eb;
+            padding-left: 12px;
+            color: #1d4ed8;
+            font-size: 28px;
+        }
+        .section {
+            background: #f8fafc;
+            border: 2px solid #dbeafe;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 16px 0;
+        }
+        .title { font-size: 18px; color: #111827; font-weight: 700; margin-bottom: 10px; }
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        @media (max-width: 1000px) { .flow { grid-template-columns: 1fr; } }
+        .flow-item {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 92px;
+        }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #fff;
+            background: #2563eb;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn-2 { background: #14b8a6; }
+        .btn-2:hover { background: #0d9488; }
+        .btn-3 { background: #f59e0b; }
+        .btn-3:hover { background: #d97706; }
+        .log {
+            background: #111827;
+            color: #bbf7d0;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .code {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            border-radius: 10px;
+            padding: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre;
+        }
+        .box-info, .box-warn, .box-ok {
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+        .box-info { background: #eff6ff; border-color: #2563eb; }
+        .box-warn { background: #fffbeb; border-color: #f59e0b; }
+        .box-ok { background: #ecfdf5; border-color: #16a34a; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+        .card {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 12px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>🚀 23.5 实例化过程详解</h1>
+        <p class="subtitle">理解 new Vue() 内部发生了什么：初始化、编译、挂载、更新</p>
+
+        <div class="intro">
+            <h2>🎯 本节目标</h2>
+            <ul style="margin-left: 20px;">
+                <li>掌握 Vue 实例从创建到渲染的关键步骤</li>
+                <li>理解 _init、状态初始化、编译、挂载的先后关系</li>
+                <li>能回答面试中 new Vue 相关问题</li>
+            </ul>
+        </div>
+
+        <h2>🗺️ 总流程（高频面试答案）</h2>
+        <div class="section">
+            <div class="flow">
+                <div class="flow-item"><strong>1. new Vue</strong><br>执行构造函数，进入 _init</div>
+                <div class="flow-item"><strong>2. 合并选项</strong><br>处理全局配置、组件配置、实例配置</div>
+                <div class="flow-item"><strong>3. 初始化状态</strong><br>props/methods/data/computed/watch</div>
+                <div class="flow-item"><strong>4. 编译模板</strong><br>template 转 render（如需）</div>
+                <div class="flow-item"><strong>5. 挂载渲染</strong><br>mount -> watcher -> patch 到 DOM</div>
+            </div>
+            <div class="box-info">一句话：先把“能力”准备好（数据/方法/响应式），再把“视图”渲染到页面。</div>
+        </div>
+
+        <h2>📘 Demo 1：初始化链路日志（模拟）</h2>
+        <div class="section">
+            <div class="title">点击运行，查看一条完整实例化时间线</div>
+            <button class="btn" @click="runInitDemo">运行实例化流程</button>
+            <button class="btn btn-2" @click="clear('initLog')">清空日志</button>
+            <div class="log">{{ initLog }}</div>
+        </div>
+
+        <h2>📘 Demo 2：选项合并与状态初始化</h2>
+        <div class="section">
+            <div class="title">为什么 data 是函数？为什么 methods 可以直接用？</div>
+            <div class="grid">
+                <div class="card">
+                    <strong>data 初始化：</strong><br>
+                    读取 data 结果对象，代理到 vm 上，并做响应式处理。
+                </div>
+                <div class="card">
+                    <strong>methods 初始化：</strong><br>
+                    把方法挂到 vm，自动绑定 this 到实例。
+                </div>
+                <div class="card">
+                    <strong>computed 初始化：</strong><br>
+                    创建惰性 watcher，按需计算并缓存。
+                </div>
+                <div class="card">
+                    <strong>watch 初始化：</strong><br>
+                    创建用户 watcher，侦听指定数据变化。
+                </div>
+            </div>
+            <div class="box-warn">组件中 data 必须是函数，避免多个实例共享同一对象。</div>
+        </div>
+
+        <h2>📘 Demo 3：模板编译与挂载时机</h2>
+        <div class="section">
+            <div class="title">有 render 就用 render；没有则尝试编译 template</div>
+            <div class="code">if (!options.render) {
+  // runtime+compiler 才能做这步
+  options.render = compileToFunctions(options.template)
+}
+mountComponent(vm, el) // 创建渲染 watcher，首次 patch</div>
+            <div class="box-info">脚手架常用 runtime-only：编译在构建阶段完成，运行时直接执行 render。</div>
+        </div>
+
+        <h2>📘 Demo 4：首次渲染与后续更新</h2>
+        <div class="section">
+            <div class="title">修改数据，观察“渲染 watcher -> patch”</div>
+            <div style="margin-bottom: 8px;">当前计数：<strong>{{ count }}</strong></div>
+            <button class="btn" @click="updateCount">count + 1</button>
+            <button class="btn btn-3" @click="resetCount">重置</button>
+            <div class="log">{{ updateLog }}</div>
+        </div>
+
+        <h2>📘 Demo 5：常见误区与排查</h2>
+        <div class="section">
+            <ul style="margin-left: 20px; line-height: 1.9;">
+                <li>误区1：created 可以拿到 DOM（错误）</li>
+                <li>误区2：每次 set data 都会立刻重绘（错误，异步批处理）</li>
+                <li>误区3：runtime-only 也能直接在线编译 template（错误）</li>
+                <li>误区4：组件 data 写对象没问题（错误，会共享状态）</li>
+            </ul>
+            <div class="box-ok">排查思路：先确认版本构建类型，再确认生命周期时机，最后检查响应式边界。</div>
+        </div>
+
+        <h2>📘 Demo 6：面试速答 + 练习</h2>
+        <div class="section">
+            <ul style="margin-left: 20px; line-height: 1.9;">
+                <li><strong>Q1：</strong>new Vue 后做了什么？<br>答：_init -> 合并选项 -> 初始化状态/生命周期/事件 -> 编译(可选) -> 挂载 -> 渲染 watcher。</li>
+                <li><strong>Q2：</strong>为什么模板有时不能用？<br>答：runtime-only 不带编译器，需预编译成 render。</li>
+                <li><strong>Q3：</strong>首屏渲染和后续更新核心差异？<br>答：首屏是首次 patch，后续是响应式驱动 watcher 触发 patch。</li>
+            </ul>
+            <div class="box-ok">完成 23.5 后，你已完成 23 全章（原理深入）主线。</div>
+        </div>
+
+        <h2>🧪 练习任务（40-60 分钟）</h2>
+        <div class="section">
+            <ol style="margin-left: 20px; line-height: 1.9;">
+                <li>手写一份 new Vue 实例化流程图（5 步版）。</li>
+                <li>写一个 runtime-only 与 template 报错复现（可选）。</li>
+                <li>写一段 60 秒口述：实例化流程 + 生命周期关键点 + 更新机制。</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    initLog: '点击“运行实例化流程”查看输出... ',
+                    count: 0,
+                    updateLog: '点击 count + 1，观察更新链路...'
+                };
+            },
+            methods: {
+                clear(field) {
+                    this[field] = '已清空。';
+                },
+                runInitDemo() {
+                    const lines = [];
+                    lines.push('1) 调用 new Vue(options)');
+                    lines.push('2) 进入 _init：合并全局与局部 options');
+                    lines.push('3) 初始化生命周期、事件、渲染上下文');
+                    lines.push('4) 执行 beforeCreate');
+                    lines.push('5) 初始化 injections / state(props,data,methods,computed,watch) / provide');
+                    lines.push('6) 执行 created');
+                    lines.push('7) 若存在 el，进入 $mount');
+                    lines.push('8) 若无 render 且可编译，template -> render');
+                    lines.push('9) beforeMount -> 创建渲染 watcher -> 首次 patch');
+                    lines.push('10) mounted（DOM 可操作）');
+                    this.initLog = lines.join('\n');
+                },
+                updateCount() {
+                    this.count += 1;
+                    this.updateLog += '\n数据变更：count=' + this.count;
+                    this.$nextTick(() => {
+                        this.updateLog += '\n渲染 watcher 已触发，DOM 完成本轮 patch';
+                    });
+                },
+                resetCount() {
+                    this.count = 0;
+                    this.updateLog = '已重置。点击 count + 1，观察更新链路...';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

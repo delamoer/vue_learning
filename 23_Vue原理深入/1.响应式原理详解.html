@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 2 响应式原理详解</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            padding: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+        h1 {
+            font-size: 36px;
+            color: #1f2937;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 17px;
+        }
+        .intro {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: #fff;
+            padding: 26px;
+            border-radius: 12px;
+            line-height: 1.9;
+            margin-bottom: 35px;
+        }
+        .intro h2 { color: #fff; margin-bottom: 8px; }
+        h2 {
+            margin-top: 40px;
+            margin-bottom: 18px;
+            color: #2563eb;
+            border-left: 5px solid #2563eb;
+            padding-left: 12px;
+            font-size: 28px;
+        }
+        h3 { margin: 18px 0 12px; color: #374151; }
+        .demo {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 18px 0;
+        }
+        .demo-title { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 12px; }
+        .panel {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin: 6px 6px 6px 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn-secondary { background: #6b7280; }
+        .btn-secondary:hover { background: #4b5563; }
+        .btn-success { background: #16a34a; }
+        .btn-success:hover { background: #15803d; }
+        .box-info, .box-warn, .box-ok {
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+        .box-info { background: #eff6ff; border-color: #2563eb; }
+        .box-warn { background: #fffbeb; border-color: #f59e0b; }
+        .box-ok { background: #ecfdf5; border-color: #16a34a; }
+        .code {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 14px;
+            border-radius: 10px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .log {
+            margin-top: 10px;
+            background: #111827;
+            color: #d1fae5;
+            border-radius: 8px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            padding: 12px;
+            min-height: 80px;
+            white-space: pre-wrap;
+        }
+        .card {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+        input[type='text'] {
+            width: 100%;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        input[type='text']:focus { outline: none; border-color: #2563eb; }
+        .todo li { margin: 8px 0; }
+        .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 900px) {
+            .phase-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>⚙️ 23.1 响应式原理详解</h1>
+        <p class="subtitle">从 <code>Object.defineProperty</code> 到 <code>Dep / Watcher</code>，彻底理解 Vue 2 为什么“数据变，视图就变”</p>
+
+        <div class="intro">
+            <h2>🎯 本节目标</h2>
+            <p>你将掌握：<strong>数据劫持</strong>、<strong>依赖收集</strong>、<strong>派发更新</strong> 三个核心流程，并能解释面试常见问题。</p>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+                <li>Vue 2 如何把普通对象变成响应式对象</li>
+                <li>为什么新增属性/数组下标修改会“失效”</li>
+                <li>为什么需要 <code>Vue.set</code> 与数组变异方法</li>
+            </ul>
+        </div>
+
+        <h2>🗺️ 学习清单（Demo 路线）</h2>
+        <div class="demo">
+            <div class="phase-grid">
+                <div class="card">Demo 1：手写最小响应式（defineProperty）</div>
+                <div class="card">Demo 2：依赖收集（Dep / Watcher）</div>
+                <div class="card">Demo 3：Vue 2 新增属性问题与 Vue.set</div>
+                <div class="card">Demo 4：数组响应式与变异方法</div>
+                <div class="card">Demo 5：更新队列与异步批处理</div>
+                <div class="card">Demo 6：面试题速答与自测</div>
+            </div>
+        </div>
+
+        <h2>📘 Demo 1：手写最小响应式</h2>
+        <div class="demo">
+            <div class="demo-title">核心：getter 收集依赖，setter 派发通知</div>
+            <div class="panel">
+                <button class="btn" @click="runDemo1">运行 Demo 1</button>
+                <button class="btn btn-secondary" @click="clearLog('demo1Log')">清空日志</button>
+                <div class="log">{{ demo1Log }}</div>
+            </div>
+            <div class="code">function defineReactive(obj, key, val) {
+  const deps = [];
+  Object.defineProperty(obj, key, {
+    get() { return val; },
+    set(newVal) { val = newVal; deps.forEach(fn =&gt; fn(newVal)); }
+  });
+}</div>
+        </div>
+
+        <h2>📘 Demo 2：依赖收集（简化版 Dep / Watcher）</h2>
+        <div class="demo">
+            <div class="demo-title">核心：读取数据时建立订阅关系，修改数据时通知 watcher 更新</div>
+            <div class="panel">
+                <button class="btn" @click="runDemo2">运行 Demo 2</button>
+                <button class="btn btn-secondary" @click="clearLog('demo2Log')">清空日志</button>
+                <div class="log">{{ demo2Log }}</div>
+            </div>
+        </div>
+
+        <h2>📘 Demo 3：新增属性为什么不响应？</h2>
+        <div class="demo">
+            <div class="demo-title">核心：Vue 2 初始化时递归劫持已有 key，后加 key 需用 Vue.set</div>
+            <div class="panel">
+                <div>当前用户：{{ user }}</div>
+                <button class="btn" @click="addAgeDirectly">直接新增 age（不推荐）</button>
+                <button class="btn btn-success" @click="addAgeBySet">Vue.set 新增 age（推荐）</button>
+                <div class="box-warn">观察：直接赋值后页面不一定更新；使用 <code>Vue.set(this.user, 'age', 18)</code> 一定可响应。</div>
+            </div>
+        </div>
+
+        <h2>📘 Demo 4：数组响应式要点</h2>
+        <div class="demo">
+            <div class="demo-title">核心：通过重写变异方法（push/splice...）触发更新</div>
+            <div class="panel">
+                <div>列表：{{ books.join('、') }}</div>
+                <button class="btn" @click="replaceByIndex">直接改下标 books[1]=X（演示）</button>
+                <button class="btn btn-success" @click="replaceBySplice">splice 改值（推荐）</button>
+                <button class="btn" @click="pushBook">push 新项</button>
+                <div class="box-info">Vue 2 对数组下标赋值与 length 改动无法直接侦测，推荐 <code>splice</code> / <code>Vue.set</code>。</div>
+            </div>
+        </div>
+
+        <h2>📘 Demo 5：更新队列与异步批处理</h2>
+        <div class="demo">
+            <div class="demo-title">核心：同一轮事件循环内的多次变更，会被合并更新</div>
+            <div class="panel">
+                <div>count: <strong>{{ queueCount }}</strong></div>
+                <button class="btn" @click="multiUpdate">连续改 3 次 count</button>
+                <div class="log">{{ queueLog }}</div>
+            </div>
+        </div>
+
+        <h2>📘 Demo 6：面试高频题（速答）</h2>
+        <div class="demo">
+            <ul class="todo">
+                <li><strong>Q1：</strong>Vue 2 响应式基于什么？<br>答：<code>Object.defineProperty</code> + 依赖收集 + 派发更新。</li>
+                <li><strong>Q2：</strong>为什么对象新增属性不响应？<br>答：初始化时未被劫持，需 <code>Vue.set</code>。</li>
+                <li><strong>Q3：</strong>数组下标赋值为什么可能不更新？<br>答：Vue 2 无法拦截下标写入，需 <code>splice</code> / <code>Vue.set</code>。</li>
+                <li><strong>Q4：</strong>为什么更新是异步的？<br>答：批量合并更新，提升性能，避免重复渲染。</li>
+            </ul>
+            <div class="box-ok">你已经完成 23.1 的核心认知，下一步建议学 23.2：虚拟 DOM 与 Diff。</div>
+        </div>
+
+        <h2>🧪 练习任务（建议 60-90 分钟）</h2>
+        <div class="demo">
+            <ol style="margin-left: 20px; line-height: 1.8;">
+                <li>手写一个 <code>defineReactive</code>，支持两个字段并打印变更日志。</li>
+                <li>实现一个最小版 <code>Dep</code>/<code>Watcher</code>，做到“读时收集、写时通知”。</li>
+                <li>写一个对象新增 key 的 demo，对比“直接赋值 vs Vue.set”。</li>
+                <li>写一个数组 demo，对比“下标赋值 vs splice”。</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    demo1Log: '点击“运行 Demo 1”查看输出...',
+                    demo2Log: '点击“运行 Demo 2”查看输出...',
+                    user: { name: '张三' },
+                    books: ['Vue', 'React', 'Angular'],
+                    queueCount: 0,
+                    queueLog: '点击“连续改 3 次 count”查看输出...'
+                };
+            },
+            methods: {
+                clearLog(field) {
+                    this[field] = '已清空。';
+                },
+                runDemo1() {
+                    let log = [];
+                    function defineReactive(obj, key, val) {
+                        const deps = [];
+                        Object.defineProperty(obj, key, {
+                            get() {
+                                log.push(`[get] ${key} -> ${val}`);
+                                return val;
+                            },
+                            set(newVal) {
+                                log.push(`[set] ${key}: ${val} -> ${newVal}`);
+                                val = newVal;
+                                deps.forEach(fn => fn(newVal));
+                            }
+                        });
+                        return {
+                            watch(fn) { deps.push(fn); }
+                        };
+                    }
+
+                    const state = {};
+                    const reactiveCount = defineReactive(state, 'count', 0);
+                    reactiveCount.watch(v => log.push(`[watcher] count changed to ${v}`));
+
+                    log.push('读取 count 一次：' + state.count);
+                    state.count = 1;
+                    state.count = 2;
+
+                    this.demo1Log = log.join('\n');
+                },
+                runDemo2() {
+                    let log = [];
+                    class Dep {
+                        constructor() { this.subs = []; }
+                        depend() {
+                            if (Dep.target && !this.subs.includes(Dep.target)) this.subs.push(Dep.target);
+                        }
+                        notify() { this.subs.forEach(sub => sub.update()); }
+                    }
+                    Dep.target = null;
+
+                    class Watcher {
+                        constructor(name, getter) {
+                            this.name = name;
+                            this.getter = getter;
+                            this.update();
+                        }
+                        update() {
+                            Dep.target = this;
+                            const value = this.getter();
+                            Dep.target = null;
+                            log.push(`[watcher:${this.name}] render with value=${value}`);
+                        }
+                    }
+
+                    const dep = new Dep();
+                    let value = 10;
+                    const state = {
+                        get price() {
+                            dep.depend();
+                            return value;
+                        },
+                        set price(v) {
+                            value = v;
+                            log.push(`[setter] price = ${v}`);
+                            dep.notify();
+                        }
+                    };
+
+                    new Watcher('A', () => state.price);
+                    state.price = 20;
+                    state.price = 35;
+
+                    this.demo2Log = log.join('\n');
+                },
+                addAgeDirectly() {
+                    this.user.age = 18;
+                    this.user = this.user;
+                },
+                addAgeBySet() {
+                    Vue.set(this.user, 'age', 18);
+                },
+                replaceByIndex() {
+                    this.books[1] = 'Svelte';
+                    this.books = this.books;
+                },
+                replaceBySplice() {
+                    this.books.splice(1, 1, 'Svelte');
+                },
+                pushBook() {
+                    this.books.push('Solid');
+                },
+                multiUpdate() {
+                    this.queueLog = '';
+                    this.queueCount = 1;
+                    this.queueCount = 2;
+                    this.queueCount = 3;
+                    this.queueLog += `同步代码中最终 count=${this.queueCount}\n`;
+                    this.queueLog += 'DOM 更新会被批处理，视图最终显示 3\n';
+                    this.$nextTick(() => {
+                        this.queueLog += '$nextTick：DOM 已完成本轮更新';
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
