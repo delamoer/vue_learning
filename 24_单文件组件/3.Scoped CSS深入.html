@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>24-3 · Scoped CSS 深入</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #0c1a35 50%, #0f172a 100%);
+      min-height: 100vh; color: #e2e8f0; padding: 20px;
+    }
+    .page-header {
+      text-align: center; padding: 40px 20px 30px;
+      background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(99,102,241,0.12));
+      border-radius: 16px; margin-bottom: 30px;
+      border: 1px solid rgba(6,182,212,0.25);
+    }
+    .page-header h1 { font-size: 2rem; color: #22d3ee; margin-bottom: 8px; }
+    .page-header p  { color: #94a3b8; font-size: 1rem; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin: 4px 4px 0;
+    }
+    .badge-green  { background: rgba(16,185,129,0.2);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-purple { background: rgba(139,92,246,0.2);  color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .badge-blue   { background: rgba(59,130,246,0.2);  color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-orange { background: rgba(245,158,11,0.2);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-cyan   { background: rgba(6,182,212,0.2);   color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); }
+    .badge-red    { background: rgba(239,68,68,0.2);   color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(580px, 1fr)); gap: 24px; max-width: 1400px; margin: 0 auto; }
+    .demo-card {
+      background: rgba(255,255,255,0.04); border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+    }
+    .demo-card-header {
+      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .demo-card-header h3 { font-size: 1rem; color: #e2e8f0; flex: 1; }
+    .demo-card-body { padding: 20px; }
+
+    /* 代码块 */
+    .code-block {
+      background: #0d1117; border-radius: 8px; padding: 16px;
+      font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.82rem;
+      line-height: 1.65; overflow-x: auto; margin: 8px 0;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .c { color: #6e7681; }
+    .k { color: #ff7b72; }
+    .s { color: #a5d6ff; }
+    .t { color: #7ee787; }
+    .a { color: #ffa657; }
+    .v { color: #79c0ff; }
+    .f { color: #d2a8ff; }
+    .hl { background: rgba(255,210,0,0.1); border-left: 2px solid #fbbf24; padding-left: 6px; display: block; margin-left: -16px; padding-left: 14px; }
+
+    /* 双列对比 */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+    .split-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+      padding: 5px 10px; border-radius: 4px 4px 0 0; text-align: center;
+    }
+    .label-bad  { background: rgba(239,68,68,0.15);  color: #f87171; }
+    .label-good { background: rgba(16,185,129,0.15); color: #34d399; }
+    .label-a    { background: rgba(99,102,241,0.15); color: #a78bfa; }
+    .label-b    { background: rgba(6,182,212,0.15);  color: #22d3ee; }
+    .split-block .code-block { border-radius: 0 0 8px 8px; border-top: none; margin: 0; }
+
+    /* 提示框 */
+    .tip {
+      padding: 10px 14px; border-radius: 8px; margin: 10px 0;
+      font-size: 0.83rem; line-height: 1.6;
+    }
+    .tip-blue   { background: rgba(59,130,246,0.1);  border-left: 3px solid #60a5fa; color: #93c5fd; }
+    .tip-yellow { background: rgba(245,158,11,0.1);  border-left: 3px solid #fbbf24; color: #fde68a; }
+    .tip-green  { background: rgba(16,185,129,0.1);  border-left: 3px solid #34d399; color: #6ee7b7; }
+    .tip-purple { background: rgba(139,92,246,0.1);  border-left: 3px solid #a78bfa; color: #c4b5fd; }
+    .tip-red    { background: rgba(239,68,68,0.1);   border-left: 3px solid #f87171; color: #fca5a5; }
+    .tip-cyan   { background: rgba(6,182,212,0.1);   border-left: 3px solid #22d3ee; color: #67e8f9; }
+
+    /* 面试速答 */
+    .qa-list { list-style: none; }
+    .qa-list li {
+      padding: 12px 14px; margin-bottom: 8px;
+      background: rgba(255,255,255,0.03); border-radius: 8px;
+      border-left: 3px solid #0891b2;
+    }
+    .qa-q { color: #22d3ee; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .qa-a { color: #94a3b8; font-size: 0.82rem; line-height: 1.6; }
+    .qa-a code { background: rgba(6,182,212,0.15); padding: 1px 5px; border-radius: 3px; color: #67e8f9; font-size: 0.8rem; }
+
+    /* 练习任务 */
+    .task-block {
+      background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 10px; padding: 16px;
+    }
+    .task-block h4 { color: #34d399; margin-bottom: 10px; font-size: 0.9rem; }
+    .task-block ol { padding-left: 20px; color: #94a3b8; font-size: 0.85rem; line-height: 1.9; }
+    .task-block ol li strong { color: #22d3ee; }
+
+    /* 编译结果可视化 */
+    .compile-viz {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px;
+      align-items: center; margin: 12px 0;
+    }
+    .compile-arrow {
+      text-align: center; color: #fbbf24; font-size: 1.2rem;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .compile-label { font-size: 0.7rem; color: #6e7681; }
+
+    .section-title {
+      font-size: 0.75rem; font-weight: 700; color: #0891b2;
+      text-transform: uppercase; letter-spacing: 1.5px; margin: 14px 0 8px;
+    }
+    p  { font-size: 0.85rem; line-height: 1.7; color: #94a3b8; margin: 6px 0; }
+    h3 { font-size: 0.9rem; }
+
+    /* 文件标签 */
+    .file-tab {
+      display: inline-block; padding: 3px 10px; border-radius: 4px;
+      font-size: 0.75rem; font-family: 'Consolas', monospace; margin-bottom: 4px;
+    }
+    .file-vue    { background: rgba(65,184,131,0.15); color: #42b883; }
+    .file-output { background: rgba(255,210,0,0.1);   color: #fbbf24; }
+
+    /* 使用场景标签 */
+    .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+    .scenario-card {
+      background: rgba(255,255,255,0.03); border-radius: 8px;
+      padding: 12px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .scenario-card h4 { font-size: 0.82rem; margin-bottom: 6px; }
+    .scenario-card p  { font-size: 0.78rem; margin: 0; }
+    .use-scoped    h4 { color: #34d399; }
+    .use-module    h4 { color: #a78bfa; }
+    .use-global    h4 { color: #fbbf24; }
+    .use-deep      h4 { color: #22d3ee; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Scoped CSS 深入</h1>
+  <p>样式隔离原理、深度选择器、CSS Modules 与动态样式</p>
+  <div style="margin-top:12px">
+    <span class="badge badge-cyan">scoped 原理</span>
+    <span class="badge badge-blue">::v-deep</span>
+    <span class="badge badge-purple">CSS Modules</span>
+    <span class="badge badge-green">动态 class/style</span>
+    <span class="badge badge-orange">全局样式</span>
+    <span class="badge badge-red">常见坑</span>
+  </div>
+</div>
+
+<div class="demo-grid">
+
+  <!-- ==================== Demo 1：scoped 原理 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-cyan">Demo 1</span>
+      <h3>scoped 的编译原理</h3>
+    </div>
+    <div class="demo-card-body">
+      <p>加了 <code>scoped</code> 的样式，Vue CLI / Vite 编译时会做两件事：</p>
+
+      <div class="section-title">第一步：给 DOM 打唯一 hash 属性</div>
+      <div class="compile-viz">
+        <div>
+          <div class="file-tab file-vue">Card.vue（源码）</div>
+          <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"card"</span><span class="t">&gt;</span>
+    <span class="t">&lt;h2</span> <span class="a">class</span>=<span class="s">"title"</span><span class="t">&gt;</span>标题<span class="t">&lt;/h2&gt;</span>
+    <span class="t">&lt;p&gt;</span>内容<span class="t">&lt;/p&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="f">.card</span>  { <span class="a">border</span>: <span class="s">1px solid #ccc</span>; }
+<span class="f">.title</span> { <span class="a">color</span>: <span class="s">red</span>; }
+<span class="t">&lt;/style&gt;</span></div>
+        </div>
+        <div class="compile-arrow">
+          <span>⟹</span>
+          <span class="compile-label">编译后</span>
+        </div>
+        <div>
+          <div class="file-tab file-output">浏览器中实际渲染</div>
+          <div class="code-block"><span class="c">&lt;!-- 每个元素加 hash 属性 --&gt;</span>
+<span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"card"</span> <span class="a">data-v-7ba5bd90</span><span class="t">&gt;</span>
+  <span class="t">&lt;h2</span> <span class="a">class</span>=<span class="s">"title"</span> <span class="a">data-v-7ba5bd90</span><span class="t">&gt;</span>标题<span class="t">&lt;/h2&gt;</span>
+  <span class="t">&lt;p</span> <span class="a">data-v-7ba5bd90</span><span class="t">&gt;</span>内容<span class="t">&lt;/p&gt;</span>
+<span class="t">&lt;/div&gt;</span>
+
+<span class="c">/* CSS 选择器自动追加属性选择器 */</span>
+<span class="f">.card</span>[<span class="a">data-v-7ba5bd90</span>]  { <span class="a">border</span>: <span class="s">1px solid #ccc</span>; }
+<span class="f">.title</span>[<span class="a">data-v-7ba5bd90</span>] { <span class="a">color</span>: <span class="s">red</span>; }</div>
+        </div>
+      </div>
+
+      <div class="tip tip-cyan">
+        💡 hash 值（如 <code>data-v-7ba5bd90</code>）由文件路径 + 内容生成，同一个文件每次构建结果一致，不同组件的 hash 必然不同——这就是样式隔离的根本。
+      </div>
+
+      <div class="section-title">子组件根元素的特殊行为</div>
+      <p>父组件的 scoped 样式能作用到<strong>子组件的根元素</strong>，但不能影响子组件内部：</p>
+      <div class="code-block"><span class="c">/* 父组件 Parent.vue scoped 样式 */</span>
+<span class="f">.wrapper</span> { <span class="a">padding</span>: <span class="s">20px</span>; }   <span class="c">/* ✅ 只影响父自身的 .wrapper */</span>
+
+<span class="c">/* 子组件 &lt;MyCard /&gt; 的根元素会同时带父、子两个 hash */</span>
+<span class="c">/* 所以父的根元素选择器 .my-card[data-v-父hash] 能命中子的根元素 */</span>
+<span class="f">.my-card</span> { <span class="a">margin</span>: <span class="s">10px</span>; }   <span class="c">/* ✅ 能影响子组件根元素的外边距 */</span>
+<span class="f">.my-card</span> <span class="f">.inner</span> { }        <span class="c">/* ❌ 无法影响子组件内部的 .inner */</span></div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 2：深度选择器 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-blue">Demo 2</span>
+      <h3>深度选择器：穿透 scoped 影响子组件</h3>
+    </div>
+    <div class="demo-card-body">
+      <p>使用第三方 UI 组件库（如 Element UI）时，需要覆盖库内部的样式，必须用深度选择器穿透 scoped。</p>
+
+      <div class="section-title">三种写法对比</div>
+      <div class="code-block"><span class="c">/* ❌ 普通 scoped 写法，无法穿透 */</span>
+<span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="f">.el-input__inner</span> { <span class="a">border-radius</span>: <span class="s">0</span>; }
+<span class="c">/* 编译为 .el-input__inner[data-v-xxx]，但库的 DOM 没有这个 hash，不生效 */</span>
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="section-title">写法一：<code>::v-deep</code>（Vue CLI / Webpack，推荐）</div>
+      <div class="code-block"><span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="c">/* 编译为：.wrapper[data-v-xxx] .el-input__inner */</span>
+<span class="c">/* hash 只加在左侧祖先，右侧不加 → 可以穿透子组件 */</span>
+<span class="f">.wrapper</span> <span class="k">::v-deep</span> <span class="f">.el-input__inner</span> {
+  <span class="a">border-radius</span>: <span class="s">0</span>;
+  <span class="a">border-color</span>: <span class="s">#6366f1</span>;
+}
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="section-title">写法二：<code>/deep/</code>（旧版语法，兼容 Vue CLI 2）</div>
+      <div class="code-block"><span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="f">.wrapper</span> <span class="k">/deep/</span> <span class="f">.el-input__inner</span> { <span class="a">border-radius</span>: <span class="s">0</span>; }
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="section-title">写法三：<code>>>></code>（纯 CSS，不支持预处理器）</div>
+      <div class="code-block"><span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="f">.wrapper</span> <span class="k">>>></span> <span class="f">.el-input__inner</span> { <span class="a">border-radius</span>: <span class="s">0</span>; }
+<span class="c">/* 使用 scss/less 时不支持 >>>，必须用 ::v-deep 或 /deep/ */</span>
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="tip tip-yellow">
+        ⚠️ <strong>作用域最小化原则</strong>：深度选择器尽量加祖先限定（如 <code>.wrapper ::v-deep .el-input</code>），避免写成全局 <code>::v-deep .el-input</code>，否则会无意中影响页面中所有同名元素。
+      </div>
+
+      <div class="section-title">实际场景：覆盖 Element UI 输入框样式</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"search-box"</span><span class="t">&gt;</span>
+    <span class="t">&lt;el-input</span> <span class="a">v-model</span>=<span class="s">"keyword"</span> <span class="a">placeholder</span>=<span class="s">"搜索"</span> <span class="t">/&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="c">/* 只影响当前组件内的 el-input，不污染其他页面的 el-input */</span>
+<span class="f">.search-box</span> <span class="k">::v-deep</span> <span class="f">.el-input__inner</span> {
+  <span class="a">height</span>: <span class="s">48px</span>;
+  <span class="a">border-radius</span>: <span class="s">24px</span>;
+  <span class="a">padding-left</span>: <span class="s">20px</span>;
+}
+<span class="t">&lt;/style&gt;</span></div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 3：全局样式与多 style 块 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-orange">Demo 3</span>
+      <h3>全局样式 vs scoped：正确的组织方式</h3>
+    </div>
+    <div class="demo-card-body">
+      <div class="section-title">在同一个 .vue 文件里混用全局 + scoped</div>
+      <div class="code-block"><span class="c">/* ✅ 一个组件可以有两个 style 块 */</span>
+
+<span class="c">/* Block 1：全局样式（没有 scoped）*/</span>
+<span class="t">&lt;style&gt;</span>
+<span class="c">/* 影响全局，适合重置样式或定义全局 CSS 变量 */</span>
+<span class="f">:root</span> {
+  <span class="a">--primary</span>: <span class="s">#6366f1</span>;
+  <span class="a">--radius</span>: <span class="s">8px</span>;
+}
+<span class="t">&lt;/style&gt;</span>
+
+<span class="c">/* Block 2：局部 scoped 样式 */</span>
+<span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="f">.card</span> {
+  <span class="a">border-radius</span>: <span class="s">var(--radius)</span>;  <span class="c">/* 使用全局变量 */</span>
+  <span class="a">border</span>: <span class="s">1px solid var(--primary)</span>;
+}
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="section-title">推荐的全局样式组织结构</div>
+      <div class="code-block"><span class="c">/* src/assets/styles/ 目录下 */</span>
+
+<span class="c">/* reset.css — 浏览器默认样式重置 */</span>
+<span class="f">*</span>, <span class="f">*::before</span>, <span class="f">*::after</span> { <span class="a">box-sizing</span>: <span class="s">border-box</span>; <span class="a">margin</span>: <span class="s">0</span>; }
+
+<span class="c">/* variables.css — CSS 自定义属性 */</span>
+<span class="f">:root</span> { <span class="a">--primary</span>: <span class="s">#6366f1</span>; <span class="a">--text</span>: <span class="s">#1e293b</span>; }
+
+<span class="c">/* main.js 中统一引入 */</span>
+<span class="k">import</span> <span class="s">'./assets/styles/reset.css'</span>
+<span class="k">import</span> <span class="s">'./assets/styles/variables.css'</span></div>
+
+      <div class="section-title">使用 SCSS 变量（需安装 sass）</div>
+      <div class="code-block"><span class="c"># 安装 sass（一次性）</span>
+npm install -D sass
+
+<span class="c">/* 然后在 .vue 文件中直接用 */</span>
+<span class="t">&lt;style</span> <span class="a">lang</span>=<span class="s">"scss"</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="c">// SCSS 变量和嵌套，开箱即用</span>
+<span class="k">$primary</span>: <span class="s">#6366f1</span>;
+
+<span class="f">.card</span> {
+  <span class="a">border</span>: <span class="s">1px solid</span> <span class="k">$primary</span>;
+
+  <span class="f">&:hover</span> {             <span class="c">// SCSS 嵌套 &amp; 伪类</span>
+    <span class="a">box-shadow</span>: <span class="s">0 4px 12px rgba(99,102,241,0.2)</span>;
+  }
+
+  <span class="f">.title</span> {             <span class="c">// 嵌套子选择器</span>
+    <span class="a">color</span>: <span class="k">$primary</span>;
+  }
+}
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="tip tip-green">
+        💡 <code>scoped</code> 和 <code>lang="scss"</code> 可以同时使用：<code>&lt;style lang="scss" scoped&gt;</code>，两者互不干扰——SCSS 先编译为 CSS，再由 Vue 加 scoped hash。
+      </div>
+
+      <div class="section-title">四种使用场景选择</div>
+      <div class="scenario-grid">
+        <div class="scenario-card use-scoped">
+          <h4>✅ 用 scoped</h4>
+          <p>大多数组件的私有样式，防止污染全局</p>
+        </div>
+        <div class="scenario-card use-deep">
+          <h4>🔧 用 ::v-deep</h4>
+          <p>需要覆盖第三方组件库（Element UI 等）的内部样式</p>
+        </div>
+        <div class="scenario-card use-global">
+          <h4>⚠️ 不加 scoped</h4>
+          <p>全局 CSS 变量、字体、reset 样式；放在 App.vue 或独立 CSS 文件</p>
+        </div>
+        <div class="scenario-card use-module">
+          <h4>🎯 用 CSS Modules</h4>
+          <p>需要在 JS 中动态引用 class 名，或彻底避免命名冲突</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 4：CSS Modules ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-purple">Demo 4</span>
+      <h3>CSS Modules：用 JS 引用 class 名</h3>
+    </div>
+    <div class="demo-card-body">
+      <p>CSS Modules 是另一种样式隔离方案：class 名编译成<strong>唯一 hash 字符串</strong>，通过 <code>$style.xxx</code> 在模板/JS 中引用。</p>
+
+      <div class="section-title">基本用法：<code>&lt;style module&gt;</code></div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="c">&lt;!-- 用 :class="$style.xxx" 引用（注意是动态绑定）--&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">:class</span>=<span class="s">"$style.card"</span><span class="t">&gt;</span>
+    <span class="t">&lt;h2</span> <span class="a">:class</span>=<span class="s">"$style.title"</span><span class="t">&gt;</span>标题<span class="t">&lt;/h2&gt;</span>
+
+    <span class="c">&lt;!-- 多个 class --&gt;</span>
+    <span class="t">&lt;p</span> <span class="a">:class</span>=<span class="s">"[$style.text, isActive && $style.active]"</span><span class="t">&gt;</span>
+      内容
+    <span class="t">&lt;/p&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;style</span> <span class="a">module</span><span class="t">&gt;</span>
+<span class="c">/* 类名会被编译为唯一 hash，如 _card_abc12_1 */</span>
+<span class="f">.card</span>  { <span class="a">border-radius</span>: <span class="s">8px</span>; <span class="a">padding</span>: <span class="s">16px</span>; }
+<span class="f">.title</span> { <span class="a">color</span>: <span class="s">#6366f1</span>; }
+<span class="f">.text</span>  { <span class="a">color</span>: <span class="s">#64748b</span>; }
+<span class="f">.active</span> { <span class="a">color</span>: <span class="s">#10b981</span>; <span class="a">font-weight</span>: <span class="s">bold</span>; }
+<span class="t">&lt;/style&gt;</span></div>
+
+      <div class="section-title">在 JS 中使用 class 名</div>
+      <div class="code-block"><span class="k">export default</span> {
+  <span class="f">methods</span>: {
+    <span class="f">getCardClass</span>() {
+      <span class="c">// $style 对象包含所有 class 名的映射</span>
+      console.<span class="f">log</span>(<span class="k">this</span>.<span class="f">$style</span>)
+      <span class="c">// { card: '_card_abc12_1', title: '_title_abc12_2', ... }</span>
+      <span class="k">return</span> <span class="k">this</span>.<span class="f">$style</span>.card
+    }
+  }
+}</div>
+
+      <div class="section-title">scoped vs CSS Modules 对比</div>
+      <div class="split">
+        <div class="split-block">
+          <div class="split-label label-a">scoped</div>
+          <div class="code-block"><span class="c">// 模板中直接写 class 名</span>
+<span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"card"</span><span class="t">&gt;</span>
+
+<span class="c">// 编译后 DOM：</span>
+<span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"card"</span>
+     <span class="a">data-v-7ba5bd</span><span class="t">&gt;</span></div>
+        </div>
+        <div class="split-block">
+          <div class="split-label label-b">CSS Modules</div>
+          <div class="code-block"><span class="c">// 模板中动态绑定</span>
+<span class="t">&lt;div</span> <span class="a">:class</span>=<span class="s">"$style.card"</span><span class="t">&gt;</span>
+
+<span class="c">// 编译后 DOM：</span>
+<span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"_card_abc12_1"</span><span class="t">&gt;</span></div>
+        </div>
+      </div>
+
+      <div class="tip tip-purple">
+        💎 实际项目 <strong>90% 用 scoped 就足够了</strong>。CSS Modules 的主要优势是可以在 JS 中编程式操作 class 引用，适合组件库开发或需要极致隔离的场景。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 5：动态 class / style ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-green">Demo 5</span>
+      <h3>动态 class / style 绑定实战</h3>
+    </div>
+    <div class="demo-card-body">
+      <div class="section-title">:class 的四种写法（配合 scoped 使用）</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="c">&lt;!-- 写法一：三元表达式 --&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">:class</span>=<span class="s">"isActive ? 'active' : 'inactive'"</span><span class="t">&gt;</span>
+
+  <span class="c">&lt;!-- 写法二：对象语法（最常用）--&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">:class</span>=<span class="s">"{ active: isActive, disabled: isDisabled }"</span><span class="t">&gt;</span>
+
+  <span class="c">&lt;!-- 写法三：数组语法 --&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">:class</span>=<span class="s">"[baseClass, isActive && 'active']"</span><span class="t">&gt;</span>
+
+  <span class="c">&lt;!-- 写法四：静态 class + 动态 :class 共存 --&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"card"</span> <span class="a">:class</span>=<span class="s">"{ 'card--active': isActive }"</span><span class="t">&gt;</span>
+  <span class="c">&lt;!-- 最终 class="card card--active" --&gt;</span>
+<span class="t">&lt;/template&gt;</span></div>
+
+      <div class="section-title">:style 动态内联样式</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="c">&lt;!-- 对象语法（camelCase）--&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">:style</span>=<span class="s">"{ backgroundColor: bgColor, fontSize: size + 'px' }"</span><span class="t">&gt;</span>
+
+  <span class="c">&lt;!-- 数组合并多个样式对象 --&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">:style</span>=<span class="s">"[baseStyles, themeStyles]"</span><span class="t">&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;script&gt;</span>
+<span class="k">export default</span> {
+  <span class="f">data</span>() {
+    <span class="k">return</span> {
+      bgColor: <span class="s">'#6366f1'</span>,
+      size: <span class="v">16</span>,
+      baseStyles:  { <span class="a">padding</span>: <span class="s">'16px'</span>, <span class="a">borderRadius</span>: <span class="s">'8px'</span> },
+      themeStyles: { <span class="a">background</span>: <span class="s">'#f8fafc'</span>, <span class="a">color</span>: <span class="s">'#1e293b'</span> }
+    }
+  }
+}
+<span class="t">&lt;/script&gt;</span></div>
+
+      <div class="section-title">实战：状态驱动的按钮组件</div>
+      <div class="code-block"><span class="t">&lt;template&gt;</span>
+  <span class="t">&lt;button</span>
+    <span class="a">:class</span>=<span class="s">"[
+      'btn',
+      `btn--${type}`,
+      { 'btn--loading': loading, 'btn--disabled': disabled }
+    ]"</span>
+    <span class="a">:disabled</span>=<span class="s">"loading || disabled"</span>
+    <span class="a">@click</span>=<span class="s">"handleClick"</span>
+  <span class="t">&gt;</span>
+    <span class="t">&lt;span</span> <span class="a">v-if</span>=<span class="s">"loading"</span><span class="t">&gt;</span>⏳<span class="t">&lt;/span&gt;</span>
+    <span class="t">&lt;slot /&gt;</span>
+  <span class="t">&lt;/button&gt;</span>
+<span class="t">&lt;/template&gt;</span>
+
+<span class="t">&lt;style</span> <span class="a">scoped</span><span class="t">&gt;</span>
+<span class="f">.btn</span>            { <span class="a">padding</span>: <span class="s">8px 16px</span>; <span class="a">border-radius</span>: <span class="s">6px</span>; <span class="a">cursor</span>: <span class="s">pointer</span>; }
+<span class="f">.btn--primary</span>   { <span class="a">background</span>: <span class="s">#6366f1</span>; <span class="a">color</span>: <span class="s">white</span>; }
+<span class="f">.btn--danger</span>    { <span class="a">background</span>: <span class="s">#ef4444</span>; <span class="a">color</span>: <span class="s">white</span>; }
+<span class="f">.btn--loading</span>   { <span class="a">opacity</span>: <span class="s">0.7</span>; <span class="a">cursor</span>: <span class="s">not-allowed</span>; }
+<span class="f">.btn--disabled</span>  { <span class="a">opacity</span>: <span class="s">0.4</span>; <span class="a">cursor</span>: <span class="s">not-allowed</span>; }
+<span class="t">&lt;/style&gt;</span></div>
+    </div>
+  </div>
+
+  <!-- ==================== Demo 6：面试速答 + 练习 ==================== -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="badge badge-red">Demo 6</span>
+      <h3>常见坑 + 面试速答 + 练习</h3>
+    </div>
+    <div class="demo-card-body">
+
+      <div class="section-title">常见坑（面试也会考）</div>
+      <div class="tip tip-red">
+        ⚠️ <strong>坑 1</strong>：<code>v-html</code> 动态插入的内容不会被 scoped CSS 影响，因为 Vue 不会给动态 HTML 加 hash 属性。需要用 <code>::v-deep</code> 或移到全局样式里。
+      </div>
+      <div class="tip tip-red">
+        ⚠️ <strong>坑 2</strong>：<code>&lt;transition&gt;</code> 的过渡 class（如 <code>.fade-enter-active</code>）是 Vue 运行时动态添加的，不带 hash，在 scoped 样式里写不生效，必须放在全局或用 <code>::v-deep</code>。
+      </div>
+      <div class="tip tip-red">
+        ⚠️ <strong>坑 3</strong>：多个同名组件在同一页面中，scoped 的 hash 是<strong>按文件路径</strong>生成的，路径相同的文件 hash 相同。不要把两个不同组件放在同一路径下命名相同。
+      </div>
+      <div class="tip tip-yellow">
+        ⚠️ <strong>坑 4</strong>：<code>::v-deep</code> 是 Vue 2 的写法；Vue 3 改为 <code>:deep(.selector)</code>。迁移时注意替换。
+      </div>
+
+      <div class="section-title" style="margin-top:16px">面试速答</div>
+      <ul class="qa-list">
+        <li>
+          <div class="qa-q">Q：scoped CSS 的实现原理？</div>
+          <div class="qa-a">编译时给组件内所有 DOM 元素加唯一 hash 属性（如 <code>data-v-xxx</code>），同时把 <code>&lt;style scoped&gt;</code> 中的选择器自动添加属性选择器后缀（如 <code>.title[data-v-xxx]</code>），从根本上将样式作用域锁定在当前组件。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：如何在 scoped 组件里覆盖第三方库的样式？</div>
+          <div class="qa-a">使用深度选择器 <code>::v-deep</code>（Vue CLI）或 <code>:deep()</code>（Vue 3 / Vite）。编译后 hash 只加在左侧祖先选择器，右侧选择器不加 hash，从而能命中子组件或第三方库内部的 DOM 元素。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：scoped 和 CSS Modules 的区别？</div>
+          <div class="qa-a"><code>scoped</code>：给 DOM 加属性，选择器加属性过滤，class 名本身不变，模板写法不变；<code>CSS Modules</code>：class 名本身编译成唯一 hash 字符串，模板需用 <code>:class="$style.xxx"</code> 动态绑定，可在 JS 中直接引用 class 名。日常项目 scoped 足够，组件库开发更多用 CSS Modules。</div>
+        </li>
+        <li>
+          <div class="qa-q">Q：为什么 v-html 的内容 scoped 样式不生效？</div>
+          <div class="qa-a"><code>v-html</code> 直接把字符串作为 innerHTML 插入，Vue 的编译器无法给这些动态 HTML 元素打 hash 属性，所以 scoped 样式的属性选择器无法命中。解决方法：用 <code>::v-deep</code> 或将相关样式放在无 scoped 的全局样式块里。</div>
+        </li>
+      </ul>
+
+      <div class="section-title" style="margin-top:16px">练习任务（在 vue2-sfc-demo 中完成）</div>
+      <div class="task-block">
+        <h4>🎯 动手验证：</h4>
+        <ol>
+          <li><strong>验证 scoped 隔离</strong>：在 <code>App.vue</code> 和 <code>HelloCard.vue</code> 中写同名 <code>.title</code>，打开 DevTools 检查元素，观察两个 <code>data-v-xxx</code> 的 hash 值不同</li>
+          <li><strong>使用 ::v-deep</strong>：在 <code>HelloCard.vue</code> 的 scoped 里，用 <code>::v-deep button</code> 修改按钮的 <code>font-size</code>，对比加/不加 <code>::v-deep</code> 的效果差异</li>
+          <li><strong>安装 sass</strong>：运行 <code>npm install -D sass</code>，把 <code>HelloCard.vue</code> 的 <code>&lt;style scoped&gt;</code> 改为 <code>&lt;style scoped lang="scss"&gt;</code>，使用嵌套选择器和变量重写样式</li>
+          <li><strong>动态 class</strong>：给 <code>HelloCard.vue</code> 的卡片加一个 <code>highlighted</code> prop，用对象语法 <code>:class="{ highlighted: highlighted }"</code> 动态切换高亮边框样式</li>
+          <li><strong>全局 CSS 变量</strong>：在 <code>App.vue</code> 的非 scoped style 块里定义 <code>:root { --brand: #6366f1 }</code>，然后在 <code>HelloCard.vue</code> 的 scoped 样式里用 <code>var(--brand)</code> 引用</li>
+        </ol>
+      </div>
+
+      <div class="tip tip-cyan" style="margin-top:12px">
+        🚀 完成本节后，你已掌握 SFC 开发的三大核心：<strong>组件结构</strong>、<strong>通信方式</strong>、<strong>样式隔离</strong>。下一节将综合运用这三部分，构建一个含多组件的小型实战项目，为进入 Vue Router 做好准备。
+      </div>
+    </div>
+  </div>
+
+</div><!-- /demo-grid -->
+
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  24-3 · Scoped CSS 深入 &nbsp;|&nbsp; Vue Learning Path Phase 3
+</div>
+
+</body>
+</html>
