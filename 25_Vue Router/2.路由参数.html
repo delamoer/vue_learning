@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25-2 · 路由参数</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+      --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue  { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .badge-yellow{ background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .badge-purple{ background: rgba(188,140,255,0.15);color: var(--purple); }
+    .badge-teal  { background: rgba(57,214,192,0.15); color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; } .n { color: #e6edf3; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size:0.85rem; }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+    strong { color: var(--text); }
+    .tag { display:inline-block; background:rgba(88,166,255,0.12); color:var(--accent); font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:4px; margin-right:4px; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vue Router · 路由参数</h1>
+  <p class="page-lead">25-2 &nbsp;|&nbsp; params 动态路由 / query 查询参数 / props 解耦 / 参数传递对比</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>params 参数（动态路由段）</h2>
+    </div>
+    <div class="card-body">
+      <p>用 <code>:参数名</code> 定义动态路由段，访问 <code>/user/42</code> 时，<code>42</code> 会被捕获为 <code>params.id</code>。</p>
+
+      <div class="section-title">路由配置</div>
+      <div class="code-block"><span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+  routes: [
+    <span class="c">// :id 是动态段，匹配任意值</span>
+    { path: <span class="s">'/user/:id'</span>, name: <span class="s">'user'</span>, component: User },
+
+    <span class="c">// 多个动态段</span>
+    { path: <span class="s">'/post/:year/:month'</span>, component: Post },
+
+    <span class="c">// 可选参数（? 表示可有可无）</span>
+    { path: <span class="s">'/article/:id?'</span>, component: Article },
+  ]
+})</div>
+
+      <div class="section-title">传参</div>
+      <div class="code-block"><span class="c">&lt;!-- 声明式（模板中） --&gt;</span>
+<span class="t">&lt;router-link</span> <span class="a">:to</span>=<span class="s">"{ name: 'user', params: { id: 42 } }"</span><span class="t">&gt;</span>用户详情<span class="t">&lt;/router-link&gt;</span>
+<span class="c">&lt;!-- 生成地址：/user/42 --&gt;</span>
+
+<span class="c">// 编程式（JS 中）</span>
+<span class="k">this</span>.$router.<span class="f">push</span>({ name: <span class="s">'user'</span>, params: { id: <span class="v">42</span> } })</div>
+
+      <div class="section-title">接收参数</div>
+      <div class="code-block"><span class="k">const</span> User = {
+  template: <span class="s">`&lt;div&gt;
+    &lt;h2&gt;用户 ID：{{ $route.params.id }}&lt;/h2&gt;
+  &lt;/div&gt;`</span>,
+  created() {
+    <span class="c">// $route.params 是一个对象</span>
+    console.<span class="f">log</span>(<span class="k">this</span>.$route.params.id)   <span class="c">// "42"（字符串！）</span>
+    console.<span class="f">log</span>(<span class="k">this</span>.$route.params)        <span class="c">// { id: "42" }</span>
+  }
+}</div>
+
+      <div class="tip tip-yellow">
+        ⚠️ <strong>注意：params 只能配合命名路由（name）使用</strong>，不能配合 path 字符串 + params 一起用。<br>
+        如果用 <code>{ path: '/user', params: { id: 42 } }</code>，params 会被忽略！必须用 <code>{ name: 'user', params: { id: 42 } }</code>。
+      </div>
+
+      <div class="section-title">同一路由，参数变化时组件不重建！</div>
+      <p>从 <code>/user/1</code> 跳转到 <code>/user/2</code> 时，Vue Router 为了性能会复用同一个组件，而不是销毁重建。这导致 <code>created</code> 等生命周期钩子不会重新触发。</p>
+      <div class="code-block"><span class="c">// 解决方案1：用 watch 监听 $route</span>
+watch: {
+  <span class="s">'$route.params.id'</span>(newId, oldId) {
+    <span class="k">this</span>.<span class="f">fetchUser</span>(newId)   <span class="c">// 参数变化时重新请求数据</span>
+  }
+},
+
+<span class="c">// 解决方案2：用 beforeRouteUpdate 导航守卫（更推荐）</span>
+beforeRouteUpdate(to, from, next) {
+  <span class="k">this</span>.<span class="f">fetchUser</span>(to.params.id)
+  <span class="f">next</span>()
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>query 参数（查询字符串）</h2>
+    </div>
+    <div class="card-body">
+      <p>query 参数出现在 URL 的 <code>?</code> 之后，如 <code>/search?keyword=vue&page=2</code>，不需要在路由配置中声明。</p>
+
+      <div class="section-title">传参</div>
+      <div class="code-block"><span class="c">&lt;!-- 声明式 --&gt;</span>
+<span class="t">&lt;router-link</span> <span class="a">:to</span>=<span class="s">"{ path: '/search', query: { keyword: 'vue', page: 2 } }"</span><span class="t">&gt;</span>
+  搜索结果
+<span class="t">&lt;/router-link&gt;</span>
+<span class="c">&lt;!-- 生成地址：/search?keyword=vue&amp;page=2 --&gt;</span>
+
+<span class="c">// 编程式</span>
+<span class="k">this</span>.$router.<span class="f">push</span>({
+  path: <span class="s">'/search'</span>,
+  query: { keyword: <span class="s">'vue'</span>, page: <span class="v">2</span> }
+})</div>
+
+      <div class="section-title">接收参数</div>
+      <div class="code-block"><span class="k">const</span> Search = {
+  template: <span class="s">`&lt;div&gt;
+    &lt;p&gt;搜索关键词：{{ $route.query.keyword }}&lt;/p&gt;
+    &lt;p&gt;当前页：{{ $route.query.page }}&lt;/p&gt;
+  &lt;/div&gt;`</span>,
+  created() {
+    console.<span class="f">log</span>(<span class="k">this</span>.$route.query)  <span class="c">// { keyword: 'vue', page: '2' }</span>
+    <span class="c">// page 是字符串！需要 Number(this.$route.query.page)</span>
+  }
+}</div>
+
+      <div class="section-title">params vs query 对比</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对比项</th><th>params</th><th>query</th></tr></thead>
+          <tbody>
+            <tr><td>URL 形态</td><td><code>/user/42</code></td><td><code>/search?id=42</code></td></tr>
+            <tr><td>路由配置</td><td>需要 <code>:id</code> 占位符</td><td>无需配置，直接用</td></tr>
+            <tr><td>搭配</td><td>必须配合 <code>name</code></td><td>可以配合 <code>path</code> 或 <code>name</code></td></tr>
+            <tr><td>刷新后保留</td><td>✅ 保留（在 URL 里）</td><td>✅ 保留（在 URL 里）</td></tr>
+            <tr><td>适合场景</td><td>资源标识（用户ID、文章ID等）</td><td>可选过滤/排序参数（页码、关键词等）</td></tr>
+            <tr><td>语义</td><td>标识"哪一条"资源</td><td>过滤/查询条件</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>props 解耦（推荐写法）</h2>
+    </div>
+    <div class="card-body">
+      <p>默认写法需要在组件内写 <code>this.$route.params.id</code>，这让组件与路由强耦合——脱离路由就不能用这个组件了。<br>
+      <strong>props 配置可以让组件接收路由参数就像接收普通 props 一样，完全解耦。</strong></p>
+
+      <div class="section-title">写法一：布尔值（props: true）—— 将 params 转为 props</div>
+      <div class="code-block"><span class="c">// 路由配置</span>
+{ path: <span class="s">'/user/:id'</span>, name: <span class="s">'user'</span>, component: User, props: <span class="k">true</span> }
+
+<span class="c">// 组件中：直接用 props 接收，不用写 $route.params</span>
+<span class="k">const</span> User = {
+  props: [<span class="s">'id'</span>],    <span class="c">// id 直接来自路由 params</span>
+  template: <span class="s">'&lt;div&gt;用户ID：{{ id }}&lt;/div&gt;'</span>
+}
+
+<span class="c">// 等价于之前的：</span>
+<span class="c">// template: '&lt;div&gt;用户ID：{{ $route.params.id }}&lt;/div&gt;'</span></div>
+
+      <div class="tip tip-blue">
+        📌 <code>props: true</code> 只把 <strong>params</strong> 转成 props，不处理 query。
+      </div>
+
+      <div class="section-title">写法二：对象（props: {}）—— 传入静态 props</div>
+      <div class="code-block"><span class="c">// 路由配置：传入固定的 props 值，不依赖路由参数</span>
+{
+  path: <span class="s">'/promotion'</span>,
+  component: Banner,
+  props: { theme: <span class="s">'holiday'</span>, discount: <span class="v">0.8</span> }  <span class="c">// 静态值</span>
+}
+
+<span class="k">const</span> Banner = {
+  props: [<span class="s">'theme'</span>, <span class="s">'discount'</span>],
+  template: <span class="s">'&lt;div&gt;{{ theme }} 折扣：{{ discount }}&lt;/div&gt;'</span>
+}
+
+<span class="c">// 适合：给路由组件传入与路由无关的固定配置</span></div>
+
+      <div class="section-title">写法三：函数（最灵活）—— 自定义映射</div>
+      <div class="code-block"><span class="c">// props 是一个函数，接收 $route 对象，返回要传给组件的 props 对象</span>
+{
+  path: <span class="s">'/search'</span>,
+  component: SearchResult,
+  props: route => ({
+    keyword: route.query.keyword,    <span class="c">// 把 query 转为 props</span>
+    page: <span class="f">Number</span>(route.query.page) || <span class="v">1</span>,    <span class="c">// 顺便做类型转换</span>
+    id: route.params.id              <span class="c">// params 也可以</span>
+  })
+}
+
+<span class="k">const</span> SearchResult = {
+  props: [<span class="s">'keyword'</span>, <span class="s">'page'</span>, <span class="s">'id'</span>],
+  template: <span class="s">'&lt;div&gt;搜索：{{ keyword }}，第 {{ page }} 页&lt;/div&gt;'</span>
+}
+
+<span class="c">// 函数写法可以处理 query、params 和静态值，是最推荐的方式</span></div>
+
+      <div class="section-title">三种写法对比</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>写法</th><th>适用场景</th><th>能处理</th></tr></thead>
+          <tbody>
+            <tr><td>props: true</td><td>路由只有 params 参数</td><td>params → props</td></tr>
+            <tr><td>props: {}</td><td>需要传入固定静态值</td><td>静态值 → props</td></tr>
+            <tr><td>props: route => ()</td><td>需要处理 query、类型转换等</td><td>params + query + 静态 → props</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>完整 Demo：文章详情页</h2>
+    </div>
+    <div class="card-body">
+      <p>演示 params + query + props 三种参数方式的综合使用场景。</p>
+      <div class="code-block"><span class="t">&lt;!DOCTYPE html&gt;</span>
+<span class="t">&lt;html&gt;&lt;head&gt;&lt;title&gt;</span>路由参数 Demo<span class="t">&lt;/title&gt;&lt;/head&gt;</span>
+<span class="t">&lt;body&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">id</span>=<span class="s">"app"</span><span class="t">&gt;</span>
+    <span class="t">&lt;nav&gt;</span>
+      <span class="c">&lt;!-- params 传参 --&gt;</span>
+      <span class="t">&lt;router-link</span> <span class="a">:to</span>=<span class="s">"{ name: 'article', params: { id: 1 } }"</span><span class="t">&gt;</span>文章1<span class="t">&lt;/router-link&gt;</span>
+      <span class="t">&lt;router-link</span> <span class="a">:to</span>=<span class="s">"{ name: 'article', params: { id: 2 } }"</span><span class="t">&gt;</span>文章2<span class="t">&lt;/router-link&gt;</span>
+      <span class="c">&lt;!-- query 传参，同一个组件 --&gt;</span>
+      <span class="t">&lt;router-link</span> <span class="a">:to</span>=<span class="s">"{ path: '/search', query: { kw: 'vue', page: 1 } }"</span><span class="t">&gt;</span>搜索<span class="t">&lt;/router-link&gt;</span>
+    <span class="t">&lt;/nav&gt;</span>
+    <span class="t">&lt;router-view&gt;&lt;/router-view&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+
+  <span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"../js/vue.js"</span><span class="t">&gt;&lt;/script&gt;</span>
+  <span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"https://unpkg.com/vue-router@3.6.5/dist/vue-router.js"</span><span class="t">&gt;&lt;/script&gt;</span>
+  <span class="t">&lt;script&gt;</span>
+    <span class="c">// 组件用 props 接收，与路由解耦</span>
+    <span class="k">const</span> Article = {
+      props: [<span class="s">'id'</span>],
+      template: <span class="s">`&lt;div&gt;
+        &lt;h3&gt;文章详情&lt;/h3&gt;
+        &lt;p&gt;文章 ID：{{ id }}（类型：{{ typeof id }}）&lt;/p&gt;
+        &lt;p&gt;$route.params：{{ $route.params }}&lt;/p&gt;
+      &lt;/div&gt;`</span>
+    }
+    <span class="k">const</span> Search = {
+      props: [<span class="s">'kw'</span>, <span class="s">'page'</span>],
+      template: <span class="s">`&lt;div&gt;
+        &lt;h3&gt;搜索结果&lt;/h3&gt;
+        &lt;p&gt;关键词：{{ kw }}，当前页：{{ page }}（类型：{{ typeof page }}）&lt;/p&gt;
+        &lt;p&gt;$route.query：{{ $route.query }}&lt;/p&gt;
+      &lt;/div&gt;`</span>
+    }
+
+    <span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+      routes: [
+        <span class="c">// props: true → params.id 作为 prop 传入</span>
+        { path: <span class="s">'/article/:id'</span>, name: <span class="s">'article'</span>, component: Article, props: <span class="k">true</span> },
+        <span class="c">// props 函数 → query 也转成 prop，顺便做类型转换</span>
+        {
+          path: <span class="s">'/search'</span>,
+          component: Search,
+          props: route => ({
+            kw: route.query.kw,
+            page: <span class="f">Number</span>(route.query.page) || <span class="v">1</span>
+          })
+        }
+      ]
+    })
+    <span class="k">new</span> <span class="f">Vue</span>({ el: <span class="s">'#app'</span>, router })
+  <span class="t">&lt;/script&gt;</span>
+<span class="t">&lt;/body&gt;&lt;/html&gt;</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>参数传递速查表</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>需求</th><th>配置</th><th>传参</th><th>接收</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>URL 路径参数<br><code>/user/42</code></td>
+              <td><code>path: '/user/:id'</code></td>
+              <td><code>{ name: 'user', params: { id: 42 } }</code></td>
+              <td><code>$route.params.id</code></td>
+            </tr>
+            <tr>
+              <td>查询参数<br><code>/search?kw=vue</code></td>
+              <td>不需要配置</td>
+              <td><code>{ path: '/search', query: { kw: 'vue' } }</code></td>
+              <td><code>$route.query.kw</code></td>
+            </tr>
+            <tr>
+              <td>params 解耦</td>
+              <td><code>props: true</code></td>
+              <td>同上</td>
+              <td>组件 <code>props: ['id']</code></td>
+            </tr>
+            <tr>
+              <td>query 解耦</td>
+              <td><code>props: route => ({ kw: route.query.kw })</code></td>
+              <td>同上</td>
+              <td>组件 <code>props: ['kw']</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip tip-green">
+        ✅ <strong>最佳实践：</strong>在团队/正式项目中，推荐给所有需要传参的路由配置 <code>props</code>，让组件不直接依赖 <code>$route</code>，提升组件的可复用性和可测试性。
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  25-2 · 路由参数 &nbsp;|&nbsp; params / query / props 三种传参解耦方式
+</div>
+</body>
+</html>

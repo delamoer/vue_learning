@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25-4 · 编程式导航</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+      --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue  { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .badge-yellow{ background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .badge-purple{ background: rgba(188,140,255,0.15);color: var(--purple); }
+    .badge-teal  { background: rgba(57,214,192,0.15); color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; } .n { color: #e6edf3; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size:0.85rem; }
+    strong { color: var(--text); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vue Router · 编程式导航</h1>
+  <p class="page-lead">25-4 &nbsp;|&nbsp; $router.push / replace / go / 声明式 vs 编程式 / 常见陷阱</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>声明式导航 vs 编程式导航</h2>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div style="background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.2); border-radius:8px; padding:14px">
+          <div style="color:#58a6ff; font-weight:700; margin-bottom:8px">📌 声明式导航</div>
+          <p style="font-size:0.83rem">用 <code>&lt;router-link&gt;</code> 标签，写在模板中。<br><br>适合：普通导航链接、菜单。</p>
+          <div class="code-block" style="margin-top:8px"><span class="t">&lt;router-link</span> <span class="a">to</span>=<span class="s">"/home"</span><span class="t">&gt;</span>首页<span class="t">&lt;/router-link&gt;</span></div>
+        </div>
+        <div style="background:rgba(63,185,80,0.05); border:1px solid rgba(63,185,80,0.2); border-radius:8px; padding:14px">
+          <div style="color:#3fb950; font-weight:700; margin-bottom:8px">⚡ 编程式导航</div>
+          <p style="font-size:0.83rem">用 <code>this.$router</code> 方法，写在 JS 逻辑中。<br><br>适合：表单提交后跳转、权限判断后跳转、按条件跳转等。</p>
+          <div class="code-block" style="margin-top:8px"><span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/home'</span>)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>$router.push()</h2>
+    </div>
+    <div class="card-body">
+      <p><code>push</code> 会向历史记录栈中推入一条新记录，用户可以点浏览器"后退"回来。</p>
+
+      <div class="section-title">字符串写法</div>
+      <div class="code-block"><span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/home'</span>)
+<span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/user/42'</span>)
+<span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/search?kw=vue'</span>)</div>
+
+      <div class="section-title">对象写法（推荐）</div>
+      <div class="code-block"><span class="c">// 用 path</span>
+<span class="k">this</span>.$router.<span class="f">push</span>({ path: <span class="s">'/home'</span> })
+
+<span class="c">// 用命名路由 + params</span>
+<span class="k">this</span>.$router.<span class="f">push</span>({ name: <span class="s">'user'</span>, params: { id: <span class="v">42</span> } })
+
+<span class="c">// 用 path + query（params 在 path 下会被忽略，query 不受影响）</span>
+<span class="k">this</span>.$router.<span class="f">push</span>({ path: <span class="s">'/search'</span>, query: { kw: <span class="s">'vue'</span>, page: <span class="v">1</span> } })
+
+<span class="c">// 带 hash</span>
+<span class="k">this</span>.$router.<span class="f">push</span>({ path: <span class="s">'/about'</span>, hash: <span class="s">'#team'</span> })</div>
+
+      <div class="section-title">push 的回调（成功/失败）</div>
+      <div class="code-block"><span class="c">// Vue Router 3：push 返回 undefined（不是 Promise）</span>
+<span class="c">// 需要用回调获取导航结果</span>
+<span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/home'</span>, () => {
+  console.<span class="f">log</span>(<span class="s">'导航完成'</span>)
+}, (err) => {
+  console.<span class="f">log</span>(<span class="s">'导航失败'</span>, err)
+})
+
+<span class="c">// Vue Router 4（Vue 3）：push 返回 Promise</span>
+<span class="k">await</span> <span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/home'</span>)</div>
+
+      <div class="tip tip-red">
+        ⚠️ <strong>常见报错：NavigationDuplicated</strong><br>
+        在 Vue Router 3 中，重复导航到同一路由会报错（比如多次点击同一导航）。<br>
+        解决方案：在 <code>push</code> 后加空的 <code>.catch(() => {})</code>，或者升级到不会报错的 Router 4。
+      </div>
+      <div class="code-block"><span class="c">// 临时解决重复导航报错（Vue Router 3 常见做法）</span>
+<span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/home'</span>).<span class="f">catch</span>(() => {})</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>$router.replace() 和 $router.go()</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">replace()：替换当前历史记录</div>
+      <p><code>replace</code> 和 <code>push</code> 用法完全相同，区别在于它不会留下历史记录——用户<strong>无法通过后退返回</strong>替换前的页面。</p>
+      <div class="code-block"><span class="c">// 用法与 push 一致</span>
+<span class="k">this</span>.$router.<span class="f">replace</span>(<span class="s">'/login'</span>)
+<span class="k">this</span>.$router.<span class="f">replace</span>({ name: <span class="s">'home'</span> })</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>什么时候用 replace：</strong><br>
+        • 登录后跳转首页（不希望用户后退回登录页）<br>
+        • 表单提交成功后跳转结果页（不希望用户后退后重复提交）<br>
+        • 重定向时（比如未登录跳转到 /login）
+      </div>
+
+      <div class="section-title">go()、back()、forward()</div>
+      <div class="code-block"><span class="c">// 在历史记录中前进/后退</span>
+<span class="k">this</span>.$router.<span class="f">go</span>(-<span class="v">1</span>)    <span class="c">// 后退一步，等同于浏览器后退</span>
+<span class="k">this</span>.$router.<span class="f">go</span>(<span class="v">1</span>)     <span class="c">// 前进一步</span>
+<span class="k">this</span>.$router.<span class="f">go</span>(-<span class="v">3</span>)    <span class="c">// 后退三步</span>
+<span class="k">this</span>.$router.<span class="f">go</span>(<span class="v">0</span>)     <span class="c">// 刷新当前页</span>
+
+<span class="c">// 语义化简写</span>
+<span class="k">this</span>.$router.<span class="f">back</span>()     <span class="c">// 等同于 go(-1)</span>
+<span class="k">this</span>.$router.<span class="f">forward</span>() <span class="c">// 等同于 go(1)</span></div>
+
+      <div class="section-title">全部方法速查</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方法</th><th>历史记录</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td>$router.push(location)</td><td>增加一条记录</td><td>普通导航跳转</td></tr>
+            <tr><td>$router.replace(location)</td><td>替换当前记录</td><td>登录跳转、表单提交后跳转</td></tr>
+            <tr><td>$router.go(n)</td><td>在已有记录中移动</td><td>后退/前进按钮</td></tr>
+            <tr><td>$router.back()</td><td>go(-1) 简写</td><td>返回上一页按钮</td></tr>
+            <tr><td>$router.forward()</td><td>go(1) 简写</td><td>前进按钮</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>实际场景示例</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">场景1：表单登录后跳转</div>
+      <div class="code-block">methods: {
+  <span class="k">async</span> <span class="f">handleLogin</span>() {
+    <span class="k">try</span> {
+      <span class="k">await</span> <span class="k">this</span>.<span class="f">login</span>(<span class="k">this</span>.form)
+      <span class="c">// 登录成功：replace 跳首页，不留登录页历史记录</span>
+      <span class="k">this</span>.$router.<span class="f">replace</span>({ name: <span class="s">'home'</span> })
+    } <span class="k">catch</span> (err) {
+      <span class="k">this</span>.errorMsg = <span class="s">'账号或密码错误'</span>
+    }
+  }
+}</div>
+
+      <div class="section-title">场景2：带参数跳转文章详情</div>
+      <div class="code-block">methods: {
+  <span class="f">goToArticle</span>(articleId) {
+    <span class="k">this</span>.$router.<span class="f">push</span>({
+      name: <span class="s">'article-detail'</span>,
+      params: { id: articleId }
+    })
+  },
+  <span class="f">goToSearch</span>(keyword) {
+    <span class="k">this</span>.$router.<span class="f">push</span>({
+      path: <span class="s">'/search'</span>,
+      query: { kw: keyword, page: <span class="v">1</span> }
+    })
+  }
+}</div>
+
+      <div class="section-title">场景3：路由跳转前判断权限</div>
+      <div class="code-block">methods: {
+  <span class="f">goToAdmin</span>() {
+    <span class="k">if</span> (!<span class="k">this</span>.isLoggedIn) {
+      <span class="c">// 未登录：跳转到登录页，同时记录目标地址</span>
+      <span class="k">this</span>.$router.<span class="f">push</span>({
+        path: <span class="s">'/login'</span>,
+        query: { redirect: <span class="k">this</span>.$route.fullPath }
+      })
+      <span class="k">return</span>
+    }
+    <span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/admin'</span>)
+  }
+}
+
+<span class="c">// 登录成功后：读取 redirect 参数，跳转到原目标页</span>
+<span class="k">const</span> redirect = <span class="k">this</span>.$route.query.redirect || <span class="s">'/'</span>
+<span class="k">this</span>.$router.<span class="f">replace</span>(redirect)</div>
+
+      <div class="tip tip-green">
+        ✅ <strong>最佳实践：</strong>权限跳转（未登录重定向）推荐放在路由守卫（<code>router.beforeEach</code>）里统一处理，而不是在每个组件里写。详见下一章：路由守卫。
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  25-4 · 编程式导航 &nbsp;|&nbsp; push / replace / go / back / forward
+</div>
+</body>
+</html>

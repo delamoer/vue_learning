@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25-5 · 路由守卫</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+      --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue  { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .badge-yellow{ background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .badge-purple{ background: rgba(188,140,255,0.15);color: var(--purple); }
+    .badge-teal  { background: rgba(57,214,192,0.15); color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; } .n { color: #e6edf3; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size:0.85rem; }
+    strong { color: var(--text); }
+    .flow { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: monospace; font-size: 0.82rem; line-height: 2; margin: 10px 0; white-space: pre; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vue Router · 路由守卫</h1>
+  <p class="page-lead">25-5 &nbsp;|&nbsp; 全局守卫 / 路由独享守卫 / 组件内守卫 / 完整导航流程 / 登录鉴权实战</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>路由守卫是什么</h2>
+    </div>
+    <div class="card-body">
+      <p>路由守卫（Navigation Guards）是 Vue Router 提供的<strong>钩子函数</strong>，允许你在路由跳转发生前后执行逻辑，比如：</p>
+      <ul style="list-style:none; padding:0; margin:10px 0">
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">✦</span> 检查用户是否已登录（未登录则重定向到 /login）</li>
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">✦</span> 检查用户是否有权限访问某个页面</li>
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">✦</span> 进入页面前设置标题（document.title）</li>
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">✦</span> 离开页面前提示用户保存未提交的表单</li>
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">✦</span> 进入页面前预加载数据</li>
+      </ul>
+      <div class="tip tip-blue">
+        📌 路由守卫分三类：<strong>全局守卫</strong>（所有路由都触发）/ <strong>路由独享守卫</strong>（在路由配置中，只对该路由生效）/ <strong>组件内守卫</strong>（在组件 options 中定义）
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>全局守卫</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">beforeEach — 全局前置守卫（最常用）</div>
+      <p>每次路由跳转前都会触发，可以在这里做权限验证。</p>
+      <div class="code-block"><span class="c">// 在 router 实例上注册</span>
+router.<span class="f">beforeEach</span>((to, from, next) => {
+  <span class="c">// to：即将进入的路由对象（$route 的样子）</span>
+  <span class="c">// from：当前正要离开的路由对象</span>
+  <span class="c">// next：函数，必须调用！决定导航如何继续</span>
+
+  <span class="k">const</span> isLoggedIn = localStorage.<span class="f">getItem</span>(<span class="s">'token'</span>)
+
+  <span class="k">if</span> (to.meta.requiresAuth && !isLoggedIn) {
+    <span class="c">// 需要登录，但未登录 → 重定向到登录页</span>
+    <span class="f">next</span>({ path: <span class="s">'/login'</span>, query: { redirect: to.fullPath } })
+  } <span class="k">else</span> {
+    <span class="f">next</span>()  <span class="c">// 放行，继续导航</span>
+  }
+})</div>
+
+      <div class="section-title">next() 的几种调用方式</div>
+      <div class="code-block"><span class="f">next</span>()                         <span class="c">// ✅ 放行，继续正常导航</span>
+<span class="f">next</span>(<span class="k">false</span>)                   <span class="c">// ❌ 中断导航，留在当前页</span>
+<span class="f">next</span>(<span class="s">'/login'</span>)                <span class="c">// 重定向到 /login</span>
+<span class="f">next</span>({ path: <span class="s">'/login'</span> })     <span class="c">// 同上，对象写法</span>
+<span class="f">next</span>(<span class="k">new</span> <span class="f">Error</span>(<span class="s">'无权访问'</span>))  <span class="c">// 导航中断并触发 router.onError()</span></div>
+
+      <div class="tip tip-red">
+        ⚠️ <strong>必须调用 next()！</strong>否则导航会永远停在那里，页面不跳转。这是新手最常见的错误。
+      </div>
+
+      <div class="section-title">afterEach — 全局后置钩子</div>
+      <p>路由跳转<strong>完成后</strong>触发，没有 <code>next</code> 参数（导航已经完成，无法改变了）。常用于修改页面标题、统计访问日志。</p>
+      <div class="code-block">router.<span class="f">afterEach</span>((to, from) => {
+  <span class="c">// 根据路由 meta 设置页面标题</span>
+  document.title = to.meta.title || <span class="s">'我的应用'</span>
+  <span class="c">// 埋点统计：记录用户访问了哪个页面</span>
+  analytics.<span class="f">track</span>(<span class="s">'pageview'</span>, { path: to.path })
+})</div>
+
+      <div class="section-title">路由 meta 字段</div>
+      <p>在路由配置里可以附加自定义信息，在守卫中读取 <code>to.meta</code> 来判断：</p>
+      <div class="code-block">routes: [
+  {
+    path: <span class="s">'/admin'</span>,
+    component: Admin,
+    meta: {
+      requiresAuth: <span class="k">true</span>,   <span class="c">// 需要登录才能访问</span>
+      roles: [<span class="s">'admin'</span>],       <span class="c">// 需要的角色</span>
+      title: <span class="s">'后台管理'</span>          <span class="c">// 页面标题</span>
+    }
+  },
+  {
+    path: <span class="s">'/dashboard'</span>,
+    component: Dashboard,
+    meta: { requiresAuth: <span class="k">true</span>, title: <span class="s">'仪表盘'</span> }
+  },
+  {
+    path: <span class="s">'/login'</span>,
+    component: Login,
+    meta: { title: <span class="s">'登录'</span> }         <span class="c">// 不需要 requiresAuth</span>
+  }
+]</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>路由独享守卫与组件内守卫</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">路由独享守卫（beforeEnter）</div>
+      <p>写在路由配置中，只对该路由生效，等同于 <code>beforeEach</code> 但作用域更小。</p>
+      <div class="code-block">routes: [
+  {
+    path: <span class="s">'/vip-page'</span>,
+    component: VipPage,
+    <span class="f">beforeEnter</span>(to, from, next) {
+      <span class="k">const</span> user = store.<span class="f">getState</span>().user
+      <span class="k">if</span> (!user.isVip) {
+        <span class="f">next</span>({ path: <span class="s">'/upgrade'</span> })  <span class="c">// 非VIP跳到升级页</span>
+      } <span class="k">else</span> {
+        <span class="f">next</span>()
+      }
+    }
+  }
+]</div>
+
+      <div class="section-title">组件内守卫</div>
+      <p>直接写在 Vue 组件的 options 中，有三个：</p>
+      <div class="code-block">export default {
+  name: <span class="s">'EditArticle'</span>,
+
+  <span class="c">// ① beforeRouteEnter：路由进入该组件前触发</span>
+  <span class="c">//    ⚠️ 此时组件还未创建，无法访问 this！</span>
+  <span class="f">beforeRouteEnter</span>(to, from, next) {
+    <span class="f">next</span>(vm => {
+      <span class="c">// 通过回调访问组件实例（vm），此时组件已创建</span>
+      vm.<span class="f">fetchArticle</span>(to.params.id)
+    })
+  },
+
+  <span class="c">// ② beforeRouteUpdate：同一路由，参数变化时触发（组件复用时）</span>
+  <span class="c">//    此时 this 可以用</span>
+  <span class="f">beforeRouteUpdate</span>(to, from, next) {
+    <span class="k">this</span>.<span class="f">fetchArticle</span>(to.params.id)  <span class="c">// 重新加载数据</span>
+    <span class="f">next</span>()
+  },
+
+  <span class="c">// ③ beforeRouteLeave：离开该路由前触发</span>
+  <span class="c">//    常用：用户有未保存的内容时，离开前提示</span>
+  <span class="f">beforeRouteLeave</span>(to, from, next) {
+    <span class="k">if</span> (<span class="k">this</span>.hasUnsavedChanges) {
+      <span class="k">const</span> confirmed = window.<span class="f">confirm</span>(<span class="s">'有未保存的内容，确定要离开吗？'</span>)
+      <span class="f">next</span>(confirmed)   <span class="c">// true 放行，false 取消</span>
+    } <span class="k">else</span> {
+      <span class="f">next</span>()
+    }
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>完整导航解析流程</h2>
+    </div>
+    <div class="card-body">
+      <p>当一次路由跳转发生时，Vue Router 按以下顺序执行所有守卫：</p>
+      <div class="flow"><span class="v">1.</span> <span class="n">导航被触发</span>（用户点击链接 / 调用 push）
+
+<span class="v">2.</span> <span class="c">【组件内守卫】</span> 在离开的组件里调用 <span class="f">beforeRouteLeave</span>
+
+<span class="v">3.</span> <span class="c">【全局守卫】</span>  调用全局 <span class="f">beforeEach</span>
+
+<span class="v">4.</span> <span class="c">【路由独享守卫】</span>如果目标路由配置了 <span class="f">beforeEnter</span>，调用它
+
+<span class="v">5.</span> <span class="c">【解析异步组件】</span>（懒加载路由）
+
+<span class="v">6.</span> <span class="c">【组件内守卫】</span> 在被激活的组件里调用 <span class="f">beforeRouteEnter</span>
+
+<span class="v">7.</span> <span class="c">【全局守卫】</span>  调用全局 <span class="f">beforeResolve</span>
+
+<span class="v">8.</span> <span class="n">导航被确认（navigation confirmed）</span>
+
+<span class="v">9.</span> <span class="c">【全局钩子】</span>  调用全局 <span class="f">afterEach</span>
+
+<span class="v">10.</span> <span class="c">【DOM 更新】</span> 触发 DOM 更新
+
+<span class="v">11.</span> <span class="c">【组件内守卫】</span> beforeRouteEnter 的 next 回调被调用（组件实例已创建）</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>记住顺序的口诀：</strong>离开组件守卫 → 全局前置守卫 → 路由独享守卫 → 进入组件守卫 → 全局解析守卫 → <strong>导航确认</strong> → 全局后置钩子
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>实战：登录鉴权完整方案</h2>
+    </div>
+    <div class="card-body">
+      <p>以下是真实项目中最常用的路由守卫鉴权方案：</p>
+      <div class="code-block"><span class="c">// router/index.js</span>
+<span class="k">import</span> Vue <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> VueRouter <span class="k">from</span> <span class="s">'vue-router'</span>
+<span class="k">import</span> Home <span class="k">from</span> <span class="s">'../views/Home.vue'</span>
+<span class="k">import</span> Login <span class="k">from</span> <span class="s">'../views/Login.vue'</span>
+<span class="k">import</span> Admin <span class="k">from</span> <span class="s">'../views/Admin.vue'</span>
+
+Vue.<span class="f">use</span>(VueRouter)
+
+<span class="k">const</span> routes = [
+  { path: <span class="s">'/'</span>,      component: Home,  meta: { title: <span class="s">'首页'</span> } },
+  { path: <span class="s">'/login'</span>, component: Login, meta: { title: <span class="s">'登录'</span> } },
+  {
+    path: <span class="s">'/admin'</span>,
+    component: Admin,
+    meta: { requiresAuth: <span class="k">true</span>, title: <span class="s">'后台管理'</span> }
+  },
+  { path: <span class="s">'*'</span>, redirect: <span class="s">'/'</span> }
+]
+
+<span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({ mode: <span class="s">'history'</span>, routes })
+
+<span class="c">// 全局前置守卫：统一处理登录鉴权</span>
+router.<span class="f">beforeEach</span>((to, from, next) => {
+  <span class="c">// 设置页面标题</span>
+  document.title = to.meta.title || <span class="s">'My App'</span>
+
+  <span class="c">// 检查是否需要登录</span>
+  <span class="k">if</span> (to.meta.requiresAuth) {
+    <span class="k">const</span> token = localStorage.<span class="f">getItem</span>(<span class="s">'token'</span>)
+    <span class="k">if</span> (!token) {
+      <span class="c">// 未登录 → 跳转登录页，记录目标地址</span>
+      <span class="f">next</span>({ path: <span class="s">'/login'</span>, query: { redirect: to.fullPath } })
+    } <span class="k">else</span> {
+      <span class="f">next</span>()
+    }
+  } <span class="k">else</span> {
+    <span class="f">next</span>()
+  }
+})
+
+<span class="k">export default</span> router</div>
+
+      <div class="code-block"><span class="c">// Login.vue 登录成功后跳回原目标页</span>
+methods: {
+  <span class="k">async</span> <span class="f">handleLogin</span>() {
+    <span class="k">await</span> <span class="f">login</span>(<span class="k">this</span>.form)
+    localStorage.<span class="f">setItem</span>(<span class="s">'token'</span>, <span class="s">'xxx'</span>)
+    <span class="c">// 读取登录前想去的地址，没有则去首页</span>
+    <span class="k">const</span> redirect = <span class="k">this</span>.$route.query.redirect || <span class="s">'/'</span>
+    <span class="k">this</span>.$router.<span class="f">replace</span>(redirect)
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第六节</span>
+      <h2>守卫速查表</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>守卫</th><th>位置</th><th>触发时机</th><th>this 可用</th><th>常见用途</th></tr></thead>
+          <tbody>
+            <tr><td>beforeEach</td><td>全局</td><td>每次路由跳转前</td><td>❌（不在组件中）</td><td>登录鉴权、权限检查</td></tr>
+            <tr><td>afterEach</td><td>全局</td><td>每次路由跳转后</td><td>❌</td><td>设置标题、统计埋点</td></tr>
+            <tr><td>beforeResolve</td><td>全局</td><td>确认导航前（所有守卫都解析完）</td><td>❌</td><td>数据预加载完成后放行</td></tr>
+            <tr><td>beforeEnter</td><td>路由配置</td><td>进入该路由前</td><td>❌</td><td>针对特定路由的权限</td></tr>
+            <tr><td>beforeRouteEnter</td><td>组件内</td><td>路由进入，组件创建前</td><td>❌（用 next(vm)）</td><td>进入前预加载数据</td></tr>
+            <tr><td>beforeRouteUpdate</td><td>组件内</td><td>参数变化，组件复用时</td><td>✅</td><td>参数变化时刷新数据</td></tr>
+            <tr><td>beforeRouteLeave</td><td>组件内</td><td>离开该路由前</td><td>✅</td><td>提示未保存内容</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  25-5 · 路由守卫 &nbsp;|&nbsp; 全局 / 路由独享 / 组件内守卫 / 登录鉴权实战
+</div>
+</body>
+</html>

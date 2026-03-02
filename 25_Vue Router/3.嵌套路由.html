@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25-3 · 嵌套路由</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+      --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue  { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .badge-yellow{ background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .badge-purple{ background: rgba(188,140,255,0.15);color: var(--purple); }
+    .badge-teal  { background: rgba(57,214,192,0.15); color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; } .n { color: #e6edf3; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .flow { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: monospace; font-size: 0.82rem; line-height: 2; margin: 10px 0; white-space: pre; }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size:0.85rem; }
+    strong { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vue Router · 嵌套路由</h1>
+  <p class="page-lead">25-3 &nbsp;|&nbsp; children 配置 / 嵌套 router-view / 默认子路由 / 多级路由</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>为什么需要嵌套路由</h2>
+    </div>
+    <div class="card-body">
+      <p>真实应用中，界面通常是多层嵌套的。例如：用户中心页面有固定的侧边栏，但中间内容区根据不同子菜单切换。</p>
+
+      <div class="flow"><span class="c">【界面结构示意】</span>
+┌─────────────────────────────────────────┐
+│  顶部导航 NavBar（每个页面都有）         │
+├──────────┬──────────────────────────────┤
+│          │                              │
+│  左侧    │   /user/profile → 个人资料   │
+│  侧边栏  │   /user/orders  → 订单列表   │
+│          │   /user/favs    → 我的收藏   │
+│          │                              │
+└──────────┴──────────────────────────────┘</div>
+
+      <p>这里需要两层 <code>&lt;router-view&gt;</code>：</p>
+      <ul style="list-style:none; padding:0; margin:8px 0">
+        <li style="padding:4px 0; color:#94a3b8"><span style="color:#58a6ff">①</span> 最外层：在 <code>App.vue</code> 里，渲染"哪个一级页面"（Home / User / Admin...）</li>
+        <li style="padding:4px 0; color:#94a3b8"><span style="color:#58a6ff">②</span> 内层：在 <code>User.vue</code> 里，渲染"用户中心的哪个子页面"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>children 配置</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">路由配置：用 children 定义子路由</div>
+      <div class="code-block"><span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+  routes: [
+    {
+      path: <span class="s">'/user'</span>,
+      name: <span class="s">'user'</span>,
+      component: User,        <span class="c">// User 模板里要有 &lt;router-view&gt;</span>
+      children: [
+        <span class="c">// ★ 子路由的 path 不加 /，最终路径是 /user/profile</span>
+        { path: <span class="s">'profile'</span>, name: <span class="s">'user-profile'</span>, component: UserProfile },
+        { path: <span class="s">'orders'</span>,  name: <span class="s">'user-orders'</span>,  component: UserOrders  },
+        { path: <span class="s">'favs'</span>,    name: <span class="s">'user-favs'</span>,    component: UserFavs    },
+
+        <span class="c">// 访问 /user 时显示的默认子页面（path 为空）</span>
+        { path: <span class="s">''</span>, redirect: <span class="s">'profile'</span> },
+
+        <span class="c">// 子路由也可以有动态段</span>
+        { path: <span class="s">'order/:orderId'</span>, name: <span class="s">'order-detail'</span>, component: OrderDetail },
+      ]
+    }
+  ]
+})</div>
+
+      <div class="tip tip-yellow">
+        ⚠️ <strong>子路由 path 的斜杠规则：</strong><br>
+        <code>path: 'profile'</code> → 最终路径是 <code>/user/profile</code>（不加 /，追加到父路径）<br>
+        <code>path: '/profile'</code> → 最终路径是 <code>/profile</code>（加了 /，从根路径开始，通常不这样写）
+      </div>
+
+      <div class="section-title">父组件模板：必须包含 &lt;router-view&gt;</div>
+      <div class="code-block"><span class="c">&lt;!-- User.vue / User 组件的模板 --&gt;</span>
+<span class="k">const</span> User = {
+  template: <span class="s">`
+    &lt;div class="user-layout"&gt;
+      &lt;h2&gt;用户中心&lt;/h2&gt;
+      &lt;!-- 左侧导航 --&gt;
+      &lt;nav&gt;
+        &lt;router-link :to="{ name: 'user-profile' }"&gt;个人资料&lt;/router-link&gt;
+        &lt;router-link :to="{ name: 'user-orders' }"&gt;我的订单&lt;/router-link&gt;
+        &lt;router-link :to="{ name: 'user-favs' }"&gt;我的收藏&lt;/router-link&gt;
+      &lt;/nav&gt;
+      &lt;!-- ★ 子路由渲染在这里，而不是 App 根组件的 router-view --&gt;
+      &lt;router-view&gt;&lt;/router-view&gt;
+    &lt;/div&gt;
+  `</span>
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>路由层级与 router-view 的对应关系</h2>
+    </div>
+    <div class="card-body">
+      <div class="flow"><span class="c">URL: /user/profile</span>
+
+App.vue
+└── &lt;router-view&gt;            ← 渲染一级路由：User 组件
+    └── User.vue
+        └── &lt;router-view&gt;    ← 渲染二级路由：UserProfile 组件
+            └── UserProfile.vue
+
+<span class="c">URL: /user/order/88</span>
+
+App.vue
+└── &lt;router-view&gt;            ← 渲染：User 组件
+    └── User.vue
+        └── &lt;router-view&gt;    ← 渲染：OrderDetail 组件（orderId=88）
+            └── OrderDetail.vue</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>关键规则：有几层嵌套路由，就需要几层 <code>&lt;router-view&gt;</code></strong>。每一层 router-view 只展示它所在层级的路由对应的组件。
+      </div>
+
+      <div class="section-title">三级路由示例</div>
+      <div class="code-block">routes: [
+  {
+    path: <span class="s">'/admin'</span>,
+    component: Admin,           <span class="c">// Admin.vue 里有 &lt;router-view&gt;</span>
+    children: [
+      {
+        path: <span class="s">'users'</span>,
+        component: AdminUsers,   <span class="c">// AdminUsers.vue 里也有 &lt;router-view&gt;</span>
+        children: [
+          { path: <span class="s">':id'</span>, component: AdminUserDetail }
+          <span class="c">// 最终路径：/admin/users/42</span>
+        ]
+      }
+    ]
+  }
+]</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>命名视图（同级多个 router-view）</h2>
+    </div>
+    <div class="card-body">
+      <p>有时候需要在同一级同时渲染多个组件，比如"主内容区 + 侧边栏"。这时可以给 <code>&lt;router-view&gt;</code> 命名。</p>
+
+      <div class="section-title">模板</div>
+      <div class="code-block"><span class="c">&lt;!-- App.vue / 根模板 --&gt;</span>
+<span class="t">&lt;router-view&gt;&lt;/router-view&gt;</span>                   <span class="c">&lt;!-- 名字是 default --&gt;</span>
+<span class="t">&lt;router-view</span> <span class="a">name</span>=<span class="s">"sidebar"</span><span class="t">&gt;&lt;/router-view&gt;</span>     <span class="c">&lt;!-- 命名视图 --&gt;</span></div>
+
+      <div class="section-title">路由配置：components（注意是复数）</div>
+      <div class="code-block"><span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+  routes: [
+    {
+      path: <span class="s">'/'</span>,
+      components: {          <span class="c">// ← 注意是 components 复数！</span>
+        default: Home,       <span class="c">// 渲染到没有 name 的 router-view</span>
+        sidebar: Sidebar     <span class="c">// 渲染到 name="sidebar" 的 router-view</span>
+      }
+    },
+    {
+      path: <span class="s">'/about'</span>,
+      components: {
+        default: About,
+        sidebar: AboutSidebar
+      }
+    }
+  ]
+})</div>
+      <div class="tip tip-green">
+        ✅ 一般项目较少用命名视图。最常见的使用场景是"后台管理系统"布局，顶部导航 + 侧边栏 + 主内容区同时需要根据路由切换的情况。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>完整可运行 Demo</h2>
+    </div>
+    <div class="card-body">
+      <div class="code-block"><span class="t">&lt;!DOCTYPE html&gt;</span>
+<span class="t">&lt;html&gt;&lt;head&gt;&lt;title&gt;</span>嵌套路由 Demo<span class="t">&lt;/title&gt;</span>
+<span class="t">&lt;style&gt;</span>
+  body { font-family: sans-serif; max-width: 700px; margin: 40px auto; }
+  nav a { margin: 0 8px; color: #666; text-decoration: none; }
+  .router-link-exact-active { color: #6366f1; font-weight: bold; }
+  .layout { display: flex; gap: 20px; margin-top: 16px; }
+  .sidebar { width: 140px; border-right: 1px solid #eee; padding-right: 16px; }
+  .sidebar a { display: block; margin: 8px 0; }
+  .content { flex: 1; padding: 16px; border: 1px solid #eee; border-radius: 8px; }
+<span class="t">&lt;/style&gt;&lt;/head&gt;</span>
+
+<span class="t">&lt;body&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">id</span>=<span class="s">"app"</span><span class="t">&gt;</span>
+    <span class="t">&lt;nav&gt;</span>
+      <span class="t">&lt;router-link</span> <span class="a">to</span>=<span class="s">"/"</span> <span class="a">exact</span><span class="t">&gt;</span>首页<span class="t">&lt;/router-link&gt;</span>
+      <span class="t">&lt;router-link</span> <span class="a">to</span>=<span class="s">"/user"</span><span class="t">&gt;</span>用户中心<span class="t">&lt;/router-link&gt;</span>
+    <span class="t">&lt;/nav&gt;</span>
+    <span class="t">&lt;router-view&gt;&lt;/router-view&gt;</span>   <span class="c">&lt;!-- 一级路由出口 --&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+
+  <span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"../js/vue.js"</span><span class="t">&gt;&lt;/script&gt;</span>
+  <span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"https://unpkg.com/vue-router@3.6.5/dist/vue-router.js"</span><span class="t">&gt;&lt;/script&gt;</span>
+  <span class="t">&lt;script&gt;</span>
+    <span class="k">const</span> Home    = { template: <span class="s">'&lt;div style="padding:16px"&gt;&lt;h3&gt;🏠 首页&lt;/h3&gt;&lt;/div&gt;'</span> }
+    <span class="k">const</span> Profile = { template: <span class="s">'&lt;div&gt;&lt;h4&gt;👤 个人资料&lt;/h4&gt;&lt;p&gt;姓名：张三，邮箱：zhang@example.com&lt;/p&gt;&lt;/div&gt;'</span> }
+    <span class="k">const</span> Orders  = { template: <span class="s">'&lt;div&gt;&lt;h4&gt;📦 我的订单&lt;/h4&gt;&lt;p&gt;共 3 个订单&lt;/p&gt;&lt;/div&gt;'</span> }
+    <span class="k">const</span> Favs    = { template: <span class="s">'&lt;div&gt;&lt;h4&gt;❤️ 我的收藏&lt;/h4&gt;&lt;p&gt;共 12 个收藏&lt;/p&gt;&lt;/div&gt;'</span> }
+
+    <span class="k">const</span> User = {
+      template: <span class="s">`&lt;div class="layout"&gt;
+        &lt;div class="sidebar"&gt;
+          &lt;strong&gt;用户中心&lt;/strong&gt;
+          &lt;router-link to="/user/profile"&gt;个人资料&lt;/router-link&gt;
+          &lt;router-link to="/user/orders"&gt;我的订单&lt;/router-link&gt;
+          &lt;router-link to="/user/favs"&gt;我的收藏&lt;/router-link&gt;
+        &lt;/div&gt;
+        &lt;div class="content"&gt;
+          &lt;router-view&gt;&lt;/router-view&gt;  &lt;!-- 二级路由出口 --&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;`</span>
+    }
+
+    <span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+      routes: [
+        { path: <span class="s">'/'</span>, component: Home },
+        {
+          path: <span class="s">'/user'</span>,
+          component: User,
+          children: [
+            { path: <span class="s">''</span>, redirect: <span class="s">'profile'</span> },   <span class="c">// /user → /user/profile</span>
+            { path: <span class="s">'profile'</span>, component: Profile },
+            { path: <span class="s">'orders'</span>,  component: Orders  },
+            { path: <span class="s">'favs'</span>,    component: Favs    },
+          ]
+        }
+      ]
+    })
+    <span class="k">new</span> <span class="f">Vue</span>({ el: <span class="s">'#app'</span>, router })
+  <span class="t">&lt;/script&gt;</span>
+<span class="t">&lt;/body&gt;&lt;/html&gt;</span></div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  25-3 · 嵌套路由 &nbsp;|&nbsp; children / 多层 router-view / 命名视图
+</div>
+</body>
+</html>

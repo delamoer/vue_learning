@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25-6 · Hash 与 History 模式</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+      --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue  { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .badge-yellow{ background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .badge-purple{ background: rgba(188,140,255,0.15);color: var(--purple); }
+    .badge-teal  { background: rgba(57,214,192,0.15); color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; } .n { color: #e6edf3; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size:0.85rem; }
+    strong { color: var(--text); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vue Router · Hash 与 History 模式</h1>
+  <p class="page-lead">25-6 &nbsp;|&nbsp; Hash 原理 / History API / 两种模式对比 / 服务器配置 / 如何选择</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>Hash 模式</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">URL 长什么样</div>
+      <div class="code-block"><span class="c">// Hash 模式的 URL（默认）</span>
+http://localhost:8080<span class="a">/#/home</span>
+http://localhost:8080<span class="a">/#/user/42</span>
+http://localhost:8080<span class="a">/#/search?kw=vue</span>
+<span class="c">//                    ↑ # 后面的部分叫做 hash</span></div>
+
+      <div class="section-title">工作原理</div>
+      <p>浏览器中，URL 的 <code>#</code> 及其后面的内容叫 <strong>hash</strong>。</p>
+      <ul style="list-style:none; padding:0; margin:8px 0">
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">①</span> hash 变化时，浏览器<strong>不会向服务器发请求</strong>（服务器永远只收到 <code>/</code>）</li>
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">②</span> 浏览器会触发 <code>hashchange</code> 事件</li>
+        <li style="padding:5px 0; color:#94a3b8"><span style="color:#58a6ff">③</span> Vue Router 监听 <code>hashchange</code>，根据 hash 渲染对应组件</li>
+      </ul>
+      <div class="code-block"><span class="c">// Vue Router 内部大致逻辑（简化）</span>
+window.<span class="f">addEventListener</span>(<span class="s">'hashchange'</span>, () => {
+  <span class="k">const</span> hash = location.hash  <span class="c">// "#/user/42"</span>
+  <span class="k">const</span> path = hash.<span class="f">slice</span>(<span class="v">1</span>)  <span class="c">// "/user/42"</span>
+  <span class="c">// 根据 path 找对应路由，渲染组件...</span>
+})</div>
+
+      <div class="tip tip-green">
+        ✅ <strong>Hash 模式的最大优点：</strong>不需要服务器做任何配置，因为 hash 从来不会发到服务器端。打开 <code>dist/index.html</code> 直接双击也能用（本地文件）。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>History 模式</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">URL 长什么样</div>
+      <div class="code-block"><span class="c">// History 模式的 URL（更漂亮）</span>
+http://localhost:8080<span class="t">/home</span>
+http://localhost:8080<span class="t">/user/42</span>
+http://localhost:8080<span class="t">/search?kw=vue</span>
+<span class="c">// 没有 #，就像普通多页应用的 URL</span></div>
+
+      <div class="section-title">工作原理</div>
+      <p>利用 HTML5 的 History API：<code>pushState</code> 和 <code>replaceState</code>。</p>
+      <div class="code-block"><span class="c">// History API 可以改变 URL 而不引起页面刷新</span>
+history.<span class="f">pushState</span>({}, <span class="s">''</span>, <span class="s">'/user/42'</span>)   <span class="c">// URL 变成 /user/42，但页面不刷新</span>
+history.<span class="f">replaceState</span>({}, <span class="s">''</span>, <span class="s">'/home'</span>)  <span class="c">// URL 替换为 /home，无历史记录</span>
+
+<span class="c">// 监听前进/后退（popstate 事件）</span>
+window.<span class="f">addEventListener</span>(<span class="s">'popstate'</span>, () => {
+  <span class="c">// 根据 location.pathname 渲染组件</span>
+})</div>
+
+      <div class="section-title">开启 History 模式</div>
+      <div class="code-block"><span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+  mode: <span class="s">'history'</span>,  <span class="c">// ← 只需要加这一行</span>
+  routes: [...]
+})
+
+<span class="c">// 默认是 hash 模式（mode: 'hash'），不用写</span></div>
+
+      <div class="tip tip-red">
+        ⚠️ <strong>History 模式的问题：</strong><br>
+        用户直接访问 <code>http://example.com/user/42</code>（刷新或直接输入地址），浏览器会向服务器请求 <code>/user/42</code> 这个路径。但服务器上只有 <code>index.html</code>，<code>/user/42</code> 根本不存在，就会返回 <strong>404</strong>！
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>History 模式的服务器配置</h2>
+    </div>
+    <div class="card-body">
+      <p>解决方案：让服务器对任何路径都返回 <code>index.html</code>，然后让前端 Vue Router 来解析路径。</p>
+
+      <div class="section-title">Nginx 配置</div>
+      <div class="code-block">server {
+    listen 80;
+    server_name example.com;
+    root /var/www/dist;
+
+    location / {
+        try_files $uri $uri/ <span class="s">/index.html</span>;
+        <span class="c"># 意思：先找对应文件，找不到就返回 index.html</span>
+    }
+}</div>
+
+      <div class="section-title">Node.js + Express</div>
+      <div class="code-block"><span class="k">const</span> express = <span class="f">require</span>(<span class="s">'express'</span>)
+<span class="k">const</span> history = <span class="f">require</span>(<span class="s">'connect-history-api-fallback'</span>)
+<span class="k">const</span> app = <span class="f">express</span>()
+
+<span class="c">// 关键：放在静态文件服务之前</span>
+app.<span class="f">use</span>(<span class="f">history</span>())
+app.<span class="f">use</span>(express.<span class="f">static</span>(<span class="s">'dist'</span>))
+
+app.<span class="f">listen</span>(<span class="v">3000</span>)</div>
+
+      <div class="section-title">Vue CLI devServer（开发环境）</div>
+      <div class="code-block"><span class="c">// vue.config.js — 开发服务器会自动处理，但可以显式配置</span>
+module.exports = {
+  devServer: {
+    historyApiFallback: <span class="k">true</span>  <span class="c">// 开发时自动回退到 index.html</span>
+  }
+}</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>Vue CLI 的开发服务器默认已配置 historyApiFallback</strong>，所以开发时你感觉不到差异。问题只会在打包部署到真实服务器后出现。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>两种模式全面对比</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对比项</th><th>Hash 模式</th><th>History 模式</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>URL 形态</td>
+              <td><code>/#/user/42</code></td>
+              <td><code>/user/42</code></td>
+            </tr>
+            <tr>
+              <td>URL 美观度</td>
+              <td>有 # 符号，不够优雅</td>
+              <td style="color:#34d399">✅ 干净，像普通 URL</td>
+            </tr>
+            <tr>
+              <td>服务器是否收到路径</td>
+              <td style="color:#34d399">❌ 服务器只收到 /（hash 不发送）</td>
+              <td>✅ 服务器会收到完整路径</td>
+            </tr>
+            <tr>
+              <td>需要服务器配置</td>
+              <td style="color:#34d399">❌ 不需要（静态文件服务即可）</td>
+              <td>✅ 需要（否则刷新 404）</td>
+            </tr>
+            <tr>
+              <td>直接打开 index.html</td>
+              <td style="color:#34d399">✅ 可以（适合无服务器部署）</td>
+              <td>❌ 不可以（需要 HTTP 服务器）</td>
+            </tr>
+            <tr>
+              <td>SEO 友好性</td>
+              <td>差（爬虫不能抓取 hash 后的内容）</td>
+              <td style="color:#34d399">✅ 好（正常 URL，可被爬虫抓取）</td>
+            </tr>
+            <tr>
+              <td>浏览器兼容性</td>
+              <td style="color:#34d399">✅ 极好（所有浏览器）</td>
+              <td>良好（IE10+，需要 HTML5 History API）</td>
+            </tr>
+            <tr>
+              <td>分享 URL 时</td>
+              <td>带 # 号略丑</td>
+              <td style="color:#34d399">✅ 正常链接</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>如何选择？</h2>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div style="background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.2); border-radius:8px; padding:14px">
+          <div style="color:#58a6ff; font-weight:700; margin-bottom:8px">选 Hash 模式</div>
+          <ul style="list-style:disc; padding-left:18px; color:#94a3b8; font-size:0.83rem; line-height:2">
+            <li>需要部署到<strong style="color:#e2e8f0">纯静态服务器</strong>（如 GitHub Pages、CDN 直接托管）</li>
+            <li>服务器是<strong style="color:#e2e8f0">第三方托管</strong>，无法配置</li>
+            <li>需要支持 <strong style="color:#e2e8f0">IE 9</strong> 等老旧浏览器</li>
+            <li>项目不在乎 SEO（内部管理系统、后台）</li>
+          </ul>
+        </div>
+        <div style="background:rgba(63,185,80,0.05); border:1px solid rgba(63,185,80,0.2); border-radius:8px; padding:14px">
+          <div style="color:#3fb950; font-weight:700; margin-bottom:8px">选 History 模式（推荐）</div>
+          <ul style="list-style:disc; padding-left:18px; color:#94a3b8; font-size:0.83rem; line-height:2">
+            <li>能控制服务器配置（Nginx、Node.js 等）</li>
+            <li>URL 美观是需求之一</li>
+            <li>对外的 C 端产品，<strong style="color:#e2e8f0">SEO 有要求</strong></li>
+            <li>现代项目的默认选择</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tip tip-yellow">
+        ⭐ <strong>实际项目结论：</strong><br>
+        有服务器控制权 → 用 <strong>History 模式</strong>（更专业，URL 干净）<br>
+        纯静态托管（GitHub Pages、直接打开 HTML 文件）→ 用 <strong>Hash 模式</strong>（零配置）<br><br>
+        我们的 <code>vue2-sfc-demo</code> 和 <code>vue2-router-demo</code> 均使用 History 模式，因为 Vue CLI devServer 已自动处理。
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  25-6 · Hash 与 History 模式 &nbsp;|&nbsp; 原理 / 对比 / 服务器配置 / 如何选择
+</div>
+</body>
+</html>
