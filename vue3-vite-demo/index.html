@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 3 Vite Demo</title>
+    <!--
+      ★ 与 Vue CLI 版本的关键区别：
+      1. 这个 index.html 在【根目录】，不在 public/ 里
+      2. 这里直接用 <script type="module"> 引入 main.js，不需要 HtmlWebpackPlugin 注入
+      3. 没有 EJS 语法（<%= %>），就是普通 HTML
+    -->
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
