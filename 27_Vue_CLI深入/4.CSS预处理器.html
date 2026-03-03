@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27-4 CSS预处理器</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; line-height: 1.7; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.4rem; color: var(--green); margin: 32px 0 12px; }
+    h3 { font-size: 1.1rem; color: var(--yellow); margin: 20px 0 8px; }
+    p { margin-bottom: 10px; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+    .code-block pre { font-family: 'Consolas', monospace; font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .num { color: #79c0ff; }
+    .var { color: #ffa657; } .tag { color: #7ee787; }
+    .tip { border-left: 4px solid var(--accent); padding: 12px 16px; background: rgba(88,166,255,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .warn { border-left: 4px solid var(--yellow); padding: 12px 16px; background: rgba(210,153,34,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .success { border-left: 4px solid var(--green); padding: 12px 16px; background: rgba(63,185,80,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--accent); font-size: 0.9rem; }
+    td { border: 1px solid var(--border); padding: 8px 12px; font-size: 0.88rem; color: var(--muted); }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🎨 27-4 CSS 预处理器（Sass/Less）</h1>
+
+  <!-- ==================== 1. 安装 ==================== -->
+  <h2>1. 安装与配置</h2>
+  <p>Vue CLI 通过 Webpack loader 支持 CSS 预处理器，需要手动安装对应的依赖。</p>
+
+  <div class="code-block"><pre><span class="comment"># 安装 Sass (推荐，生态更好)</span>
+npm install -D sass sass-loader
+
+<span class="comment"># 安装 Less</span>
+npm install -D less less-loader
+
+<span class="comment"># 安装 Stylus</span>
+npm install -D stylus stylus-loader</pre></div>
+
+  <div class="tip">
+    <strong>Vue CLI 5 注意：</strong> 使用 <code>sass</code>（非 <code>node-sass</code>），sass-loader 推荐 v12+。
+    项目中已有 <code>@vue/cli-service</code>，只需安装 <code>sass</code> 和 <code>sass-loader</code> 即可，
+    无需在 <code>vue.config.js</code> 额外配置 loader。
+  </div>
+
+  <h3>在 .vue 组件中使用</h3>
+  <div class="code-block"><pre><span class="comment">&lt;!-- 只需在 style 标签加 lang 属性 --&gt;</span>
+<span class="tag">&lt;style lang="scss" scoped&gt;</span>
+.user-card {
+  $primary: #42b983;     <span class="comment">// 局部变量</span>
+
+  padding: 16px;
+  border: 2px solid $primary;
+
+  &amp;:hover {              <span class="comment">// 嵌套 &amp; 父选择器</span>
+    background: lighten($primary, 40%);
+  }
+
+  .title {               <span class="comment">// 嵌套选择器（避免 BEM 写法的冗长）</span>
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+}
+<span class="tag">&lt;/style&gt;</span>
+
+<span class="tag">&lt;style lang="less" scoped&gt;</span>
+.user-card {
+  @primary: #42b983;     <span class="comment">// Less 变量用 @</span>
+
+  padding: 16px;
+  .title { font-weight: bold; }
+}
+<span class="tag">&lt;/style&gt;</span></pre></div>
+
+  <!-- ==================== 2. 全局变量注入 ==================== -->
+  <h2>2. 全局变量自动注入（关键配置）</h2>
+  <p>最大的痛点：在每个组件里都要 <code>@import</code> 变量文件。通过 <code>vue.config.js</code> 配置自动注入，一劳永逸。</p>
+
+  <div class="code-block"><pre><span class="comment">// src/styles/variables.scss — 全局变量文件</span>
+$primary-color: #42b983;
+$danger-color:  #f56c6c;
+$warning-color: #e6a23c;
+$text-base:     #303133;
+$text-muted:    #909399;
+$border-color:  #dcdfe6;
+$border-radius: 4px;
+
+$font-size-sm: 12px;
+$font-size-md: 14px;
+$font-size-lg: 16px;
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;</pre></div>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js — 自动注入到每个组件的 style 块</span>
+<span class="kw">const</span> { <span class="var">defineConfig</span> } = <span class="fn">require</span>(<span class="str">'@vue/cli-service'</span>)
+
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="var">css</span>: {
+    <span class="var">loaderOptions</span>: {
+      <span class="var">sass</span>: {
+        <span class="comment">// sass-loader v8+: prependData → additionalData</span>
+        <span class="var">additionalData</span>: <span class="str">`@import "@/styles/variables.scss";`</span>
+      },
+      <span class="comment">// Less 的写法</span>
+      <span class="var">less</span>: {
+        <span class="var">additionalData</span>: <span class="str">`@import "@/styles/variables.less";`</span>
+      }
+    }
+  }
+})</pre></div>
+
+  <p>配置后，每个 <code>&lt;style lang="scss"&gt;</code> 块都自动拥有变量，无需手动 import：</p>
+  <div class="code-block"><pre><span class="comment">&lt;!-- 组件中直接使用全局变量，无需 @import --&gt;</span>
+<span class="tag">&lt;style lang="scss" scoped&gt;</span>
+.btn {
+  background: $primary-color;   <span class="comment">// ✅ 直接用，不需要 @import</span>
+  border-radius: $border-radius;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-md;
+}
+<span class="tag">&lt;/style&gt;</span></pre></div>
+
+  <!-- ==================== 3. Mixin 文件 ==================== -->
+  <h2>3. 样式 Mixin 复用</h2>
+
+  <div class="code-block"><pre><span class="comment">// src/styles/mixins.scss</span>
+
+<span class="comment">// 单行文字超出省略</span>
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+<span class="comment">// 多行文字超出省略</span>
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  overflow: hidden;
+}
+
+<span class="comment">// flex 居中</span>
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+<span class="comment">// 响应式断点</span>
+@mixin mobile {
+  @media (max-width: 768px) { @content; }
+}
+@mixin tablet {
+  @media (min-width: 769px) and (max-width: 1024px) { @content; }
+}
+
+<span class="comment">// ---- 使用方式 ----</span>
+.card-title {
+  @include ellipsis;             <span class="comment">// 单行超出省略</span>
+}
+.description {
+  @include line-clamp(3);        <span class="comment">// 三行超出省略</span>
+}
+.loading-mask {
+  @include flex-center;          <span class="comment">// flex 居中遮罩</span>
+  position: absolute;
+}
+.sidebar {
+  width: 240px;
+  @include mobile {              <span class="comment">// 手机上隐藏侧边栏</span>
+    display: none;
+  }
+}</pre></div>
+
+  <!-- ==================== 4. 全局样式文件结构 ==================== -->
+  <h2>4. 全局样式组织结构</h2>
+
+  <div class="code-block"><pre><span class="comment">// src/styles/index.scss — 入口（在 main.js 中 import）</span>
+@import "./reset";           <span class="comment">// CSS 重置</span>
+@import "./variables";      <span class="comment">// 变量（不包含任何 CSS，无副作用）</span>
+@import "./mixins";         <span class="comment">// Mixin（不包含任何 CSS，无副作用）</span>
+@import "./base";            <span class="comment">// 基础全局样式（body、h1-h6、a、ul…）</span>
+@import "./transition";     <span class="comment">// 全局 transition 动画类</span>
+@import "./utilities";      <span class="comment">// 工具类（.text-center / .mt-16…）</span></pre></div>
+
+  <div class="code-block"><pre><span class="comment">// src/styles/reset.scss — 基础重置</span>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: $font-size-md;    <span class="comment">// 引用变量（因为全局注入，这里可以直接用）</span>
+  color: $text-base;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: $primary-color; text-decoration: none; }
+img { max-width: 100%; }
+ul, ol { list-style: none; padding: 0; margin: 0; }</pre></div>
+
+  <!-- ==================== 5. Sass vs Less ==================== -->
+  <h2>5. Sass vs Less 选择指南</h2>
+
+  <table>
+    <tr><th></th><th>Sass (SCSS)</th><th>Less</th></tr>
+    <tr><td>语法</td><td>类 CSS（.scss）或缩进式（.sass）</td><td>类 CSS，与原生 CSS 差异最小</td></tr>
+    <tr><td>变量声明</td><td><code>$primary: #42b983;</code></td><td><code>@primary: #42b983;</code></td></tr>
+    <tr><td>嵌套</td><td>支持</td><td>支持</td></tr>
+    <tr><td>Mixin</td><td><code>@mixin</code> / <code>@include</code></td><td><code>.mixin()</code></td></tr>
+    <tr><td>函数</td><td>内置函数丰富（颜色、数学）</td><td>较少</td></tr>
+    <tr><td>生态</td><td>Bootstrap 5, 更广泛</td><td>Ant Design（历史），Element Plus 已迁至 Sass</td></tr>
+    <tr><td>推荐度</td><td>⭐⭐⭐⭐⭐ 首选</td><td>⭐⭐⭐ 老项目延续用</td></tr>
+  </table>
+
+  <div class="success">
+    <strong>建议：</strong> 新项目统一使用 Sass（SCSS 语法），与主流 UI 库（Element Plus、Vuetify）保持一致。
+  </div>
+
+  <!-- ==================== 6. 深度选择器 ==================== -->
+  <h2>6. 深度选择器完整总结</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>场景</th><th>写法</th></tr>
+      <tr><td>普通 CSS + scoped</td><td><code>.parent >>> .child {}</code></td></tr>
+      <tr><td>Sass/Less + scoped</td><td><code>.parent ::v-deep .child {}</code></td></tr>
+      <tr><td>Vue 3 所有情况</td><td><code>.parent :deep(.child) {}</code></td></tr>
+      <tr><td>穿透到插槽内容</td><td><code>::v-slotted(.child) {}</code>（Vue 3）</td></tr>
+      <tr><td>全局样式（不受 scoped 限制）</td><td><code>::v-global(.g-class) {}</code>（Vue 3）</td></tr>
+    </table>
+  </div>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- 实际使用示例：修改 Element UI 的 el-dialog 样式 --&gt;</span>
+<span class="tag">&lt;style lang="scss" scoped&gt;</span>
+.my-dialog {
+  ::v-deep .el-dialog__header {
+    background: $primary-color;
+    padding: 16px 20px;
+  }
+
+  ::v-deep .el-dialog__title {
+    color: #fff;
+    font-weight: bold;
+  }
+
+  ::v-deep .el-dialog__body {
+    padding: $spacing-lg;
+  }
+}
+<span class="tag">&lt;/style&gt;</span></pre></div>
+
+  <div class="success">
+    <strong>下一节：</strong> 环境变量与模式 —— .env 文件的完整用法，多环境配置管理。
+  </div>
+
+</div>
+</body>
+</html>

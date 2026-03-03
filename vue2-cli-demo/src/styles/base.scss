@@ -1,0 +1,96 @@
+// 全局基础样式
+.container {
+  max-width: $content-max-width;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+// 通用卡片
+.card {
+  @include card;
+  color: #e6edf3;
+}
+
+// 按钮
+.btn {
+  @include btn-base;
+}
+
+.btn-primary {
+  @include btn-base;
+  background: $primary;
+  color: #fff;
+  &:hover { background: $primary-dark; }
+}
+
+.btn-secondary {
+  @include btn-base;
+  background: transparent;
+  color: $text-muted;
+  border: 1px solid $border-color;
+  &:hover { border-color: $primary; color: $primary; }
+}
+
+.btn-danger {
+  @include btn-base;
+  background: $danger;
+  color: #fff;
+  &:hover { background: darken($danger, 10%); }
+}
+
+// 徽标
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  &-primary { background: rgba($primary, 0.15); color: $primary; }
+  &-warning { background: rgba($warning, 0.15); color: $warning; }
+  &-danger  { background: rgba($danger, 0.15);  color: $danger;  }
+  &-info    { background: rgba($info, 0.15);    color: $info;    }
+}
+
+// 分隔线
+.divider {
+  height: 1px;
+  background: $border-color;
+  margin: $spacing-md 0;
+}
+
+// 代码块
+.code-block {
+  @include code-block;
+  pre { white-space: pre; }
+}
+
+// 提示块
+.tip, .warn, .success-tip, .danger-tip {
+  padding: $spacing-sm $spacing-md;
+  border-radius: 0 $radius-sm $radius-sm 0;
+  margin: $spacing-sm 0;
+  font-size: $font-size-sm;
+}
+.tip        { border-left: 4px solid $info;    background: rgba($info, 0.08); color: lighten($info, 20%); }
+.warn       { border-left: 4px solid $warning; background: rgba($warning, 0.08); color: lighten($warning, 10%); }
+.success-tip{ border-left: 4px solid $success; background: rgba($success, 0.08); color: $success; }
+.danger-tip { border-left: 4px solid $danger;  background: rgba($danger, 0.08);  color: $danger; }
+
+// 栅格
+.grid { display: grid; gap: $spacing-md; }
+.grid-2 { @extend .grid; grid-template-columns: 1fr 1fr; @include mobile { grid-template-columns: 1fr; } }
+.grid-3 { @extend .grid; grid-template-columns: 1fr 1fr 1fr; @include mobile { grid-template-columns: 1fr; } }
+
+// 文字工具
+.text-primary { color: $primary !important; }
+.text-muted   { color: $text-muted !important; }
+.text-danger  { color: $danger !important; }
+.text-warning { color: $warning !important; }
+.font-mono    { font-family: 'Consolas', monospace; }
+
+// 间距工具
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27-6 打包部署与性能优化</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; line-height: 1.7; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.4rem; color: var(--green); margin: 32px 0 12px; }
+    h3 { font-size: 1.1rem; color: var(--yellow); margin: 20px 0 8px; }
+    p { margin-bottom: 10px; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+    .code-block pre { font-family: 'Consolas', monospace; font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .num { color: #79c0ff; }
+    .var { color: #ffa657; }
+    .tip { border-left: 4px solid var(--accent); padding: 12px 16px; background: rgba(88,166,255,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .warn { border-left: 4px solid var(--yellow); padding: 12px 16px; background: rgba(210,153,34,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .success { border-left: 4px solid var(--green); padding: 12px 16px; background: rgba(63,185,80,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--accent); font-size: 0.9rem; }
+    td { border: 1px solid var(--border); padding: 8px 12px; font-size: 0.88rem; color: var(--muted); }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .tag { color: #7ee787; }
+    .step { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; }
+    .step-num { background: var(--accent); color: #000; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: bold; flex-shrink: 0; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🚀 27-6 打包部署与性能优化</h1>
+
+  <!-- ==================== 1. npm run build ==================== -->
+  <h2>1. npm run build 原理与产物</h2>
+
+  <div class="code-block"><pre><span class="comment"># 生产构建</span>
+npm run build
+
+<span class="comment"># 构建完成后，dist/ 目录结构：</span>
+dist/
+├── index.html               <span class="comment">← 入口 HTML</span>
+├── favicon.ico
+└── static/
+    ├── js/
+    │   ├── app.xxx.js       <span class="comment">← 应用代码（含路由非懒加载部分）</span>
+    │   ├── chunk-vendors.xxx.js   <span class="comment">← 第三方依赖（vue、vuex等）</span>
+    │   └── chunk-xxx.js     <span class="comment">← 懒加载的路由组件（各自单独文件）</span>
+    └── css/
+        └── app.xxx.css</pre></div>
+
+  <div class="card">
+    <h3>构建时做了什么？</h3>
+    <table>
+      <tr><th>优化项</th><th>说明</th></tr>
+      <tr><td>代码压缩</td><td>JS 经 Terser 压缩，CSS 经 cssnano 压缩</td></tr>
+      <tr><td>Tree-shaking</td><td>移除未使用的代码（需要 ES Module 语法）</td></tr>
+      <tr><td>文件哈希</td><td>文件名含内容哈希（app.<strong>abc123</strong>.js），用于缓存控制</td></tr>
+      <tr><td>代码拆包</td><td>第三方库单独打包（chunk-vendors），浏览器可长期缓存</td></tr>
+      <tr><td>source map</td><td>默认关闭（productionSourceMap: false），可按需开启</td></tr>
+    </table>
+  </div>
+
+  <!-- ==================== 2. 包体积分析 ==================== -->
+  <h2>2. 包体积分析（优化前必做）</h2>
+  <p>在优化前，先用报告工具看清楚"谁占了最多体积"，针对性优化。</p>
+
+  <div class="code-block"><pre><span class="comment"># 方式1：Vue CLI 内置 --report 参数</span>
+npm run build -- --report
+<span class="comment"># 生成 dist/report.html，用浏览器打开即可看可视化分析</span>
+
+<span class="comment"># 方式2：安装 webpack-bundle-analyzer（更好看）</span>
+npm install -D webpack-bundle-analyzer</pre></div>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js — 集成 webpack-bundle-analyzer</span>
+<span class="kw">const</span> { <span class="var">BundleAnalyzerPlugin</span> } = <span class="fn">require</span>(<span class="str">'webpack-bundle-analyzer'</span>)
+
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="fn">chainWebpack</span>(<span class="var">config</span>) {
+    <span class="comment">// 只在显式传入 ANALYZE=true 时开启，避免每次都弹出</span>
+    <span class="kw">if</span> (process.env.<span class="var">ANALYZE</span> === <span class="str">'true'</span>) {
+      <span class="var">config</span>.<span class="fn">plugin</span>(<span class="str">'analyzer'</span>).<span class="fn">use</span>(<span class="var">BundleAnalyzerPlugin</span>)
+    }
+  }
+})
+
+<span class="comment">// package.json</span>
+<span class="str">"analyze"</span>: <span class="str">"cross-env ANALYZE=true vue-cli-service build"</span>
+<span class="comment">// npm install -D cross-env  ← 跨平台设置环境变量</span>
+<span class="comment">// npm run analyze</span></pre></div>
+
+  <!-- ==================== 3. 路由懒加载 ==================== -->
+  <h2>3. 路由懒加载（最有效的优化）</h2>
+  <p>将每个路由对应的组件拆成独立 chunk，访问该路由时才加载，大幅减少首屏体积。</p>
+
+  <div class="code-block"><pre><span class="comment">// ❌ 不懒加载（所有页面打进一个 app.js）</span>
+<span class="kw">import</span> <span class="var">HomeView</span> <span class="kw">from</span> <span class="str">'../views/HomeView.vue'</span>
+<span class="kw">import</span> <span class="var">DashboardView</span> <span class="kw">from</span> <span class="str">'../views/DashboardView.vue'</span>
+
+<span class="comment">// ✅ 路由懒加载（每个页面独立 chunk，按需加载）</span>
+<span class="kw">const</span> <span class="var">routes</span> = [
+  {
+    <span class="var">path</span>: <span class="str">'/'</span>,
+    <span class="var">component</span>: () => <span class="kw">import</span>(<span class="str">'../views/HomeView.vue'</span>)
+  },
+  {
+    <span class="var">path</span>: <span class="str">'/dashboard'</span>,
+    <span class="comment">// webpackChunkName：同名 chunk 会合并打包</span>
+    <span class="var">component</span>: () => <span class="kw">import</span>(
+      <span class="comment">/* webpackChunkName: "admin" */</span>
+      <span class="str">'../views/DashboardView.vue'</span>
+    )
+  },
+  {
+    <span class="var">path</span>: <span class="str">'/users'</span>,
+    <span class="var">component</span>: () => <span class="kw">import</span>(
+      <span class="comment">/* webpackChunkName: "admin" */</span>  <span class="comment">// 与 dashboard 同名 → 合并到一个包</span>
+      <span class="str">'../views/UsersView.vue'</span>
+    )
+  }
+]</pre></div>
+
+  <!-- ==================== 4. CDN 外链 ==================== -->
+  <h2>4. CDN 外链（减少打包体积）</h2>
+  <p>将 Vue、Vue Router、Vuex、axios 等大型依赖从 Webpack 打包中排除，改为从 CDN 加载。</p>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js</span>
+<span class="kw">const</span> <span class="var">isProd</span> = process.env.<span class="var">NODE_ENV</span> === <span class="str">'production'</span>
+
+<span class="comment">// CDN 配置表</span>
+<span class="kw">const</span> <span class="var">cdn</span> = {
+  <span class="comment">// externals：告诉 Webpack "这些包不要打进去，从全局变量取"</span>
+  <span class="var">externals</span>: {
+    <span class="str">'vue'</span>: <span class="str">'Vue'</span>,
+    <span class="str">'vue-router'</span>: <span class="str">'VueRouter'</span>,
+    <span class="str">'vuex'</span>: <span class="str">'Vuex'</span>,
+    <span class="str">'axios'</span>: <span class="str">'axios'</span>
+  },
+  <span class="comment">// 需要在 HTML 中手动引入的 CDN 链接</span>
+  <span class="var">js</span>: [
+    <span class="str">'https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.min.js'</span>,
+    <span class="str">'https://cdn.jsdelivr.net/npm/vue-router@3.6.5/dist/vue-router.min.js'</span>,
+    <span class="str">'https://cdn.jsdelivr.net/npm/vuex@3.6.2/dist/vuex.min.js'</span>,
+    <span class="str">'https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js'</span>
+  ]
+}
+
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="fn">chainWebpack</span>(<span class="var">config</span>) {
+    <span class="kw">if</span> (<span class="var">isProd</span>) {
+      <span class="comment">// 生产环境：排除这些依赖，用 CDN</span>
+      <span class="var">config</span>.<span class="fn">externals</span>(<span class="var">cdn</span>.<span class="var">externals</span>)
+
+      <span class="comment">// 在 HTML 模板中注入 CDN 链接</span>
+      <span class="var">config</span>.<span class="fn">plugin</span>(<span class="str">'html'</span>).<span class="fn">tap</span>(<span class="var">args</span> => {
+        <span class="var">args</span>[<span class="num">0</span>].<span class="var">cdn</span> = <span class="var">cdn</span>
+        <span class="kw">return</span> <span class="var">args</span>
+      })
+    }
+  }
+})</pre></div>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- public/index.html — 配合 CDN 注入 --&gt;</span>
+&lt;head&gt;
+  &lt;!-- &lt;% if (htmlWebpackPlugin.options.cdn) { %&gt; --&gt;
+  &lt;% for (var js of htmlWebpackPlugin.options.cdn.js) { %&gt;
+  &lt;script src="&lt;%= js %&gt;" crossorigin="anonymous"&gt;&lt;/script&gt;
+  &lt;% } %&gt;
+  &lt;!-- &lt;% } %&gt; --&gt;
+&lt;/head&gt;</pre></div>
+
+  <!-- ==================== 5. Gzip ==================== -->
+  <h2>5. Gzip 压缩（构建时预压缩）</h2>
+
+  <div class="code-block"><pre><span class="comment"># 安装 compression-webpack-plugin</span>
+npm install -D compression-webpack-plugin</pre></div>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js</span>
+<span class="kw">const</span> <span class="var">CompressionPlugin</span> = <span class="fn">require</span>(<span class="str">'compression-webpack-plugin'</span>)
+
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="fn">chainWebpack</span>(<span class="var">config</span>) {
+    <span class="kw">if</span> (process.env.<span class="var">NODE_ENV</span> === <span class="str">'production'</span>) {
+      <span class="var">config</span>.<span class="fn">plugin</span>(<span class="str">'compression'</span>)
+        .<span class="fn">use</span>(<span class="var">CompressionPlugin</span>, [{
+          <span class="var">algorithm</span>: <span class="str">'gzip'</span>,
+          <span class="var">test</span>: <span class="str">/\.(js|css|html|svg)$/</span>,
+          <span class="var">threshold</span>: <span class="num">10240</span>,       <span class="comment">// 大于 10KB 才压缩</span>
+          <span class="var">minRatio</span>: <span class="num">0.8</span>           <span class="comment">// 压缩率 > 80% 才生成</span>
+        }])
+    }
+  }
+})</pre></div>
+
+  <div class="tip">
+    <strong>Nginx 配合：</strong> 生成了 <code>.gz</code> 文件后，需要 Nginx 开启 <code>gzip_static on</code>，
+    浏览器支持时直接返回 .gz 文件，省去动态压缩开销。
+  </div>
+
+  <!-- ==================== 6. splitChunks 代码分割 ==================== -->
+  <h2>6. splitChunks 代码分割策略</h2>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js — 自定义拆包策略</span>
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="var">configureWebpack</span>: {
+    <span class="var">optimization</span>: {
+      <span class="var">splitChunks</span>: {
+        <span class="var">chunks</span>: <span class="str">'all'</span>,
+        <span class="var">cacheGroups</span>: {
+          <span class="comment">// 把 vue 全家桶单独打一个包（变化不频繁，可长期缓存）</span>
+          <span class="var">vue</span>: {
+            <span class="var">name</span>: <span class="str">'chunk-vue'</span>,
+            <span class="var">test</span>: <span class="str">/[\\/]node_modules[\\/](vue|vue-router|vuex)[\\/]/</span>,
+            <span class="var">priority</span>: <span class="num">20</span>
+          },
+          <span class="comment">// 把 UI 组件库单独打一个包</span>
+          <span class="var">elementUI</span>: {
+            <span class="var">name</span>: <span class="str">'chunk-elementUI'</span>,
+            <span class="var">test</span>: <span class="str">/[\\/]node_modules[\\/]element-ui[\\/]/</span>,
+            <span class="var">priority</span>: <span class="num">15</span>
+          },
+          <span class="comment">// 其余 node_modules 打进 vendors</span>
+          <span class="var">vendors</span>: {
+            <span class="var">name</span>: <span class="str">'chunk-vendors'</span>,
+            <span class="var">test</span>: <span class="str">/[\\/]node_modules[\\/]/</span>,
+            <span class="var">priority</span>: <span class="num">10</span>
+          }
+        }
+      }
+    }
+  }
+})</pre></div>
+
+  <!-- ==================== 7. 图片优化 ==================== -->
+  <h2>7. 图片优化</h2>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js — 调整图片转 Base64 的阈值</span>
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="fn">chainWebpack</span>(<span class="var">config</span>) {
+    <span class="comment">// 默认 &lt; 4KB 的图片转 Base64，可根据需要调整</span>
+    <span class="var">config</span>.<span class="fn">module</span>
+      .<span class="fn">rule</span>(<span class="str">'images'</span>)
+      .<span class="fn">use</span>(<span class="str">'url-loader'</span>)
+      .<span class="fn">tap</span>(<span class="var">options</span> => ({
+        ...<span class="var">options</span>,
+        <span class="var">limit</span>: <span class="num">8192</span>    <span class="comment">// 改为 8KB</span>
+      }))
+  }
+})</pre></div>
+
+  <!-- ==================== 8. ESLint 代码规范 ==================== -->
+  <h2>8. ESLint + Prettier 代码规范</h2>
+
+  <div class="code-block"><pre><span class="comment">// .eslintrc.js — 推荐配置</span>
+<span class="kw">module</span>.exports = {
+  <span class="var">root</span>: <span class="kw">true</span>,
+  <span class="var">env</span>: { <span class="var">browser</span>: <span class="kw">true</span>, <span class="var">node</span>: <span class="kw">true</span>, <span class="var">es2021</span>: <span class="kw">true</span> },
+  <span class="var">extends</span>: [
+    <span class="str">'plugin:vue/essential'</span>,     <span class="comment">// Vue 2 基础规则（essential/strongly-recommended/recommended）</span>
+    <span class="str">'eslint:recommended'</span>
+  ],
+  <span class="var">parserOptions</span>: { <span class="var">parser</span>: <span class="str">'babel-eslint'</span> },
+  <span class="var">rules</span>: {
+    <span class="str">'no-console'</span>:  process.env.<span class="var">NODE_ENV</span> === <span class="str">'production'</span> ? <span class="str">'warn'</span> : <span class="str">'off'</span>,
+    <span class="str">'no-debugger'</span>: process.env.<span class="var">NODE_ENV</span> === <span class="str">'production'</span> ? <span class="str">'error'</span> : <span class="str">'off'</span>,
+    <span class="str">'vue/multi-word-component-names'</span>: <span class="str">'off'</span>,  <span class="comment">// 单词组件名关闭（按需）</span>
+    <span class="str">'no-unused-vars'</span>: <span class="str">'warn'</span>                  <span class="comment">// 未使用变量降为警告</span>
+  }
+}</pre></div>
+
+  <div class="code-block"><pre><span class="comment">// .prettierrc — Prettier 格式化配置</span>
+{
+  <span class="str">"semi"</span>: <span class="kw">false</span>,            <span class="comment">// 不加分号</span>
+  <span class="str">"singleQuote"</span>: <span class="kw">true</span>,      <span class="comment">// 单引号</span>
+  <span class="str">"tabWidth"</span>: 2,            <span class="comment">// 2 空格缩进</span>
+  <span class="str">"trailingComma"</span>: <span class="str">"none"</span>, <span class="comment">// 不加尾随逗号</span>
+  <span class="str">"printWidth"</span>: 100         <span class="comment">// 一行最多 100 字符</span>
+}</pre></div>
+
+  <h3>lint-staged + husky：提交前自动 lint</h3>
+  <div class="code-block"><pre><span class="comment"># 安装</span>
+npm install -D husky lint-staged
+npx husky install
+npx husky add .husky/pre-commit "npx lint-staged"</pre></div>
+
+  <div class="code-block"><pre><span class="comment">// package.json</span>
+{
+  <span class="str">"lint-staged"</span>: {
+    <span class="str">"src/**/*.{js,vue}"</span>: [
+      <span class="str">"vue-cli-service lint --fix"</span>,
+      <span class="str">"git add"</span>
+    ],
+    <span class="str">"src/**/*.{css,scss}"</span>: [
+      <span class="str">"prettier --write"</span>,
+      <span class="str">"git add"</span>
+    ]
+  }
+}</pre></div>
+
+  <!-- 性能优化清单 -->
+  <h2>📋 性能优化清单总结</h2>
+  <div class="card">
+    <table>
+      <tr><th>优化项</th><th>方式</th><th>效果</th></tr>
+      <tr><td>路由懒加载</td><td><code>() => import('./View.vue')</code></td><td>⭐⭐⭐⭐⭐ 首屏体积最优</td></tr>
+      <tr><td>关闭 source map</td><td><code>productionSourceMap: false</code></td><td>⭐⭐⭐⭐ 减少构建时间和包体积</td></tr>
+      <tr><td>CDN 外链</td><td>externals + index.html 引用</td><td>⭐⭐⭐⭐ 减少 vendors 体积</td></tr>
+      <tr><td>Gzip 预压缩</td><td>compression-webpack-plugin</td><td>⭐⭐⭐⭐ 传输体积减 60-70%</td></tr>
+      <tr><td>splitChunks</td><td>分离 vue/ui库/业务代码</td><td>⭐⭐⭐ 充分利用浏览器缓存</td></tr>
+      <tr><td>图片 Base64</td><td>调整 limit 阈值</td><td>⭐⭐⭐ 减少小图片请求</td></tr>
+      <tr><td>组件按需引入</td><td>babel-plugin-component</td><td>⭐⭐⭐⭐ UI 库体积优化</td></tr>
+    </table>
+  </div>
+
+  <div class="success">
+    <strong>章节完成！</strong> 27_Vue CLI 深入全部学习完毕。
+    下一章是 <strong>28_综合项目实战</strong> —— 将所有知识综合运用，构建一个企业级 Vue 2 应用。
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27-3 单文件组件深入</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --cyan: #39c5cf;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; line-height: 1.7; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.4rem; color: var(--green); margin: 32px 0 12px; }
+    h3 { font-size: 1.1rem; color: var(--yellow); margin: 20px 0 8px; }
+    p { margin-bottom: 10px; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+    .code-block pre { font-family: 'Consolas', monospace; font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .num { color: #79c0ff; }
+    .var { color: #ffa657; } .tag { color: #7ee787; }
+    .tip { border-left: 4px solid var(--accent); padding: 12px 16px; background: rgba(88,166,255,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .warn { border-left: 4px solid var(--yellow); padding: 12px 16px; background: rgba(210,153,34,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .success { border-left: 4px solid var(--green); padding: 12px 16px; background: rgba(63,185,80,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .danger { border-left: 4px solid var(--red); padding: 12px 16px; background: rgba(248,81,73,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--accent); font-size: 0.9rem; }
+    td { border: 1px solid var(--border); padding: 8px 12px; font-size: 0.88rem; color: var(--muted); }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🧩 27-3 单文件组件深入</h1>
+
+  <!-- ==================== 1. SFC 结构回顾 ==================== -->
+  <h2>1. SFC 三块结构深入</h2>
+  <p>.vue 文件由三个块组成，每个块都有丰富的扩展选项。</p>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- 完整的 SFC 结构及可选属性 --&gt;</span>
+
+<span class="comment">&lt;!-- ① template：只能有一个根元素（Vue 2 限制） --&gt;</span>
+<span class="tag">&lt;template&gt;</span>
+  &lt;div class="user-card"&gt;...&lt;/div&gt;
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="comment">&lt;!-- ② script：组件选项 --&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+<span class="kw">export default</span> {
+  <span class="var">name</span>: <span class="str">'UserCard'</span>,    <span class="comment">// ⭐ 强烈推荐加 name，便于 Devtools 调试和 keep-alive</span>
+  <span class="var">props</span>: {},
+  <span class="var">data</span>() { <span class="kw">return</span> {} },
+  <span class="var">computed</span>: {},
+  <span class="var">methods</span>: {},
+  <span class="var">watch</span>: {},
+  <span class="var">created</span>() {},
+  <span class="var">mounted</span>() {}
+}
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- ③ style：支持多个，可混用 scoped 和非 scoped --&gt;</span>
+<span class="tag">&lt;style scoped&gt;</span>   <span class="comment">/* scoped：样式隔离 */</span>
+<span class="tag">&lt;/style&gt;</span>
+<span class="tag">&lt;style&gt;</span>          <span class="comment">/* 无 scoped：全局生效 */</span>
+<span class="tag">&lt;/style&gt;</span></pre></div>
+
+  <!-- ==================== 2. scoped 样式原理 ==================== -->
+  <h2>2. Scoped CSS 原理与穿透</h2>
+
+  <h3>Scoped 的实现原理</h3>
+  <p>Vue 通过给组件的每个 DOM 元素添加唯一的 <code>data-v-xxxxxx</code> 属性，然后给 CSS 选择器添加属性选择器来实现作用域隔离。</p>
+
+  <div class="code-block"><pre><span class="comment">/* 源码写法（.vue 文件中） */</span>
+.btn { color: red; }
+
+<span class="comment">/* 编译后（Webpack 处理结果） */</span>
+.btn[data-v-7ba5bd90] { color: red; }
+
+<span class="comment">/* DOM 中的元素 */</span>
+&lt;button data-v-7ba5bd90 class="btn"&gt;点击&lt;/button&gt;</pre></div>
+
+  <h3>深度作用选择器（穿透子组件）</h3>
+  <p>当你想在父组件修改子组件/第三方组件的样式时，需要用"深度选择器"绕过 scoped。</p>
+
+  <div class="code-block"><pre><span class="comment">/* 场景：修改 Element UI 组件的内部样式 */</span>
+
+<span class="comment">/* Vue 2 + 普通 CSS */</span>
+.parent >>> .el-input__inner { border-color: red; }
+
+<span class="comment">/* Vue 2 + Sass/Less（推荐） */</span>
+.parent ::v-deep .el-input__inner { border-color: red; }
+
+<span class="comment">/* 编译后变为（不加 data-v-xxx 限制） */</span>
+[data-v-7ba5bd90] .el-input__inner { border-color: red; }</pre></div>
+
+  <div class="warn">
+    <strong>注意：</strong> <code>::v-deep</code> 是 Vue 2.x 的写法。Vue 3 中改为 <code>:deep()</code>。
+    使用时注意版本。
+  </div>
+
+  <!-- ==================== 3. CSS Modules ==================== -->
+  <h2>3. CSS Modules（模块化 CSS）</h2>
+  <p>比 scoped 更彻底的隔离方案：类名会被编译成哈希字符串，在 JS 中作为对象使用。</p>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- 使用 CSS Modules：给 style 加 module 属性 --&gt;</span>
+<span class="tag">&lt;template&gt;</span>
+  &lt;!-- 通过 $style.类名 引用 --&gt;
+  &lt;div :class="<span class="var">$style</span>.card"&gt;
+    &lt;p :class="[<span class="var">$style</span>.text, <span class="var">$style</span>.bold]"&gt;内容&lt;/p&gt;
+
+    &lt;!-- 动态 class 与 CSS Modules 混用 --&gt;
+    &lt;span :class="{ [<span class="var">$style</span>.active]: isActive }"&gt;状态&lt;/span&gt;
+  &lt;/div&gt;
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="kw">export default</span> {
+  data() {
+    <span class="kw">return</span> { isActive: <span class="kw">true</span> }
+  },
+  mounted() {
+    <span class="comment">// 在 JS 中也可以访问编译后的类名</span>
+    console.<span class="fn">log</span>(<span class="kw">this</span>.<span class="var">$style</span>.card)  <span class="comment">// "_card_1a2b3c_1"（哈希类名）</span>
+  }
+}
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="tag">&lt;style module&gt;</span>    <span class="comment">/* 注意：不加 scoped，加 module */</span>
+.card { padding: 16px; border: 1px solid #ccc; }
+.text { font-size: 14px; }
+.bold { font-weight: bold; }
+.active { color: green; }
+<span class="tag">&lt;/style&gt;</span></pre></div>
+
+  <table>
+    <tr><th></th><th>scoped</th><th>CSS Modules</th></tr>
+    <tr><td>隔离方式</td><td>属性选择器</td><td>哈希类名</td></tr>
+    <tr><td>引用方式</td><td>普通 class 字符串</td><td><code>$style.xxx</code> 对象</td></tr>
+    <tr><td>动态类名</td><td>普通</td><td>更灵活（可在 JS 中处理）</td></tr>
+    <tr><td>适用场景</td><td>普通组件样式隔离</td><td>需要复杂动态样式的场景</td></tr>
+  </table>
+
+  <!-- ==================== 4. Functional 组件 ==================== -->
+  <h2>4. Functional（函数式）组件</h2>
+  <p>没有响应式数据、没有实例、没有生命周期的组件，渲染性能比普通组件高。</p>
+
+  <h3>适用场景</h3>
+  <div class="card">
+    <p>✅ 纯展示组件（只接收 props，渲染 UI）</p>
+    <p>✅ 高频渲染的列表项组件（table-row、list-item）</p>
+    <p>✅ 包装/高阶组件（包一层但不需要状态）</p>
+  </div>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- 方式1：template 中声明 functional --&gt;</span>
+<span class="tag">&lt;template functional&gt;</span>
+  <span class="comment">&lt;!-- functional 组件中没有 this，用 props 和 parent 代替 --&gt;</span>
+  &lt;div class="tag-item" :class="{ active: props.active }"&gt;
+    {{ props.label }}
+  &lt;/div&gt;
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="kw">export default</span> {
+  <span class="var">name</span>: <span class="str">'TagItem'</span>,
+  <span class="var">functional</span>: <span class="kw">true</span>,   <span class="comment">// ⭐ 也可以在这里声明</span>
+  <span class="var">props</span>: {
+    <span class="var">label</span>: <span class="var">String</span>,
+    <span class="var">active</span>: <span class="var">Boolean</span>
+  }
+  <span class="comment">// 没有 data、created、mounted 等</span>
+}
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- 方式2：纯 render 函数写法（高阶组件常用）--&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+<span class="kw">export default</span> {
+  <span class="var">functional</span>: <span class="kw">true</span>,
+  <span class="var">props</span>: [<span class="str">'level'</span>, <span class="str">'text'</span>],
+  <span class="fn">render</span>(<span class="var">h</span>, <span class="var">ctx</span>) {             <span class="comment">// ctx = { props, data, slots, parent, listeners }</span>
+    <span class="kw">return</span> <span class="fn">h</span>(
+      <span class="str">`h<span class="var">${ctx.props.level}</span>`</span>,  <span class="comment">// 动态标签 h1~h6</span>
+      <span class="var">ctx</span>.<span class="var">data</span>,
+      [<span class="var">ctx</span>.<span class="var">props</span>.<span class="var">text</span>]
+    )
+  }
+}
+<span class="tag">&lt;/script&gt;</span></pre></div>
+
+  <!-- ==================== 5. 内联模板 & v-once ==================== -->
+  <h2>5. 性能相关：v-once 与 v-memo</h2>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- v-once：只渲染一次，之后跳过 diff（静态内容优化）--&gt;</span>
+&lt;header v-once&gt;
+  &lt;h1&gt;{{ title }}&lt;/h1&gt;    &lt;!-- title 改变后不会重新渲染 --&gt;
+&lt;/header&gt;
+
+<span class="comment">&lt;!-- 适合：帮助信息、法律条款等完全静态的大块内容 --&gt;</span>
+&lt;div v-once class="terms"&gt;
+  &lt;!-- 很多段落... --&gt;
+&lt;/div&gt;</pre></div>
+
+  <div class="tip">
+    <strong>Vue 2 没有 v-memo</strong>（v-memo 是 Vue 3.2+ 的功能）。
+    Vue 2 中的静态内容优化主要通过：<code>v-once</code>（一次性渲染）和 <code>functional</code> 组件。
+  </div>
+
+  <!-- ==================== 6. 异步组件（Vue 2 写法）==================== -->
+  <h2>6. 异步组件（性能优化核心）</h2>
+  <p>将组件代码分割成独立的 chunk，只在需要时才加载，减少首屏体积。</p>
+
+  <div class="code-block"><pre><span class="comment">// ① 路由级懒加载（最常用）</span>
+<span class="kw">const</span> <span class="var">routes</span> = [
+  {
+    <span class="var">path</span>: <span class="str">'/dashboard'</span>,
+    <span class="comment">// import() 返回 Promise，Webpack 自动拆包</span>
+    <span class="var">component</span>: () => <span class="kw">import</span>(<span class="str">'@/views/Dashboard.vue'</span>)
+  },
+  {
+    <span class="var">path</span>: <span class="str">'/chart'</span>,
+    <span class="comment">// 魔法注释：指定 chunk 名，相关页面打进同一个包</span>
+    <span class="var">component</span>: () => <span class="kw">import</span>(
+      <span class="comment">/* webpackChunkName: "analytics" */</span>
+      <span class="str">'@/views/Chart.vue'</span>
+    )
+  }
+]
+
+<span class="comment">// ② 组件级懒加载（弹窗、Tab 内容等）</span>
+<span class="kw">export default</span> {
+  <span class="var">components</span>: {
+    <span class="comment">// 简单写法</span>
+    <span class="var">HeavyChart</span>: () => <span class="kw">import</span>(<span class="str">'./HeavyChart.vue'</span>),
+
+    <span class="comment">// 带加载/失败状态的完整写法</span>
+    <span class="var">DataTable</span>: () => ({
+      <span class="var">component</span>: <span class="kw">import</span>(<span class="str">'./DataTable.vue'</span>),
+      <span class="var">loading</span>: <span class="var">LoadingSpinner</span>,   <span class="comment">// 加载中显示</span>
+      <span class="var">error</span>: <span class="var">ErrorComponent</span>,      <span class="comment">// 加载失败显示</span>
+      <span class="var">delay</span>: <span class="num">200</span>,                  <span class="comment">// 200ms 后才显示 loading</span>
+      <span class="var">timeout</span>: <span class="num">3000</span>               <span class="comment">// 3s 超时</span>
+    })
+  }
+}</pre></div>
+
+  <!-- ==================== 7. 全局注册 vs 局部注册 ==================== -->
+  <h2>7. 全局注册 vs 局部注册</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>全局注册</h3>
+      <div class="code-block"><pre><span class="comment">// main.js</span>
+<span class="var">Vue</span>.<span class="fn">component</span>(<span class="str">'BaseButton'</span>, {
+  <span class="comment">/* ... */</span>
+})</pre></div>
+      <p>✅ 无需每个组件都 import</p>
+      <p>❌ 无法 Tree-shaking（即使不用也打包）</p>
+      <p><strong>适合：</strong> 全局高频基础组件</p>
+    </div>
+    <div class="card">
+      <h3>局部注册（推荐）</h3>
+      <div class="code-block"><pre><span class="kw">import</span> <span class="var">BaseButton</span> <span class="kw">from</span> <span class="str">'@/components/BaseButton'</span>
+<span class="kw">export default</span> {
+  <span class="var">components</span>: { <span class="var">BaseButton</span> }
+}</pre></div>
+      <p>✅ 支持 Tree-shaking</p>
+      <p>✅ 依赖关系明确</p>
+      <p><strong>适合：</strong> 大多数业务组件</p>
+    </div>
+  </div>
+
+  <h3>自动全局注册基础组件（进阶技巧）</h3>
+  <div class="code-block"><pre><span class="comment">// src/components/base/index.js — 批量自动注册 Base 开头的组件</span>
+<span class="kw">import</span> <span class="var">Vue</span> <span class="kw">from</span> <span class="str">'vue'</span>
+
+<span class="comment">// require.context 是 Webpack 的功能，扫描目录</span>
+<span class="kw">const</span> <span class="var">requireComponent</span> = require.<span class="fn">context</span>(
+  <span class="str">'.'</span>,           <span class="comment">// 目录：当前目录</span>
+  <span class="kw">false</span>,         <span class="comment">// 不递归子目录</span>
+  <span class="str">/Base[A-Z]\w+\.(vue|js)$/</span>  <span class="comment">// 匹配 Base 开头的文件</span>
+)
+
+<span class="var">requireComponent</span>.<span class="fn">keys</span>().<span class="fn">forEach</span>(<span class="var">fileName</span> => {
+  <span class="kw">const</span> <span class="var">componentConfig</span> = <span class="fn">requireComponent</span>(<span class="var">fileName</span>)
+  <span class="kw">const</span> <span class="var">componentName</span> = <span class="var">fileName</span>
+    .<span class="fn">replace</span>(<span class="str">/^\.\//</span>, <span class="str">''</span>)
+    .<span class="fn">replace</span>(<span class="str">/\.\w+$/</span>, <span class="str">''</span>)
+
+  <span class="var">Vue</span>.<span class="fn">component</span>(
+    <span class="var">componentName</span>,
+    <span class="var">componentConfig</span>.<span class="kw">default</span> || <span class="var">componentConfig</span>
+  )
+})
+
+<span class="comment">// main.js 中引入</span>
+<span class="kw">import</span> <span class="str">'@/components/base'</span></pre></div>
+
+  <!-- ==================== 8. 组件 name 的作用 ==================== -->
+  <h2>8. 组件 name 的重要作用</h2>
+  <div class="card">
+    <table>
+      <tr><th>场景</th><th>name 的作用</th></tr>
+      <tr><td>Vue Devtools</td><td>在组件树中显示名字，便于定位调试</td></tr>
+      <tr><td>keep-alive</td><td><code>&lt;keep-alive include="UserCard"&gt;</code> 按 name 匹配缓存</td></tr>
+      <tr><td>递归组件</td><td>组件在模板中引用自身时通过 name 找到自己</td></tr>
+      <tr><td>错误追踪</td><td>报错时控制台能显示组件名称，而非 "Anonymous component"</td></tr>
+    </table>
+  </div>
+
+  <div class="danger">
+    <strong>养成好习惯：</strong> 每个 .vue 组件都加 <code>name</code> 选项，即使是简单组件也不例外。
+  </div>
+
+  <div class="success">
+    <strong>下一节：</strong> CSS 预处理器 —— 在 Vue CLI 中配置 Sass/Less，使用全局变量和 mixin。
+  </div>
+
+</div>
+</body>
+</html>

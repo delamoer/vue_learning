@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27-1 Vue CLI 基础与插件机制</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --cyan: #39c5cf;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; line-height: 1.7; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.4rem; color: var(--green); margin: 32px 0 12px; }
+    h3 { font-size: 1.1rem; color: var(--yellow); margin: 20px 0 8px; }
+    p { margin-bottom: 10px; color: var(--muted); }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 6px; }
+    .badge-blue { background: #1f6feb; color: #fff; }
+    .badge-green { background: #1a7f37; color: #fff; }
+    .badge-yellow { background: #9e6a03; color: #fff; }
+    .badge-red { background: #8b1a1a; color: #fff; }
+    .badge-purple { background: #6e40c9; color: #fff; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+    .code-block pre { font-family: 'Consolas', monospace; font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .num { color: #79c0ff; }
+    .var { color: #ffa657; } .type { color: #56d364; }
+    .tip { border-left: 4px solid var(--accent); padding: 12px 16px; background: rgba(88,166,255,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .warn { border-left: 4px solid var(--yellow); padding: 12px 16px; background: rgba(210,153,34,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .success { border-left: 4px solid var(--green); padding: 12px 16px; background: rgba(63,185,80,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--accent); font-size: 0.9rem; }
+    td { border: 1px solid var(--border); padding: 8px 12px; font-size: 0.88rem; color: var(--muted); }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .tree { font-family: monospace; font-size: 0.9rem; line-height: 1.8; color: var(--text); background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+    .tree .dir { color: var(--accent); } .tree .file { color: var(--green); }
+    .tree .desc { color: var(--muted); font-size: 0.8rem; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>📦 27-1 Vue CLI 基础与插件机制</h1>
+
+  <!-- ==================== 1. Vue CLI 是什么 ==================== -->
+  <h2>1. Vue CLI 是什么</h2>
+  <p>Vue CLI 是 Vue.js 官方的<strong>命令行工具</strong>（Command Line Interface），提供了一套完整的前端开发工程化解决方案。</p>
+
+  <div class="card">
+    <h3>核心能力</h3>
+    <div class="grid-2">
+      <div>
+        <p><span class="badge badge-blue">脚手架</span> 快速初始化项目（交互式选择特性）</p>
+        <p><span class="badge badge-green">Dev Server</span> 热重载开发服务器 + 代理</p>
+        <p><span class="badge badge-yellow">构建</span> 基于 Webpack 的生产构建（压缩、拆包、CDN）</p>
+      </div>
+      <div>
+        <p><span class="badge badge-purple">插件系统</span> 可扩展，通过 add 命令添加功能</p>
+        <p><span class="badge badge-red">预设 Preset</span> 可保存配置复用到多个项目</p>
+        <p><span class="badge badge-blue">图形界面</span> <code>vue ui</code> 可视化管理</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <strong>Vue CLI vs Vite：</strong> Vue CLI 基于 Webpack，启动慢但生态成熟；Vite 基于原生 ES Module，启动极快。
+    Vue 2 项目推荐使用 Vue CLI 5；Vue 3 新项目推荐 Vite。
+  </div>
+
+  <!-- ==================== 2. 安装与基本命令 ==================== -->
+  <h2>2. 安装与常用命令</h2>
+
+  <div class="code-block"><pre><span class="comment"># 全局安装 Vue CLI（需要 Node.js ≥ 12）</span>
+npm install -g @vue/cli
+
+<span class="comment"># 查看版本</span>
+vue --version          <span class="comment"># @vue/cli 5.x.x</span>
+vue -V
+
+<span class="comment"># 创建新项目（交互式）</span>
+vue create my-app
+
+<span class="comment"># 创建项目（使用默认 Vue 2 配置，跳过交互）</span>
+vue create my-app --default
+
+<span class="comment"># 图形化界面（浏览器打开）</span>
+vue ui
+
+<span class="comment"># 在已有项目中添加插件</span>
+vue add router
+vue add vuex
+vue add eslint</pre></div>
+
+  <h3>vue create 交互选项说明</h3>
+  <div class="code-block"><pre><span class="comment"># 创建时的选项（手动选择）：</span>
+? Please pick a preset:
+  Default ([Vue 3] babel, eslint)
+  Default ([Vue 2] babel, eslint)
+❯ Manually select features       <span class="comment">← 选这个，手动控制</span>
+
+? Check the features needed for your project:
+ ◉ Babel                         <span class="comment">← 必选，ES6+ 转译</span>
+ ◉ TypeScript                    <span class="comment">← 可选</span>
+ ◯ Progressive Web App (PWA)     <span class="comment">← 可选</span>
+ ◉ Router                        <span class="comment">← 需要路由时选</span>
+ ◉ Vuex                          <span class="comment">← 需要状态管理时选</span>
+ ◉ CSS Pre-processors            <span class="comment">← 需要 Sass/Less 时选</span>
+ ◉ Linter / Formatter            <span class="comment">← 推荐选，代码规范</span>
+ ◉ Unit Testing                  <span class="comment">← 需要单元测试时选</span>
+ ◯ E2E Testing                   <span class="comment">← 端到端测试，可选</span></pre></div>
+
+  <!-- ==================== 3. 项目脚本 ==================== -->
+  <h2>3. 项目脚本（package.json scripts）</h2>
+
+  <div class="code-block"><pre>{
+  <span class="str">"scripts"</span>: {
+    <span class="str">"serve"</span>: <span class="str">"vue-cli-service serve"</span>,      <span class="comment">// 启动开发服务器</span>
+    <span class="str">"build"</span>: <span class="str">"vue-cli-service build"</span>,      <span class="comment">// 生产构建</span>
+    <span class="str">"lint"</span>:  <span class="str">"vue-cli-service lint"</span>         <span class="comment">// 代码检查</span>
+  }
+}</pre></div>
+
+  <table>
+    <tr><th>命令</th><th>作用</th><th>常用参数</th></tr>
+    <tr><td><code>npm run serve</code></td><td>启动热重载开发服务器</td><td><code>--port 8081</code>, <code>--open</code>, <code>--https</code></td></tr>
+    <tr><td><code>npm run build</code></td><td>打包到 dist/ 目录</td><td><code>--modern</code>, <code>--report</code>, <code>--target lib</code></td></tr>
+    <tr><td><code>npm run lint</code></td><td>检查并自动修复代码</td><td><code>--fix</code></td></tr>
+    <tr><td><code>npx vue-cli-service inspect</code></td><td>查看完整 Webpack 配置</td><td><code>--mode development</code></td></tr>
+  </table>
+
+  <!-- ==================== 4. vue.config.js 配置文件 ==================== -->
+  <h2>4. vue.config.js 完整解析</h2>
+  <p>Vue CLI 项目根目录下的 <code>vue.config.js</code> 是项目的核心配置文件（可选，默认自动生效）。</p>
+
+  <div class="code-block"><pre><span class="comment">// vue.config.js</span>
+<span class="kw">const</span> { <span class="var">defineConfig</span> } = <span class="fn">require</span>(<span class="str">'@vue/cli-service'</span>)
+
+<span class="kw">module</span>.exports = <span class="fn">defineConfig</span>({
+  <span class="comment">// ① 应用基础路径（部署到子目录时修改）</span>
+  <span class="var">publicPath</span>: process.env.<span class="var">NODE_ENV</span> === <span class="str">'production'</span>
+    ? <span class="str">'/'</span>          <span class="comment">// 生产：根目录</span>
+    : <span class="str">'/'</span>,         <span class="comment">// 开发：根目录</span>
+
+  <span class="comment">// ② 打包输出目录（默认 dist）</span>
+  <span class="var">outputDir</span>: <span class="str">'dist'</span>,
+
+  <span class="comment">// ③ 静态资源目录（相对于 outputDir）</span>
+  <span class="var">assetsDir</span>: <span class="str">'static'</span>,
+
+  <span class="comment">// ④ 生产环境关闭 source map（减小包体积）</span>
+  <span class="var">productionSourceMap</span>: <span class="kw">false</span>,
+
+  <span class="comment">// ⑤ 开发服务器配置</span>
+  <span class="var">devServer</span>: {
+    <span class="var">port</span>: <span class="num">8081</span>,          <span class="comment">// 端口号</span>
+    <span class="var">open</span>: <span class="kw">false</span>,         <span class="comment">// 启动后自动打开浏览器</span>
+    <span class="var">https</span>: <span class="kw">false</span>,        <span class="comment">// 是否启用 HTTPS</span>
+    <span class="var">proxy</span>: {             <span class="comment">// API 代理（解决跨域）</span>
+      <span class="str">'/api'</span>: {
+        <span class="var">target</span>: <span class="str">'http://localhost:3000'</span>,
+        <span class="var">changeOrigin</span>: <span class="kw">true</span>,
+        <span class="var">pathRewrite</span>: { <span class="str">'^/api'</span>: <span class="str">''</span> }
+      }
+    }
+  },
+
+  <span class="comment">// ⑥ 自定义 Webpack 配置（链式 API）</span>
+  <span class="fn">chainWebpack</span>(<span class="var">config</span>) {
+    <span class="comment">// 设置 HTML 标题</span>
+    <span class="var">config</span>.<span class="fn">plugin</span>(<span class="str">'html'</span>).<span class="fn">tap</span>(<span class="var">args</span> => {
+      <span class="var">args</span>[<span class="num">0</span>].<span class="var">title</span> = <span class="str">'我的应用'</span>
+      <span class="kw">return</span> <span class="var">args</span>
+    })
+  },
+
+  <span class="comment">// ⑦ 覆盖 Webpack 配置（对象合并或函数修改）</span>
+  <span class="var">configureWebpack</span>: {
+    <span class="comment">// 例：添加路径别名</span>
+    <span class="var">resolve</span>: {
+      <span class="var">alias</span>: {
+        <span class="str">'@utils'</span>: <span class="str">'@/utils'</span>  <span class="comment">// 补充别名（@ 已默认指向 src）</span>
+      }
+    }
+  },
+
+  <span class="comment">// ⑧ CSS 相关配置</span>
+  <span class="var">css</span>: {
+    <span class="var">loaderOptions</span>: {
+      <span class="var">sass</span>: {
+        <span class="comment">// 每个组件自动注入全局变量（Sass）</span>
+        <span class="var">additionalData</span>: <span class="str">`@import "@/styles/variables.scss";`</span>
+      }
+    }
+  }
+})</pre></div>
+
+  <!-- ==================== 5. 插件系统 ==================== -->
+  <h2>5. 插件（Plugin）机制</h2>
+  <p>Vue CLI 的插件系统是其最强大的特性之一，允许在项目中插拔式地添加功能。</p>
+
+  <h3>插件的两种形式</h3>
+  <div class="grid-2">
+    <div class="card">
+      <p><strong>@vue/cli-plugin-*</strong></p>
+      <p style="color:var(--muted);font-size:0.9rem;">官方维护的核心插件</p>
+      <p style="color:var(--green);font-size:0.85rem;">babel、eslint、router、vuex、unit-jest</p>
+    </div>
+    <div class="card">
+      <p><strong>vue-cli-plugin-*</strong></p>
+      <p style="color:var(--muted);font-size:0.9rem;">社区插件</p>
+      <p style="color:var(--green);font-size:0.85rem;">element-ui、vant、axios、mock</p>
+    </div>
+  </div>
+
+  <h3>插件安装与工作原理</h3>
+  <div class="code-block"><pre><span class="comment"># 添加插件（自动修改代码和 package.json）</span>
+vue add element           <span class="comment">→ vue-cli-plugin-element</span>
+vue add @vue/unit-jest    <span class="comment">→ @vue/cli-plugin-unit-jest</span>
+
+<span class="comment">## 插件做了什么？以 router 为例：</span>
+<span class="comment"># 1. 安装 vue-router 依赖</span>
+<span class="comment"># 2. 创建 src/router/index.js</span>
+<span class="comment"># 3. 修改 src/main.js（注入 router）</span>
+<span class="comment"># 4. 创建示例页面 src/views/</span></pre></div>
+
+  <h3>每个插件包含的文件结构</h3>
+  <div class="tree">
+<span class="dir">vue-cli-plugin-xxx/</span>
+├── <span class="file">index.js</span>         <span class="desc">← Service 插件（修改 Webpack 配置）</span>
+├── <span class="file">generator.js</span>     <span class="desc">← Generator（生成模板文件、修改 package.json）</span>
+├── <span class="file">prompts.js</span>       <span class="desc">← 交互式提问（询问用户配置项）</span>
+└── <span class="dir">template/</span>        <span class="desc">← 要注入到项目的文件模板</span>
+  </div>
+
+  <!-- ==================== 6. Preset 预设 ==================== -->
+  <h2>6. Preset 预设：保存并复用配置</h2>
+  <p>Preset 允许你把一套经过验证的项目配置保存下来，下次创建项目时直接套用。</p>
+
+  <h3>本地 Preset（~/.vuerc）</h3>
+  <div class="code-block"><pre><span class="comment">// ~/.vuerc（Vue CLI 全局配置文件）</span>
+{
+  <span class="str">"useTaobaoRegistry"</span>: <span class="kw">false</span>,
+  <span class="str">"presets"</span>: {
+    <span class="str">"my-vue2-preset"</span>: {         <span class="comment">← 你的预设名字</span>
+      <span class="str">"useConfigFiles"</span>: <span class="kw">true</span>,    <span class="comment">← 独立配置文件</span>
+      <span class="str">"plugins"</span>: {
+        <span class="str">"@vue/cli-plugin-babel"</span>: {},
+        <span class="str">"@vue/cli-plugin-eslint"</span>: {
+          <span class="str">"config"</span>: <span class="str">"standard"</span>,
+          <span class="str">"lintOn"</span>: [<span class="str">"save"</span>]
+        },
+        <span class="str">"@vue/cli-plugin-router"</span>: { <span class="str">"historyMode"</span>: <span class="kw">true</span> },
+        <span class="str">"@vue/cli-plugin-vuex"</span>: {}
+      },
+      <span class="str">"vueVersion"</span>: <span class="str">"2"</span>
+    }
+  }
+}</pre></div>
+
+  <h3>远程 Preset（GitHub 仓库）</h3>
+  <div class="code-block"><pre><span class="comment"># 使用 GitHub 上的 preset</span>
+vue create --preset username/my-preset my-app
+
+<span class="comment"># preset.json 的内容与上面的格式相同</span></pre></div>
+
+  <!-- ==================== 7. 路径别名 @ ==================== -->
+  <h2>7. 路径别名 @ 的本质</h2>
+  <p>Vue CLI 默认将 <code>@</code> 配置为 <code>src</code> 目录的别名，这是 Webpack 的 <code>resolve.alias</code> 功能。</p>
+
+  <div class="code-block"><pre><span class="comment">// 在组件中使用 @ 别名（避免 ../../ 层级混乱）</span>
+<span class="kw">import</span> <span class="var">api</span> <span class="kw">from</span> <span class="str">'@/api/user'</span>        <span class="comment">// ✅ 推荐</span>
+<span class="kw">import</span> <span class="var">api</span> <span class="kw">from</span> <span class="str">'../../api/user'</span>    <span class="comment">// ❌ 不推荐</span>
+
+<span class="comment">// 在 CSS 中引用图片也可以用 @</span>
+<span class="comment">/* background: url(@/assets/logo.png) */</span>
+<span class="comment">/* @import "@/styles/variables.scss" */</span>
+
+<span class="comment">// 扩展更多别名（vue.config.js）</span>
+<span class="var">configureWebpack</span>: {
+  <span class="var">resolve</span>: {
+    <span class="var">alias</span>: {
+      <span class="str">'@'</span>: <span class="fn">path</span>.<span class="fn">resolve</span>(__dirname, <span class="str">'src'</span>),      <span class="comment">// 默认已有</span>
+      <span class="str">'@components'</span>: <span class="fn">path</span>.<span class="fn">resolve</span>(__dirname, <span class="str">'src/components'</span>),
+      <span class="str">'@views'</span>: <span class="fn">path</span>.<span class="fn">resolve</span>(__dirname, <span class="str">'src/views'</span>),
+      <span class="str">'@api'</span>: <span class="fn">path</span>.<span class="fn">resolve</span>(__dirname, <span class="str">'src/api'</span>)
+    }
+  }
+}</pre></div>
+
+  <div class="warn">
+    <strong>VSCode 别名跳转配置：</strong> 在项目根目录创建 <code>jsconfig.json</code>，配置 paths，
+    让 VSCode 能识别 <code>@</code> 别名并支持 Ctrl+点击 跳转。
+  </div>
+
+  <div class="code-block"><pre><span class="comment">// jsconfig.json（根目录）</span>
+{
+  <span class="str">"compilerOptions"</span>: {
+    <span class="str">"baseUrl"</span>: <span class="str">"."</span>,
+    <span class="str">"paths"</span>: {
+      <span class="str">"@/*"</span>: [<span class="str">"src/*"</span>]
+    }
+  },
+  <span class="str">"exclude"</span>: [<span class="str">"node_modules"</span>, <span class="str">"dist"</span>]
+}</pre></div>
+
+  <!-- 总结 -->
+  <h2>📋 本节速查</h2>
+  <div class="card">
+    <table>
+      <tr><th>概念</th><th>要点</th></tr>
+      <tr><td>全局安装</td><td><code>npm i -g @vue/cli</code>，版本 5.x 对应 Vue 2/3</td></tr>
+      <tr><td>创建项目</td><td><code>vue create &lt;name&gt;</code>，推荐手动选特性</td></tr>
+      <tr><td>核心配置</td><td>根目录 <code>vue.config.js</code>，用 defineConfig 获得类型提示</td></tr>
+      <tr><td>devServer 代理</td><td>配置 <code>devServer.proxy</code> 解决开发环境跨域</td></tr>
+      <tr><td>插件</td><td><code>vue add &lt;plugin&gt;</code>，自动改代码和配置</td></tr>
+      <tr><td>Preset</td><td>保存在 <code>~/.vuerc</code>，也可放到 GitHub</td></tr>
+      <tr><td>路径别名</td><td><code>@</code> 默认指向 <code>src/</code>，在代码和 CSS 中均可使用</td></tr>
+    </table>
+  </div>
+
+  <div class="success">
+    <strong>下一节：</strong> 企业级项目结构规范 —— 如何组织 src/ 目录，让大型项目条理清晰。
+  </div>
+
+</div>
+</body>
+</html>

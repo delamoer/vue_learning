@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27-2 项目结构规范</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --cyan: #39c5cf;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; line-height: 1.7; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.4rem; color: var(--green); margin: 32px 0 12px; }
+    h3 { font-size: 1.1rem; color: var(--yellow); margin: 20px 0 8px; }
+    p { margin-bottom: 10px; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+    .code-block pre { font-family: 'Consolas', monospace; font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .num { color: #79c0ff; }
+    .var { color: #ffa657; }
+    .tip { border-left: 4px solid var(--accent); padding: 12px 16px; background: rgba(88,166,255,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .warn { border-left: 4px solid var(--yellow); padding: 12px 16px; background: rgba(210,153,34,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .success { border-left: 4px solid var(--green); padding: 12px 16px; background: rgba(63,185,80,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--accent); font-size: 0.9rem; }
+    td { border: 1px solid var(--border); padding: 8px 12px; font-size: 0.88rem; color: var(--muted); }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .tree { font-family: monospace; font-size: 0.88rem; line-height: 1.9; color: var(--text); background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+    .tree .dir { color: var(--accent); font-weight: bold; }
+    .tree .file { color: var(--green); }
+    .tree .desc { color: var(--muted); font-size: 0.78rem; margin-left: 4px; }
+    .tree .important { color: var(--yellow); }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🗂️ 27-2 项目结构规范</h1>
+
+  <!-- ==================== 1. 基础结构 ==================== -->
+  <h2>1. Vue CLI 默认项目结构</h2>
+
+  <div class="tree">
+<span class="dir">my-app/</span>
+├── <span class="dir">node_modules/</span>       <span class="desc">← 依赖，不提交 Git</span>
+├── <span class="dir">public/</span>             <span class="desc">← 静态资源（不经过 Webpack 处理）</span>
+│   ├── <span class="file">favicon.ico</span>
+│   └── <span class="file">index.html</span>      <span class="desc">← 应用入口 HTML 模板</span>
+├── <span class="dir">src/</span>                <span class="desc">← 源代码目录（重点）</span>
+│   ├── <span class="file">main.js</span>         <span class="desc">← 应用入口，创建 Vue 实例</span>
+│   ├── <span class="file">App.vue</span>         <span class="desc">← 根组件</span>
+│   ├── <span class="dir">assets/</span>         <span class="desc">← 经 Webpack 处理的静态资源</span>
+│   ├── <span class="dir">components/</span>     <span class="desc">← 全局通用组件</span>
+│   ├── <span class="dir">views/</span>          <span class="desc">← 页面级组件（对应路由）</span>
+│   ├── <span class="dir">router/</span>         <span class="desc">← Vue Router 配置</span>
+│   └── <span class="dir">store/</span>          <span class="desc">← Vuex 配置</span>
+├── <span class="file">.env</span>               <span class="desc">← 所有环境的环境变量（后面详讲）</span>
+├── <span class="file">.eslintrc.js</span>       <span class="desc">← ESLint 配置</span>
+├── <span class="file">babel.config.js</span>    <span class="desc">← Babel 配置</span>
+├── <span class="file">package.json</span>
+└── <span class="file">vue.config.js</span>      <span class="desc">← Vue CLI 配置</span>
+  </div>
+
+  <!-- ==================== 2. 企业级结构 ==================== -->
+  <h2>2. 企业级项目结构（推荐）</h2>
+  <p>随着项目规模扩大，需要在默认结构的基础上扩展，保持代码高度可维护。</p>
+
+  <div class="tree">
+<span class="dir">src/</span>
+├── <span class="file">main.js</span>                 <span class="desc">← 入口：注册插件、全局配置</span>
+├── <span class="file">App.vue</span>                 <span class="desc">← 根组件（只负责路由容器）</span>
+│
+├── <span class="dir">api/</span>                    <span class="desc">← 所有接口请求封装</span>
+│   ├── <span class="file">index.js</span>            <span class="desc">← axios 实例 + 拦截器</span>
+│   ├── <span class="file">user.js</span>             <span class="desc">← 用户相关接口</span>
+│   └── <span class="file">product.js</span>          <span class="desc">← 商品相关接口</span>
+│
+├── <span class="dir">assets/</span>                 <span class="desc">← 静态资源（经 Webpack 打包处理）</span>
+│   ├── <span class="dir">images/</span>
+│   ├── <span class="dir">icons/</span>              <span class="desc">← SVG 图标</span>
+│   └── <span class="dir">fonts/</span>
+│
+├── <span class="dir important">components/</span>             <span class="desc">← 全局可复用组件（不含业务逻辑）</span>
+│   ├── <span class="dir">base/</span>               <span class="desc">← 基础组件（Button/Input/Modal…）</span>
+│   │   ├── <span class="file">BaseButton.vue</span>
+│   │   └── <span class="file">BaseInput.vue</span>
+│   └── <span class="dir">layout/</span>             <span class="desc">← 布局组件（Sidebar/Header/Footer）</span>
+│       ├── <span class="file">AppHeader.vue</span>
+│       └── <span class="file">AppSidebar.vue</span>
+│
+├── <span class="dir important">views/</span>                  <span class="desc">← 页面组件（对应一个路由，含业务逻辑）</span>
+│   ├── <span class="dir">Home/</span>               <span class="desc">← 每个页面用文件夹（含局部组件）</span>
+│   │   ├── <span class="file">index.vue</span>       <span class="desc">← 页面主文件</span>
+│   │   └── <span class="file">Banner.vue</span>      <span class="desc">← 此页面专属组件</span>
+│   └── <span class="dir">User/</span>
+│       ├── <span class="file">index.vue</span>
+│       └── <span class="file">ProfileCard.vue</span>
+│
+├── <span class="dir important">router/</span>                 <span class="desc">← 路由配置</span>
+│   ├── <span class="file">index.js</span>            <span class="desc">← 路由实例 + 全局守卫</span>
+│   └── <span class="file">modules/</span>            <span class="desc">← 按业务拆分路由模块</span>
+│       ├── <span class="file">user.js</span>
+│       └── <span class="file">product.js</span>
+│
+├── <span class="dir important">store/</span>                  <span class="desc">← Vuex 状态管理</span>
+│   ├── <span class="file">index.js</span>
+│   ├── <span class="file">mutation-types.js</span>
+│   └── <span class="dir">modules/</span>
+│       ├── <span class="file">user.js</span>
+│       └── <span class="file">cart.js</span>
+│
+├── <span class="dir">styles/</span>                 <span class="desc">← 全局样式</span>
+│   ├── <span class="file">variables.scss</span>      <span class="desc">← 颜色/字体/间距变量</span>
+│   ├── <span class="file">mixins.scss</span>         <span class="desc">← 常用样式 mixin</span>
+│   ├── <span class="file">reset.scss</span>          <span class="desc">← 样式重置</span>
+│   └── <span class="file">index.scss</span>          <span class="desc">← 汇总导出</span>
+│
+├── <span class="dir">utils/</span>                  <span class="desc">← 工具函数（纯函数，不依赖 Vue）</span>
+│   ├── <span class="file">format.js</span>           <span class="desc">← 格式化（日期、金额）</span>
+│   ├── <span class="file">validate.js</span>         <span class="desc">← 表单验证规则</span>
+│   └── <span class="file">storage.js</span>          <span class="desc">← localStorage 封装</span>
+│
+├── <span class="dir">hooks/</span>                  <span class="desc">← 自定义 Mixin/复用逻辑（Vue 2 叫 mixins）</span>
+│   └── <span class="file">useTable.js</span>         <span class="desc">← 表格分页 mixin</span>
+│
+└── <span class="dir">constants/</span>              <span class="desc">← 常量定义</span>
+    ├── <span class="file">api.js</span>              <span class="desc">← 接口路径常量</span>
+    └── <span class="file">enum.js</span>             <span class="desc">← 枚举值（状态码等）</span>
+  </div>
+
+  <!-- ==================== 3. 命名规范 ==================== -->
+  <h2>3. 文件命名规范</h2>
+
+  <table>
+    <tr><th>类型</th><th>命名规范</th><th>示例</th><th>原因</th></tr>
+    <tr><td>组件 .vue</td><td>PascalCase（大驼峰）</td><td><code>UserCard.vue</code></td><td>Vue 官方推荐，与 HTML 原生标签区分</td></tr>
+    <tr><td>普通 JS</td><td>camelCase（小驼峰）</td><td><code>userService.js</code></td><td>JS 惯例</td></tr>
+    <tr><td>工具/配置</td><td>kebab-case（短横线）</td><td><code>mutation-types.js</code></td><td>Node.js/Linux 惯例</td></tr>
+    <tr><td>页面目录</td><td>PascalCase</td><td><code>views/UserProfile/</code></td><td>与组件名对应</td></tr>
+    <tr><td>样式文件</td><td>kebab-case</td><td><code>user-card.scss</code></td><td>CSS 惯例</td></tr>
+    <tr><td>常量</td><td>SCREAMING_SNAKE_CASE</td><td><code>API_BASE_URL</code></td><td>常量与变量视觉区分</td></tr>
+  </table>
+
+  <h3>组件命名的三个原则（Vue 官方风格指南）</h3>
+  <div class="code-block"><pre><span class="comment">✅ 基础/通用组件加 Base 前缀</span>
+BaseButton.vue  BaseInput.vue  BaseModal.vue
+
+<span class="comment">✅ 单例组件（全局只用一次）加 The 前缀</span>
+TheHeader.vue  TheSidebar.vue  TheFooter.vue
+
+<span class="comment">✅ 强关联的父子组件加相同前缀</span>
+<span class="comment">// TodoList → TodoListItem → TodoListItemButton</span>
+TodoList.vue
+TodoListItem.vue
+TodoListItemButton.vue</pre></div>
+
+  <!-- ==================== 4. public vs assets ==================== -->
+  <h2>4. public/ vs assets/ 的区别</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>public/ 目录</h3>
+      <p>❌ <strong>不经过 Webpack</strong> 处理</p>
+      <p>✅ 直接复制到 dist/</p>
+      <p>✅ 用绝对路径引用：<code>/logo.png</code></p>
+      <p><strong>适合：</strong> favicon、第三方不支持模块化的 JS、已优化的图片</p>
+    </div>
+    <div class="card">
+      <h3>src/assets/ 目录</h3>
+      <p>✅ <strong>经过 Webpack</strong> 处理</p>
+      <p>✅ 自动哈希文件名（缓存更新）</p>
+      <p>✅ 小图片自动转 Base64</p>
+      <p><strong>适合：</strong> 组件用到的图片、字体、图标</p>
+    </div>
+  </div>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- public/ 中的资源：用绝对路径（.env 中的 VUE_APP_BASE_URL 可辅助）--&gt;</span>
+&lt;img src="/logo.png"&gt;
+&lt;link rel="icon" href="/favicon.ico"&gt;
+
+<span class="comment">&lt;!-- assets/ 中的资源：用相对路径或 @ 别名（Webpack 处理）--&gt;</span>
+&lt;img src="@/assets/images/banner.png"&gt;
+<span class="comment">/* CSS 中 */</span>
+<span class="comment">/* background: url(@/assets/images/bg.png) */</span></pre></div>
+
+  <!-- ==================== 5. main.js 最佳实践 ==================== -->
+  <h2>5. main.js 组织规范</h2>
+  <p><code>main.js</code> 是应用入口，职责是"注册和启动"，不应包含业务逻辑。</p>
+
+  <div class="code-block"><pre><span class="comment">// src/main.js — 标准写法（分层清晰）</span>
+<span class="kw">import</span> <span class="var">Vue</span> <span class="kw">from</span> <span class="str">'vue'</span>
+<span class="kw">import</span> <span class="var">App</span> <span class="kw">from</span> <span class="str">'./App.vue'</span>
+<span class="kw">import</span> <span class="var">router</span> <span class="kw">from</span> <span class="str">'./router'</span>
+<span class="kw">import</span> <span class="var">store</span> <span class="kw">from</span> <span class="str">'./store'</span>
+
+<span class="comment">// ① 全局样式</span>
+<span class="kw">import</span> <span class="str">'./styles/index.scss'</span>
+
+<span class="comment">// ② UI 组件库（按需引入更优）</span>
+<span class="kw">import</span> <span class="var">ElementUI</span> <span class="kw">from</span> <span class="str">'element-ui'</span>
+<span class="kw">import</span> <span class="str">'element-ui/lib/theme-chalk/index.css'</span>
+<span class="var">Vue</span>.<span class="fn">use</span>(<span class="var">ElementUI</span>)
+
+<span class="comment">// ③ 全局配置</span>
+<span class="var">Vue</span>.<span class="var">config</span>.<span class="var">productionTip</span> = <span class="kw">false</span>
+<span class="var">Vue</span>.<span class="var">config</span>.<span class="var">devtools</span> = process.env.<span class="var">NODE_ENV</span> !== <span class="str">'production'</span>
+
+<span class="comment">// ④ 全局指令 / 过滤器（少量，多了用插件方式）</span>
+<span class="kw">import</span> { <span class="var">formatDate</span> } <span class="kw">from</span> <span class="str">'./utils/format'</span>
+<span class="var">Vue</span>.<span class="fn">filter</span>(<span class="str">'formatDate'</span>, <span class="var">formatDate</span>)
+
+<span class="comment">// ⑤ 创建实例（最后执行）</span>
+<span class="kw">new</span> <span class="fn">Vue</span>({
+  <span class="var">router</span>,
+  <span class="var">store</span>,
+  <span class="fn">render</span>: <span class="var">h</span> => <span class="fn">h</span>(<span class="var">App</span>)
+}).<span class="fn">$mount</span>(<span class="str">'#app'</span>)</pre></div>
+
+  <!-- ==================== 6. 组件分层原则 ==================== -->
+  <h2>6. 组件分层原则</h2>
+  <p>合理的组件分层能让代码可复用、易维护。</p>
+
+  <div class="card">
+    <h3>三层架构</h3>
+    <table>
+      <tr><th>层级</th><th>位置</th><th>职责</th><th>特征</th></tr>
+      <tr>
+        <td><strong>页面层</strong></td>
+        <td><code>views/</code></td>
+        <td>与路由对应，协调数据流</td>
+        <td>dispatch action、传 props 给子组件、体积可以大</td>
+      </tr>
+      <tr>
+        <td><strong>业务组件层</strong></td>
+        <td><code>views/Xxx/</code> 子目录</td>
+        <td>页面专属的业务逻辑组件</td>
+        <td>可以访问 store，但只被一个页面使用</td>
+      </tr>
+      <tr>
+        <td><strong>通用组件层</strong></td>
+        <td><code>components/</code></td>
+        <td>纯展示 / 通用交互，无业务逻辑</td>
+        <td>只通过 props/emit 通信，不访问 store，高度可复用</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="warn">
+    <strong>常见错误：</strong> 把 <code>store.dispatch</code> 写在通用组件里。通用组件应该只接收 props、触发 emit，
+    由父层（页面/业务组件）决定数据来源。这样组件才能真正跨项目复用。
+  </div>
+
+  <!-- ==================== 7. API 层封装 ==================== -->
+  <h2>7. API 请求层封装规范</h2>
+
+  <div class="code-block"><pre><span class="comment">// src/api/index.js — axios 实例</span>
+<span class="kw">import</span> <span class="var">axios</span> <span class="kw">from</span> <span class="str">'axios'</span>
+<span class="kw">import</span> <span class="var">store</span> <span class="kw">from</span> <span class="str">'@/store'</span>
+<span class="kw">import</span> <span class="var">router</span> <span class="kw">from</span> <span class="str">'@/router'</span>
+
+<span class="kw">const</span> <span class="var">http</span> = <span class="var">axios</span>.<span class="fn">create</span>({
+  <span class="var">baseURL</span>: process.env.<span class="var">VUE_APP_API_BASE_URL</span>,  <span class="comment">// 读环境变量</span>
+  <span class="var">timeout</span>: <span class="num">10000</span>
+})
+
+<span class="comment">// 请求拦截器：自动带上 token</span>
+<span class="var">http</span>.<span class="var">interceptors</span>.<span class="var">request</span>.<span class="fn">use</span>(<span class="var">config</span> => {
+  <span class="kw">const</span> <span class="var">token</span> = <span class="var">store</span>.<span class="var">state</span>.<span class="var">user</span>.<span class="var">token</span>
+  <span class="kw">if</span> (<span class="var">token</span>) <span class="var">config</span>.<span class="var">headers</span>.<span class="var">Authorization</span> = <span class="str">`Bearer <span class="var">${token}</span>`</span>
+  <span class="kw">return</span> <span class="var">config</span>
+})
+
+<span class="comment">// 响应拦截器：统一错误处理</span>
+<span class="var">http</span>.<span class="var">interceptors</span>.<span class="var">response</span>.<span class="fn">use</span>(
+  <span class="var">res</span> => <span class="var">res</span>.<span class="var">data</span>,
+  <span class="var">err</span> => {
+    <span class="kw">if</span> (<span class="var">err</span>.<span class="var">response</span>?.status === <span class="num">401</span>) {
+      <span class="var">store</span>.<span class="fn">dispatch</span>(<span class="str">'user/logout'</span>)
+      <span class="var">router</span>.<span class="fn">push</span>(<span class="str">'/login'</span>)
+    }
+    <span class="kw">return</span> Promise.<span class="fn">reject</span>(<span class="var">err</span>)
+  }
+)
+
+<span class="kw">export default</span> <span class="var">http</span>
+
+<span class="comment">// -----------------------------------------------</span>
+<span class="comment">// src/api/user.js — 按模块拆分接口</span>
+<span class="kw">import</span> <span class="var">http</span> <span class="kw">from</span> <span class="str">'.'</span>
+
+<span class="kw">export const</span> <span class="var">userApi</span> = {
+  <span class="fn">login</span>: (<span class="var">data</span>) => <span class="var">http</span>.<span class="fn">post</span>(<span class="str">'/auth/login'</span>, <span class="var">data</span>),
+  <span class="fn">logout</span>: () => <span class="var">http</span>.<span class="fn">post</span>(<span class="str">'/auth/logout'</span>),
+  <span class="fn">getProfile</span>: () => <span class="var">http</span>.<span class="fn">get</span>(<span class="str">'/user/profile'</span>),
+  <span class="fn">updateProfile</span>: (<span class="var">data</span>) => <span class="var">http</span>.<span class="fn">put</span>(<span class="str">'/user/profile'</span>, <span class="var">data</span>)
+}</pre></div>
+
+  <div class="success">
+    <strong>下一节：</strong> 单文件组件深入 —— functional 组件、CSS Modules、动态组件等高级用法。
+  </div>
+
+</div>
+</body>
+</html>

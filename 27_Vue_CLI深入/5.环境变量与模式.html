@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27-5 环境变量与模式</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; line-height: 1.7; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.4rem; color: var(--green); margin: 32px 0 12px; }
+    h3 { font-size: 1.1rem; color: var(--yellow); margin: 20px 0 8px; }
+    p { margin-bottom: 10px; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+    .code-block pre { font-family: 'Consolas', monospace; font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .num { color: #79c0ff; }
+    .var { color: #ffa657; }
+    .tip { border-left: 4px solid var(--accent); padding: 12px 16px; background: rgba(88,166,255,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .warn { border-left: 4px solid var(--yellow); padding: 12px 16px; background: rgba(210,153,34,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .success { border-left: 4px solid var(--green); padding: 12px 16px; background: rgba(63,185,80,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    .danger { border-left: 4px solid var(--red); padding: 12px 16px; background: rgba(248,81,73,0.08); border-radius: 0 6px 6px 0; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--accent); font-size: 0.9rem; }
+    td { border: 1px solid var(--border); padding: 8px 12px; font-size: 0.88rem; color: var(--muted); }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; }
+    .tree { font-family: monospace; font-size: 0.88rem; line-height: 1.9; background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+    .tree .file { color: var(--green); } .tree .desc { color: var(--muted); font-size: 0.78rem; }
+    @media (max-width: 640px) { .grid-3 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>⚙️ 27-5 环境变量与模式</h1>
+
+  <!-- ==================== 1. 为什么需要环境变量 ==================== -->
+  <h2>1. 为什么需要环境变量？</h2>
+
+  <div class="card">
+    <p>不同环境（开发/测试/生产）需要<strong>不同的配置</strong>：</p>
+    <table>
+      <tr><th>配置项</th><th>开发环境</th><th>测试环境</th><th>生产环境</th></tr>
+      <tr><td>API 地址</td><td>http://localhost:3000</td><td>https://test-api.com</td><td>https://api.com</td></tr>
+      <tr><td>调试日志</td><td>开启</td><td>开启</td><td>关闭</td></tr>
+      <tr><td>Mock 数据</td><td>开启</td><td>关闭</td><td>关闭</td></tr>
+      <tr><td>Source Map</td><td>完整</td><td>完整</td><td>关闭</td></tr>
+    </table>
+  </div>
+
+  <p>如果把这些值写死在 JS 里，每次部署前都要手改代码 → 非常容易出错。<br>
+  环境变量让你<strong>将环境相关的配置独立出来</strong>，代码与配置分离。</p>
+
+  <!-- ==================== 2. .env 文件规则 ==================== -->
+  <h2>2. .env 文件规则</h2>
+
+  <div class="tree">
+<span class="file">.env</span>                   <span class="desc">← 所有模式都加载（优先级最低）</span>
+<span class="file">.env.local</span>            <span class="desc">← 所有模式，但不提交 Git（个人配置）</span>
+<span class="file">.env.development</span>      <span class="desc">← 仅 development 模式（npm run serve）</span>
+<span class="file">.env.development.local</span> <span class="desc">← 仅 development，不提交 Git</span>
+<span class="file">.env.production</span>       <span class="desc">← 仅 production 模式（npm run build）</span>
+<span class="file">.env.production.local</span>  <span class="desc">← 仅 production，不提交 Git</span>
+<span class="file">.env.staging</span>          <span class="desc">← 自定义模式（npm run build --mode staging）</span>
+  </div>
+
+  <h3>优先级规则（高覆盖低）</h3>
+  <div class="card">
+    <p><strong>最高：</strong> <code>.env.{mode}.local</code> （本地专用，Git 忽略）</p>
+    <p><strong>次之：</strong> <code>.env.{mode}</code> （模式专用）</p>
+    <p><strong>最低：</strong> <code>.env.local</code> 和 <code>.env</code> （通用基础配置）</p>
+  </div>
+
+  <!-- ==================== 3. 变量命名规则 ==================== -->
+  <h2>3. 变量命名规则 ⚠️ 重要</h2>
+
+  <div class="danger">
+    <strong>只有 VUE_APP_ 前缀的变量才会暴露给客户端代码！</strong><br>
+    其他变量（如 <code>SECRET_KEY</code>）即使写在 .env 文件里，也不会注入到 Vue 代码中，
+    只在 <code>vue.config.js</code>（Node.js 进程）中可访问。
+  </div>
+
+  <div class="code-block"><pre><span class="comment"># .env.development</span>
+NODE_ENV=development
+
+<span class="comment"># ✅ 以 VUE_APP_ 开头 → 注入到客户端代码</span>
+VUE_APP_API_BASE_URL=http://localhost:3000/api
+VUE_APP_APP_TITLE=我的应用（开发版）
+VUE_APP_ENABLE_MOCK=true
+VUE_APP_LOG_LEVEL=debug
+
+<span class="comment"># ❌ 不以 VUE_APP_ 开头 → 仅在 vue.config.js 中可用</span>
+WEBPACK_PORT=8081
+DB_PASSWORD=secret123</pre></div>
+
+  <div class="code-block"><pre><span class="comment"># .env.production</span>
+NODE_ENV=production
+
+VUE_APP_API_BASE_URL=https://api.example.com
+VUE_APP_APP_TITLE=我的应用
+VUE_APP_ENABLE_MOCK=false
+VUE_APP_LOG_LEVEL=error</pre></div>
+
+  <!-- ==================== 4. 在代码中使用 ==================== -->
+  <h2>4. 在代码中使用环境变量</h2>
+
+  <div class="code-block"><pre><span class="comment">// src/api/index.js — 根据环境变量配置 axios</span>
+<span class="kw">import</span> <span class="var">axios</span> <span class="kw">from</span> <span class="str">'axios'</span>
+
+<span class="kw">const</span> <span class="var">http</span> = <span class="var">axios</span>.<span class="fn">create</span>({
+  <span class="comment">// ⭐ 读取环境变量</span>
+  <span class="var">baseURL</span>: process.env.<span class="var">VUE_APP_API_BASE_URL</span>,
+  <span class="var">timeout</span>: <span class="num">10000</span>
+})
+
+<span class="kw">export default</span> <span class="var">http</span>
+
+<span class="comment">// -----------------------------------------------</span>
+<span class="comment">// src/utils/logger.js — 根据日志级别控制输出</span>
+<span class="kw">const</span> <span class="var">LOG_LEVEL</span> = process.env.<span class="var">VUE_APP_LOG_LEVEL</span> || <span class="str">'error'</span>
+
+<span class="kw">export const</span> <span class="var">logger</span> = {
+  <span class="fn">debug</span>(...<span class="var">args</span>) {
+    <span class="kw">if</span> (<span class="var">LOG_LEVEL</span> === <span class="str">'debug'</span>) console.<span class="fn">log</span>(<span class="str">'[DEBUG]'</span>, ...<span class="var">args</span>)
+  },
+  <span class="fn">info</span>(...<span class="var">args</span>) {
+    <span class="kw">if</span> ([<span class="str">'debug'</span>, <span class="str">'info'</span>].<span class="fn">includes</span>(<span class="var">LOG_LEVEL</span>)) console.<span class="fn">info</span>(<span class="str">'[INFO]'</span>, ...<span class="var">args</span>)
+  },
+  <span class="fn">error</span>(...<span class="var">args</span>) { console.<span class="fn">error</span>(<span class="str">'[ERROR]'</span>, ...<span class="var">args</span>) }
+}</pre></div>
+
+  <div class="code-block"><pre><span class="comment">&lt;!-- 在模板中也可以直接使用（通过计算属性） --&gt;</span>
+<span class="tag">&lt;template&gt;</span>
+  &lt;div&gt;
+    &lt;span&gt;版本: {{ appVersion }}&lt;/span&gt;
+    &lt;span v-if="isDev" class="dev-badge"&gt;DEV&lt;/span&gt;
+  &lt;/div&gt;
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="kw">export default</span> {
+  computed: {
+    <span class="fn">appVersion</span>() { <span class="kw">return</span> process.env.<span class="var">VUE_APP_VERSION</span> },
+    <span class="fn">isDev</span>() { <span class="kw">return</span> process.env.<span class="var">NODE_ENV</span> === <span class="str">'development'</span> }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></pre></div>
+
+  <!-- ==================== 5. 内置变量 ==================== -->
+  <h2>5. Vue CLI 内置变量</h2>
+
+  <table>
+    <tr><th>变量名</th><th>值</th><th>来源</th></tr>
+    <tr><td><code>process.env.NODE_ENV</code></td><td><code>'development'</code> / <code>'production'</code> / 自定义</td><td>Vue CLI 自动设置</td></tr>
+    <tr><td><code>process.env.VUE_APP_*</code></td><td>你在 .env 文件中定义的</td><td>.env 文件</td></tr>
+    <tr><td><code>process.env.BASE_URL</code></td><td>与 <code>vue.config.js</code> 中的 publicPath 相同</td><td>Vue CLI 自动设置</td></tr>
+  </table>
+
+  <!-- ==================== 6. 自定义模式 ==================== -->
+  <h2>6. 自定义模式（多环境部署）</h2>
+  <p>除了默认的 <code>development</code> 和 <code>production</code>，你可以创建自定义模式（如 staging、uat）。</p>
+
+  <div class="code-block"><pre><span class="comment"># .env.staging — 测试/预发环境</span>
+NODE_ENV=production        <span class="comment"># ⭐ 注意：这里设置 production，让代码做生产优化</span>
+VUE_APP_API_BASE_URL=https://staging-api.example.com
+VUE_APP_APP_TITLE=我的应用（staging）
+VUE_APP_ENABLE_MOCK=false</span></pre></div>
+
+  <div class="code-block"><pre><span class="comment">// package.json — 在 scripts 中指定 --mode</span>
+{
+  <span class="str">"scripts"</span>: {
+    <span class="str">"serve"</span>:          <span class="str">"vue-cli-service serve"</span>,
+    <span class="str">"build"</span>:          <span class="str">"vue-cli-service build"</span>,
+    <span class="str">"build:staging"</span>:  <span class="str">"vue-cli-service build --mode staging"</span>,
+    <span class="str">"build:prod"</span>:     <span class="str">"vue-cli-service build --mode production"</span>
+  }
+}</pre></div>
+
+  <div class="code-block"><pre><span class="comment"># 使用</span>
+npm run build:staging     <span class="comment">→ 加载 .env.staging（打出 staging 包）</span>
+npm run build             <span class="comment">→ 加载 .env.production（打出生产包）</span></pre></div>
+
+  <!-- ==================== 7. .gitignore ==================== -->
+  <h2>7. .env 文件的 Git 管理</h2>
+
+  <div class="warn">
+    <strong>安全原则：</strong> 含敏感信息（密码、密钥）的 .local 文件必须加入 .gitignore，
+    而 <code>.env.development</code>、<code>.env.production</code> 通常应该提交到 Git（填入无敏感的配置）。
+  </div>
+
+  <div class="code-block"><pre><span class="comment"># .gitignore</span>
+*.local           <span class="comment"># 忽略所有 .local 文件（含个人密钥、密码）</span>
+
+<span class="comment"># 以下文件提交 Git（不含敏感信息）</span>
+# .env
+# .env.development
+# .env.staging
+# .env.production</span>
+
+<span class="comment"># 如果生产环境配置敏感，用 .env.production.local（不提交）</span>
+# 在 CI/CD 中通过环境变量注入</pre></div>
+
+  <div class="success">
+    <p><strong>CI/CD 最佳实践：</strong> 在 GitHub Actions / Jenkins 等 CI 工具中，
+    通过 <strong>Secrets</strong> 配置生产环境变量，在构建时动态生成 <code>.env.production.local</code>，
+    不需要把真实密钥提交到代码仓库。</p>
+  </div>
+
+  <!-- ==================== 8. 速查 ==================== -->
+  <h2>📋 速查卡</h2>
+  <div class="card">
+    <table>
+      <tr><th>操作</th><th>方式</th></tr>
+      <tr><td>开发环境变量</td><td><code>.env.development</code></td></tr>
+      <tr><td>生产环境变量</td><td><code>.env.production</code></td></tr>
+      <tr><td>所有环境通用</td><td><code>.env</code></td></tr>
+      <tr><td>个人不提交</td><td><code>.env.*.local</code></td></tr>
+      <tr><td>暴露到客户端</td><td>必须以 <code>VUE_APP_</code> 开头</td></tr>
+      <tr><td>代码中读取</td><td><code>process.env.VUE_APP_XXX</code></td></tr>
+      <tr><td>判断当前模式</td><td><code>process.env.NODE_ENV === 'production'</code></td></tr>
+      <tr><td>自定义模式构建</td><td><code>vue-cli-service build --mode staging</code></td></tr>
+    </table>
+  </div>
+
+  <div class="success">
+    <strong>下一节：</strong> 打包部署与性能优化 —— build 命令、分析报告、路由懒加载、CDN 外链、Gzip 压缩。
+  </div>
+
+</div>
+</body>
+</html>
