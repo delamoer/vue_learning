@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25-7 · Nginx 部署实战</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+      --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .badge-orange { background: rgba(255,166,87,0.15);  color: var(--orange); }
+    .badge-red    { background: rgba(248,81,73,0.15);   color: var(--red); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k  { color: #ff7b72; } .s  { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f  { color: #d2a8ff; } .v  { color: #79c0ff; } .t { color: #7ee787; }
+    .a  { color: #ffa657; } .n  { color: #e6edf3; } .ng { color: #3fb950; }
+    .nc { color: #58a6ff; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+    strong { color: var(--text); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+    .step-list { list-style: none; padding: 0; counter-reset: step; }
+    .step-list li { counter-increment: step; display: flex; gap: 14px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid rgba(48,54,61,0.5); }
+    .step-list li:last-child { border-bottom: none; }
+    .step-num { min-width: 28px; height: 28px; background: rgba(88,166,255,0.15); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; margin-top: 2px; }
+    .step-content { flex: 1; }
+    .step-title { color: var(--text); font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .step-desc { color: var(--muted); font-size: 0.83rem; }
+    .trouble-item { background: rgba(248,81,73,0.04); border: 1px solid rgba(248,81,73,0.2); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+    .trouble-q { color: var(--red); font-weight: 700; font-size: 0.85rem; margin-bottom: 6px; }
+    .trouble-a { color: var(--muted); font-size: 0.83rem; line-height: 1.65; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Nginx 部署实战</h1>
+  <p class="page-lead">25-7 &nbsp;|&nbsp; 打包 dist → Nginx 配置 → History 路由 → 反向代理 API → Gzip / 缓存 → 常见坑排查</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>为什么需要 Nginx？开发 vs 生产的差异</h2>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div style="background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.2); border-radius:8px; padding:14px">
+          <div style="color:#58a6ff; font-weight:700; margin-bottom:8px">💻 npm run serve（开发）</div>
+          <ul style="list-style:none; padding:0; font-size:0.83rem; color:#94a3b8; line-height:2">
+            <li>✦ webpack-dev-server 内置服务器</li>
+            <li>✦ 自动处理 History 路由回退</li>
+            <li>✦ 自带 devServer.proxy 反向代理</li>
+            <li>✦ Hot reload、sourcemap 等开发工具</li>
+            <li>✦ <strong style="color:#ff7b72">不能用于生产环境</strong>（性能/安全）</li>
+          </ul>
+        </div>
+        <div style="background:rgba(63,185,80,0.05); border:1px solid rgba(63,185,80,0.2); border-radius:8px; padding:14px">
+          <div style="color:#3fb950; font-weight:700; margin-bottom:8px">🌐 上线后（生产）</div>
+          <ul style="list-style:none; padding:0; font-size:0.83rem; color:#94a3b8; line-height:2">
+            <li>✦ 运行 <code>npm run build</code> 生成 <code>dist/</code></li>
+            <li>✦ dist 里全是静态文件（html/js/css）</li>
+            <li>✦ 需要 Nginx（或 Apache/CDN）来托管</li>
+            <li>✦ <strong style="color:#ffa657">History 路由、API 代理都要手动配</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="tip tip-blue">
+        📌 Nginx 是一个高性能 HTTP 服务器，在前端部署中主要承担三件事：<br>
+        <strong>① 托管静态文件</strong>（把 dist 暴露到网络）&nbsp;&nbsp;
+        <strong>② 处理 History 路由</strong>（避免刷新 404）&nbsp;&nbsp;
+        <strong>③ 反向代理 API</strong>（把 /api 转发给后端服务）
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>Step 1 — 打包前端项目</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">运行构建命令</div>
+      <div class="code-block"><span class="c"># 在项目根目录执行</span>
+npm run build
+
+<span class="c"># 构建完成后，会生成 dist/ 目录</span>
+<span class="c"># 这个目录里的全部内容就是要上传到服务器的东西</span></div>
+
+      <div class="section-title">dist 目录结构</div>
+      <div class="code-block">dist/
+├── index.html           <span class="c"># 入口文件（唯一 HTML）</span>
+├── favicon.ico
+└── static/              <span class="c">（或 assets/，取决于 Vue CLI 版本）</span>
+    ├── css/
+    │   └── app.xxx.css  <span class="c"># 样式文件（hash 命名，长缓存）</span>
+    ├── js/
+    │   ├── app.xxx.js   <span class="c"># 应用代码</span>
+    │   ├── chunk-xxx.js <span class="c"># 懒加载路由分包</span>
+    │   └── chunk-vendors.xxx.js  <span class="c"># 第三方库（vue、vue-router 等）</span>
+    └── img/</div>
+
+      <div class="tip tip-yellow">
+        ⭐ <strong>publicPath 配置</strong>：如果你的应用不是部署在域名根路径，而是子路径（如 <code>https://example.com/myapp/</code>），需要在 <code>vue.config.js</code> 中设置 <code>publicPath: '/myapp/'</code>，并且路由的 <code>base</code> 选项也要一致。
+      </div>
+      <div class="code-block"><span class="c">// vue.config.js（子路径部署时）</span>
+module.exports = {
+  publicPath: process.env.NODE_ENV === <span class="s">'production'</span>
+    ? <span class="s">'/myapp/'</span>   <span class="c">// 生产环境子路径</span>
+    : <span class="s">'/'</span>          <span class="c">// 开发环境根路径</span>
+}
+
+<span class="c">// router/index.js（对应配置 base）</span>
+<span class="k">const</span> router = <span class="k">new</span> <span class="f">VueRouter</span>({
+  mode: <span class="s">'history'</span>,
+  base: process.env.NODE_ENV === <span class="s">'production'</span> ? <span class="s">'/myapp/'</span> : <span class="s">'/'</span>,
+  routes
+})</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>Step 2 — 最小可用 Nginx 配置</h2>
+    </div>
+    <div class="card-body">
+      <p>把 <code>dist/</code> 上传到服务器（例如 <code>/var/www/myapp</code>），然后写 Nginx 配置文件：</p>
+
+      <div class="section-title">基础配置（支持 History 路由）</div>
+      <div class="code-block"><span class="nc">server</span> {
+    <span class="k">listen</span>       <span class="v">80</span>;
+    <span class="k">server_name</span>  <span class="s">example.com</span>;   <span class="c"># 换成你的域名或服务器 IP</span>
+
+    <span class="c"># dist 文件夹路径</span>
+    <span class="k">root</span>   <span class="s">/var/www/myapp</span>;
+    <span class="k">index</span>  <span class="s">index.html</span>;
+
+    <span class="nc">location</span> / {
+        <span class="c"># 关键配置：找不到文件时回退到 index.html</span>
+        <span class="c"># 这样刷新 /articles/3 不会报 404</span>
+        <span class="k">try_files</span> $uri $uri/ <span class="s">/index.html</span>;
+    }
+}</div>
+
+      <div class="tip tip-red">
+        ⚠️ <code>try_files $uri $uri/ /index.html</code> 是 History 模式部署的核心配置。<br>
+        含义：先找真实文件（<code>$uri</code>）→ 再找目录（<code>$uri/</code>）→ 都找不到则返回 <code>index.html</code>，让前端路由接管。
+      </div>
+
+      <div class="section-title">验证配置 & 重载</div>
+      <div class="code-block"><span class="c"># 测试配置文件语法是否正确</span>
+nginx -t
+
+<span class="c"># 重载配置（不中断服务）</span>
+nginx -s reload
+
+<span class="c"># 或者用 systemd 管理</span>
+systemctl reload nginx</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>Step 3 — 反向代理 API</h2>
+    </div>
+    <div class="card-body">
+      <p>前端打包后无法再用 <code>vue.config.js</code> 里的 <code>devServer.proxy</code>，必须在 Nginx 里配反向代理。</p>
+
+      <div class="section-title">场景：前端部署在 80 端口，后端跑在 3000 端口</div>
+      <div class="code-block"><span class="nc">server</span> {
+    <span class="k">listen</span>      <span class="v">80</span>;
+    <span class="k">server_name</span> <span class="s">example.com</span>;
+    <span class="k">root</span>        <span class="s">/var/www/myapp</span>;
+    <span class="k">index</span>       <span class="s">index.html</span>;
+
+    <span class="c"># ① 前端静态资源 + History 路由回退</span>
+    <span class="nc">location</span> / {
+        <span class="k">try_files</span> $uri $uri/ <span class="s">/index.html</span>;
+    }
+
+    <span class="c"># ② 把 /api/* 转发给后端服务</span>
+    <span class="nc">location</span> /api/ {
+        <span class="k">proxy_pass</span>         <span class="s">http://127.0.0.1:3000/</span>;
+        <span class="k">proxy_http_version</span> <span class="v">1.1</span>;
+        <span class="k">proxy_set_header</span>   Host             $host;
+        <span class="k">proxy_set_header</span>   X-Real-IP        $remote_addr;
+        <span class="k">proxy_set_header</span>   X-Forwarded-For  $proxy_add_x_forwarded_for;
+    }
+}</div>
+
+      <div class="section-title">前端代码中 API 请求写法对应关系</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>前端请求</th><th>Nginx 转发到</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>axios.get('/api/users')</td><td>http://127.0.0.1:3000/users</td><td>proxy_pass 末尾有 / → 截掉 /api 前缀</td></tr>
+            <tr><td>axios.post('/api/login')</td><td>http://127.0.0.1:3000/login</td><td>同上</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tip tip-blue">
+        📌 <strong>proxy_pass 末尾斜线的区别：</strong><br>
+        <code>proxy_pass http://127.0.0.1:3000/</code>（有斜线）→ <code>/api/users</code> 变成 <code>/users</code>（截掉 <code>/api</code>）<br>
+        <code>proxy_pass http://127.0.0.1:3000</code>（无斜线）→ <code>/api/users</code> 变成 <code>/api/users</code>（完整转发）<br>
+        选哪种取决于你后端路由是否带 <code>/api</code> 前缀。
+      </div>
+
+      <div class="section-title">与 vue.config.js devServer.proxy 的对比</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>配置位置</th><th>生效环境</th><th>原理</th></tr></thead>
+          <tbody>
+            <tr><td>vue.config.js devServer.proxy</td><td>开发环境（npm run serve）</td><td>webpack-dev-server 内置代理</td></tr>
+            <tr><td>Nginx location /api/</td><td>生产环境（npm run build 后）</td><td>Nginx 反向代理</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>Step 4 — Gzip 压缩与静态资源缓存</h2>
+    </div>
+    <div class="card-body">
+      <p>Vue 打包生成的 JS 文件往往有数百 KB，开启 Gzip 后体积通常能压缩到 1/3，页面加载更快。</p>
+
+      <div class="section-title">开启 Gzip</div>
+      <div class="code-block"><span class="c"># /etc/nginx/nginx.conf 或 server 块中加入</span>
+<span class="k">gzip</span>             on;
+<span class="k">gzip_min_length</span>  1k;       <span class="c"># 小于 1k 的文件不压缩</span>
+<span class="k">gzip_comp_level</span>  6;        <span class="c"># 压缩级别 1-9，6 是性能/压缩比均衡点</span>
+<span class="k">gzip_types</span>       text/plain text/css text/javascript
+                 application/javascript application/json
+                 application/xml image/svg+xml;
+<span class="k">gzip_vary</span>        on;        <span class="c"># 告诉代理服务器缓存两种版本</span></div>
+
+      <div class="section-title">静态资源长缓存（hash 文件名策略）</div>
+      <p>Vue CLI 打包生成的 JS / CSS 文件名中包含 hash（如 <code>app.3f1a2b.js</code>），内容不变 hash 不变，内容改变 hash 改变。利用这个特性，可以放心开启长缓存：</p>
+      <div class="code-block"><span class="nc">server</span> {
+    ...
+    <span class="nc">location</span> / {
+        <span class="k">try_files</span> $uri $uri/ <span class="s">/index.html</span>;
+    }
+
+    <span class="c"># index.html：永远不缓存（或极短缓存）</span>
+    <span class="c"># 因为它引用了带 hash 的 js/css，每次部署都要拿最新的</span>
+    <span class="nc">location</span> = /index.html {
+        <span class="k">add_header</span> Cache-Control <span class="s">"no-cache, no-store, must-revalidate"</span>;
+    }
+
+    <span class="c"># 带 hash 的 js/css：1 年长缓存</span>
+    <span class="nc">location</span> ~* <span class="s">\.(js|css)$</span> {
+        <span class="k">expires</span>    <span class="v">1y</span>;
+        <span class="k">add_header</span> Cache-Control <span class="s">"public, immutable"</span>;
+    }
+
+    <span class="c"># 图片字体：适当缓存</span>
+    <span class="nc">location</span> ~* <span class="s">\.(png|jpg|jpeg|gif|ico|svg|woff2|ttf)$</span> {
+        <span class="k">expires</span>    <span class="v">30d</span>;
+        <span class="k">add_header</span> Cache-Control <span class="s">"public"</span>;
+    }
+}</div>
+
+      <div class="tip tip-green">
+        ✅ <strong>这组缓存策略的逻辑：</strong><br>
+        • <code>index.html</code> 禁止缓存 → 用户每次打开都拿最新的，保证加载最新的 js/css hash 引用<br>
+        • 带 hash 文件名的 js/css 永久缓存 → 内容没变就不重新下载，极大加速二次访问
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-orange">第六节</span>
+      <h2>HTTPS 配置（Let's Encrypt 免费证书）</h2>
+    </div>
+    <div class="card-body">
+      <p>生产环境强烈建议开启 HTTPS，现代浏览器对非 HTTPS 站点会有安全警告，且 PWA / Service Worker 等功能依赖 HTTPS。</p>
+
+      <div class="section-title">使用 Certbot 获取 Let's Encrypt 免费证书</div>
+      <div class="code-block"><span class="c"># 安装 certbot（Ubuntu/Debian）</span>
+apt install certbot python3-certbot-nginx
+
+<span class="c"># 自动申请证书并修改 Nginx 配置</span>
+certbot --nginx -d example.com -d www.example.com
+
+<span class="c"># certbot 会自动在 Nginx 配置里加上 SSL 相关内容</span>
+<span class="c"># 证书有效期 90 天，通过 cron 任务自动续期</span></div>
+
+      <div class="section-title">手动 HTTPS 配置示例</div>
+      <div class="code-block"><span class="c"># HTTP → 强制跳转 HTTPS</span>
+<span class="nc">server</span> {
+    <span class="k">listen</span>      <span class="v">80</span>;
+    <span class="k">server_name</span> <span class="s">example.com</span>;
+    <span class="k">return</span>      <span class="v">301</span> https://$host$request_uri;
+}
+
+<span class="nc">server</span> {
+    <span class="k">listen</span>           <span class="v">443</span> ssl http2;
+    <span class="k">server_name</span>      <span class="s">example.com</span>;
+
+    <span class="k">ssl_certificate</span>     <span class="s">/etc/letsencrypt/live/example.com/fullchain.pem</span>;
+    <span class="k">ssl_certificate_key</span> <span class="s">/etc/letsencrypt/live/example.com/privkey.pem</span>;
+
+    <span class="k">root</span>  <span class="s">/var/www/myapp</span>;
+    <span class="k">index</span> <span class="s">index.html</span>;
+
+    <span class="nc">location</span> / {
+        <span class="k">try_files</span> $uri $uri/ <span class="s">/index.html</span>;
+    }
+
+    <span class="nc">location</span> /api/ {
+        <span class="k">proxy_pass</span> <span class="s">http://127.0.0.1:3000/</span>;
+    }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-red">第七节</span>
+      <h2>常见问题排查</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="trouble-item">
+        <div class="trouble-q">❌ 刷新页面出现 404（Not Found）</div>
+        <div class="trouble-a">
+          <strong>原因：</strong>History 模式下 Nginx 直接找对应文件，找不到就 404。<br>
+          <strong>解决：</strong>在 <code>location /</code> 里加上 <code>try_files $uri $uri/ /index.html;</code>
+        </div>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q">❌ API 请求出现 502 Bad Gateway</div>
+        <div class="trouble-a">
+          <strong>原因：</strong>Nginx 无法连接到后端服务（后端没起来，或端口/地址写错）。<br>
+          <strong>排查：</strong><br>
+          1. 确认后端服务是否在运行：<code>curl http://127.0.0.1:3000/api/users</code><br>
+          2. 检查 <code>proxy_pass</code> 地址是否正确<br>
+          3. 查看 Nginx 错误日志：<code>tail -f /var/log/nginx/error.log</code>
+        </div>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q">❌ API 请求出现 404，但后端服务正常</div>
+        <div class="trouble-a">
+          <strong>原因：</strong><code>proxy_pass</code> 末尾斜线导致路径转换出错。<br>
+          <strong>排查：</strong>弄清楚后端路由是否带 <code>/api</code> 前缀，再决定 proxy_pass 末尾是否加斜线（详见第四节）。
+        </div>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q">❌ 部署后页面空白（白屏）</div>
+        <div class="trouble-a">
+          <strong>原因：</strong>最常见是 JS/CSS 路径 404，通常是 <code>publicPath</code> 配置不对。<br>
+          <strong>排查：</strong>打开浏览器 DevTools → Network 面板，看哪些资源 404 → 检查路径是否和 <code>publicPath</code> / <code>base</code> 一致。
+        </div>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q">❌ 修改代码重新部署后浏览器还是旧版本</div>
+        <div class="trouble-a">
+          <strong>原因：</strong>浏览器缓存了旧的 <code>index.html</code>，加载了旧的 js hash。<br>
+          <strong>解决：</strong>确保 <code>index.html</code> 配置了 <code>Cache-Control: no-cache</code>（见第五节）。
+        </div>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q">❌ nginx -t 报错 "unknown directive"</div>
+        <div class="trouble-a">
+          <strong>原因：</strong>配置文件语法错误，或使用了未安装的 Nginx 模块（如 <code>gzip_static</code> 需要额外模块）。<br>
+          <strong>解决：</strong>仔细看错误提示的行号，对照语法检查。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第八节</span>
+      <h2>完整生产配置模板（可直接复用）</h2>
+    </div>
+    <div class="card-body">
+      <p>结合前几节，这是一份完整的生产级配置，覆盖 History 路由 / API 代理 / Gzip / 缓存策略 / HTTPS 跳转：</p>
+      <div class="tip tip-yellow">
+        ⭐ 该配置同时存放在 <code>nginx.conf.example</code> 文件中，可直接复制修改 <code>server_name</code> 和 <code>root</code> 路径使用。
+      </div>
+      <div class="code-block"><span class="c"># ====================================================</span>
+<span class="c"># Vue 2 项目 Nginx 生产配置模板</span>
+<span class="c"># 修改：server_name、root、proxy_pass 三处即可使用</span>
+<span class="c"># ====================================================</span>
+
+<span class="c"># HTTP → HTTPS 跳转（如无 HTTPS 可删除此 server 块）</span>
+<span class="nc">server</span> {
+    <span class="k">listen</span>      <span class="v">80</span>;
+    <span class="k">server_name</span> <span class="s">example.com</span>;
+    <span class="k">return</span>      <span class="v">301</span> https://$host$request_uri;
+}
+
+<span class="nc">server</span> {
+    <span class="k">listen</span>           <span class="v">443</span> ssl http2;
+    <span class="k">server_name</span>      <span class="s">example.com</span>;         <span class="c"># ← 改成你的域名</span>
+
+    <span class="c"># SSL 证书（Let's Encrypt）</span>
+    <span class="k">ssl_certificate</span>     <span class="s">/etc/letsencrypt/live/example.com/fullchain.pem</span>;
+    <span class="k">ssl_certificate_key</span> <span class="s">/etc/letsencrypt/live/example.com/privkey.pem</span>;
+
+    <span class="c"># Gzip 压缩</span>
+    <span class="k">gzip</span>            on;
+    <span class="k">gzip_min_length</span> 1k;
+    <span class="k">gzip_comp_level</span> 6;
+    <span class="k">gzip_types</span>      text/plain text/css application/javascript
+                    application/json image/svg+xml;
+
+    <span class="c"># dist 目录</span>
+    <span class="k">root</span>   <span class="s">/var/www/myapp</span>;               <span class="c"># ← 改成你的 dist 路径</span>
+    <span class="k">index</span>  <span class="s">index.html</span>;
+
+    <span class="c"># index.html：禁止缓存（确保每次拿最新版本）</span>
+    <span class="nc">location</span> = /index.html {
+        <span class="k">add_header</span> Cache-Control <span class="s">"no-cache, no-store, must-revalidate"</span>;
+    }
+
+    <span class="c"># 带 hash 的 js/css：1 年长缓存</span>
+    <span class="nc">location</span> ~* <span class="s">\.(js|css)$</span> {
+        <span class="k">expires</span>    <span class="v">1y</span>;
+        <span class="k">add_header</span> Cache-Control <span class="s">"public, immutable"</span>;
+    }
+
+    <span class="c"># 图片字体</span>
+    <span class="nc">location</span> ~* <span class="s">\.(png|jpg|jpeg|gif|ico|svg|woff2|ttf|eot)$</span> {
+        <span class="k">expires</span>    <span class="v">30d</span>;
+        <span class="k">add_header</span> Cache-Control <span class="s">"public"</span>;
+    }
+
+    <span class="c"># API 反向代理（把 /api/* 转发给后端 Node.js / Spring Boot 等）</span>
+    <span class="nc">location</span> /api/ {
+        <span class="k">proxy_pass</span>         <span class="s">http://127.0.0.1:3000/</span>;  <span class="c"># ← 改成你的后端地址</span>
+        <span class="k">proxy_http_version</span> <span class="v">1.1</span>;
+        <span class="k">proxy_set_header</span>   Upgrade          $http_upgrade;
+        <span class="k">proxy_set_header</span>   Connection       <span class="s">'upgrade'</span>;
+        <span class="k">proxy_set_header</span>   Host             $host;
+        <span class="k">proxy_set_header</span>   X-Real-IP        $remote_addr;
+        <span class="k">proxy_set_header</span>   X-Forwarded-For  $proxy_add_x_forwarded_for;
+        <span class="k">proxy_cache_bypass</span>                  $http_upgrade;
+    }
+
+    <span class="c"># 前端路由 + History 模式回退（必须放在最后）</span>
+    <span class="nc">location</span> / {
+        <span class="k">try_files</span> $uri $uri/ <span class="s">/index.html</span>;
+    }
+}</div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  25-7 · Nginx 部署实战 &nbsp;|&nbsp; 打包 → 静态托管 → History路由 → 反向代理 → Gzip/缓存 → HTTPS
+</div>
+</body>
+</html>

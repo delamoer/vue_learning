@@ -1,0 +1,71 @@
+# ====================================================
+# Vue 2 项目 Nginx 生产配置模板
+# 使用前修改 3 处：server_name / root / proxy_pass
+# ====================================================
+
+# HTTP → HTTPS 强制跳转（纯 HTTP 部署时删除此块）
+server {
+    listen      80;
+    server_name example.com;    # ← 改成你的域名或 IP
+    return      301 https://$host$request_uri;
+}
+
+server {
+    listen           443 ssl http2;
+    server_name      example.com;   # ← 改成你的域名
+
+    # SSL 证书路径（Let's Encrypt / 自签名均可）
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+
+    # ---------- Gzip 压缩 ----------
+    gzip            on;
+    gzip_min_length 1k;
+    gzip_comp_level 6;
+    gzip_types      text/plain text/css application/javascript
+                    application/json image/svg+xml;
+    gzip_vary       on;
+
+    # ---------- 静态文件根目录 ----------
+    root   /var/www/myapp;      # ← 改成 dist 目录的实际路径
+    index  index.html;
+
+    # ---------- 缓存策略 ----------
+
+    # index.html：禁止缓存（确保每次部署用户都能拿到最新版本）
+    location = /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+
+    # 带 hash 的 js/css：1 年长缓存（内容变了 hash 自然变，安全）
+    location ~* \.(js|css)$ {
+        expires    1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # 图片、字体：30 天缓存
+    location ~* \.(png|jpg|jpeg|gif|ico|svg|woff2|ttf|eot)$ {
+        expires    30d;
+        add_header Cache-Control "public";
+    }
+
+    # ---------- API 反向代理 ----------
+    # 把 /api/* 转发给后端服务（Node.js / Spring Boot / Django 等）
+    # proxy_pass 末尾有 / → 转发时去掉 /api 前缀
+    location /api/ {
+        proxy_pass         http://127.0.0.1:3000/;  # ← 改成后端地址:端口
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade          $http_upgrade;
+        proxy_set_header   Connection       'upgrade';
+        proxy_set_header   Host             $host;
+        proxy_set_header   X-Real-IP        $remote_addr;
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+        proxy_cache_bypass                  $http_upgrade;
+    }
+
+    # ---------- 前端路由（History 模式必须）----------
+    # 找不到真实文件时回退到 index.html，让 Vue Router 接管
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
