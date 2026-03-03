@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vuetify 2.x 常用组件详解</title>
+  <!-- Material Design Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet" />
+  <!-- Vuetify 2.x CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.7.2/dist/vuetify.min.css" rel="stylesheet" />
+  <script src="../js/vue.js"></script>
+  <!-- Vuetify 2.x JS -->
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.7.2/dist/vuetify.js"></script>
+  <style>
+    /* 页面外壳样式（非 Vuetify 作用域）*/
+    body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: #f0f2f5; color: #333; margin: 0; }
+    .page-header { background: linear-gradient(135deg, #1976D2, #0D47A1); color: #fff; padding: 30px 40px; }
+    .page-header h1 { font-size: 2rem; }
+    .page-header p  { margin-top: 8px; opacity: .85; font-size: .95rem; }
+    .toc { background: #fff; border-radius: 10px; padding: 20px 28px; margin: 20px auto; max-width: 1100px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .toc h2 { font-size: 1rem; color: #1976D2; margin-bottom: 10px; }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+    .toc-grid a { color: #555; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: .85rem; }
+    .toc-grid a:hover { background: #E3F2FD; color: #1976D2; }
+    .container-wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; }
+    .section { background: #fff; border-radius: 10px; padding: 28px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .section-title { font-size: 1.25rem; font-weight: 700; color: #1a1a2e; padding-bottom: 12px; border-bottom: 2px solid #E3F2FD; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .section-title .num { background: #1976D2; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; }
+    .sub-title { font-size: 1rem; font-weight: 600; color: #1976D2; margin: 20px 0 10px; }
+    .demo-block { border: 1px solid #e4e7ed; border-radius: 6px; padding: 20px; margin: 10px 0; background: #fafafa; }
+    /* 专门为 Vuetify Demo 提供的 app 容器 */
+    .v-demo-wrap { border: 1px solid #e4e7ed; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; font-size: .81rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .kw  { color: #cba6f7; }
+    .fn  { color: #89b4fa; }
+    .str { color: #a6e3a1; }
+    .cmt { color: #6c7086; font-style: italic; }
+    .attr{ color: #f38ba8; }
+    .num_c { color: #fab387; }
+    .box-info { background: #E3F2FD; border-left: 4px solid #1976D2; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    .box-warn { background: #FFF8E1; border-left: 4px solid #F9A825; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    .box-ok   { background: #E8F5E9; border-left: 4px solid #388E3C; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    .box-diff { background: #FBE9E7; border-left: 4px solid #D84315; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    code { background: #f0f2f5; padding: 1px 6px; border-radius: 3px; font-size: .86em; color: #e6354e; }
+    table.props { width: 100%; border-collapse: collapse; font-size: .86rem; margin: 10px 0; }
+    table.props th { background: #E3F2FD; padding: 8px 12px; text-align: left; font-weight: 600; }
+    table.props td { border-bottom: 1px solid #ebeef5; padding: 7px 12px; vertical-align: top; }
+    table.props tr:hover td { background: #f5f7fa; }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; }
+    @media(max-width:700px){ .compare-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🎨 Vuetify 2.x 常用组件详解</h1>
+  <p>基于 Vuetify 2.7（Vue 2）· Material Design 组件库 · 含核心组件 Props / 插槽 / 与 Element UI 对比</p>
+</div>
+
+<!-- 目录 -->
+<div class="toc">
+  <h2>📋 目录</h2>
+  <div class="toc-grid">
+    <a href="#s1">1. 安装与初始化</a>
+    <a href="#s2">2. 核心：v-app 架构</a>
+    <a href="#s3">3. 栅格系统</a>
+    <a href="#s4">4. 按钮 v-btn</a>
+    <a href="#s5">5. 文本框 v-text-field</a>
+    <a href="#s6">6. 表单与验证</a>
+    <a href="#s7">7. 数据表格 v-data-table</a>
+    <a href="#s8">8. 卡片 v-card</a>
+    <a href="#s9">9. 对话框 v-dialog</a>
+    <a href="#s10">10. 提示 Snackbar / Alert</a>
+    <a href="#s11">11. 进度条 / 加载</a>
+    <a href="#s12">12. Chip / Badge</a>
+    <a href="#s13">13. 导航组件</a>
+    <a href="#s14">14. 与 Element UI 对比</a>
+    <a href="#s15">15. 综合实战 CRUD</a>
+  </div>
+</div>
+
+<div class="container-wrap">
+
+  <!-- ===== 1. 安装 ===== -->
+  <div class="section" id="s1">
+    <div class="section-title"><span class="num">1</span>安装与初始化</div>
+
+    <div class="sub-title">Vue CLI 安装（推荐）</div>
+    <pre><span class="cmt"># 通过 vue add 安装（自动配置）</span>
+vue add vuetify    <span class="cmt"># 选 Vuetify 2 - Vue CLI (recommended)</span>
+
+<span class="cmt"># 或手动 npm 安装</span>
+npm install vuetify@^2.7.2</pre>
+
+    <div class="sub-title">main.js 配置</div>
+    <pre><span class="kw">import</span> Vue       <span class="kw">from</span> <span class="str">'vue'</span>
+<span class="kw">import</span> Vuetify   <span class="kw">from</span> <span class="str">'vuetify/lib'</span>
+<span class="kw">import</span> <span class="str">'vuetify/dist/vuetify.min.css'</span>
+<span class="kw">import</span> <span class="str">'@mdi/font/css/materialdesignicons.css'</span>   <span class="cmt">// MDI 图标</span>
+
+Vue.<span class="fn">use</span>(Vuetify)
+
+<span class="kw">const</span> vuetify = <span class="kw">new</span> <span class="fn">Vuetify</span>({
+  theme: {
+    themes: {
+      light: {
+        primary:   <span class="str">'#1976D2'</span>,
+        secondary: <span class="str">'#424242'</span>,
+        accent:    <span class="str">'#82B1FF'</span>,
+        error:     <span class="str">'#FF5252'</span>,
+        success:   <span class="str">'#4CAF50'</span>,
+        warning:   <span class="str">'#FFC107'</span>,
+      }
+    }
+  }
+})
+
+<span class="kw">new</span> <span class="fn">Vue</span>({ el: <span class="str">'#app'</span>, vuetify, render: h => <span class="fn">h</span>(App) })
+<span class="cmt">// ⚠️ 必须把 vuetify 实例传入 new Vue，否则所有主题/颜色失效</span></pre>
+
+    <div class="box-warn">
+      <strong>⚠️ 最重要的规则：</strong>所有 Vuetify 组件必须被包裹在 <code>&lt;v-app&gt;</code> 根组件内，
+      否则主题、RTL、暗色模式、Portal（dialog/snackbar）均无法正常工作。
+    </div>
+
+    <div class="sub-title">CDN 引入（本文 Demo 使用方式）</div>
+    <pre><span class="cmt">&lt;!-- MDI 图标 --&gt;</span>
+&lt;link href=<span class="str">"https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css"</span> rel=<span class="str">"stylesheet"</span>&gt;
+<span class="cmt">&lt;!-- Vuetify CSS --&gt;</span>
+&lt;link href=<span class="str">"https://cdn.jsdelivr.net/npm/vuetify@2.7.2/dist/vuetify.min.css"</span> rel=<span class="str">"stylesheet"</span>&gt;
+&lt;script src=<span class="str">"../js/vue.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"https://cdn.jsdelivr.net/npm/vuetify@2.7.2/dist/vuetify.js"</span>&gt;&lt;/script&gt;
+
+<span class="cmt">// JS 初始化</span>
+Vue.<span class="fn">use</span>(Vuetify)
+<span class="kw">new</span> <span class="fn">Vue</span>({
+  el: <span class="str">'#app'</span>,
+  vuetify: <span class="kw">new</span> <span class="fn">Vuetify</span>(),
+  <span class="cmt">// template 或 data / methods ...</span>
+})</pre>
+  </div>
+
+  <!-- ===== 2. v-app 架构 ===== -->
+  <div class="section" id="s2">
+    <div class="section-title"><span class="num">2</span>核心：v-app 应用架构</div>
+
+    <div class="box-info">
+      Vuetify 提供了一套完整的应用布局组件，通过语义化组件描述应用结构，
+      Vuetify 内部会自动计算各区域的 z-index、尺寸和安全距离（inset）。
+    </div>
+
+    <pre><span class="cmt">&lt;!-- 完整后台管理系统布局骨架 --&gt;</span>
+&lt;<span class="attr">v-app</span>&gt;
+  <span class="cmt">&lt;!-- 顶部导航栏 --&gt;</span>
+  &lt;<span class="attr">v-app-bar</span> <span class="attr">app</span> <span class="attr">color</span>=<span class="str">"primary"</span> <span class="attr">dark</span>&gt;
+    &lt;<span class="attr">v-app-bar-nav-icon</span> <span class="attr">@click</span>=<span class="str">"drawer = !drawer"</span> /&gt;
+    &lt;<span class="attr">v-toolbar-title</span>&gt;管理系统&lt;/<span class="attr">v-toolbar-title</span>&gt;
+    &lt;<span class="attr">v-spacer</span> /&gt;
+    &lt;<span class="attr">v-btn</span> <span class="attr">icon</span>&gt;&lt;<span class="attr">v-icon</span>&gt;mdi-account&lt;/<span class="attr">v-icon</span>&gt;&lt;/<span class="attr">v-btn</span>&gt;
+  &lt;/<span class="attr">v-app-bar</span>&gt;
+
+  <span class="cmt">&lt;!-- 侧边导航 --&gt;</span>
+  &lt;<span class="attr">v-navigation-drawer</span> <span class="attr">v-model</span>=<span class="str">"drawer"</span> <span class="attr">app</span>&gt;
+    &lt;<span class="attr">v-list</span> <span class="attr">nav</span> <span class="attr">dense</span>&gt;
+      &lt;<span class="attr">v-list-item</span> <span class="attr">v-for</span>=<span class="str">"item in navItems"</span> <span class="attr">:key</span>=<span class="str">"item.title"</span> <span class="attr">:to</span>=<span class="str">"item.path"</span> <span class="attr">link</span>&gt;
+        &lt;<span class="attr">v-list-item-icon</span>&gt;&lt;<span class="attr">v-icon</span>&gt;{{ item.icon }}&lt;/<span class="attr">v-icon</span>&gt;&lt;/<span class="attr">v-list-item-icon</span>&gt;
+        &lt;<span class="attr">v-list-item-title</span>&gt;{{ item.title }}&lt;/<span class="attr">v-list-item-title</span>&gt;
+      &lt;/<span class="attr">v-list-item</span>&gt;
+    &lt;/<span class="attr">v-list</span>&gt;
+  &lt;/<span class="attr">v-navigation-drawer</span>&gt;
+
+  <span class="cmt">&lt;!-- 主内容区（⚠️ app prop 告知 Vuetify 自动计算偏移）--&gt;</span>
+  &lt;<span class="attr">v-main</span>&gt;
+    &lt;<span class="attr">v-container</span> <span class="attr">fluid</span>&gt;
+      &lt;<span class="attr">router-view</span> /&gt;
+    &lt;/<span class="attr">v-container</span>&gt;
+  &lt;/<span class="attr">v-main</span>&gt;
+
+  <span class="cmt">&lt;!-- 底部栏（可选）--&gt;</span>
+  &lt;<span class="attr">v-footer</span> <span class="attr">app</span>&gt;版权信息&lt;/<span class="attr">v-footer</span>&gt;
+&lt;/<span class="attr">v-app</span>&gt;</pre>
+
+    <div class="box-info">
+      <strong>app prop 的作用：</strong>带有 <code>app</code> 的布局组件（v-app-bar、v-navigation-drawer、v-footer）
+      会自动告知 <code>v-main</code> 预留对应的内边距，无需手动计算高度偏移。
+    </div>
+  </div>
+
+  <!-- ===== 3. 栅格 ===== -->
+  <div class="section" id="s3">
+    <div class="section-title"><span class="num">3</span>栅格系统（v-container / v-row / v-col）</div>
+    <div class="box-info">
+      与 Element UI 相同的 <strong>12列</strong>栅格（注意 Element UI 是 24列！Vuetify 是 12列），
+      断点：<code>xs sm md lg xl</code>，响应式 cols 写法：<code>:sm="6" :md="4"</code>。
+    </div>
+
+    <div id="grid-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- Vuetify 12列栅格 --&gt;</span>
+&lt;<span class="attr">v-container</span>&gt;
+  &lt;<span class="attr">v-row</span>&gt;
+    &lt;<span class="attr">v-col</span> <span class="attr">cols</span>=<span class="str">"12"</span> <span class="attr">sm</span>=<span class="str">"6"</span> <span class="attr">md</span>=<span class="str">"3"</span>&gt;   <span class="cmt">&lt;-- 手机全宽/平板半宽/桌面1/4</span>
+      卡片 1
+    &lt;/<span class="attr">v-col</span>&gt;
+  &lt;/<span class="attr">v-row</span>&gt;
+
+  <span class="cmt">&lt;!-- 常用辅助 prop --&gt;</span>
+  &lt;<span class="attr">v-row</span> <span class="attr">dense</span>&gt;       <span class="cmt">&lt;-- dense: 减小列间距（4px → 2px）</span>
+  &lt;<span class="attr">v-row</span> <span class="attr">no-gutters</span>&gt; <span class="cmt">&lt;-- 去掉所有 gutter</span>
+  &lt;<span class="attr">v-row</span> <span class="attr">justify</span>=<span class="str">"center"</span> <span class="attr">align</span>=<span class="str">"center"</span>&gt;  <span class="cmt">&lt;-- flex 对齐</span>
+&lt;/<span class="attr">v-container</span>&gt;
+
+<span class="cmt">&lt;!-- ⚠️ 12列 vs 24列 记忆口诀 --&gt;</span>
+<span class="cmt">// Vuetify: cols="6" = 50%    （一半）</span>
+<span class="cmt">// Element: :span="12" = 50%  （一半）</span></pre>
+  </div>
+
+  <!-- ===== 4. v-btn ===== -->
+  <div class="section" id="s4">
+    <div class="section-title"><span class="num">4</span>按钮 v-btn</div>
+
+    <div id="btn-app" class="v-demo-wrap"></div>
+
+    <table class="props" style="margin-top:14px">
+      <thead><tr><th>Prop</th><th>说明</th><th>可选值 / 示例</th></tr></thead>
+      <tbody>
+        <tr><td><code>color</code></td><td>颜色（主题色或 CSS 颜色）</td><td>primary / success / error / #FF5252 …</td></tr>
+        <tr><td><code>outlined</code></td><td>描边按钮（无填充）</td><td>Boolean</td></tr>
+        <tr><td><code>text</code></td><td>文字按钮（无背景无边框）</td><td>Boolean</td></tr>
+        <tr><td><code>icon</code></td><td>图标按钮（正圆形）</td><td>Boolean</td></tr>
+        <tr><td><code>fab</code></td><td>浮动按钮（FAB）</td><td>Boolean</td></tr>
+        <tr><td><code>small / large / x-large</code></td><td>尺寸</td><td>Boolean</td></tr>
+        <tr><td><code>block</code></td><td>宽度撑满父容器</td><td>Boolean</td></tr>
+        <tr><td><code>loading</code></td><td>加载状态</td><td>Boolean</td></tr>
+        <tr><td><code>disabled</code></td><td>禁用</td><td>Boolean</td></tr>
+        <tr><td><code>depressed</code></td><td>无阴影（扁平带背景）</td><td>Boolean</td></tr>
+        <tr><td><code>rounded / tile</code></td><td>完全圆角 / 无圆角</td><td>Boolean</td></tr>
+        <tr><td><code>elevation</code></td><td>阴影高度 0-24</td><td>Number</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 5. v-text-field ===== -->
+  <div class="section" id="s5">
+    <div class="section-title"><span class="num">5</span>文本框 v-text-field（及其他输入组件）</div>
+    <div class="box-info">
+      Vuetify 的所有输入组件（v-text-field、v-select、v-textarea、v-autocomplete 等）
+      共享一套基础 Props，统一的 <code>outlined / filled / solo</code> 外观模式。
+    </div>
+
+    <div id="input-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- 三种外观模式 --&gt;</span>
+&lt;<span class="attr">v-text-field</span> <span class="attr">label</span>=<span class="str">"默认（下划线）"</span>   <span class="attr">v-model</span>=<span class="str">"val"</span> /&gt;
+&lt;<span class="attr">v-text-field</span> <span class="attr">label</span>=<span class="str">"outlined（边框）"</span> <span class="attr">outlined</span> <span class="attr">v-model</span>=<span class="str">"val"</span> /&gt;
+&lt;<span class="attr">v-text-field</span> <span class="attr">label</span>=<span class="str">"filled（填充）"</span>   <span class="attr">filled</span>   <span class="attr">v-model</span>=<span class="str">"val"</span> /&gt;
+&lt;<span class="attr">v-text-field</span> <span class="attr">label</span>=<span class="str">"solo（独立）"</span>     <span class="attr">solo</span>     <span class="attr">v-model</span>=<span class="str">"val"</span> /&gt;
+
+<span class="cmt">&lt;!-- 常用 Props --&gt;</span>
+&lt;<span class="attr">v-text-field</span>
+  <span class="attr">v-model</span>=<span class="str">"keyword"</span>
+  <span class="attr">label</span>=<span class="str">"搜索"</span>
+  <span class="attr">outlined</span>
+  <span class="attr">dense</span>                       <span class="cmt">&lt;-- 紧凑高度</span>
+  <span class="attr">clearable</span>
+  <span class="attr">prepend-inner-icon</span>=<span class="str">"mdi-magnify"</span>
+  <span class="attr">hide-details</span>                <span class="cmt">&lt;-- 隐藏错误信息占位（紧凑布局用）</span>
+  <span class="attr">@keyup.enter</span>=<span class="str">"search"</span>
+/&gt;
+
+<span class="cmt">&lt;!-- 密码框 --&gt;</span>
+&lt;<span class="attr">v-text-field</span>
+  <span class="attr">v-model</span>=<span class="str">"pwd"</span>
+  <span class="attr">label</span>=<span class="str">"密码"</span>
+  <span class="attr">outlined</span>
+  <span class="attr">:type</span>=<span class="str">"showPwd ? 'text' : 'password'"</span>
+  <span class="attr">:append-icon</span>=<span class="str">"showPwd ? 'mdi-eye' : 'mdi-eye-off'"</span>
+  <span class="attr">@click:append</span>=<span class="str">"showPwd = !showPwd"</span>
+/&gt;
+
+<span class="cmt">&lt;!-- v-select 下拉 --&gt;</span>
+&lt;<span class="attr">v-select</span>
+  <span class="attr">v-model</span>=<span class="str">"role"</span>
+  <span class="attr">:items</span>=<span class="str">"roleItems"</span>
+  <span class="attr">item-text</span>=<span class="str">"label"</span>     <span class="cmt">&lt;-- 显示哪个字段</span>
+  <span class="attr">item-value</span>=<span class="str">"value"</span>   <span class="cmt">&lt;-- 绑定哪个字段</span>
+  <span class="attr">label</span>=<span class="str">"角色"</span>
+  <span class="attr">outlined</span>
+  <span class="attr">dense</span>
+  <span class="attr">clearable</span>
+/&gt;</pre>
+  </div>
+
+  <!-- ===== 6. Form 验证 ===== -->
+  <div class="section" id="s6">
+    <div class="section-title"><span class="num">6</span>表单与验证</div>
+    <div class="box-info">
+      Vuetify 的表单验证通过 <code>:rules</code> 传入<strong>函数数组</strong>，每个函数接收当前值，
+      返回 <code>true</code> 表示通过，返回字符串则作为错误信息展示。与 Element UI 的对象式规则不同。
+    </div>
+
+    <div id="form-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- 模板 --&gt;</span>
+&lt;<span class="attr">v-form</span> <span class="attr">ref</span>=<span class="str">"form"</span> <span class="attr">v-model</span>=<span class="str">"formValid"</span>&gt;    <span class="cmt">&lt;-- v-model 绑定整体是否合法</span>
+  &lt;<span class="attr">v-text-field</span>
+    <span class="attr">v-model</span>=<span class="str">"form.username"</span>
+    <span class="attr">label</span>=<span class="str">"用户名"</span>
+    <span class="attr">outlined</span>
+    <span class="attr">:rules</span>=<span class="str">"usernameRules"</span>
+  /&gt;
+  &lt;<span class="attr">v-btn</span> <span class="attr">color</span>=<span class="str">"primary"</span> <span class="attr">:disabled</span>=<span class="str">"!formValid"</span> <span class="attr">@click</span>=<span class="str">"submit"</span>&gt;提交&lt;/<span class="attr">v-btn</span>&gt;
+&lt;/<span class="attr">v-form</span>&gt;
+
+<span class="cmt">// JS 验证规则（函数数组）</span>
+usernameRules: [
+  v => !!v              || <span class="str">'用户名不能为空'</span>,
+  v => v.length >= <span class="num">3</span>   || <span class="str">'长度至少 3 位'</span>,
+  v => v.length <= <span class="num">20</span>  || <span class="str">'长度不超过 20 位'</span>,
+  v => /^[a-zA-Z0-9_]+$/.test(v) || <span class="str">'只能包含字母数字下划线'</span>
+],
+emailRules: [
+  v => !!v || <span class="str">'邮箱不能为空'</span>,
+  v => /.+@.+\..+/.test(v) || <span class="str">'邮箱格式不正确'</span>
+]
+
+<span class="cmt">// 通过 ref 调用的方法</span>
+<span class="kw">this</span>.$refs.form.<span class="fn">validate</span>()       <span class="cmt">// 触发所有字段校验，返回 Boolean</span>
+<span class="kw">this</span>.$refs.form.<span class="fn">reset</span>()          <span class="cmt">// 重置值 + 清除校验状态</span>
+<span class="kw">this</span>.$refs.form.<span class="fn">resetValidation</span>() <span class="cmt">// 仅清除校验状态（不改值）</span></pre>
+  </div>
+
+  <!-- ===== 7. v-data-table ===== -->
+  <div class="section" id="s7">
+    <div class="section-title"><span class="num">7</span>数据表格 v-data-table（重点）</div>
+    <div class="box-info">
+      <code>v-data-table</code> 是 Vuetify 最强大的组件之一，<strong>内置客户端排序、分页、搜索过滤</strong>，
+      不需要手动处理这些逻辑（与 Element UI 的 el-table 需要手动实现不同）。
+    </div>
+
+    <div id="table-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- headers 定义列 --&gt;</span>
+&lt;<span class="attr">v-data-table</span>
+  <span class="attr">:headers</span>=<span class="str">"headers"</span>
+  <span class="attr">:items</span>=<span class="str">"list"</span>
+  <span class="attr">:search</span>=<span class="str">"keyword"</span>       <span class="cmt">&lt;-- 传入就自动实现全局搜索过滤！</span>
+  <span class="attr">:loading</span>=<span class="str">"loading"</span>
+  <span class="attr">:items-per-page</span>=<span class="str">"10"</span>
+  <span class="attr">item-key</span>=<span class="str">"id"</span>
+  <span class="attr">show-select</span>            <span class="cmt">&lt;-- 显示复选框（多选）</span>
+  <span class="attr">v-model</span>=<span class="str">"selected"</span>      <span class="cmt">&lt;-- 绑定选中行</span>
+&gt;
+  <span class="cmt">&lt;!-- 自定义列（作用域插槽 item.列名）--&gt;</span>
+  <span class="kw">&lt;template</span> <span class="attr">v-slot:item.status</span>=<span class="str">"{ item }"</span>&gt;
+    &lt;<span class="attr">v-chip</span> <span class="attr">:color</span>=<span class="str">"item.status ? 'success' : 'error'"</span> <span class="attr">small</span> <span class="attr">dark</span>&gt;
+      {{ item.status ? '启用' : '禁用' }}
+    &lt;/<span class="attr">v-chip</span>&gt;
+  &lt;/template&gt;
+
+  <span class="cmt">&lt;!-- 操作列 --&gt;</span>
+  <span class="kw">&lt;template</span> <span class="attr">v-slot:item.actions</span>=<span class="str">"{ item }"</span>&gt;
+    &lt;<span class="attr">v-icon</span> <span class="attr">small</span> <span class="attr">class</span>=<span class="str">"mr-2"</span> <span class="attr">@click</span>=<span class="str">"edit(item)"</span>&gt;mdi-pencil&lt;/<span class="attr">v-icon</span>&gt;
+    &lt;<span class="attr">v-icon</span> <span class="attr">small</span> <span class="attr">color</span>=<span class="str">"error"</span> <span class="attr">@click</span>=<span class="str">"del(item)"</span>&gt;mdi-delete&lt;/<span class="attr">v-icon</span>&gt;
+  &lt;/template&gt;
+&lt;/<span class="attr">v-data-table</span>&gt;
+
+<span class="cmt">// headers 格式</span>
+headers: [
+  { text: <span class="str">'姓名'</span>,  value: <span class="str">'name'</span>,    sortable: <span class="kw">true</span>  },
+  { text: <span class="str">'邮箱'</span>,  value: <span class="str">'email'</span>,   sortable: <span class="kw">false</span> },
+  { text: <span class="str">'状态'</span>,  value: <span class="str">'status'</span>,  align: <span class="str">'center'</span> },
+  { text: <span class="str">'操作'</span>,  value: <span class="str">'actions'</span>, sortable: <span class="kw">false</span>, align: <span class="str">'end'</span> }
+]</pre>
+  </div>
+
+  <!-- ===== 8. v-card ===== -->
+  <div class="section" id="s8">
+    <div class="section-title"><span class="num">8</span>卡片 v-card</div>
+
+    <div id="card-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- v-card 由子组件拼装 --&gt;</span>
+&lt;<span class="attr">v-card</span> <span class="attr">:elevation</span>=<span class="str">"4"</span>&gt;
+  <span class="cmt">&lt;!-- 媒体图片（可选）--&gt;</span>
+  &lt;<span class="attr">v-img</span> <span class="attr">src</span>=<span class="str">"..."</span> <span class="attr">height</span>=<span class="str">"200px"</span> /&gt;
+
+  <span class="cmt">&lt;!-- 标题区 --&gt;</span>
+  &lt;<span class="attr">v-card-title</span>&gt;卡片标题&lt;/<span class="attr">v-card-title</span>&gt;
+  &lt;<span class="attr">v-card-subtitle</span>&gt;副标题 / 描述&lt;/<span class="attr">v-card-subtitle</span>&gt;
+
+  <span class="cmt">&lt;!-- 内容区 --&gt;</span>
+  &lt;<span class="attr">v-card-text</span>&gt;
+    正文内容...
+  &lt;/<span class="attr">v-card-text</span>&gt;
+
+  <span class="cmt">&lt;!-- 操作按钮区 --&gt;</span>
+  &lt;<span class="attr">v-card-actions</span>&gt;
+    &lt;<span class="attr">v-spacer</span> /&gt;
+    &lt;<span class="attr">v-btn</span> <span class="attr">text</span> <span class="attr">color</span>=<span class="str">"primary"</span>&gt;取消&lt;/<span class="attr">v-btn</span>&gt;
+    &lt;<span class="attr">v-btn</span> <span class="attr">color</span>=<span class="str">"primary"</span>&gt;确认&lt;/<span class="attr">v-btn</span>&gt;
+  &lt;/<span class="attr">v-card-actions</span>&gt;
+&lt;/<span class="attr">v-card</span>&gt;</pre>
+  </div>
+
+  <!-- ===== 9. v-dialog ===== -->
+  <div class="section" id="s9">
+    <div class="section-title"><span class="num">9</span>对话框 v-dialog</div>
+
+    <div id="dialog-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- v-dialog 使用 v-model 控制显示 --&gt;</span>
+&lt;<span class="attr">v-dialog</span> <span class="attr">v-model</span>=<span class="str">"dialogVisible"</span> <span class="attr">max-width</span>=<span class="str">"500px"</span> <span class="attr">persistent</span>&gt;
+  <span class="cmt">&lt;!-- persistent: 点遮罩不关闭（类似 Element :close-on-click-modal="false"）--&gt;</span>
+
+  <span class="cmt">&lt;!-- 触发器（作用域插槽 activator）--&gt;</span>
+  <span class="kw">&lt;template</span> <span class="attr">v-slot:activator</span>=<span class="str">"{ on, attrs }"</span>&gt;
+    &lt;<span class="attr">v-btn</span> <span class="attr">v-bind</span>=<span class="str">"attrs"</span> <span class="attr">v-on</span>=<span class="str">"on"</span> <span class="attr">color</span>=<span class="str">"primary"</span>&gt;打开弹窗&lt;/<span class="attr">v-btn</span>&gt;
+  &lt;/template&gt;
+
+  <span class="cmt">&lt;!-- 弹窗内容（通常用 v-card 包裹）--&gt;</span>
+  &lt;<span class="attr">v-card</span>&gt;
+    &lt;<span class="attr">v-card-title</span>&gt;新建用户&lt;/<span class="attr">v-card-title</span>&gt;
+    &lt;<span class="attr">v-card-text</span>&gt;
+      &lt;<span class="attr">v-text-field</span> <span class="attr">v-model</span>=<span class="str">"form.name"</span> <span class="attr">label</span>=<span class="str">"姓名"</span> <span class="attr">outlined</span> <span class="attr">dense</span> /&gt;
+    &lt;/<span class="attr">v-card-text</span>&gt;
+    &lt;<span class="attr">v-card-actions</span>&gt;
+      &lt;<span class="attr">v-spacer</span> /&gt;
+      &lt;<span class="attr">v-btn</span> <span class="attr">text</span> <span class="attr">@click</span>=<span class="str">"dialogVisible = false"</span>&gt;取消&lt;/<span class="attr">v-btn</span>&gt;
+      &lt;<span class="attr">v-btn</span> <span class="attr">color</span>=<span class="str">"primary"</span> <span class="attr">:loading</span>=<span class="str">"saving"</span> <span class="attr">@click</span>=<span class="str">"save"</span>&gt;保存&lt;/<span class="attr">v-btn</span>&gt;
+    &lt;/<span class="attr">v-card-actions</span>&gt;
+  &lt;/<span class="attr">v-card</span>&gt;
+&lt;/<span class="attr">v-dialog</span>&gt;</pre>
+
+    <div class="box-info">
+      <strong>Vuetify Dialog vs Element Dialog 的区别：</strong>
+      Vuetify 的 Dialog 不靠 <code>:visible.sync</code> 而是普通 <code>v-model</code> 控制；
+      触发按钮可以通过 <code>activator</code> 插槽内嵌（无需额外 data 变量），也可用独立 boolean data 控制。
+    </div>
+  </div>
+
+  <!-- ===== 10. Snackbar / Alert ===== -->
+  <div class="section" id="s10">
+    <div class="section-title"><span class="num">10</span>提示：v-snackbar / v-alert</div>
+
+    <div id="snack-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- v-snackbar：底部弹出提示（类似 Element $message）--&gt;</span>
+&lt;<span class="attr">v-snackbar</span>
+  <span class="attr">v-model</span>=<span class="str">"snackbar"</span>
+  <span class="attr">:timeout</span>=<span class="str">"3000"</span>
+  <span class="attr">:color</span>=<span class="str">"snackColor"</span>
+  <span class="attr">top</span>                   <span class="cmt">&lt;-- 位置 top/bottom/left/right 组合</span>
+&gt;
+  {{ snackText }}
+  <span class="kw">&lt;template</span> <span class="attr">v-slot:action</span>&gt;
+    &lt;<span class="attr">v-btn</span> <span class="attr">text</span> <span class="attr">@click</span>=<span class="str">"snackbar = false"</span>&gt;关闭&lt;/<span class="attr">v-btn</span>&gt;
+  &lt;/template&gt;
+&lt;/<span class="attr">v-snackbar</span>&gt;
+
+<span class="cmt">// 封装为全局方法（类似 $message）</span>
+methods: {
+  <span class="fn">toast</span>(text, color = <span class="str">'success'</span>) {
+    <span class="kw">this</span>.snackText  = text
+    <span class="kw">this</span>.snackColor = color
+    <span class="kw">this</span>.snackbar   = <span class="kw">true</span>
+  }
+}
+<span class="cmt">// 调用</span>
+<span class="kw">this</span>.<span class="fn">toast</span>(<span class="str">'保存成功'</span>)
+<span class="kw">this</span>.<span class="fn">toast</span>(<span class="str">'删除失败'</span>, <span class="str">'error'</span>)
+
+<span class="cmt">&lt;!-- v-alert：页面内嵌提示框（类似 Element $message + 常驻版）--&gt;</span>
+&lt;<span class="attr">v-alert</span> <span class="attr">type</span>=<span class="str">"success"</span> <span class="attr">dense</span> <span class="attr">dismissible</span>&gt;操作成功！&lt;/<span class="attr">v-alert</span>&gt;
+&lt;<span class="attr">v-alert</span> <span class="attr">type</span>=<span class="str">"error"</span>   <span class="attr">outlined</span>&gt;错误信息&lt;/<span class="attr">v-alert</span>&gt;
+&lt;<span class="attr">v-alert</span> <span class="attr">type</span>=<span class="str">"warning"</span> <span class="attr">border</span>=<span class="str">"left"</span> <span class="attr">colored-border</span> <span class="attr">:elevation</span>=<span class="str">"2"</span>&gt;
+  带左边框警告
+&lt;/<span class="attr">v-alert</span>&gt;</pre>
+  </div>
+
+  <!-- ===== 11. Loading ===== -->
+  <div class="section" id="s11">
+    <div class="section-title"><span class="num">11</span>进度条与加载</div>
+
+    <div id="progress-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- 线性进度条（常用于页面顶部加载）--&gt;</span>
+&lt;<span class="attr">v-progress-linear</span>
+  <span class="attr">v-if</span>=<span class="str">"loading"</span>
+  <span class="attr">indeterminate</span>           <span class="cmt">&lt;-- 不确定进度模式（来回滚动）</span>
+  <span class="attr">color</span>=<span class="str">"primary"</span>
+  <span class="attr">top</span>                     <span class="cmt">&lt;-- 固定在顶部</span>
+  <span class="attr">absolute</span>
+/&gt;
+
+<span class="cmt">&lt;!-- 确定进度 --&gt;</span>
+&lt;<span class="attr">v-progress-linear</span> <span class="attr">:value</span>=<span class="str">"uploadPercent"</span> <span class="attr">height</span>=<span class="str">"8"</span> <span class="attr">rounded</span> <span class="attr">color</span>=<span class="str">"success"</span> /&gt;
+
+<span class="cmt">&lt;!-- 圆形进度（转圈）--&gt;</span>
+&lt;<span class="attr">v-progress-circular</span>   <span class="attr">indeterminate</span> <span class="attr">color</span>=<span class="str">"primary"</span> /&gt;
+&lt;<span class="attr">v-progress-circular</span>   <span class="attr">:value</span>=<span class="str">"75"</span>    <span class="attr">color</span>=<span class="str">"success"</span> <span class="attr">:size</span>=<span class="str">"60"</span>&gt;75%&lt;/<span class="attr">v-progress-circular</span>&gt;
+
+<span class="cmt">&lt;!-- 覆盖遮罩（类似 Element $loading 全屏）--&gt;</span>
+&lt;<span class="attr">v-overlay</span> <span class="attr">:value</span>=<span class="str">"loading"</span>&gt;
+  &lt;<span class="attr">v-progress-circular</span> <span class="attr">indeterminate</span> <span class="attr">size</span>=<span class="str">"64"</span> /&gt;
+&lt;/<span class="attr">v-overlay</span>&gt;</pre>
+  </div>
+
+  <!-- ===== 12. Chip / Badge ===== -->
+  <div class="section" id="s12">
+    <div class="section-title"><span class="num">12</span>标签 v-chip / 徽章 v-badge</div>
+
+    <div id="chip-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- v-chip（类似 Element el-tag）--&gt;</span>
+&lt;<span class="attr">v-chip</span>&gt;默认&lt;/<span class="attr">v-chip</span>&gt;
+&lt;<span class="attr">v-chip</span> <span class="attr">color</span>=<span class="str">"primary"</span> <span class="attr">dark</span>&gt;Primary&lt;/<span class="attr">v-chip</span>&gt;
+&lt;<span class="attr">v-chip</span> <span class="attr">color</span>=<span class="str">"success"</span> <span class="attr">outlined</span>&gt;描边&lt;/<span class="attr">v-chip</span>&gt;
+&lt;<span class="attr">v-chip</span> <span class="attr">small</span> <span class="attr">close</span> <span class="attr">@click:close</span>=<span class="str">"remove"</span>&gt;可关闭&lt;/<span class="attr">v-chip</span>&gt;
+
+<span class="cmt">&lt;!-- 带图标 --&gt;</span>
+&lt;<span class="attr">v-chip</span> <span class="attr">color</span>=<span class="str">"error"</span> <span class="attr">dark</span>&gt;
+  &lt;<span class="attr">v-icon</span> <span class="attr">left</span>&gt;mdi-alert&lt;/<span class="attr">v-icon</span>&gt;警告
+&lt;/<span class="attr">v-chip</span>&gt;
+
+<span class="cmt">&lt;!-- v-badge（类似 Element el-badge）--&gt;</span>
+&lt;<span class="attr">v-badge</span> <span class="attr">:content</span>=<span class="str">"5"</span> <span class="attr">color</span>=<span class="str">"error"</span> <span class="attr">overlap</span>&gt;
+  &lt;<span class="attr">v-icon</span>&gt;mdi-bell&lt;/<span class="attr">v-icon</span>&gt;
+&lt;/<span class="attr">v-badge</span>&gt;
+&lt;<span class="attr">v-badge</span> <span class="attr">dot</span> <span class="attr">color</span>=<span class="str">"success"</span>&gt;&lt;<span class="attr">v-icon</span>&gt;mdi-account&lt;/<span class="attr">v-icon</span>&gt;&lt;/<span class="attr">v-badge</span>&gt;</pre>
+  </div>
+
+  <!-- ===== 13. 导航组件 ===== -->
+  <div class="section" id="s13">
+    <div class="section-title"><span class="num">13</span>导航组件（Tabs / List / Breadcrumbs）</div>
+
+    <div id="nav-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- v-tabs 标签页 --&gt;</span>
+&lt;<span class="attr">v-tabs</span> <span class="attr">v-model</span>=<span class="str">"tab"</span> <span class="attr">background-color</span>=<span class="str">"primary"</span> <span class="attr">dark</span>&gt;
+  &lt;<span class="attr">v-tab</span> <span class="attr">v-for</span>=<span class="str">"t in tabs"</span> <span class="attr">:key</span>=<span class="str">"t"</span>&gt;{{ t }}&lt;/<span class="attr">v-tab</span>&gt;
+&lt;/<span class="attr">v-tabs</span>&gt;
+&lt;<span class="attr">v-tabs-items</span> <span class="attr">v-model</span>=<span class="str">"tab"</span>&gt;
+  &lt;<span class="attr">v-tab-item</span> <span class="attr">v-for</span>=<span class="str">"t in tabs"</span> <span class="attr">:key</span>=<span class="str">"t"</span>&gt;
+    {{ t }} 的内容
+  &lt;/<span class="attr">v-tab-item</span>&gt;
+&lt;/<span class="attr">v-tabs-items</span>&gt;
+
+<span class="cmt">&lt;!-- v-breadcrumbs 面包屑 --&gt;</span>
+&lt;<span class="attr">v-breadcrumbs</span> <span class="attr">:items</span>=<span class="str">"breadItems"</span>&gt;&lt;/<span class="attr">v-breadcrumbs</span>&gt;
+breadItems: [
+  { text: <span class="str">'首页'</span>, disabled: <span class="kw">false</span>, href: <span class="str">'/'</span> },
+  { text: <span class="str">'用户管理'</span>, disabled: <span class="kw">false</span>, href: <span class="str">'/users'</span> },
+  { text: <span class="str">'用户详情'</span>, disabled: <span class="kw">true</span> }
+]</pre>
+  </div>
+
+  <!-- ===== 14. 对比 ===== -->
+  <div class="section" id="s14">
+    <div class="section-title"><span class="num">14</span>Vuetify vs Element UI 全面对比</div>
+
+    <table class="props">
+      <thead><tr><th>维度</th><th>Vuetify 2.x</th><th>Element UI 2.x</th></tr></thead>
+      <tbody>
+        <tr><td><strong>设计规范</strong></td><td>Google Material Design</td><td>阿里 Element 设计规范</td></tr>
+        <tr><td><strong>适用场景</strong></td><td>面向 C 端/消费者产品、跨平台外观</td><td>面向 B 端/后台管理系统（国内主流）</td></tr>
+        <tr><td><strong>栅格列数</strong></td><td>12 列（<code>cols="6"</code> = 50%）</td><td>24 列（<code>:span="12"</code> = 50%）</td></tr>
+        <tr><td><strong>表单验证</strong></td><td><strong>函数数组</strong>，每个函数返回 true 或错误字符串</td><td><strong>规则对象数组</strong>，含 required/type/min/max 等字段</td></tr>
+        <tr><td><strong>表格内置功能</strong></td><td>内置排序+分页+搜索过滤（客户端）</td><td>排序需手动监听事件，分页独立组件</td></tr>
+        <tr><td><strong>主题定制</strong></td><td>new Vuetify({ theme: { themes: { light: {...} } } })</td><td>修改 SCSS 变量，需自定义主题编译</td></tr>
+        <tr><td><strong>图标系统</strong></td><td>内置 MDI / Font Awesome 等多套图标</td><td>自带 el-icon-* 类名图标（较少）</td></tr>
+        <tr><td><strong>暗色模式</strong></td><td>官方原生支持（<code>dark</code> prop / 全局切换）</td><td>不支持，需第三方或手动实现</td></tr>
+        <tr><td><strong>消息提示</strong></td><td>v-snackbar 组件（需手动管理 boolean）</td><td>this.$message() 直接调用更简单</td></tr>
+        <tr><td><strong>Dialog 控制</strong></td><td>普通 v-model</td><td>:visible.sync（.sync 修饰符）</td></tr>
+        <tr><td><strong>Bundle 大小</strong></td><td>完整引入约 ~250KB gzip</td><td>完整引入约 ~160KB gzip</td></tr>
+        <tr><td><strong>国内生态</strong></td><td>文档/中文社区相对较少</td><td>中文文档完善，国内项目首选</td></tr>
+        <tr><td><strong>SSR/Nuxt</strong></td><td>官方 @nuxtjs/vuetify 模块支持良好</td><td>需手动配置，无官方 Nuxt 模块</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box-ok" style="margin-top:16px">
+      <strong>选型建议：</strong>
+      国内 B 端后台管理系统首选 <strong>Element UI</strong>（生态成熟、文档完善、符合国内审美）；
+      C 端/ToC 产品、国际化项目、需要暗色模式/Material Design 风格时选 <strong>Vuetify</strong>。
+    </div>
+  </div>
+
+  <!-- ===== 15. 综合 CRUD ===== -->
+  <div class="section" id="s15">
+    <div class="section-title"><span class="num">15</span>综合实战（Vuetify 版 CRUD 页面）</div>
+    <div class="box-ok">利用 v-data-table 内置搜索 + 分页，配合 v-dialog 实现新建/编辑弹窗，比 Element UI 代码量更少。</div>
+
+    <div id="crud-app" class="v-demo-wrap"></div>
+
+    <pre><span class="cmt">&lt;!-- Vuetify CRUD 页面核心模板 --&gt;</span>
+&lt;<span class="attr">v-app</span>&gt;
+  &lt;<span class="attr">v-container</span>&gt;
+    <span class="cmt">&lt;!-- 工具栏 --&gt;</span>
+    &lt;<span class="attr">v-row</span> <span class="attr">class</span>=<span class="str">"mb-4"</span> <span class="attr">align</span>=<span class="str">"center"</span>&gt;
+      &lt;<span class="attr">v-col</span> <span class="attr">cols</span>=<span class="str">"12"</span> <span class="attr">sm</span>=<span class="str">"6"</span>&gt;
+        &lt;<span class="attr">v-text-field</span> <span class="attr">v-model</span>=<span class="str">"search"</span> <span class="attr">label</span>=<span class="str">"搜索"</span>
+          <span class="attr">prepend-inner-icon</span>=<span class="str">"mdi-magnify"</span> <span class="attr">outlined</span> <span class="attr">dense</span> <span class="attr">hide-details</span> /&gt;
+      &lt;/<span class="attr">v-col</span>&gt;
+      &lt;<span class="attr">v-col</span> <span class="attr">cols</span>=<span class="str">"auto"</span>&gt;
+        &lt;<span class="attr">v-btn</span> <span class="attr">color</span>=<span class="str">"primary"</span> <span class="attr">@click</span>=<span class="str">"openDialog()"</span>&gt;
+          &lt;<span class="attr">v-icon</span> <span class="attr">left</span>&gt;mdi-plus&lt;/<span class="attr">v-icon</span>&gt;新建
+        &lt;/<span class="attr">v-btn</span>&gt;
+      &lt;/<span class="attr">v-col</span>&gt;
+    &lt;/<span class="attr">v-row</span>&gt;
+
+    <span class="cmt">&lt;!-- 表格（内置搜索 :search="search" 即可，无需额外代码）--&gt;</span>
+    &lt;<span class="attr">v-data-table</span>
+      <span class="attr">:headers</span>=<span class="str">"headers"</span> <span class="attr">:items</span>=<span class="str">"list"</span> <span class="attr">:search</span>=<span class="str">"search"</span>
+      <span class="attr">:loading</span>=<span class="str">"loading"</span> <span class="attr">class</span>=<span class="str">"elevation-1"</span>
+    &gt;
+      &lt;<span class="attr">template</span> <span class="attr">v-slot:item.status</span>=<span class="str">"{ item }"</span>&gt;
+        &lt;<span class="attr">v-chip</span> <span class="attr">:color</span>=<span class="str">"item.status ? 'success' : 'error'"</span> <span class="attr">small</span> <span class="attr">dark</span>&gt;
+          {{ item.status ? '启用' : '禁用' }}
+        &lt;/<span class="attr">v-chip</span>&gt;
+      &lt;/template&gt;
+      &lt;<span class="attr">template</span> <span class="attr">v-slot:item.actions</span>=<span class="str">"{ item }"</span>&gt;
+        &lt;<span class="attr">v-icon</span> <span class="attr">small</span> <span class="attr">class</span>=<span class="str">"mr-2"</span> <span class="attr">@click</span>=<span class="str">"openDialog(item)"</span>&gt;mdi-pencil&lt;/<span class="attr">v-icon</span>&gt;
+        &lt;<span class="attr">v-icon</span> <span class="attr">small</span> <span class="attr">color</span>=<span class="str">"error"</span>         <span class="attr">@click</span>=<span class="str">"remove(item)"</span>&gt;mdi-delete&lt;/<span class="attr">v-icon</span>&gt;
+      &lt;/template&gt;
+    &lt;/<span class="attr">v-data-table</span>&gt;
+
+    <span class="cmt">&lt;!-- 弹窗 --&gt;</span>
+    &lt;<span class="attr">v-dialog</span> <span class="attr">v-model</span>=<span class="str">"dialogVisible"</span> <span class="attr">max-width</span>=<span class="str">"440px"</span> <span class="attr">persistent</span>&gt;
+      &lt;<span class="attr">v-card</span>&gt;
+        &lt;<span class="attr">v-card-title</span>&gt;{{ isEdit ? '编辑用户' : '新建用户' }}&lt;/<span class="attr">v-card-title</span>&gt;
+        &lt;<span class="attr">v-card-text</span>&gt;
+          &lt;<span class="attr">v-form</span> <span class="attr">ref</span>=<span class="str">"form"</span> <span class="attr">v-model</span>=<span class="str">"valid"</span>&gt;
+            &lt;<span class="attr">v-text-field</span> <span class="attr">v-model</span>=<span class="str">"form.name"</span>  <span class="attr">label</span>=<span class="str">"姓名"</span> <span class="attr">:rules</span>=<span class="str">"[v => !!v || '必填']"</span> <span class="attr">outlined</span> <span class="attr">dense</span> /&gt;
+            &lt;<span class="attr">v-text-field</span> <span class="attr">v-model</span>=<span class="str">"form.email"</span> <span class="attr">label</span>=<span class="str">"邮箱"</span> <span class="attr">:rules</span>=<span class="str">"emailRules"</span>            <span class="attr">outlined</span> <span class="attr">dense</span> /&gt;
+          &lt;/<span class="attr">v-form</span>&gt;
+        &lt;/<span class="attr">v-card-text</span>&gt;
+        &lt;<span class="attr">v-card-actions</span>&gt;
+          &lt;<span class="attr">v-spacer</span> /&gt;
+          &lt;<span class="attr">v-btn</span> <span class="attr">text</span> <span class="attr">@click</span>=<span class="str">"close"</span>&gt;取消&lt;/<span class="attr">v-btn</span>&gt;
+          &lt;<span class="attr">v-btn</span> <span class="attr">color</span>=<span class="str">"primary"</span> <span class="attr">:loading</span>=<span class="str">"saving"</span> <span class="attr">@click</span>=<span class="str">"save"</span>&gt;保存&lt;/<span class="attr">v-btn</span>&gt;
+        &lt;/<span class="attr">v-card-actions</span>&gt;
+      &lt;/<span class="attr">v-card</span>&gt;
+    &lt;/<span class="attr">v-dialog</span>&gt;
+
+    <span class="cmt">&lt;!-- Snackbar 提示 --&gt;</span>
+    &lt;<span class="attr">v-snackbar</span> <span class="attr">v-model</span>=<span class="str">"snack"</span> <span class="attr">:color</span>=<span class="str">"snackColor"</span> <span class="attr">top</span> <span class="attr">:timeout</span>=<span class="str">"3000"</span>&gt;
+      {{ snackText }}
+      &lt;<span class="attr">template</span> <span class="attr">#action</span>&gt;&lt;<span class="attr">v-btn</span> <span class="attr">text</span> <span class="attr">@click</span>=<span class="str">"snack=false"</span>&gt;关闭&lt;/<span class="attr">v-btn</span>&gt;&lt;/template&gt;
+    &lt;/<span class="attr">v-snackbar</span>&gt;
+  &lt;/<span class="attr">v-container</span>&gt;
+&lt;/<span class="attr">v-app</span>&gt;</pre>
+  </div>
+
+</div><!-- /container-wrap -->
+
+<script>
+Vue.use(Vuetify)
+const makeVuetify = () => new Vuetify({ theme: { themes: { light: { primary: '#1976D2' } } } })
+
+// ===== 3. Grid Demo =====
+new Vue({
+  el: '#grid-app',
+  vuetify: makeVuetify(),
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-row dense>
+        <v-col cols="12" sm="6" md="3" v-for="n in 4" :key="n">
+          <v-card :color="['blue lighten-4','green lighten-4','orange lighten-4','pink lighten-4'][n-1]" flat class="pa-3 text-center">
+            <div style="font-size:.85rem">cols=12/sm=6/md=3</div>
+            <div style="font-weight:600">卡片 {{n}}</div>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row class="mt-2" dense>
+        <v-col cols="8">
+          <v-card color="blue lighten-5" flat class="pa-3 text-center">cols=8（2/3）</v-card>
+        </v-col>
+        <v-col cols="4">
+          <v-card color="green lighten-5" flat class="pa-3 text-center">cols=4（1/3）</v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 4. Button Demo =====
+new Vue({
+  el: '#btn-app',
+  vuetify: makeVuetify(),
+  data() { return { loading: false } },
+  methods: {
+    toggle() { this.loading = true; setTimeout(() => this.loading = false, 1500) }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <div class="d-flex flex-wrap gap" style="gap:8px;margin-bottom:10px">
+        <v-btn color="primary">Primary</v-btn>
+        <v-btn color="success">Success</v-btn>
+        <v-btn color="warning">Warning</v-btn>
+        <v-btn color="error">Error</v-btn>
+        <v-btn outlined color="primary">Outlined</v-btn>
+        <v-btn text color="primary">Text</v-btn>
+        <v-btn depressed color="primary">Depressed</v-btn>
+      </div>
+      <div class="d-flex flex-wrap" style="gap:8px;margin-bottom:10px;align-items:center">
+        <v-btn color="primary" small><v-icon left>mdi-plus</v-icon>新建</v-btn>
+        <v-btn color="error"   small><v-icon left>mdi-delete</v-icon>删除</v-btn>
+        <v-btn color="primary" icon><v-icon>mdi-pencil</v-icon></v-btn>
+        <v-btn color="primary" fab small><v-icon>mdi-plus</v-icon></v-btn>
+        <v-btn color="primary" rounded>Rounded</v-btn>
+        <v-btn disabled>Disabled</v-btn>
+      </div>
+      <div class="d-flex flex-wrap" style="gap:8px;align-items:center">
+        <v-btn x-small>x-small</v-btn>
+        <v-btn small>small</v-btn>
+        <v-btn>default</v-btn>
+        <v-btn large>large</v-btn>
+        <v-btn color="primary" :loading="loading" @click="toggle">
+          {{ loading ? '加载中...' : '点击触发 Loading' }}
+        </v-btn>
+      </div>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 5. Input Demo =====
+new Vue({
+  el: '#input-app',
+  vuetify: makeVuetify(),
+  data() { return { v1: '', v2: '', v3: '', v4: '', role: '', showPwd: false,
+    roleItems: [{ label: '管理员', value: 'admin' }, { label: '编辑', value: 'editor' }, { label: '只读', value: 'viewer' }] } },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-row dense>
+        <v-col cols="12" sm="6">
+          <v-text-field v-model="v1" label="默认（下划线）" />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field v-model="v2" label="outlined" outlined dense />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field v-model="v3" label="搜索框" outlined dense clearable
+            prepend-inner-icon="mdi-magnify" hide-details />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field v-model="v4" label="密码" outlined dense
+            :type="showPwd ? 'text' : 'password'"
+            :append-icon="showPwd ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append="showPwd=!showPwd" />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-select v-model="role" :items="roleItems" item-text="label" item-value="value"
+            label="选择角色" outlined dense clearable hide-details />
+        </v-col>
+        <v-col cols="12" sm="6" class="d-flex align-center">
+          <span style="font-size:.85rem">当前 role：<strong>{{ role || '(未选)' }}</strong></span>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 6. Form Demo =====
+new Vue({
+  el: '#form-app',
+  vuetify: makeVuetify(),
+  data() {
+    return {
+      valid: true,
+      form: { username: '', email: '' },
+      usernameRules: [
+        v => !!v || '用户名不能为空',
+        v => (v && v.length >= 3) || '长度至少 3 位',
+        v => (v && v.length <= 20) || '不超过 20 位'
+      ],
+      emailRules: [
+        v => !!v || '邮箱不能为空',
+        v => /.+@.+\..+/.test(v) || '邮箱格式不正确'
+      ]
+    }
+  },
+  methods: {
+    submit() {
+      if (this.$refs.form.validate()) {
+        this.$vuetify.theme.themes.light.primary = '#1976D2'
+        alert('✅ 校验通过！用户名：' + this.form.username)
+      }
+    },
+    reset() { this.$refs.form.reset() }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px;max-width:420px">
+      <v-form ref="form" v-model="valid">
+        <v-text-field v-model="form.username" label="用户名" outlined dense :rules="usernameRules" />
+        <v-text-field v-model="form.email"    label="邮箱"   outlined dense :rules="emailRules"    />
+        <div style="display:flex;gap:8px">
+          <v-btn color="primary" :disabled="!valid" @click="submit">提交验证</v-btn>
+          <v-btn outlined @click="reset">重置</v-btn>
+        </div>
+      </v-form>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 7. Table Demo =====
+const tableData2 = [
+  { id: 1, name: '张伟', email: 'zhangwei@demo.com', role: '管理员', status: 1 },
+  { id: 2, name: '李娜', email: 'lina@demo.com',     role: '编辑',   status: 1 },
+  { id: 3, name: '王芳', email: 'wangfang@demo.com', role: '只读',   status: 0 },
+  { id: 4, name: '赵磊', email: 'zhaolei@demo.com',  role: '编辑',   status: 1 },
+]
+new Vue({
+  el: '#table-app',
+  vuetify: makeVuetify(),
+  data() {
+    return {
+      search: '',
+      loading: false,
+      list: tableData2,
+      headers: [
+        { text: '#',    value: 'id',      width: 50 },
+        { text: '姓名', value: 'name',    width: 90 },
+        { text: '邮箱', value: 'email' },
+        { text: '角色', value: 'role',    width: 80 },
+        { text: '状态', value: 'status',  align: 'center', width: 80 },
+        { text: '操作', value: 'actions', sortable: false, align: 'end', width: 80 },
+      ]
+    }
+  },
+  methods: {
+    edit(item) { alert('编辑：' + item.name) },
+    del(item)  { if (confirm('删除 ' + item.name + '？')) this.list = this.list.filter(r => r.id !== item.id) }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-text-field v-model="search" label="实时搜索（试试输入姓名）" outlined dense clearable
+        prepend-inner-icon="mdi-magnify" hide-details class="mb-3" />
+      <v-data-table :headers="headers" :items="list" :search="search" :loading="loading"
+        class="elevation-1" dense>
+        <template v-slot:item.status="{ item }">
+          <v-chip :color="item.status ? 'success' : 'error'" small dark>
+            {{ item.status ? '启用' : '禁用' }}
+          </v-chip>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-icon small class="mr-1" color="primary" @click="edit(item)">mdi-pencil</v-icon>
+          <v-icon small color="error" @click="del(item)">mdi-delete</v-icon>
+        </template>
+      </v-data-table>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 8. Card Demo =====
+new Vue({
+  el: '#card-app',
+  vuetify: makeVuetify(),
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-row dense>
+        <v-col cols="12" sm="6">
+          <v-card elevation="3">
+            <v-card-title>用户卡片 <v-spacer/> <v-chip color="success" small dark>正常</v-chip></v-card-title>
+            <v-card-subtitle>副标题 / 描述文字</v-card-subtitle>
+            <v-card-text>这是卡片的正文内容区域，可以放任意内容。</v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn text color="primary">取消</v-btn>
+              <v-btn color="primary" small>确认</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-card outlined>
+            <v-card-title><v-icon left color="primary">mdi-account</v-icon>描述列表</v-card-title>
+            <v-card-text>
+              <v-simple-table dense>
+                <tbody>
+                  <tr v-for="r in [{k:'用户名',v:'admin'},{k:'邮箱',v:'admin@demo.com'},{k:'角色',v:'超级管理员'}]" :key="r.k">
+                    <td style="color:#666;width:80px">{{r.k}}</td>
+                    <td><strong>{{r.v}}</strong></td>
+                  </tr>
+                </tbody>
+              </v-simple-table>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 9. Dialog Demo =====
+new Vue({
+  el: '#dialog-app',
+  vuetify: makeVuetify(),
+  data() { return { visible: false, form: { name: '', email: '' }, saving: false } },
+  methods: {
+    save() {
+      this.saving = true
+      setTimeout(() => { this.saving = false; this.visible = false }, 1000)
+    },
+    close() { this.visible = false; this.form = { name: '', email: '' } }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-btn color="primary" @click="visible=true"><v-icon left>mdi-plus</v-icon>打开 Dialog</v-btn>
+      <v-dialog v-model="visible" max-width="400px" persistent>
+        <v-card>
+          <v-card-title>新建用户</v-card-title>
+          <v-card-text>
+            <v-text-field v-model="form.name"  label="姓名" outlined dense class="mb-2" />
+            <v-text-field v-model="form.email" label="邮箱" outlined dense />
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn text @click="close">取消</v-btn>
+            <v-btn color="primary" :loading="saving" @click="save">保存</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 10. Snackbar Demo =====
+new Vue({
+  el: '#snack-app',
+  vuetify: makeVuetify(),
+  data() { return { snack: false, snackText: '', snackColor: 'success' } },
+  methods: {
+    toast(text, color) { this.snackText = text; this.snackColor = color; this.snack = true }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <v-btn small color="success" @click="toast('操作成功！','success')">success</v-btn>
+        <v-btn small color="error"   @click="toast('请求失败！','error')">error</v-btn>
+        <v-btn small color="warning" @click="toast('请注意！', 'warning')">warning</v-btn>
+        <v-btn small color="info"    @click="toast('提示信息', 'info')">info</v-btn>
+      </div>
+      <v-alert type="success" dense dismissible class="mb-2">这是 v-alert success（可关闭）</v-alert>
+      <v-alert type="warning" border="left" colored-border elevation="1">带左边框的警告提示</v-alert>
+      <v-snackbar v-model="snack" :color="snackColor" top :timeout="3000">
+        {{ snackText }}
+        <template #action><v-btn text @click="snack=false">关闭</v-btn></template>
+      </v-snackbar>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 11. Progress Demo =====
+new Vue({
+  el: '#progress-app',
+  vuetify: makeVuetify(),
+  data() { return { loading: false, pct: 65, overlay: false } },
+  methods: {
+    toggleLoad() { this.loading = true; setTimeout(() => this.loading = false, 2000) },
+    toggleOverlay() { this.overlay = true; setTimeout(() => this.overlay = false, 1500) }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+        <v-btn small color="primary" @click="toggleLoad">线性进度（2s）</v-btn>
+        <v-btn small color="primary" outlined @click="toggleOverlay">遮罩加载（1.5s）</v-btn>
+      </div>
+      <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-3" />
+      <v-progress-linear :value="pct" height="10" rounded color="success" class="mb-3">
+        <template #default>{{ pct }}%</template>
+      </v-progress-linear>
+      <div style="display:flex;gap:20px;align-items:center">
+        <v-progress-circular indeterminate color="primary" />
+        <v-progress-circular :value="75" color="success" :size="60" :width="5">75%</v-progress-circular>
+        <v-progress-circular :value="30" color="error"   :size="60" :width="5">30%</v-progress-circular>
+      </div>
+      <v-overlay :value="overlay" z-index="999">
+        <v-progress-circular indeterminate size="64" />
+      </v-overlay>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 12. Chip Demo =====
+new Vue({
+  el: '#chip-app',
+  vuetify: makeVuetify(),
+  data() { return { cnt: 5 } },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <v-chip>默认</v-chip>
+        <v-chip color="primary" dark>Primary</v-chip>
+        <v-chip color="success" dark>Success</v-chip>
+        <v-chip color="error"   dark>Error</v-chip>
+        <v-chip color="warning" dark>Warning</v-chip>
+        <v-chip color="primary" outlined>描边</v-chip>
+        <v-chip color="error" dark small close @click:close="$emit('close')">可关闭</v-chip>
+        <v-chip color="info" dark><v-icon left>mdi-account</v-icon>带图标</v-chip>
+      </div>
+      <div style="display:flex;gap:20px;align-items:center">
+        <v-badge :content="cnt" color="error" overlap>
+          <v-icon>mdi-bell</v-icon>
+        </v-badge>
+        <v-badge dot color="success">
+          <v-icon>mdi-account</v-icon>
+        </v-badge>
+        <v-btn small @click="cnt++">+1 徽章</v-btn>
+      </div>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 13. Nav Demo =====
+new Vue({
+  el: '#nav-app',
+  vuetify: makeVuetify(),
+  data() {
+    return {
+      tab: 0,
+      tabs: ['用户管理', '权限配置', '系统日志'],
+      breadItems: [
+        { text: '首页',     disabled: false, href: '#' },
+        { text: '用户管理', disabled: false, href: '#' },
+        { text: '用户详情', disabled: true }
+      ]
+    }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-breadcrumbs :items="breadItems" class="pa-0 mb-3" />
+      <v-tabs v-model="tab" background-color="primary" dark>
+        <v-tab v-for="t in tabs" :key="t">{{ t }}</v-tab>
+      </v-tabs>
+      <v-tabs-items v-model="tab">
+        <v-tab-item v-for="t in tabs" :key="t">
+          <v-card flat class="pa-4">{{ t }} 的内容区域</v-card>
+        </v-tab-item>
+      </v-tabs-items>
+    </v-container>
+  </v-app>`
+})
+
+// ===== 15. CRUD Demo =====
+new Vue({
+  el: '#crud-app',
+  vuetify: makeVuetify(),
+  data() {
+    return {
+      search: '',
+      loading: false,
+      list: [
+        { id: 1, name: '张伟', email: 'zhangwei@demo.com', status: 1 },
+        { id: 2, name: '李娜', email: 'lina@demo.com',     status: 1 },
+        { id: 3, name: '王芳', email: 'wangfang@demo.com', status: 0 },
+        { id: 4, name: '赵磊', email: 'zhaolei@demo.com',  status: 1 },
+      ],
+      headers: [
+        { text: '姓名', value: 'name',    width: 100 },
+        { text: '邮箱', value: 'email' },
+        { text: '状态', value: 'status',  align: 'center', width: 90, sortable: false },
+        { text: '操作', value: 'actions', sortable: false,  align: 'end', width: 80 },
+      ],
+      dialogVisible: false,
+      isEdit: false,
+      valid: false,
+      saving: false,
+      form: { name: '', email: '' },
+      editingId: null,
+      snack: false, snackText: '', snackColor: 'success',
+      nameRules:  [v => !!v || '必填'],
+      emailRules: [v => !!v || '必填', v => /.+@.+/.test(v) || '格式错误'],
+    }
+  },
+  methods: {
+    openDialog(item) {
+      this.isEdit = !!item
+      this.editingId = item ? item.id : null
+      this.form = item ? { name: item.name, email: item.email } : { name: '', email: '' }
+      this.dialogVisible = true
+      this.$nextTick(() => this.$refs.form && this.$refs.form.resetValidation())
+    },
+    close() { this.dialogVisible = false },
+    save() {
+      if (!this.$refs.form.validate()) return
+      this.saving = true
+      setTimeout(() => {
+        if (this.isEdit) {
+          const r = this.list.find(r => r.id === this.editingId)
+          if (r) { r.name = this.form.name; r.email = this.form.email }
+        } else {
+          this.list.push({ id: Date.now(), ...this.form, status: 1 })
+        }
+        this.saving = false
+        this.dialogVisible = false
+        this.toast(this.isEdit ? '编辑成功' : '新建成功', 'success')
+      }, 700)
+    },
+    remove(item) {
+      if (confirm('确定删除 ' + item.name + '？')) {
+        this.list = this.list.filter(r => r.id !== item.id)
+        this.toast('已删除', 'error')
+      }
+    },
+    toast(text, color) { this.snackText = text; this.snackColor = color; this.snack = true }
+  },
+  template: `
+  <v-app style="min-height:auto;background:transparent">
+    <v-container style="padding:16px">
+      <v-row align="center" class="mb-3">
+        <v-col cols="12" sm="6">
+          <v-text-field v-model="search" label="实时搜索" outlined dense clearable
+            prepend-inner-icon="mdi-magnify" hide-details />
+        </v-col>
+        <v-col cols="auto">
+          <v-btn color="primary" @click="openDialog()">
+            <v-icon left>mdi-plus</v-icon>新建
+          </v-btn>
+        </v-col>
+      </v-row>
+
+      <v-data-table :headers="headers" :items="list" :search="search"
+        :loading="loading" class="elevation-1" dense>
+        <template v-slot:item.status="{ item }">
+          <v-chip :color="item.status ? 'success' : 'error'" x-small dark>
+            {{ item.status ? '启用' : '禁用' }}
+          </v-chip>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-icon small color="primary" class="mr-1" @click="openDialog(item)">mdi-pencil</v-icon>
+          <v-icon small color="error" @click="remove(item)">mdi-delete</v-icon>
+        </template>
+      </v-data-table>
+
+      <v-dialog v-model="dialogVisible" max-width="400px" persistent>
+        <v-card>
+          <v-card-title>{{ isEdit ? '编辑用户' : '新建用户' }}</v-card-title>
+          <v-card-text>
+            <v-form ref="form" v-model="valid">
+              <v-text-field v-model="form.name"  label="姓名" outlined dense :rules="nameRules"  />
+              <v-text-field v-model="form.email" label="邮箱" outlined dense :rules="emailRules" />
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn text @click="close">取消</v-btn>
+            <v-btn color="primary" :loading="saving" @click="save">保存</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-snackbar v-model="snack" :color="snackColor" top :timeout="2500">
+        {{ snackText }}
+        <template #action><v-btn text @click="snack=false">关闭</v-btn></template>
+      </v-snackbar>
+    </v-container>
+  </v-app>`
+})
+</script>
+</body>
+</html>
