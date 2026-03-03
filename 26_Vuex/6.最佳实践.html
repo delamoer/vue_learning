@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26-6 · Vuex 最佳实践</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    strong { color: var(--text); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    .cheatsheet { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:640px){ .cheatsheet { grid-template-columns: 1fr; } }
+    .cs-box { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .cs-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .cs-item { font-family: monospace; font-size: 0.8rem; line-height: 2; color: #94a3b8; }
+    .cs-item .key { color: #58a6ff; }
+    .cs-item .val { color: #7ee787; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vuex · 最佳实践</h1>
+  <p class="page-lead">26-6 &nbsp;|&nbsp; 什么时候不用 Vuex / 持久化 / 常见反模式 / 与 Router 结合 / Pinia 简介 / 速查卡</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>什么时候用 Vuex，什么时候不用</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>场景</th><th>推荐方案</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>父子组件通信</td>
+              <td style="color:#3fb950">props / $emit</td>
+              <td>关系简单，不需要全局</td>
+            </tr>
+            <tr>
+              <td>表单内部状态（输入值等）</td>
+              <td style="color:#3fb950">组件 data</td>
+              <td>与其他组件无关，放 Vuex 是过度设计</td>
+            </tr>
+            <tr>
+              <td>弹窗/抽屉的开关状态</td>
+              <td style="color:#3fb950">组件 data 或 provide/inject</td>
+              <td>通常只在父子间用</td>
+            </tr>
+            <tr>
+              <td>登录用户信息、Token</td>
+              <td style="color:#d29922">Vuex</td>
+              <td>多处读取（导航栏、路由守卫、API 请求头）</td>
+            </tr>
+            <tr>
+              <td>购物车、通知未读数</td>
+              <td style="color:#d29922">Vuex</td>
+              <td>多个组件共享，需要实时更新</td>
+            </tr>
+            <tr>
+              <td>全局配置（语言、主题）</td>
+              <td style="color:#d29922">Vuex</td>
+              <td>全应用生效，需要持久化</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip tip-yellow">
+        ⭐ <strong>Vue 官方建议：</strong>如果你不确定是否需要 Vuex，那就不需要。等你感受到跨组件状态管理的痛苦时，再引入 Vuex。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>State 持久化（vuex-persistedstate）</h2>
+    </div>
+    <div class="card-body">
+      <p>默认情况下，刷新页面 Vuex State 会重置。使用 <code>vuex-persistedstate</code> 插件可以把 State 同步到 localStorage：</p>
+
+      <div class="code-block"><span class="c">// 安装</span>
+npm install vuex-persistedstate</div>
+
+      <div class="code-block"><span class="c">// store/index.js</span>
+<span class="k">import</span> createPersistedState <span class="k">from</span> <span class="s">'vuex-persistedstate'</span>
+
+<span class="k">export default new</span> Vuex.<span class="f">Store</span>({
+  plugins: [
+    <span class="c">// 默认：整个 state 都持久化</span>
+    <span class="f">createPersistedState</span>(),
+
+    <span class="c">// 推荐：只持久化特定模块/字段</span>
+    <span class="f">createPersistedState</span>({
+      paths: [<span class="s">'user.token'</span>, <span class="s">'user.id'</span>, <span class="s">'cart.items'</span>],  <span class="c">// 白名单</span>
+      key:   <span class="s">'my-app-store'</span>,                             <span class="c">// localStorage 的 key</span>
+
+      <span class="c">// 可选：使用 sessionStorage 而不是 localStorage</span>
+      storage: window.sessionStorage
+    })
+  ]
+})</div>
+
+      <div class="code-block"><span class="c">// 手动实现简单持久化（不需要额外依赖）</span>
+<span class="k">const</span> persisted = <span class="f">createPersistedState</span>({
+  getState:  (key) => JSON.<span class="f">parse</span>(localStorage.<span class="f">getItem</span>(key) || <span class="s">'null'</span>),
+  setState:  (key, state) => localStorage.<span class="f">setItem</span>(key, JSON.<span class="f">stringify</span>(state)),
+  removeState: (key) => localStorage.<span class="f">removeItem</span>(key)
+})</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>注意：</strong>不要把密码、完整 token（应该放 httpOnly cookie）等敏感信息放 localStorage。<br>
+        只持久化"用户偏好"（主题/语言）和"必要恢复状态"（如购物车）。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-red" style="background:rgba(248,81,73,0.15); color:#f85149">第三节</span>
+      <h2>常见反模式（不要这样做）</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">❌ 反模式1：直接修改 State</div>
+      <div class="code-block"><span class="c">// ❌ 直接赋值（绕过 Mutation，DevTools 无法追踪）</span>
+<span class="k">this</span>.$store.state.count = <span class="v">5</span>
+<span class="k">this</span>.$store.state.user.name = <span class="s">'Alice'</span>
+
+<span class="c">// ✅ 正确方式：commit Mutation</span>
+<span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'SET_COUNT'</span>, <span class="v">5</span>)
+<span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'SET_USER_NAME'</span>, <span class="s">'Alice'</span>)</div>
+
+      <div class="section-title">❌ 反模式2：在 Mutation 里做异步</div>
+      <div class="code-block"><span class="c">// ❌ Mutation 里写异步（DevTools 时光旅行功能失效）</span>
+mutations: {
+  <span class="f">FETCH_USER</span>(state, userId) {
+    fetch(<span class="s">`/api/user/${userId}`</span>).<span class="f">then</span>(r => r.<span class="f">json</span>()).<span class="f">then</span>(user => {
+      state.user = user   <span class="c">// 问题：何时执行未知</span>
+    })
+  }
+}
+
+<span class="c">// ✅ 异步逻辑放 Action</span>
+actions: {
+  <span class="k">async</span> <span class="f">fetchUser</span>({ commit }, userId) {
+    <span class="k">const</span> user = <span class="k">await</span> api.<span class="f">getUser</span>(userId)
+    commit(<span class="s">'SET_USER'</span>, user)
+  }
+}</div>
+
+      <div class="section-title">❌ 反模式3：在组件里做业务逻辑然后 commit</div>
+      <div class="code-block"><span class="c">// ❌ 业务逻辑放在组件里（重复、难测试）</span>
+<span class="k">async</span> <span class="f">addToCart</span>(product) {
+  <span class="k">const</span> stock = <span class="k">await</span> api.<span class="f">getStock</span>(product.id)
+  <span class="k">if</span> (stock > <span class="v">0</span>) {
+    <span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'ADD_TO_CART'</span>, product)
+  }
+  <span class="c">// 另一个组件也有一样的代码 → 重复</span>
+}
+
+<span class="c">// ✅ 业务逻辑封装在 Action 里 → 多组件复用</span>
+<span class="k">async</span> <span class="f">handleAdd</span>(product) {
+  <span class="k">await</span> <span class="k">this</span>.$store.<span class="f">dispatch</span>(<span class="s">'cart/addToCart'</span>, product)
+}</div>
+
+      <div class="section-title">❌ 反模式4：一个 Mutation 修改不相关的多个字段</div>
+      <div class="code-block"><span class="c">// ❌ 一个 mutation 做了太多事，难以追踪哪个字段为什么变</span>
+mutations: {
+  <span class="f">UPDATE_ALL</span>(state, payload) {
+    state.user     = payload.user
+    state.cart     = payload.cart
+    state.settings = payload.settings
+  }
+}
+
+<span class="c">// ✅ 每个 Mutation 只做一件事</span>
+mutations: {
+  <span class="f">SET_USER</span>(state, user)         { state.user = user },
+  <span class="f">SET_CART</span>(state, cart)         { state.cart = cart },
+  <span class="f">SET_SETTINGS</span>(state, settings) { state.settings = settings }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>Vuex + Vue Router 结合（权限控制）</h2>
+    </div>
+    <div class="card-body">
+      <div class="code-block"><span class="c">// router/index.js — 全局前置守卫读取 Vuex 状态</span>
+<span class="k">import</span> store  <span class="k">from</span> <span class="s">'@/store'</span>
+
+router.<span class="f">beforeEach</span>((to, from, next) => {
+  <span class="k">const</span> isLoggedIn  = store.getters[<span class="s">'user/isLoggedIn'</span>]
+  <span class="k">const</span> requiresAuth = to.meta.requiresAuth
+  <span class="k">const</span> requiresAdmin = to.meta.requiresAdmin
+  <span class="k">const</span> isAdmin = store.getters[<span class="s">'user/isAdmin'</span>]
+
+  <span class="k">if</span> (requiresAuth && !isLoggedIn) {
+    <span class="c">// 未登录跳登录页，记录来源</span>
+    <span class="f">next</span>({ path: <span class="s">'/login'</span>, query: { redirect: to.fullPath } })
+  } <span class="k">else if</span> (requiresAdmin && !isAdmin) {
+    <span class="c">// 无权限跳 403</span>
+    <span class="f">next</span>({ path: <span class="s">'/403'</span> })
+  } <span class="k">else</span> {
+    <span class="f">next</span>()
+  }
+})</div>
+
+      <div class="code-block"><span class="c">// 路由配置中添加 meta</span>
+{
+  path:      <span class="s">'/admin'</span>,
+  component: AdminView,
+  meta:      { requiresAuth: <span class="k">true</span>, requiresAdmin: <span class="k">true</span>, title: <span class="s">'管理后台'</span> }
+}</div>
+
+      <div class="code-block"><span class="c">// 登录成功后跳回来源页</span>
+<span class="k">async</span> <span class="f">handleLogin</span>() {
+  <span class="k">await</span> <span class="k">this</span>.$store.<span class="f">dispatch</span>(<span class="s">'user/login'</span>, <span class="k">this</span>.form)
+  <span class="k">const</span> redirect = <span class="k">this</span>.$route.query.redirect || <span class="s">'/'</span>
+  <span class="k">this</span>.$router.<span class="f">push</span>(redirect)
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>Vuex 4 / Pinia — Vue 3 时代</h2>
+    </div>
+    <div class="card-body">
+      <p>Vue 3 推荐使用 <strong>Pinia</strong>（下一代官方状态库，Vuex 5 的继任者）。如果你在学 Vue 2，了解即可：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对比项</th><th>Vuex 3 (Vue 2)</th><th>Pinia (Vue 3)</th></tr></thead>
+          <tbody>
+            <tr><td>核心概念</td><td>state / getters / mutations / actions</td><td>state / getters / actions（<strong>没有 mutations</strong>）</td></tr>
+            <tr><td>修改 state</td><td>必须通过 commit Mutation</td><td>可以在 action 里直接修改，也可以 $patch</td></tr>
+            <tr><td>TypeScript</td><td>支持差，类型推断弱</td><td>完美 TypeScript 支持</td></tr>
+            <tr><td>模块化</td><td>modules + namespaced</td><td>多个独立 store，天然无命名冲突</td></tr>
+            <tr><td>Devtools</td><td>✅</td><td>✅（更好）</td></tr>
+            <tr><td>包大小</td><td>~8KB</td><td>~1KB</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Pinia 写法预览（Vue 3）</div>
+      <div class="code-block"><span class="c">// stores/user.js (Pinia)</span>
+<span class="k">import</span> { defineStore } <span class="k">from</span> <span class="s">'pinia'</span>
+
+<span class="k">export const</span> useUserStore = <span class="f">defineStore</span>(<span class="s">'user'</span>, {
+  state: () => ({ id: <span class="k">null</span>, name: <span class="s">''</span>, token: <span class="s">''</span> }),
+
+  getters: {
+    <span class="f">isLoggedIn</span>: (state) => !!state.id
+  },
+
+  actions: {
+    <span class="k">async</span> <span class="f">login</span>(credentials) {
+      <span class="k">const</span> data = <span class="k">await</span> api.<span class="f">login</span>(credentials)
+      <span class="c">// 直接修改 state，不需要 mutation</span>
+      <span class="k">this</span>.token = data.token
+      <span class="k">this</span>.id    = data.user.id
+      <span class="k">this</span>.name  = data.user.name
+    }
+  }
+})</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第六节</span>
+      <h2>Vuex 速查卡</h2>
+    </div>
+    <div class="card-body">
+      <div class="cheatsheet">
+        <div class="cs-box">
+          <div class="cs-title" style="color:#58a6ff">读取 State / Getters</div>
+          <div class="cs-item"><span class="key">$store.state.count</span></div>
+          <div class="cs-item"><span class="key">$store.getters.total</span></div>
+          <div class="cs-item"><span class="key">$store.getters['cart/total']</span></div>
+          <div class="cs-item"><span class="key">...mapState(['count'])</span></div>
+          <div class="cs-item"><span class="key">...mapState('user', ['id'])</span></div>
+          <div class="cs-item"><span class="key">...mapGetters(['total'])</span></div>
+          <div class="cs-item"><span class="key">...mapGetters('cart', ['total'])</span></div>
+        </div>
+        <div class="cs-box">
+          <div class="cs-title" style="color:#d29922">提交 Mutation</div>
+          <div class="cs-item"><span class="key">$store.commit('SET', v)</span></div>
+          <div class="cs-item"><span class="key">$store.commit('user/SET', v)</span></div>
+          <div class="cs-item"><span class="key">$store.commit({type:'SET', ...})</span></div>
+          <div class="cs-item"><span class="key">...mapMutations(['SET'])</span></div>
+          <div class="cs-item"><span class="key">...mapMutations('user', ['SET'])</span></div>
+        </div>
+        <div class="cs-box">
+          <div class="cs-title" style="color:#bc8cff">分发 Action</div>
+          <div class="cs-item"><span class="key">$store.dispatch('login', cred)</span></div>
+          <div class="cs-item"><span class="key">$store.dispatch('user/login', v)</span></div>
+          <div class="cs-item"><span class="key">await $store.dispatch('login')</span></div>
+          <div class="cs-item"><span class="key">...mapActions(['login'])</span></div>
+          <div class="cs-item"><span class="key">...mapActions('user', ['login'])</span></div>
+        </div>
+        <div class="cs-box">
+          <div class="cs-title" style="color:#39d6c0">模块内 context</div>
+          <div class="cs-item"><span class="key">state</span> → 本模块 state</div>
+          <div class="cs-item"><span class="key">rootState</span> → 根 state</div>
+          <div class="cs-item"><span class="key">commit('TYPE', v)</span> → 本模块</div>
+          <div class="cs-item"><span class="key">dispatch('other/A', null, {root:true})</span></div>
+          <div class="cs-item"><span class="key">getters / rootGetters</span></div>
+        </div>
+        <div class="cs-box">
+          <div class="cs-title" style="color:#3fb950">辅助函数（带命名空间）</div>
+          <div class="cs-item"><span class="key">createNamespacedHelpers('user')</span></div>
+          <div class="cs-item">→ 返回所有 mapXxx，自动加前缀</div>
+        </div>
+        <div class="cs-box">
+          <div class="cs-title" style="color:#ffa657">严格模式 / 插件</div>
+          <div class="cs-item"><span class="key">strict: process.env.NODE_ENV !== 'production'</span></div>
+          <div class="cs-item"><span class="key">plugins: [createPersistedState()]</span></div>
+          <div class="cs-item">开严格模式 → 直接赋值 state 会抛错</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  26-6 · Vuex 最佳实践 &nbsp;|&nbsp; 持久化 / 反模式 / Router+Vuex / Pinia / 速查卡
+</div>
+</body>
+</html>

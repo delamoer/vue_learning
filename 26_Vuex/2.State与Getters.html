@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26-2 · State 与 Getters</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    strong { color: var(--text); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:640px){ .two-col { grid-template-columns: 1fr; } }
+    .vs-label { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
+    .vs-before { background: rgba(248,81,73,0.1); color: #f85149; }
+    .vs-after  { background: rgba(63,185,80,0.1);  color: #3fb950; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vuex · State 与 Getters</h1>
+  <p class="page-lead">26-2 &nbsp;|&nbsp; State 读取 / mapState / Getters 派生 / mapGetters / 与 computed 对比</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>State — 单一状态树</h2>
+    </div>
+    <div class="card-body">
+      <p>Vuex 用<strong>单一状态树</strong>管理所有共享状态，即整个应用只有一个 Store 实例。State 里存放的数据和 Vue 组件的 <code>data</code> 一样是响应式的——State 变化时，依赖它的组件自动更新。</p>
+
+      <div class="section-title">在 store 中定义 State</div>
+      <div class="code-block"><span class="c">// store/index.js</span>
+<span class="k">const</span> store = <span class="k">new</span> Vuex.<span class="f">Store</span>({
+  state: {
+    <span class="c">// 基本类型</span>
+    count:    <span class="v">0</span>,
+    isLoading: <span class="k">false</span>,
+    username:  <span class="s">''</span>,
+
+    <span class="c">// 数组</span>
+    cartItems: [],
+    notifications: [],
+
+    <span class="c">// 对象</span>
+    user: {
+      id:     <span class="k">null</span>,
+      name:   <span class="s">''</span>,
+      avatar: <span class="s">''</span>,
+      roles:  []
+    },
+
+    <span class="c">// 枚举类型（字符串）</span>
+    theme: <span class="s">'light'</span>,   <span class="c">// 'light' | 'dark'</span>
+    locale: <span class="s">'zh-CN'</span>
+  }
+})</div>
+
+      <div class="tip tip-red">
+        ⚠️ <strong>State 必须提前声明所有属性！</strong><br>
+        和 Vue 2 data 一样，State 里没有声明的属性<strong>不是响应式的</strong>，后续添加的属性视图不会更新。<br>
+        如果确实需要动态添加属性，使用 <code>Vue.set(state.obj, 'newKey', value)</code>。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>读取 State 的三种方式</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">方式1：直接读取（冗长，但直观）</div>
+      <div class="code-block"><span class="c">// 组件中</span>
+computed: {
+  count()    { <span class="k">return</span> <span class="k">this</span>.$store.state.count },
+  username() { <span class="k">return</span> <span class="k">this</span>.$store.state.username },
+  cartItems(){ <span class="k">return</span> <span class="k">this</span>.$store.state.cartItems }
+}
+
+<span class="c">// 模板中</span>
+<span class="t">&lt;p&gt;</span>当前用户：{{ $store.state.username }}<span class="t">&lt;/p&gt;</span>
+<span class="t">&lt;p&gt;</span>购物车：{{ $store.state.cartItems.length }} 件<span class="t">&lt;/p&gt;</span></div>
+
+      <div class="section-title">方式2：mapState 辅助函数（推荐）</div>
+      <p><code>mapState</code> 自动生成 computed 属性，大幅减少重复代码：</p>
+      <div class="code-block"><span class="k">import</span> { mapState } <span class="k">from</span> <span class="s">'vuex'</span>
+
+export default {
+  computed: {
+    <span class="c">// 数组写法：属性名和 state 键名相同</span>
+    ...<span class="f">mapState</span>([<span class="s">'count'</span>, <span class="s">'username'</span>, <span class="s">'cartItems'</span>]),
+
+    <span class="c">// 对象写法：属性名和 state 键名不同，或需要额外处理</span>
+    ...<span class="f">mapState</span>({
+      num: <span class="s">'count'</span>,                          <span class="c">// 字符串，映射 state.count</span>
+      user: state => state.user,               <span class="c">// 函数，可以做额外处理</span>
+      countPlusLocal(state) {                  <span class="c">// 可以使用 this 访问组件实例</span>
+        <span class="k">return</span> state.count + <span class="k">this</span>.localCount
+      }
+    }),
+
+    <span class="c">// 组件自己的 computed 也可以混用</span>
+    localComputed() { <span class="k">return</span> <span class="k">this</span>.someLocalData * <span class="v">2</span> }
+  }
+}</div>
+
+      <div class="section-title">方式3：在 setup()中使用（Vue 2.7 / Composition API）</div>
+      <div class="code-block"><span class="k">import</span> { computed } <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> { useStore } <span class="k">from</span> <span class="s">'vuex'</span>
+
+export default {
+  <span class="f">setup</span>() {
+    <span class="k">const</span> store = <span class="f">useStore</span>()
+    <span class="k">const</span> count = <span class="f">computed</span>(() => store.state.count)
+    <span class="k">return</span> { count }
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>Getters — 从 State 派生数据</h2>
+    </div>
+    <div class="card-body">
+      <p>Getters 就像 Store 的计算属性，基于 State 派生出新数据，并且<strong>有缓存</strong>（State 不变则返回缓存值）。</p>
+
+      <div class="section-title">定义 Getters</div>
+      <div class="code-block">getters: {
+  <span class="c">// 参数1：state；参数2：其他 getters（可选）</span>
+  <span class="f">cartCount</span>(state) {
+    <span class="k">return</span> state.cartItems.<span class="f">length</span>
+  },
+
+  <span class="c">// 基于 state 过滤</span>
+  <span class="f">doneTaskCount</span>(state) {
+    <span class="k">return</span> state.tasks.<span class="f">filter</span>(t => t.done).<span class="f">length</span>
+  },
+
+  <span class="c">// 引用其他 getter</span>
+  <span class="f">cartTotal</span>(state, getters) {
+    <span class="k">return</span> state.cartItems.<span class="f">reduce</span>((sum, i) => sum + i.price * i.qty, <span class="v">0</span>)
+  },
+
+  <span class="c">// 返回函数（用于带参数的查询，注意：返回函数时不缓存）</span>
+  <span class="f">getArticleById</span>: (state) => (id) => {
+    <span class="k">return</span> state.articles.<span class="f">find</span>(a => a.id === id)
+  },
+
+  <span class="c">// 结合 user 对象判断权限</span>
+  <span class="f">isLoggedIn</span>(state)  { <span class="k">return</span> !!state.user.id },
+  <span class="f">isAdmin</span>(state)     { <span class="k">return</span> state.user.roles.<span class="f">includes</span>(<span class="s">'admin'</span>) }
+}</div>
+
+      <div class="section-title">在组件中使用 Getters</div>
+      <div class="code-block"><span class="c">// 直接读</span>
+computed: {
+  cartCount() { <span class="k">return</span> <span class="k">this</span>.$store.getters.cartCount },
+  isAdmin()   { <span class="k">return</span> <span class="k">this</span>.$store.getters.isAdmin }
+}
+
+<span class="c">// 带参数的 getter（返回函数）</span>
+computed: {
+  <span class="f">article</span>() {
+    <span class="k">return</span> <span class="k">this</span>.$store.getters.<span class="f">getArticleById</span>(<span class="k">this</span>.articleId)
+  }
+}</div>
+
+      <div class="section-title">mapGetters 辅助函数</div>
+      <div class="code-block"><span class="k">import</span> { mapGetters } <span class="k">from</span> <span class="s">'vuex'</span>
+
+computed: {
+  <span class="c">// 数组：属性名和 getter 名相同</span>
+  ...<span class="f">mapGetters</span>([<span class="s">'cartCount'</span>, <span class="s">'cartTotal'</span>, <span class="s">'isLoggedIn'</span>, <span class="s">'isAdmin'</span>]),
+
+  <span class="c">// 对象：重命名</span>
+  ...<span class="f">mapGetters</span>({
+    total: <span class="s">'cartTotal'</span>,     <span class="c">// 本地叫 total，对应 getter 叫 cartTotal</span>
+    loggedIn: <span class="s">'isLoggedIn'</span>
+  })
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>State vs Getters：什么时候用哪个</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>场景</th><th>用 State 还是 Getter</th></tr></thead>
+          <tbody>
+            <tr><td>直接存储原始数据（用户ID、token、列表数据）</td><td style="color:#3fb950">State</td></tr>
+            <tr><td>数组的 length（如购物车件数）</td><td style="color:#d29922">Getter</td></tr>
+            <tr><td>数组过滤（如"已完成的任务"）</td><td style="color:#d29922">Getter</td></tr>
+            <tr><td>数组汇总（如"购物车总价"）</td><td style="color:#d29922">Getter</td></tr>
+            <tr><td>从 state 派生的布尔值（如 isLoggedIn = !!user.id）</td><td style="color:#d29922">Getter</td></tr>
+            <tr><td>根据 ID 查找某条数据</td><td style="color:#d29922">Getter（返回函数）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">对比：不用 Getter vs 用 Getter</div>
+      <div class="two-col">
+        <div>
+          <span class="vs-label vs-before">❌ 不用 Getter（每个组件重复写）</span>
+          <div class="code-block" style="font-size:0.78rem"><span class="c">// 组件A</span>
+computed: {
+  total() {
+    <span class="k">return</span> <span class="k">this</span>.$store.state.cartItems
+      .<span class="f">reduce</span>((s, i) => s + i.price, <span class="v">0</span>)
+  }
+}
+<span class="c">// 组件B 也要写一遍同样的代码</span></div>
+        </div>
+        <div>
+          <span class="vs-label vs-after">✅ 用 Getter（一处定义，多处复用）</span>
+          <div class="code-block" style="font-size:0.78rem"><span class="c">// store/index.js</span>
+getters: {
+  <span class="f">cartTotal</span>(state) {
+    <span class="k">return</span> state.cartItems
+      .<span class="f">reduce</span>((s,i)=>s+i.price, <span class="v">0</span>)
+  }
+}
+<span class="c">// 所有组件：this.$store.getters.cartTotal</span></div>
+        </div>
+      </div>
+
+      <div class="tip tip-blue">
+        📌 <strong>Getter 和组件 computed 的对比：</strong><br>
+        • 组件 <code>computed</code>：只在该组件内使用的计算属性<br>
+        • Vuex <code>getter</code>：需要在<strong>多个组件中共用</strong>的计算逻辑<br>
+        原则：如果只有一个组件用得到，直接写在组件的 computed 里；多个组件都需要，放到 Getter 里。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>完整示例：购物车状态管理</h2>
+    </div>
+    <div class="card-body">
+      <div class="code-block"><span class="c">// store/index.js</span>
+state: {
+  cartItems: [
+    <span class="c">// { id, name, price, qty }</span>
+  ],
+  user: { id: <span class="k">null</span>, name: <span class="s">''</span> }
+},
+
+getters: {
+  <span class="c">// 购物车件数（显示在导航栏角标）</span>
+  <span class="f">cartCount</span>: state =>
+    state.cartItems.<span class="f">reduce</span>((n, i) => n + i.qty, <span class="v">0</span>),
+
+  <span class="c">// 购物车总价</span>
+  <span class="f">cartTotal</span>: state =>
+    state.cartItems.<span class="f">reduce</span>((sum, i) => sum + i.price * i.qty, <span class="v">0</span>),
+
+  <span class="c">// 是否已登录</span>
+  <span class="f">isLoggedIn</span>: state => !!state.user.id,
+
+  <span class="c">// 某商品是否已在购物车（带参数）</span>
+  <span class="f">isInCart</span>: state => id =>
+    state.cartItems.<span class="f">some</span>(i => i.id === id)
+}</div>
+
+      <div class="code-block"><span class="c">// NavBar.vue — 显示购物车数量角标</span>
+<span class="k">import</span> { mapGetters } <span class="k">from</span> <span class="s">'vuex'</span>
+
+computed: {
+  ...<span class="f">mapGetters</span>([<span class="s">'cartCount'</span>, <span class="s">'isLoggedIn'</span>])
+}
+
+<span class="c">// 模板</span>
+<span class="t">&lt;span</span> <span class="a">class</span>=<span class="s">"badge"</span> <span class="a">v-if</span>=<span class="s">"cartCount > 0"</span><span class="t">&gt;</span>{{ cartCount }}<span class="t">&lt;/span&gt;</span>
+
+<span class="c">// CartPage.vue — 显示明细和总价</span>
+<span class="k">import</span> { mapState, mapGetters } <span class="k">from</span> <span class="s">'vuex'</span>
+
+computed: {
+  ...<span class="f">mapState</span>([<span class="s">'cartItems'</span>]),
+  ...<span class="f">mapGetters</span>([<span class="s">'cartTotal'</span>, <span class="s">'cartCount'</span>])
+}</div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  26-2 · State 与 Getters &nbsp;|&nbsp; 读取状态 / mapState / 派生数据 / mapGetters
+</div>
+</body>
+</html>

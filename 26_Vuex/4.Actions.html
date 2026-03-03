@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26-4 · Actions</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    strong { color: var(--text); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:640px){ .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vuex · Actions</h1>
+  <p class="page-lead">26-4 &nbsp;|&nbsp; Actions vs Mutations / context 对象 / 异步操作 / Action 组合 / mapActions</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>Actions vs Mutations</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对比项</th><th>Mutation</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>调用方式</td><td>commit('MUTATION', payload)</td><td>dispatch('action', payload)</td></tr>
+            <tr><td>是否允许异步</td><td>❌ 必须同步</td><td>✅ 可以异步（async/await、Promise）</td></tr>
+            <tr><td>直接修改 State?</td><td>✅ 是，直接修改</td><td>❌ 不行，通过 commit Mutation 间接修改</td></tr>
+            <tr><td>DevTools 追踪</td><td>每次 commit 都记录快照</td><td>记录 dispatch/完成，快照由 Mutation 触发</td></tr>
+            <tr><td>典型场景</td><td>简单赋值、数组增删</td><td>API 请求、定时器、多步骤操作</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip tip-yellow">
+        ⭐ <strong>简单规则：</strong>涉及异步（axios、setTimeout、Promise）→ 必须用 Action；只是改数据、没有副作用 → 直接 commit Mutation 即可，不需要绕一圈 Action。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>Action 的 context 对象</h2>
+    </div>
+    <div class="card-body">
+      <p>Action 函数接收一个叫 <code>context</code> 的对象，它包含和 Store 实例一样的属性：</p>
+
+      <div class="code-block">actions: {
+  <span class="c">// 完整写法</span>
+  <span class="f">myAction</span>(context) {
+    context.state    <span class="c">// 等同于 store.state</span>
+    context.getters  <span class="c">// 等同于 store.getters</span>
+    context.commit   <span class="c">// 等同于 store.commit</span>
+    context.dispatch <span class="c">// 等同于 store.dispatch（调用其他 action）</span>
+    context.rootState    <span class="c">// 模块内访问根 state（模块化时使用）</span>
+    context.rootGetters  <span class="c">// 模块内访问根 getters（模块化时使用）</span>
+  },
+
+  <span class="c">// 解构写法（实践中最常用）</span>
+  <span class="f">login</span>({ commit, state, dispatch }, credentials) {
+    <span class="c">// 直接拿到需要的方法，代码更简洁</span>
+    commit(<span class="s">'SET_LOADING'</span>, <span class="k">true</span>)
+  }
+}</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>context 解构是最佳实践</strong>：只解构你用到的部分，代码更清晰。<br>
+        <code>{ commit }</code>：只提交 mutation &nbsp;|&nbsp; <code>{ commit, dispatch }</code>：还需要调用其他 action &nbsp;|&nbsp; <code>{ state, commit }</code>：还需要读状态
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>dispatch 分发 Action</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">基本用法（在组件中）</div>
+      <div class="code-block"><span class="c">// 普通写法</span>
+<span class="k">this</span>.$store.<span class="f">dispatch</span>(<span class="s">'login'</span>, { username: <span class="s">'Alice'</span>, password: <span class="s">'123456'</span> })
+
+<span class="c">// 对象写法</span>
+<span class="k">this</span>.$store.<span class="f">dispatch</span>({
+  type: <span class="s">'login'</span>,
+  username: <span class="s">'Alice'</span>,
+  password: <span class="s">'123456'</span>
+})
+
+<span class="c">// dispatch 返回 Promise，可以 await</span>
+<span class="k">async</span> <span class="f">handleLogin</span>() {
+  <span class="k">try</span> {
+    <span class="k">await</span> <span class="k">this</span>.$store.<span class="f">dispatch</span>(<span class="s">'login'</span>, <span class="k">this</span>.form)
+    <span class="c">// 登录成功，跳转</span>
+    <span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/dashboard'</span>)
+  } <span class="k">catch</span> (err) {
+    <span class="c">// 登录失败，显示错误</span>
+    <span class="k">this</span>.errorMsg = err.message
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>Action 处理异步操作</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">典型模式：async/await + try/catch</div>
+      <div class="code-block">actions: {
+  <span class="c">// 登录：调用 API → 成功存 token + 用户 → 失败抛错误</span>
+  <span class="k">async</span> <span class="f">login</span>({ commit }, { username, password }) {
+    commit(<span class="s">'SET_LOADING'</span>, <span class="k">true</span>)
+    <span class="k">try</span> {
+      <span class="k">const</span> { data } = <span class="k">await</span> axios.<span class="f">post</span>(<span class="s">'/api/login'</span>, { username, password })
+      commit(<span class="s">'SET_TOKEN'</span>,  data.token)
+      commit(<span class="s">'SET_USER'</span>,   data.user)
+      <span class="k">return</span> data.user          <span class="c">// 组件 dispatch('login') 的 .then() 可拿到</span>
+    } <span class="k">catch</span> (error) {
+      commit(<span class="s">'SET_TOKEN'</span>, <span class="s">''</span>)
+      <span class="k">throw</span> error               <span class="c">// 继续向上抛，组件 .catch() 可处理</span>
+    } <span class="k">finally</span> {
+      commit(<span class="s">'SET_LOADING'</span>, <span class="k">false</span>)
+    }
+  },
+
+  <span class="c">// 获取商品列表（带分页参数）</span>
+  <span class="k">async</span> <span class="f">fetchProducts</span>({ commit }, { page = <span class="v">1</span>, pageSize = <span class="v">20</span> } = {}) {
+    <span class="k">const</span> { data } = <span class="k">await</span> axios.<span class="f">get</span>(<span class="s">'/api/products'</span>, {
+      params: { page, pageSize }
+    })
+    commit(<span class="s">'SET_PRODUCTS'</span>, data.list)
+    commit(<span class="s">'SET_TOTAL'</span>, data.total)
+  },
+
+  <span class="c">// 购物车：检查库存 → 加入购物车</span>
+  <span class="k">async</span> <span class="f">addToCart</span>({ commit, state }, product) {
+    <span class="k">const</span> alreadyInCart = state.cartItems.<span class="f">some</span>(i => i.id === product.id)
+    <span class="k">if</span> (alreadyInCart) {
+      commit(<span class="s">'INCREMENT_QTY'</span>, product.id)
+      <span class="k">return</span>
+    }
+    <span class="k">const</span> { data } = <span class="k">await</span> axios.<span class="f">get</span>(<span class="s">`/api/products/${product.id}/stock`</span>)
+    <span class="k">if</span> (data.stock > <span class="v">0</span>) {
+      commit(<span class="s">'ADD_TO_CART'</span>, product)
+    } <span class="k">else</span> {
+      <span class="k">throw new</span> <span class="f">Error</span>(<span class="s">'该商品库存不足'</span>)
+    }
+  }
+}</div>
+
+      <div class="tip tip-green">
+        ✅ <strong>Action 返回 Promise 的意义：</strong><br>
+        <code>dispatch()</code> 本质上返回 Action 函数的返回值（包装成 Promise）。<br>
+        用 <code>async</code> Action 意味着组件可以 <code>await dispatch()</code>，在 Action 完成后做跳转、提示等。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>Actions 之间相互调用</h2>
+    </div>
+    <div class="card-body">
+      <div class="code-block">actions: {
+  <span class="c">// fetchCart 依赖先加载用户信息</span>
+  <span class="k">async</span> <span class="f">initApp</span>({ dispatch }) {
+    <span class="k">await</span> dispatch(<span class="s">'fetchUser'</span>)      <span class="c">// 先获取用户</span>
+    <span class="k">await</span> dispatch(<span class="s">'fetchCart'</span>)      <span class="c">// 再获取购物车</span>
+    dispatch(<span class="s">'fetchNotifications'</span>)    <span class="c">// 通知可以并行，不用 await</span>
+  },
+
+  <span class="k">async</span> <span class="f">fetchUser</span>({ commit }) {
+    <span class="k">const</span> { data } = <span class="k">await</span> axios.<span class="f">get</span>(<span class="s">'/api/user'</span>)
+    commit(<span class="s">'SET_USER'</span>, data)
+  },
+
+  <span class="k">async</span> <span class="f">fetchCart</span>({ commit, state }) {
+    <span class="k">if</span> (!state.user) <span class="k">return</span>          <span class="c">// 未登录不加载</span>
+    <span class="k">const</span> { data } = <span class="k">await</span> axios.<span class="f">get</span>(<span class="s">`/api/cart/${state.user.id}`</span>)
+    commit(<span class="s">'SET_CART'</span>, data.items)
+  },
+
+  <span class="c">// 并行调用多个 Action</span>
+  <span class="k">async</span> <span class="f">fetchDashboard</span>({ dispatch }) {
+    <span class="k">await</span> Promise.<span class="f">all</span>([
+      dispatch(<span class="s">'fetchOrders'</span>),
+      dispatch(<span class="s">'fetchStats'</span>),
+      dispatch(<span class="s">'fetchNotifications'</span>)
+    ])
+    <span class="c">// 三个请求并发，全部完成后才继续</span>
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第六节</span>
+      <h2>mapActions 辅助函数</h2>
+    </div>
+    <div class="card-body">
+      <div class="code-block"><span class="k">import</span> { mapActions } <span class="k">from</span> <span class="s">'vuex'</span>
+
+methods: {
+  <span class="c">// 数组写法</span>
+  ...<span class="f">mapActions</span>([
+    <span class="s">'login'</span>,        <span class="c">// this.login(payload) → this.$store.dispatch('login', payload)</span>
+    <span class="s">'logout'</span>,
+    <span class="s">'fetchProducts'</span>
+  ]),
+
+  <span class="c">// 对象写法（重命名）</span>
+  ...<span class="f">mapActions</span>({
+    doLogin:  <span class="s">'login'</span>,     <span class="c">// this.doLogin(payload) → dispatch('login', payload)</span>
+    doLogout: <span class="s">'logout'</span>
+  }),
+
+  <span class="c">// 使用时和普通方法一样，可以传参、await</span>
+  <span class="k">async</span> <span class="f">handleLogin</span>() {
+    <span class="k">try</span> {
+      <span class="k">await</span> <span class="k">this</span>.<span class="f">login</span>(<span class="k">this</span>.form)
+      <span class="k">this</span>.$router.<span class="f">push</span>(<span class="s">'/dashboard'</span>)
+    } <span class="k">catch</span>(err) {
+      <span class="k">this</span>.error = err.message
+    }
+  }
+}</div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  26-4 · Actions &nbsp;|&nbsp; 异步操作 / dispatch / context / Promise / mapActions
+</div>
+</body>
+</html>

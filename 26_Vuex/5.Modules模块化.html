@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26-5 · Modules 模块化</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    strong { color: var(--text); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+    .dir-tree { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.83rem; line-height: 2; color: #94a3b8; }
+    .dir-tree .dir  { color: #58a6ff; }
+    .dir-tree .file { color: #7ee787; }
+    .dir-tree .note { color: #475569; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vuex · Modules 模块化</h1>
+  <p class="page-lead">26-5 &nbsp;|&nbsp; 为什么模块化 / 命名空间 / 在组件中访问模块 / 模块间通信 / 目录结构</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>为什么需要模块化</h2>
+    </div>
+    <div class="card-body">
+      <p>当应用变大，所有状态堆在一个 Store 里会变得难以维护：</p>
+      <ul style="color:#94a3b8; padding-left:20px; line-height:2.2; font-size:0.88rem">
+        <li>state 里有几十个属性，混在一起难以理解</li>
+        <li>mutations / actions 几百行，命名容易冲突</li>
+        <li>团队协作时，多人同时修改 store/index.js 频繁冲突</li>
+      </ul>
+      <p>Modules 允许将 Store 拆分为<strong>多个独立子模块</strong>，每个模块拥有自己的 state、getters、mutations、actions。</p>
+      <div class="tip tip-yellow">
+        ⭐ 典型拆分方式：按<strong>业务领域</strong>拆（user 模块、cart 模块、orders 模块），而不是按技术层级拆。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>模块定义与注册</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">定义子模块（store/modules/user.js）</div>
+      <div class="code-block"><span class="c">// store/modules/user.js</span>
+<span class="k">export default</span> {
+  <span class="k">namespaced</span>: <span class="k">true</span>,   <span class="c">// ← 开启命名空间（强烈推荐）</span>
+
+  state: () => ({       <span class="c">// 模块的 state 推荐写成函数（避免引用共享）</span>
+    id:     <span class="k">null</span>,
+    name:   <span class="s">''</span>,
+    token:  localStorage.<span class="f">getItem</span>(<span class="s">'token'</span>) || <span class="s">''</span>,
+    avatar: <span class="s">''</span>
+  }),
+
+  getters: {
+    <span class="f">isLoggedIn</span>: state => !!state.id,
+    <span class="f">displayName</span>: state => state.name || <span class="s">'未登录'</span>
+  },
+
+  mutations: {
+    <span class="f">SET_USER</span>(state, user) { Object.<span class="f">assign</span>(state, user) },
+    <span class="f">SET_TOKEN</span>(state, token) {
+      state.token = token
+      localStorage.<span class="f">setItem</span>(<span class="s">'token'</span>, token)
+    },
+    <span class="f">CLEAR</span>(state) {
+      state.id = <span class="k">null</span>; state.name = <span class="s">''</span>; state.token = <span class="s">''</span>
+      localStorage.<span class="f">removeItem</span>(<span class="s">'token'</span>)
+    }
+  },
+
+  actions: {
+    <span class="k">async</span> <span class="f">login</span>({ commit }, credentials) {
+      <span class="k">const</span> { data } = <span class="k">await</span> axios.<span class="f">post</span>(<span class="s">'/api/login'</span>, credentials)
+      commit(<span class="s">'SET_TOKEN'</span>, data.token)
+      commit(<span class="s">'SET_USER'</span>,  data.user)
+    },
+    <span class="f">logout</span>({ commit }) {
+      commit(<span class="s">'CLEAR'</span>)
+    }
+  }
+}</div>
+
+      <div class="section-title">注册到根 Store（store/index.js）</div>
+      <div class="code-block"><span class="k">import</span> Vue   <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> Vuex  <span class="k">from</span> <span class="s">'vuex'</span>
+<span class="k">import</span> user  <span class="k">from</span> <span class="s">'./modules/user'</span>
+<span class="k">import</span> cart  <span class="k">from</span> <span class="s">'./modules/cart'</span>
+<span class="k">import</span> order <span class="k">from</span> <span class="s">'./modules/order'</span>
+
+Vue.<span class="f">use</span>(Vuex)
+
+<span class="k">export default new</span> Vuex.<span class="f">Store</span>({
+  <span class="c">// 根级的 state/getters（全局共享的极少量状态）</span>
+  state: {
+    globalLoading: <span class="k">false</span>
+  },
+  mutations: {
+    <span class="f">SET_GLOBAL_LOADING</span>(state, v) { state.globalLoading = v }
+  },
+
+  <span class="c">// 注册模块</span>
+  modules: {
+    user,
+    cart,
+    order
+  }
+})</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>命名空间（namespaced: true）</h2>
+    </div>
+    <div class="card-body">
+      <p>不开启命名空间时，模块的 getters/mutations/actions 会合并到全局，容易命名冲突。<strong>推荐全部模块都开启 <code>namespaced: true</code></strong>。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>操作</th><th>无命名空间</th><th>有命名空间（user 模块）</th></tr></thead>
+          <tbody>
+            <tr><td>读 state</td><td>$store.state.user.id</td><td>$store.state.user.id（一样）</td></tr>
+            <tr><td>读 getter</td><td>$store.getters.isLoggedIn</td><td>$store.getters['user/isLoggedIn']</td></tr>
+            <tr><td>commit</td><td>$store.commit('SET_USER', u)</td><td>$store.commit('user/SET_USER', u)</td></tr>
+            <tr><td>dispatch</td><td>$store.dispatch('login', c)</td><td>$store.dispatch('user/login', c)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tip tip-red">
+        ⚠️ 命名空间的分隔符是 <code>/</code>，格式是 <code>'模块名/TYPE'</code>。<br>
+        嵌套模块可以多层：<code>'shop/cart/ADD'</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>在组件中访问模块（带命名空间）</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">直接访问</div>
+      <div class="code-block">computed: {
+  userId() { <span class="k">return</span> <span class="k">this</span>.$store.state.user.id },        <span class="c">// state 不受命名空间影响</span>
+  isLoggedIn() { <span class="k">return</span> <span class="k">this</span>.$store.getters[<span class="s">'user/isLoggedIn'</span>] },
+  cartCount() { <span class="k">return</span> <span class="k">this</span>.$store.getters[<span class="s">'cart/count'</span>] }
+},
+methods: {
+  <span class="f">login</span>(cred) { <span class="k">return</span> <span class="k">this</span>.$store.<span class="f">dispatch</span>(<span class="s">'user/login'</span>, cred) },
+  <span class="f">addItem</span>(item){ <span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'cart/ADD'</span>, item) }
+}</div>
+
+      <div class="section-title">mapState / mapGetters / mapActions / mapMutations + 命名空间</div>
+      <div class="code-block"><span class="k">import</span> { mapState, mapGetters, mapActions, mapMutations } <span class="k">from</span> <span class="s">'vuex'</span>
+
+computed: {
+  <span class="c">// 方式1：第一参数传模块名（字符串）</span>
+  ...<span class="f">mapState</span>(<span class="s">'user'</span>, [<span class="s">'id'</span>, <span class="s">'name'</span>, <span class="s">'token'</span>]),
+  ...<span class="f">mapGetters</span>(<span class="s">'user'</span>, [<span class="s">'isLoggedIn'</span>, <span class="s">'displayName'</span>]),
+
+  <span class="c">// 方式2：createNamespacedHelpers（整个组件只用一个模块时最简洁）</span>
+},
+
+methods: {
+  ...<span class="f">mapActions</span>(<span class="s">'user'</span>, [<span class="s">'login'</span>, <span class="s">'logout'</span>]),
+  ...<span class="f">mapMutations</span>(<span class="s">'cart'</span>, [<span class="s">'ADD'</span>, <span class="s">'REMOVE'</span>, <span class="s">'CLEAR'</span>])
+}</div>
+
+      <div class="section-title">createNamespacedHelpers（组件专注单一模块时最优）</div>
+      <div class="code-block"><span class="k">import</span> { createNamespacedHelpers } <span class="k">from</span> <span class="s">'vuex'</span>
+<span class="k">const</span> { mapState, mapGetters, mapActions } = <span class="f">createNamespacedHelpers</span>(<span class="s">'user'</span>)
+
+<span class="c">// 之后 mapState/mapGetters/mapActions 都自动带上 'user/' 前缀</span>
+computed: {
+  ...<span class="f">mapState</span>([<span class="s">'id'</span>, <span class="s">'name'</span>]),      <span class="c">// → state.user.id, state.user.name</span>
+  ...<span class="f">mapGetters</span>([<span class="s">'isLoggedIn'</span>])    <span class="c">// → getters['user/isLoggedIn']</span>
+},
+methods: {
+  ...<span class="f">mapActions</span>([<span class="s">'login'</span>, <span class="s">'logout'</span>])  <span class="c">// → dispatch('user/login')</span>
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>模块间通信（rootState / rootGetters）</h2>
+    </div>
+    <div class="card-body">
+      <p>模块内的 getters 和 actions 可以通过额外参数访问根 state 和其他模块的数据：</p>
+
+      <div class="section-title">Getters 中访问根 state</div>
+      <div class="code-block"><span class="c">// store/modules/cart.js</span>
+getters: {
+  <span class="c">// getter 参数：(localState, localGetters, rootState, rootGetters)</span>
+  <span class="f">cartWithUserInfo</span>(state, getters, rootState, rootGetters) {
+    <span class="k">const</span> user = rootState.user                <span class="c">// 访问 user 模块的 state</span>
+    <span class="k">const</span> isVip = rootGetters[<span class="s">'user/isVip'</span>]  <span class="c">// 访问 user 模块的 getter</span>
+    <span class="k">return</span> {
+      items: state.items,
+      owner: user.name,
+      discount: isVip ? <span class="v">0.9</span> : <span class="v">1.0</span>
+    }
+  }
+}</div>
+
+      <div class="section-title">Actions 中访问根 store / 调用其他模块的 Action</div>
+      <div class="code-block"><span class="c">// store/modules/cart.js</span>
+actions: {
+  <span class="c">// action 中 context 也可解构 rootState / rootGetters</span>
+  <span class="k">async</span> <span class="f">checkout</span>({ state, commit, dispatch, rootState, rootGetters }) {
+    <span class="k">const</span> userId = rootState.user.id           <span class="c">// 读 user 模块 state</span>
+    <span class="k">if</span> (!rootGetters[<span class="s">'user/isLoggedIn'</span>]) {
+      <span class="c">// 调用根级 action（不加命名空间）</span>
+      dispatch(<span class="s">'showLoginDialog'</span>, <span class="k">null</span>, { root: <span class="k">true</span> })
+      <span class="k">return</span>
+    }
+    <span class="k">const</span> { data } = <span class="k">await</span> api.<span class="f">checkout</span>({ userId, items: state.items })
+    commit(<span class="s">'CLEAR'</span>)                           <span class="c">// commit 本模块的 mutation</span>
+    <span class="c">// 调用其他模块的 action</span>
+    dispatch(<span class="s">'order/fetchList'</span>, <span class="k">null</span>, { root: <span class="k">true</span> })
+  }
+}</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>跨模块调用规则：</strong><br>
+        • 在模块内 <code>commit/dispatch</code> 时，不加路径 → 调用<strong>本模块</strong>的 mutation/action<br>
+        • 加 <code>{ root: true }</code> 选项 → 调用<strong>根级</strong>或<strong>其他模块</strong>（加全路径 <code>'order/fetchList'</code>）
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第六节</span>
+      <h2>大型项目 Store 目录结构</h2>
+    </div>
+    <div class="card-body">
+      <div class="dir-tree"><span class="dir">src/store/</span>
+├── <span class="file">index.js</span>            <span class="note">← 根 Store，注册所有模块</span>
+├── <span class="file">mutation-types.js</span>  <span class="note">← 全局通用 Mutation 常量</span>
+├── <span class="file">plugins.js</span>         <span class="note">← Vuex 插件（如 persisted state）</span>
+└── <span class="dir">modules/</span>
+    ├── <span class="dir">user/</span>
+    │   ├── <span class="file">index.js</span>         <span class="note">← 模块入口（汇总 state/getters/mutations/actions）</span>
+    │   ├── <span class="file">state.js</span>
+    │   ├── <span class="file">getters.js</span>
+    │   ├── <span class="file">mutations.js</span>
+    │   ├── <span class="file">actions.js</span>
+    │   └── <span class="file">types.js</span>        <span class="note">← 该模块专用常量</span>
+    ├── <span class="dir">cart/</span>
+    │   └── <span class="file">index.js</span>         <span class="note">← 简单模块可以合并在一个文件</span>
+    └── <span class="dir">order/</span>
+        └── <span class="file">index.js</span></div>
+
+      <div class="code-block"><span class="c">// store/modules/user/index.js — 拆分写法示例</span>
+<span class="k">import</span> state     <span class="k">from</span> <span class="s">'./state'</span>
+<span class="k">import</span> getters   <span class="k">from</span> <span class="s">'./getters'</span>
+<span class="k">import</span> mutations <span class="k">from</span> <span class="s">'./mutations'</span>
+<span class="k">import</span> actions   <span class="k">from</span> <span class="s">'./actions'</span>
+
+<span class="k">export default</span> {
+  namespaced: <span class="k">true</span>,
+  state,
+  getters,
+  mutations,
+  actions
+}</div>
+
+      <div class="tip tip-green">
+        ✅ <strong>建议：</strong><br>
+        • 小型项目（&lt;5个模块，每个模块&lt;100行）：直接写在 <code>modules/xxx.js</code> 单文件里<br>
+        • 中大型项目：每个模块建子目录，按 state/getters/mutations/actions 拆分<br>
+        • <code>namespaced: true</code> 永远都要加，防止命名冲突
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  26-5 · Modules &nbsp;|&nbsp; 模块化 / 命名空间 / 跨模块通信 / 目录结构
+</div>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26-1 · Vuex 基本概念</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; } .n { color: #e6edf3; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    strong { color: var(--text); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+    .flow-box { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 12px 0; font-family: monospace; font-size: 0.82rem; line-height: 2.2; white-space: pre; overflow-x: auto; }
+    .arch-diagram { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 12px 0; text-align: center; }
+    .arch-box { display: inline-block; padding: 8px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; margin: 4px; }
+    .box-blue { background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.4); color: #58a6ff; }
+    .box-green { background: rgba(63,185,80,0.15); border: 1px solid rgba(63,185,80,0.4); color: #3fb950; }
+    .box-yellow { background: rgba(210,153,34,0.15); border: 1px solid rgba(210,153,34,0.4); color: #d29922; }
+    .box-purple { background: rgba(188,140,255,0.15); border: 1px solid rgba(188,140,255,0.4); color: #bc8cff; }
+    .box-orange { background: rgba(255,166,87,0.15); border: 1px solid rgba(255,166,87,0.4); color: #ffa657; }
+    .arrow { color: #475569; font-size: 1.2rem; vertical-align: middle; margin: 0 4px; }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vuex · 基本概念</h1>
+  <p class="page-lead">26-1 &nbsp;|&nbsp; 为什么需要 Vuex / 五大核心概念 / store 入门 / 与 Vue Router 的区别</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>为什么需要 Vuex？</h2>
+    </div>
+    <div class="card-body">
+      <p>在学习 Vue Router 时，我们已经能在多个页面之间跳转。但一个新问题出现了：<strong>多个无关联组件之间怎么共享数据？</strong></p>
+
+      <div class="section-title">没有 Vuex 时的困境</div>
+      <div class="two-col">
+        <div style="background:rgba(248,81,73,0.05); border:1px solid rgba(248,81,73,0.2); border-radius:8px; padding:14px">
+          <div style="color:#f85149; font-weight:700; margin-bottom:8px">❌ 跨组件传数据很麻烦</div>
+          <ul style="list-style:none; padding:0; font-size:0.83rem; color:#94a3b8; line-height:2">
+            <li>父子通信：props + $emit ✓</li>
+            <li>兄弟通信：Event Bus（容易失控）</li>
+            <li>祖孙通信：provide/inject（不响应式）</li>
+            <li>跨页面通信：localStorage？❌ 不够优雅</li>
+            <li>多层嵌套：props 地狱</li>
+          </ul>
+        </div>
+        <div style="background:rgba(63,185,80,0.05); border:1px solid rgba(63,185,80,0.2); border-radius:8px; padding:14px">
+          <div style="color:#3fb950; font-weight:700; margin-bottom:8px">✅ 哪些状态需要共享</div>
+          <ul style="list-style:none; padding:0; font-size:0.83rem; color:#94a3b8; line-height:2">
+            <li>🔐 登录用户信息（多处读取）</li>
+            <li>🛒 购物车数量（导航栏 + 购物车页）</li>
+            <li>🌙 主题/语言设置（全局生效）</li>
+            <li>📢 消息通知数量（随时更新）</li>
+            <li>🔑 用户权限信息（路由守卫用）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-title">Vuex 的核心思想</div>
+      <p>把这些<strong>需要在多个组件之间共享的状态</strong>，统一放到一个叫做 <strong>Store（仓库）</strong>的地方集中管理。任何组件都可以直接读取，也可以通知 Store 修改状态，修改后所有依赖该状态的组件都会自动更新。</p>
+
+      <div class="arch-diagram">
+        <div style="margin-bottom: 16px; color: #475569; font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase">Vuex 的核心理念</div>
+        <div>
+          <span class="arch-box box-blue">组件 A</span>
+          <span class="arch-box box-blue">组件 B</span>
+          <span class="arch-box box-blue">组件 C</span>
+        </div>
+        <div style="color:#475569; margin: 8px 0; font-size:1.2rem">↕ &nbsp; 读取 / 提交变更</div>
+        <div>
+          <span class="arch-box box-orange" style="font-size:0.95rem; padding:10px 28px">Vuex Store（单一数据源）</span>
+        </div>
+      </div>
+
+      <div class="tip tip-yellow">
+        ⭐ <strong>Vuex 的哲学来自 Flux / Redux</strong>：单向数据流，状态变化可追踪，调试更方便。<br>
+        <strong>口诀</strong>：<code>组件</code> 读 <code>State</code>，<code>组件</code> 通过 <code>Action → Mutation</code> 改 <code>State</code>，<code>State</code> 变化自动刷新视图。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>Vuex 五大核心概念</h2>
+    </div>
+    <div class="card-body">
+      <p>Vuex Store 由 5 个部分组成，记住下面这张图就记住了 Vuex 的全部：</p>
+
+      <div class="arch-diagram" style="text-align:left; line-height:2">
+        <div style="text-align:center; margin-bottom: 16px; color: #475569; font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase">Vuex 数据流向图</div>
+        <div style="text-align:center">
+          <span class="arch-box box-blue">Vue 组件</span>
+        </div>
+        <div style="text-align:center; color:#475569; font-size:0.8rem; margin: 4px 0">
+          &nbsp;&nbsp;&nbsp;&nbsp;⬇ dispatch('action名', 载荷) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⬆ 读取 state / getters
+        </div>
+        <div style="text-align:center">
+          <span class="arch-box box-purple">Actions（动作）</span>
+          <span style="color:#475569; margin:0 8px">— commit →</span>
+          <span class="arch-box box-yellow">Mutations（变更）</span>
+          <span style="color:#475569; margin:0 8px">— mutate →</span>
+          <span class="arch-box box-green">State（状态）</span>
+        </div>
+        <div style="text-align:center; color:#475569; font-size:0.8rem; margin: 4px 0">
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;可做异步操作&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;只能同步&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 唯一数据源
+        </div>
+        <div style="text-align:center; margin-top:10px">
+          <span class="arch-box box-teal" style="background:rgba(57,214,192,0.15); border:1px solid rgba(57,214,192,0.4); color:#39d6c0">Getters（计算状态）</span>
+          <span style="color:#475569; font-size:0.82rem; margin-left:10px">← 基于 State 派生，类似 computed</span>
+        </div>
+        <div style="text-align:center; margin-top:8px">
+          <span class="arch-box box-orange">Modules（模块）</span>
+          <span style="color:#475569; font-size:0.82rem; margin-left:10px">← 将 Store 拆分为多个独立模块</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>概念</th><th>类比</th><th>作用</th><th>对应 Vue 选项</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>State</td>
+              <td>仓库的"库存数据"</td>
+              <td>存放共享状态，唯一数据源</td>
+              <td>data</td>
+            </tr>
+            <tr>
+              <td>Getters</td>
+              <td>仓库的"统计报表"</td>
+              <td>从 State 派生出新数据，有缓存</td>
+              <td>computed</td>
+            </tr>
+            <tr>
+              <td>Mutations</td>
+              <td>仓库的"入库单"</td>
+              <td>唯一可以直接修改 State 的地方，<strong>必须同步</strong></td>
+              <td>methods（同步）</td>
+            </tr>
+            <tr>
+              <td>Actions</td>
+              <td>仓库的"采购员"</td>
+              <td>处理异步操作，最终 commit Mutation</td>
+              <td>methods（异步）</td>
+            </tr>
+            <tr>
+              <td>Modules</td>
+              <td>仓库的"分区"</td>
+              <td>将大 Store 拆分为多个小模块</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tip tip-red">
+        ⚠️ <strong>最重要的规则：State 只能通过 Mutation 修改！</strong><br>
+        不能直接写 <code>this.$store.state.count = 5</code>（虽然技术上可以但绝对不要）。<br>
+        这样做的目的是让状态变化可追踪（Vuex DevTools 能记录每次变更）。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>第一个 Vuex Store（安装与基础配置）</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">安装</div>
+      <div class="code-block"><span class="c"># Vue 2 对应 Vuex 3</span>
+npm install vuex@3
+
+<span class="c"># Vue 3 对应 Vuex 4</span>
+npm install vuex@4</div>
+
+      <div class="section-title">创建 Store（src/store/index.js）</div>
+      <div class="code-block"><span class="k">import</span> Vue  <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> Vuex <span class="k">from</span> <span class="s">'vuex'</span>
+
+Vue.<span class="f">use</span>(Vuex)   <span class="c">// 注册插件</span>
+
+<span class="k">const</span> store = <span class="k">new</span> Vuex.<span class="f">Store</span>({
+  <span class="c">// State：共享的数据</span>
+  state: {
+    count: <span class="v">0</span>,
+    username: <span class="s">''</span>,
+    cartItems: []
+  },
+
+  <span class="c">// Getters：从 state 派生的计算属性</span>
+  getters: {
+    cartCount(state) {
+      <span class="k">return</span> state.cartItems.<span class="f">length</span>
+    },
+    <span class="c">// 接收其他 getter 作为第二参数</span>
+    cartTotal(state, getters) {
+      <span class="k">return</span> state.cartItems.<span class="f">reduce</span>((sum, item) => sum + item.price, <span class="v">0</span>)
+    }
+  },
+
+  <span class="c">// Mutations：同步修改 state（唯一合法途径）</span>
+  mutations: {
+    <span class="f">INCREMENT</span>(state) {
+      state.count++
+    },
+    <span class="f">SET_USERNAME</span>(state, name) {     <span class="c">// 第二参数叫"载荷（payload）"</span>
+      state.username = name
+    },
+    <span class="f">ADD_TO_CART</span>(state, item) {
+      state.cartItems.<span class="f">push</span>(item)
+    }
+  },
+
+  <span class="c">// Actions：可以异步，最终调用 mutation</span>
+  actions: {
+    <span class="k">async</span> <span class="f">fetchUser</span>({ commit }, userId) {
+      <span class="k">const</span> user = <span class="k">await</span> api.<span class="f">getUser</span>(userId)
+      commit(<span class="s">'SET_USERNAME'</span>, user.name)
+    }
+  }
+})
+
+<span class="k">export default</span> store</div>
+
+      <div class="section-title">挂载到 Vue 实例（main.js）</div>
+      <div class="code-block"><span class="k">import</span> Vue  <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> App   <span class="k">from</span> <span class="s">'./App.vue'</span>
+<span class="k">import</span> router <span class="k">from</span> <span class="s">'./router'</span>
+<span class="k">import</span> store  <span class="k">from</span> <span class="s">'./store'</span>   <span class="c">// ← 引入 store</span>
+
+<span class="k">new</span> <span class="f">Vue</span>({
+  router,
+  store,    <span class="c">// ← 挂载到实例，之后所有组件都可以通过 this.$store 访问</span>
+  render: h => <span class="f">h</span>(App)
+}).<span class="f">$mount</span>(<span class="s">'#app'</span>)</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>在组件中使用 Store</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">读取 State 和 Getters</div>
+      <div class="code-block"><span class="c">// 在组件中通过 this.$store 访问</span>
+computed: {
+  <span class="c">// 读取 state</span>
+  count()    { <span class="k">return</span> <span class="k">this</span>.$store.state.count },
+  username() { <span class="k">return</span> <span class="k">this</span>.$store.state.username },
+
+  <span class="c">// 读取 getter（已缓存，等同于 computed）</span>
+  cartCount()  { <span class="k">return</span> <span class="k">this</span>.$store.getters.cartCount },
+  cartTotal()  { <span class="k">return</span> <span class="k">this</span>.$store.getters.cartTotal }
+}</div>
+
+      <div class="section-title">提交 Mutation（同步修改）</div>
+      <div class="code-block">methods: {
+  <span class="f">add</span>() {
+    <span class="c">// commit('mutation名称'[, 载荷])</span>
+    <span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'INCREMENT'</span>)
+    <span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'SET_USERNAME'</span>, <span class="s">'Alice'</span>)
+
+    <span class="c">// 对象写法（载荷是对象）</span>
+    <span class="k">this</span>.$store.<span class="f">commit</span>({ type: <span class="s">'ADD_TO_CART'</span>, item: { id: <span class="v">1</span>, price: <span class="v">99</span> } })
+  }
+}</div>
+
+      <div class="section-title">分发 Action（异步操作）</div>
+      <div class="code-block">methods: {
+  <span class="k">async</span> <span class="f">loadUser</span>() {
+    <span class="c">// dispatch('action名称'[, 载荷])</span>
+    <span class="k">await</span> <span class="k">this</span>.$store.<span class="f">dispatch</span>(<span class="s">'fetchUser'</span>, <span class="k">this</span>.userId)
+  }
+}</div>
+
+      <div class="tip tip-blue">
+        📌 <strong>$store 在任意组件中都可以使用</strong>，因为我们在 main.js 里把 store 注入了 Vue 实例。<br>
+        后面会学到辅助函数（<code>mapState</code> / <code>mapGetters</code> / <code>mapMutations</code> / <code>mapActions</code>），可以大幅简化写法。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>Vuex vs Vue Router：各司其职</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对比项</th><th>Vue Router</th><th>Vuex</th></tr></thead>
+          <tbody>
+            <tr><td>解决什么问题</td><td>页面导航 / URL 映射</td><td>跨组件状态共享</td></tr>
+            <tr><td>核心对象</td><td>$router（导航）/ $route（当前路由信息）</td><td>$store（全局状态仓库）</td></tr>
+            <tr><td>数据流向</td><td>URL → 组件渲染</td><td>组件 → Action → Mutation → State → 组件</td></tr>
+            <tr><td>常用 API</td><td>push / replace / beforeEach</td><td>commit / dispatch / mapState</td></tr>
+            <tr><td>典型场景</td><td>从列表跳详情、登录重定向</td><td>购物车、用户信息、消息数量</td></tr>
+            <tr><td>配合使用</td><td colspan="2">路由守卫里读取 Vuex 用户权限，决定是否允许访问某路由</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip tip-green">
+        ✅ <strong>两者经常配合：</strong>在 <code>router.beforeEach</code> 里读取 <code>store.getters.isLoggedIn</code> 来做权限判断 — 这是企业项目中最常见的模式！
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第六节</span>
+      <h2>Vuex 完整数据流图（口诀速记）</h2>
+    </div>
+    <div class="card-body">
+      <div class="flow-box"><span style="color:#58a6ff">组件需要读数据</span>：
+  组件 → this.$store.<span style="color:#3fb950">state</span>.xxx     直接读
+  组件 → this.$store.<span style="color:#39d6c0">getters</span>.xxx   读计算后的值
+
+<span style="color:#58a6ff">组件需要改数据</span>：
+  同步操作：
+  组件 → this.$store.<span style="color:#ffa657">commit</span>('MUTATION_NAME', payload)
+                         ↓
+                    <span style="color:#d29922">Mutation</span> 直接修改 state
+
+  异步操作（API 请求等）：
+  组件 → this.$store.<span style="color:#bc8cff">dispatch</span>('actionName', payload)
+                         ↓
+                    <span style="color:#bc8cff">Action</span> 执行异步逻辑
+                         ↓
+                    commit Mutation
+                         ↓
+                    <span style="color:#d29922">Mutation</span> 修改 state
+                         ↓
+                    视图自动更新 ✅</div>
+
+      <div class="tip tip-yellow">
+        ⭐ <strong>什么时候用 Action，什么时候用 Mutation？</strong><br>
+        • 需要调用 API / setTimeout / Promise → 用 <strong>Action</strong><br>
+        • 只是简单修改数据 → 直接 <strong>commit Mutation</strong>（不必走 Action）<br>
+        • 口诀：<strong>有副作用（异步）用 Action，纯数据变更用 Mutation</strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  26-1 · Vuex 基本概念 &nbsp;|&nbsp; 为什么需要 / 五大核心 / Store 入门 / 单向数据流
+</div>
+</body>
+</html>

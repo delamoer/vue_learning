@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26-3 · Mutations</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --yellow: #d29922; --red: #f85149;
+      --purple: #bc8cff; --orange: #ffa657; --teal: #39d6c0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','PingFang SC',sans-serif; font-size: 15px; line-height: 1.7; padding: 32px 16px; }
+    h1 { font-size: 1.7rem; color: var(--accent); margin-bottom: 6px; }
+    h2 { font-size: 1.15rem; color: var(--text); margin: 0; }
+    .page-lead { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+    .content-wrap { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
+    .card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .card-body { padding: 22px; }
+    .badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-teal   { background: rgba(57,214,192,0.15);  color: var(--teal); }
+    .section-title { font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 20px 0 12px; }
+    .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: 0.82rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #8b949e; font-style: italic; }
+    .f { color: #d2a8ff; } .v { color: #79c0ff; } .t { color: #7ee787; }
+    .a { color: #ffa657; }
+    p { color: #94a3b8; line-height: 1.75; margin: 8px 0; }
+    .tip { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 0.85rem; line-height: 1.7; }
+    .tip-blue   { background: rgba(88,166,255,0.08);  border-left: 3px solid var(--accent); }
+    .tip-green  { background: rgba(63,185,80,0.08);   border-left: 3px solid var(--green); }
+    .tip-yellow { background: rgba(210,153,34,0.08);  border-left: 3px solid var(--yellow); }
+    .tip-red    { background: rgba(248,81,73,0.08);   border-left: 3px solid var(--red); }
+    code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    strong { color: var(--text); }
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #21262d; color: var(--muted); font-weight: 600; padding: 9px 14px; text-align: left; border: 1px solid var(--border); }
+    td { padding: 9px 14px; border: 1px solid var(--border); color: #94a3b8; vertical-align: top; }
+    td:first-child { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+    @media(max-width:640px){ .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="content-wrap">
+
+  <h1>Vuex · Mutations</h1>
+  <p class="page-lead">26-3 &nbsp;|&nbsp; 提交变更 / 载荷 / 对象提交 / Mutation 类型常量 / mapMutations / 响应式规则</p>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-blue">第一节</span>
+      <h2>Mutation 是什么</h2>
+    </div>
+    <div class="card-body">
+      <p>Mutation 是 Vuex 中<strong>唯一合法修改 State 的方式</strong>。它是一个函数，接收 state 作为第一参数，在函数体内直接修改 state。</p>
+      <p><strong>必须是同步函数</strong> — Vuex DevTools 会记录每次 Mutation 前后的 State 快照，异步操作无法快照（用 Action 处理异步）。</p>
+
+      <div class="section-title">定义 Mutation</div>
+      <div class="code-block">mutations: {
+  <span class="c">// 最简单的 mutation（无载荷）</span>
+  <span class="f">INCREMENT</span>(state) {
+    state.count++
+  },
+
+  <span class="f">RESET_COUNT</span>(state) {
+    state.count = <span class="v">0</span>
+  },
+
+  <span class="c">// 带载荷（payload）的 mutation</span>
+  <span class="f">SET_COUNT</span>(state, payload) {
+    state.count = payload          <span class="c">// payload 是原始值</span>
+  },
+
+  <span class="f">SET_USER</span>(state, user) {
+    state.user = user              <span class="c">// payload 是对象</span>
+  },
+
+  <span class="f">ADD_TO_CART</span>(state, item) {
+    <span class="k">const</span> found = state.cartItems.<span class="f">find</span>(i => i.id === item.id)
+    <span class="k">if</span> (found) {
+      found.qty++                  <span class="c">// 已存在：数量+1</span>
+    } <span class="k">else</span> {
+      state.cartItems.<span class="f">push</span>({ ...item, qty: <span class="v">1</span> })
+    }
+  },
+
+  <span class="f">REMOVE_FROM_CART</span>(state, itemId) {
+    state.cartItems = state.cartItems.<span class="f">filter</span>(i => i.id !== itemId)
+  },
+
+  <span class="f">CLEAR_CART</span>(state) {
+    state.cartItems = []
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-green">第二节</span>
+      <h2>提交 Mutation（commit）</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">普通写法</div>
+      <div class="code-block"><span class="c">// this.$store.commit('MUTATION_NAME', payload)</span>
+<span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'INCREMENT'</span>)
+<span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'SET_COUNT'</span>, <span class="v">10</span>)
+<span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'SET_USER'</span>, { id: <span class="v">1</span>, name: <span class="s">'Alice'</span> })
+<span class="k">this</span>.$store.<span class="f">commit</span>(<span class="s">'ADD_TO_CART'</span>, { id: <span class="v">42</span>, name: <span class="s">'商品A'</span>, price: <span class="v">99</span> })</div>
+
+      <div class="section-title">对象提交方式（载荷信息更完整）</div>
+      <div class="code-block"><span class="c">// commit({ type, ...payload })</span>
+<span class="k">this</span>.$store.<span class="f">commit</span>({
+  type: <span class="s">'ADD_TO_CART'</span>,
+  id:    <span class="v">42</span>,
+  name:  <span class="s">'商品A'</span>,
+  price: <span class="v">99</span>
+})
+
+<span class="c">// 此时 mutation 接收到的 payload 是整个对象（包含 type）</span>
+<span class="f">ADD_TO_CART</span>(state, payload) {
+  <span class="c">// payload = { type: 'ADD_TO_CART', id: 42, name: '商品A', price: 99 }</span>
+  state.cartItems.<span class="f">push</span>(payload)
+}</div>
+
+      <div class="section-title">mapMutations 辅助函数</div>
+      <div class="code-block"><span class="k">import</span> { mapMutations } <span class="k">from</span> <span class="s">'vuex'</span>
+
+methods: {
+  <span class="c">// 数组写法：生成同名方法</span>
+  ...<span class="f">mapMutations</span>([
+    <span class="s">'INCREMENT'</span>,          <span class="c">// this.INCREMENT() → this.$store.commit('INCREMENT')</span>
+    <span class="s">'RESET_COUNT'</span>,
+    <span class="s">'CLEAR_CART'</span>
+  ]),
+
+  <span class="c">// 对象写法：重命名</span>
+  ...<span class="f">mapMutations</span>({
+    add:   <span class="s">'INCREMENT'</span>,    <span class="c">// this.add() → this.$store.commit('INCREMENT')</span>
+    reset: <span class="s">'RESET_COUNT'</span>
+  }),
+
+  <span class="c">// 使用时可以直接传载荷</span>
+  <span class="f">handleAdd</span>() {
+    <span class="k">this</span>.<span class="f">ADD_TO_CART</span>({ id: <span class="v">1</span>, name: <span class="s">'商品'</span>, price: <span class="v">99</span> })
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-yellow">第三节</span>
+      <h2>Mutation 类型常量（推荐做法）</h2>
+    </div>
+    <div class="card-body">
+      <p>用字符串的 Mutation 名称容易拼写错误，且无法享受编辑器自动补全。推荐将 Mutation 类型提取为常量：</p>
+
+      <div class="code-block"><span class="c">// store/mutation-types.js</span>
+<span class="k">export const</span> INCREMENT        = <span class="s">'INCREMENT'</span>
+<span class="k">export const</span> RESET_COUNT      = <span class="s">'RESET_COUNT'</span>
+<span class="k">export const</span> SET_USER         = <span class="s">'SET_USER'</span>
+<span class="k">export const</span> SET_TOKEN        = <span class="s">'SET_TOKEN'</span>
+<span class="k">export const</span> CLEAR_USER       = <span class="s">'CLEAR_USER'</span>
+<span class="k">export const</span> ADD_TO_CART      = <span class="s">'ADD_TO_CART'</span>
+<span class="k">export const</span> REMOVE_FROM_CART = <span class="s">'REMOVE_FROM_CART'</span>
+<span class="k">export const</span> CLEAR_CART       = <span class="s">'CLEAR_CART'</span></div>
+
+      <div class="code-block"><span class="c">// store/index.js</span>
+<span class="k">import</span> * <span class="k">as</span> types <span class="k">from</span> <span class="s">'./mutation-types'</span>
+
+mutations: {
+  <span class="c">// 用计算属性名语法 [types.XXX]</span>
+  [types.INCREMENT](state) {
+    state.count++
+  },
+  [types.SET_USER](state, user) {
+    state.user = user
+  },
+  [types.ADD_TO_CART](state, item) {
+    state.cartItems.<span class="f">push</span>(item)
+  }
+}</div>
+
+      <div class="code-block"><span class="c">// 组件中提交</span>
+<span class="k">import</span> { ADD_TO_CART } <span class="k">from</span> <span class="s">'@/store/mutation-types'</span>
+
+methods: {
+  <span class="f">addToCart</span>(item) {
+    <span class="k">this</span>.$store.<span class="f">commit</span>(ADD_TO_CART, item)
+    <span class="c">// 常量名错误 → 编辑器/编译器会报错，而不是运行时默默失效</span>
+  }
+}</div>
+
+      <div class="tip tip-yellow">
+        ⭐ <strong>为什么 Mutation 名约定全大写？</strong><br>
+        全大写是社区约定（类似 Redux 的 action type），一眼就能区分"这是 Mutation 提交"而不是普通方法调用。小型项目可以不这么做，但大型项目建议遵守。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-purple">第四节</span>
+      <h2>Mutation 中的响应式规则</h2>
+    </div>
+    <div class="card-body">
+      <p>Vuex 的 State 遵循 Vue 2 的响应式规则，有一些操作不会触发视图更新：</p>
+
+      <div class="section-title">❌ 不是响应式的操作</div>
+      <div class="code-block"><span class="c">// ❌ 直接给对象添加新属性（不响应式）</span>
+<span class="f">WRONG_ADD</span>(state, { key, value }) {
+  state.obj[key] = value            <span class="c">// 视图不更新！</span>
+}
+
+<span class="c">// ❌ 直接给数组赋值（某些情况）</span>
+<span class="f">WRONG_SPLICE</span>(state, index) {
+  state.arr[index] = <span class="s">'new'</span>          <span class="c">// 视图不更新！</span>
+  <span class="c">// delete state.arr[index]        // 也不响应！</span>
+}</div>
+
+      <div class="section-title">✅ 正确做法</div>
+      <div class="code-block"><span class="c">// ✅ 给对象添加新属性：Vue.set 或对象展开</span>
+<span class="k">import</span> Vue <span class="k">from</span> <span class="s">'vue'</span>
+
+<span class="f">ADD_OBJ_PROP</span>(state, { key, value }) {
+  Vue.<span class="f">set</span>(state.obj, key, value)     <span class="c">// 响应式添加</span>
+  <span class="c">// 或者：</span>
+  state.obj = { ...state.obj, [key]: value }  <span class="c">// 替换整个对象</span>
+}
+
+<span class="c">// ✅ 修改数组元素：Vue.set 或 splice</span>
+<span class="f">UPDATE_ITEM</span>(state, { index, value }) {
+  Vue.<span class="f">set</span>(state.arr, index, value)    <span class="c">// 响应式修改</span>
+  <span class="c">// 或：</span>
+  state.arr.<span class="f">splice</span>(index, <span class="v">1</span>, value)    <span class="c">// splice 是响应式的</span>
+}
+
+<span class="c">// ✅ 删除对象属性：Vue.delete</span>
+<span class="f">DEL_OBJ_PROP</span>(state, key) {
+  Vue.<span class="f">delete</span>(state.obj, key)
+}
+
+<span class="c">// ✅ 数组响应式方法（这些都能触发更新）</span>
+<span class="c">// push / pop / shift / unshift / splice / sort / reverse</span>
+state.arr.<span class="f">push</span>(item)
+state.arr.<span class="f">splice</span>(index, <span class="v">1</span>)
+state.arr = state.arr.<span class="f">filter</span>(i => i.id !== id)  <span class="c">// filter 返回新数组，响应式</span></div>
+
+      <div class="tip tip-red">
+        ⚠️ <strong>Vue 2 响应式系统的两个经典限制：</strong><br>
+        1. 对象新增属性不响应 → 用 <code>Vue.set()</code> 或替换整个对象<br>
+        2. 数组下标赋值不响应 → 用 <code>Vue.set()</code> 或 <code>splice()</code><br>
+        Vue 3 用 Proxy 解决了这两个问题，这是 Vue 2 特有的坑。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-teal">第五节</span>
+      <h2>实战：用户登录/登出完整 Mutation 设计</h2>
+    </div>
+    <div class="card-body">
+      <div class="code-block"><span class="c">// store/mutation-types.js</span>
+<span class="k">export const</span> SET_USER  = <span class="s">'SET_USER'</span>
+<span class="k">export const</span> SET_TOKEN = <span class="s">'SET_TOKEN'</span>
+<span class="k">export const</span> CLEAR_AUTH = <span class="s">'CLEAR_AUTH'</span>
+<span class="k">export const</span> SET_LOADING = <span class="s">'SET_LOADING'</span></div>
+
+      <div class="code-block"><span class="c">// store/index.js</span>
+state: {
+  user:     <span class="k">null</span>,
+  token:    localStorage.<span class="f">getItem</span>(<span class="s">'token'</span>) || <span class="s">''</span>,  <span class="c">// 从本地存储恢复</span>
+  isLoading: <span class="k">false</span>
+},
+
+mutations: {
+  <span class="c">// 登录成功：存储用户和 token</span>
+  [types.SET_USER](state, user) {
+    state.user = user
+  },
+  [types.SET_TOKEN](state, token) {
+    state.token = token
+    localStorage.<span class="f">setItem</span>(<span class="s">'token'</span>, token)    <span class="c">// 持久化</span>
+  },
+
+  <span class="c">// 登出：清空用户信息</span>
+  [types.CLEAR_AUTH](state) {
+    state.user  = <span class="k">null</span>
+    state.token = <span class="s">''</span>
+    localStorage.<span class="f">removeItem</span>(<span class="s">'token'</span>)
+  },
+
+  <span class="c">// 全局 loading 状态</span>
+  [types.SET_LOADING](state, loading) {
+    state.isLoading = loading
+  }
+},
+
+<span class="c">// action 里统一调用多个 mutation（异步操作）</span>
+actions: {
+  <span class="k">async</span> <span class="f">login</span>({ commit }, credentials) {
+    commit(types.SET_LOADING, <span class="k">true</span>)
+    <span class="k">try</span> {
+      <span class="k">const</span> { token, user } = <span class="k">await</span> api.<span class="f">login</span>(credentials)
+      commit(types.SET_TOKEN, token)
+      commit(types.SET_USER, user)
+    } <span class="k">finally</span> {
+      commit(types.SET_LOADING, <span class="k">false</span>)
+    }
+  },
+  <span class="f">logout</span>({ commit }) {
+    commit(types.CLEAR_AUTH)
+  }
+}</div>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
+  26-3 · Mutations &nbsp;|&nbsp; 同步变更 / commit / 载荷 / 类型常量 / 响应式规则
+</div>
+</body>
+</html>
