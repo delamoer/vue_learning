@@ -97,6 +97,38 @@
     // v.$watch('numbers.c', function(newValue, oldValue) {
     //   console.log("c的值发生了变化", newValue, oldValue)
     // })
+
+    // ============================================================
+    // 补充：$watch 返回值 —— 取消监听（防内存泄漏）
+    // ============================================================
+    // $watch() 返回一个取消函数（unwatch），调用后停止该监听器
+    // 重要！在组件的 beforeDestroy 钩子中取消动态创建的监听器
+    // 否则组件销毁后监听器仍存活 → 内存泄漏
+
+    const unwatch = v.$watch('numbers.a', function(newVal, oldVal) {
+      console.log('[可取消的监听] numbers.a 变化:', oldVal, '->', newVal)
+    })
+
+    // 3 秒后自动取消监听（模拟组件 beforeDestroy）
+    setTimeout(function() {
+      unwatch()  // 调用后，numbers.a 的变化不再被该监听器捕获
+      console.log('[取消监听] numbers.a 的动态监听已停止，修改 numbers.a 不再触发上面的回调')
+    }, 3000)
+
+    // 典型应用场景：
+    //
+    // export default {
+    //   created() {
+    //     // 满足某条件后才开始监听
+    //     if (this.needWatch) {
+    //       this._unwatchFoo = this.$watch('foo', this.onFooChange)
+    //     }
+    //   },
+    //   beforeDestroy() {
+    //     // 组件销毁时务必取消，防止内存泄漏
+    //     if (this._unwatchFoo) this._unwatchFoo()
+    //   }
+    // }
   </script>
 </body>
 

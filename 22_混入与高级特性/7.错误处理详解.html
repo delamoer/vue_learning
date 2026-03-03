@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vue 2 错误处理详解</title>
+  <script src="../js/vue.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+    .header { background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff; padding: 28px 36px; }
+    .header h1 { font-size: 1.8rem; }
+    .header p  { margin-top: 6px; opacity: .85; font-size: .95rem; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 28px 20px; }
+    .card { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+    .card h2 { font-size: 1.15rem; margin-bottom: 14px; color: #c0392b; border-bottom: 2px solid #fadbd8; padding-bottom: 8px; }
+    .card h3 { font-size: 1rem; margin: 14px 0 8px; color: #555; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; font-size: .82rem; line-height: 1.7; overflow-x: auto; white-space: pre; }
+    .kw  { color: #cba6f7; }
+    .fn  { color: #89b4fa; }
+    .str { color: #a6e3a1; }
+    .cmt { color: #6c7086; font-style: italic; }
+    .num { color: #fab387; }
+    .demo  { border: 2px solid #e8e8e8; border-radius: 8px; padding: 18px; margin-top: 14px; }
+    .box-info  { background: #eaf4fb; border-left: 4px solid #3498db; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .box-warn  { background: #fef9e7; border-left: 4px solid #f1c40f; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .box-danger{ background: #fdedec; border-left: 4px solid #e74c3c; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .box-ok    { background: #eafaf1; border-left: 4px solid #2ecc71; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .tag  { display: inline-block; background: #c0392b; color: #fff; font-size: .72rem; padding: 2px 8px; border-radius: 12px; margin-right: 4px; }
+    .tag-blue { background: #2980b9; }
+    .tag-green{ background: #27ae60; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { background: #fadbd8; padding: 8px 12px; text-align: left; }
+    td { border-bottom: 1px solid #f0f0f0; padding: 8px 12px; vertical-align: top; }
+    tr:hover td { background: #fef9e7; }
+    button { padding: 7px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: .88rem; margin: 4px; }
+    .btn-red   { background: #e74c3c; color: #fff; }
+    .btn-blue  { background: #3498db; color: #fff; }
+    .btn-gray  { background: #95a5a6; color: #fff; }
+    .log-box { background: #1a1a2e; color: #a6e3a1; font-family: monospace; font-size: .8rem; padding: 12px; border-radius: 6px; min-height: 80px; max-height: 160px; overflow-y: auto; margin-top: 10px; }
+    .log-err  { color: #f38ba8; }
+    .log-warn { color: #f9e2af; }
+    .log-info { color: #89dceb; }
+    .error-boundary { border: 2px dashed #e74c3c; border-radius: 8px; padding: 12px; }
+    .error-ui { background: #fdedec; border-radius: 6px; padding: 16px; text-align: center; color: #c0392b; }
+    code { background: #f0f2f5; padding: 1px 5px; border-radius: 3px; font-size: .87em; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚠️ Vue 2 错误处理详解</h1>
+  <p>errorCaptured 组件错误边界 · Vue.config.errorHandler 全局错误捕获 · Vue.config.warnHandler · 生产监控实践</p>
+</div>
+
+<div class="container">
+
+  <!-- ===== 概览 ===== -->
+  <div class="card">
+    <h2>📌 错误处理三道防线</h2>
+    <table>
+      <thead><tr><th>防线</th><th>API</th><th>作用范围</th><th>典型用途</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>第一道</strong></td>
+          <td><code>try/catch</code> in 方法</td>
+          <td>精确到某个方法调用</td>
+          <td>处理特定的异步/同步错误</td>
+        </tr>
+        <tr>
+          <td><strong>第二道</strong></td>
+          <td><code>errorCaptured</code> 钩子</td>
+          <td>组件及其所有子孙组件</td>
+          <td>错误边界组件、局部降级 UI</td>
+        </tr>
+        <tr>
+          <td><strong>第三道</strong></td>
+          <td><code>Vue.config.errorHandler</code></td>
+          <td>全局所有 Vue 组件</td>
+          <td>上报到 Sentry / 日志监控平台</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="box-info" style="margin-top:12px">
+      <strong>传播规则：</strong>错误先向上冒泡到最近的 <code>errorCaptured</code> 钩子；
+      若该钩子返回 <code>false</code> 则停止传播；否则继续向上直到 <code>Vue.config.errorHandler</code>。
+    </div>
+  </div>
+
+  <!-- ===== errorCaptured ===== -->
+  <div class="card">
+    <h2>Demo 1：errorCaptured — 组件级错误边界</h2>
+    <div class="box-info">
+      <strong>签名：</strong><code>errorCaptured(err: Error, vm: Component, info: string): boolean | void</code><br>
+      • 在父/祖先组件上定义，捕获子孙组件抛出的错误（含 render、生命周期、事件处理器）。<br>
+      • 返回 <code>false</code> → 阻止错误继续向上传播（不进入 <code>errorHandler</code>）。<br>
+      • 不返回 / 返回 <code>true</code> → 错误继续向上冒泡。
+    </div>
+
+    <div id="demo1"></div>
+
+    <pre><span class="cmt">// ① 错误边界组件（展示降级 UI）</span>
+<span class="kw">const</span> <span class="fn">ErrorBoundary</span> = {
+  <span class="fn">data</span>() {
+    <span class="kw">return</span> { hasError: <span class="kw">false</span>, errorMsg: <span class="str">''</span>, errorInfo: <span class="str">''</span> }
+  },
+  <span class="fn">errorCaptured</span>(err, vm, info) {
+    <span class="kw">this</span>.hasError  = <span class="kw">true</span>
+    <span class="kw">this</span>.errorMsg  = err.message
+    <span class="kw">this</span>.errorInfo = info
+    <span class="cmt">// 返回 false：错误到此为止，不再传给 Vue.config.errorHandler</span>
+    <span class="kw">return</span> <span class="kw">false</span>
+  },
+  <span class="fn">methods</span>: {
+    <span class="fn">retry</span>() { <span class="kw">this</span>.hasError = <span class="kw">false</span> }
+  },
+  template: <span class="str">`
+    &lt;div&gt;
+      &lt;div v-if="hasError" class="error-ui"&gt;
+        &lt;p&gt;⚠️ 子组件出现错误&lt;/p&gt;
+        &lt;p&gt;{{ errorMsg }}&lt;/p&gt;
+        &lt;small&gt;位置：{{ errorInfo }}&lt;/small&gt;
+        &lt;br&gt;
+        &lt;button @click="retry"&gt;重试&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;slot v-else /&gt;
+    &lt;/div&gt;
+  `</span>
+}
+
+<span class="cmt">// ② 可能出错的子组件</span>
+<span class="kw">const</span> <span class="fn">BuggyChild</span> = {
+  <span class="fn">data</span>() { <span class="kw">return</span> { throwOnMount: <span class="kw">false</span>, throwOnRender: <span class="kw">false</span> } },
+  <span class="fn">mounted</span>() {
+    <span class="kw">if</span> (<span class="kw">this</span>.throwOnMount) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'mounted 钩子中的错误'</span>)
+  },
+  template: <span class="str">`
+    &lt;div&gt;
+      &lt;span v-if="throwOnRender"&gt;{{ undefined.property }}&lt;/span&gt;
+      &lt;span v-else&gt;子组件正常运行中 ✅&lt;/span&gt;
+    &lt;/div&gt;
+  `</span>
+}</pre>
+  </div>
+
+  <!-- ===== Vue.config.errorHandler ===== -->
+  <div class="card">
+    <h2>Demo 2：Vue.config.errorHandler — 全局错误捕获</h2>
+    <div class="box-warn">
+      <strong>注意：</strong>在 Vue 实例创建之前（<code>new Vue(...)</code> 之前）设置，否则部分初始化错误无法被捕获。
+      生产项目应在 <code>main.js</code> 最顶部配置。
+    </div>
+
+    <div id="demo2"></div>
+
+    <pre><span class="cmt">// main.js 顶部（new Vue 之前）</span>
+
+<span class="cmt">// 1. 全局错误处理器</span>
+Vue.config.<span class="fn">errorHandler</span> = <span class="kw">function</span>(err, vm, info) {
+  <span class="cmt">// err   : Error 对象，包含 stack</span>
+  <span class="cmt">// vm    : 发生错误的组件实例</span>
+  <span class="cmt">// info  : Vue 提供的错误说明字符串（如 "render function", "mounted hook"）</span>
+
+  console.error(<span class="str">'[全局错误]'</span>, err)
+  console.error(<span class="str">'[组件名]'</span>, vm?.$options?.name)
+  console.error(<span class="str">'[位置]'</span>, info)
+
+  <span class="cmt">// 上报到 Sentry（生产示例）</span>
+  <span class="cmt">// Sentry.captureException(err, { extra: { info, component: vm?.$options?.name } })</span>
+}
+
+<span class="cmt">// 2. 全局警告处理器（开发阶段调试用）</span>
+Vue.config.<span class="fn">warnHandler</span> = <span class="kw">function</span>(msg, vm, trace) {
+  <span class="cmt">// 过滤掉不关心的 warn，只保留重要的</span>
+  <span class="kw">if</span> (msg.includes(<span class="str">'Missing required prop'</span>)) {
+    console.warn(<span class="str">'[PropWarning]'</span>, msg, trace)
+  }
+  <span class="cmt">// warnHandler 只在 development 模式下生效，生产会被忽略</span>
+}</pre>
+
+    <div class="box-info" style="margin-top:10px">
+      <strong>与 errorCaptured 的分工：</strong><br>
+      • <code>errorCaptured</code> 返回 <code>false</code> → 错误被局部吞掉，不进入 <code>errorHandler</code>（适合"局部降级 UI"）<br>
+      • <code>errorCaptured</code> 不返回 / 返回其他值 → 错误继续上报到 <code>errorHandler</code>（适合"记录 + 降级并存"）
+    </div>
+  </div>
+
+  <!-- ===== 实战模式 ===== -->
+  <div class="card">
+    <h2>Demo 3：生产级完整模式（可运行）</h2>
+    <div class="box-info">下面演示：全局 errorHandler 日志收集 + 页面内 ErrorBoundary 组件降级</div>
+    <div id="demo3"></div>
+  </div>
+
+  <!-- ===== async 错误 ===== -->
+  <div class="card">
+    <h2>Demo 4：异步错误的陷阱与正确处理</h2>
+
+    <div class="box-danger">
+      <strong>⚠️ 重要陷阱：</strong><code>errorCaptured</code> 和 <code>Vue.config.errorHandler</code>
+      <strong>无法</strong>自动捕获以下场景的错误：
+      <ul style="margin-top:8px;padding-left:20px">
+        <li>原生 <code>setTimeout / setInterval</code> 回调中的错误</li>
+        <li>普通 <code>Promise</code> 中未 catch 的 rejection</li>
+        <li>独立的 <code>async</code> 函数（未被 Vue 感知的异步流）</li>
+      </ul>
+    </div>
+
+    <pre><span class="cmt">// ❌ Vue 无法捕获</span>
+<span class="fn">mounted</span>() {
+  setTimeout(() => {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'这个错误 errorCaptured / errorHandler 都抓不到'</span>)
+  }, <span class="num">1000</span>)
+}
+
+<span class="cmt">// ✅ 方案 1：手动 try/catch</span>
+<span class="fn">mounted</span>() {
+  setTimeout(() => {
+    <span class="kw">try</span> {
+      riskyOperation()
+    } <span class="kw">catch</span>(err) {
+      <span class="kw">this</span>.<span class="fn">handleError</span>(err)   <span class="cmt">// 自行上报或更新 UI</span>
+    }
+  }, <span class="num">1000</span>)
+}
+
+<span class="cmt">// ✅ 方案 2：async/await（Vue 生命周期钩子 / 方法中的 async 会被捕获）</span>
+<span class="kw">async</span> <span class="fn">mounted</span>() {
+  <span class="cmt">// Vue 会包装生命周期钩子，所以这里的错误能被 errorCaptured 捕获</span>
+  <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchData</span>()   <span class="cmt">// 若 fetchData reject → Vue 捕获 ✅</span>
+}
+
+<span class="cmt">// ✅ 方案 3：全局兜底 unhandledrejection</span>
+window.addEventListener(<span class="str">'unhandledrejection'</span>, (event) => {
+  console.error(<span class="str">'未处理的 Promise 异常:'</span>, event.reason)
+  <span class="cmt">// Sentry.captureException(event.reason)</span>
+  event.preventDefault()  <span class="cmt">// 阻止默认的 console error</span>
+})</pre>
+
+    <div id="demo4"></div>
+  </div>
+
+  <!-- ===== 总结 ===== -->
+  <div class="card">
+    <h2>📊 总结：错误处理完整方案</h2>
+    <pre><span class="cmt">// main.js 生产级模板</span>
+
+<span class="cmt">// ① 全局 Vue 错误 → 上报监控</span>
+Vue.config.<span class="fn">errorHandler</span> = (err, vm, info) => {
+  <span class="fn">reportToMonitor</span>({ err, component: vm?.$options?.name, info })
+}
+
+<span class="cmt">// ② 未捕获的 Promise rejection → 上报监控</span>
+window.addEventListener(<span class="str">'unhandledrejection'</span>, e => {
+  <span class="fn">reportToMonitor</span>({ err: e.reason, type: <span class="str">'promise'</span> })
+})
+
+<span class="cmt">// ③ 关键页面/功能区域 → ErrorBoundary 组件（局部降级 UI）</span>
+<span class="cmt">// &lt;error-boundary&gt;</span>
+<span class="cmt">//   &lt;payment-module /&gt;   ← 支付模块崩了不影响其他区域</span>
+<span class="cmt">// &lt;/error-boundary&gt;</span>
+
+<span class="cmt">// ④ 高风险异步操作 → try/catch 精确处理</span>
+<span class="kw">try</span> {
+  <span class="kw">await</span> <span class="fn">submitOrder</span>(data)
+} <span class="kw">catch</span> (err) {
+  <span class="kw">this</span>.errorMsg = <span class="str">'提交失败，请重试'</span>
+}</pre>
+
+    <table style="margin-top:12px">
+      <thead><tr><th>方式</th><th>能捕获</th><th>不能捕获</th></tr></thead>
+      <tbody>
+        <tr><td><code>errorCaptured</code></td><td>render错误、生命周期、methods、async钩子</td><td>setTimeout、自由Promise</td></tr>
+        <tr><td><code>errorHandler</code></td><td>同上（全局范围）</td><td>同上</td></tr>
+        <tr><td><code>unhandledrejection</code></td><td>未 catch 的 Promise rejection</td><td>同步错误</td></tr>
+        <tr><td><code>try/catch</code></td><td>任意位置的同步和 await 异步</td><td>-（最全面）</td></tr>
+      </tbody>
+    </table>
+    <div class="box-ok" style="margin-top:12px">
+      💡 <strong>记忆口诀</strong>：Vue 错误 → errorCaptured（局部）→ errorHandler（全局）→ unhandledrejection（Promise 兜底）→ try/catch（精确处理）
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========================================================
+// Demo 1：errorCaptured 错误边界
+// ========================================================
+const ErrorBoundary = {
+  name: 'ErrorBoundary',
+  data() { return { hasError: false, errorMsg: '', errorInfo: '' } },
+  errorCaptured(err, vm, info) {
+    this.hasError  = true
+    this.errorMsg  = err.message
+    this.errorInfo = info
+    return false // 阻止继续传播
+  },
+  methods: { retry() { this.hasError = false } },
+  template: `
+    <div class="error-boundary">
+      <div v-if="hasError" class="error-ui">
+        <p>⚠️ 子组件发生渲染/钩子错误</p>
+        <p style="font-weight:700; margin:6px 0">{{ errorMsg }}</p>
+        <small>错误位置：{{ errorInfo }}</small><br>
+        <button @click="retry" style="margin-top:8px;padding:6px 14px;background:#c0392b;color:#fff;border:none;border-radius:4px;cursor:pointer">
+          🔄 重试
+        </button>
+      </div>
+      <slot v-else />
+    </div>
+  `
+}
+
+const BuggyChild = {
+  name: 'BuggyChild',
+  props: { triggerRender: Boolean, triggerMount: Boolean },
+  mounted() {
+    if (this.triggerMount) throw new Error('mounted 钩子中抛出了错误！')
+  },
+  template: `
+    <div style="padding:8px;background:#eafaf1;border-radius:4px">
+      <span v-if="triggerRender">{{ undefined.crash }}</span>
+      <span v-else>✅ 子组件运行正常</span>
+    </div>
+  `
+}
+
+new Vue({
+  el: '#demo1',
+  components: { ErrorBoundary, BuggyChild },
+  data() { return { triggerRender: false, triggerMount: false } },
+  template: `
+    <div class="demo">
+      <div style="margin-bottom:10px">
+        <button class="btn-red" @click="triggerRender=!triggerRender">
+          {{ triggerRender ? '恢复正常' : '触发 render 错误' }}
+        </button>
+        <button class="btn-blue" @click="triggerMount=!triggerMount;triggerRender=false">
+          触发 mounted 错误（需重试恢复）
+        </button>
+      </div>
+      <strong>↓ ErrorBoundary 包裹的区域（错误只影响此处）：</strong>
+      <div style="margin-top:8px">
+        <error-boundary>
+          <buggy-child :trigger-render="triggerRender" :trigger-mount="triggerMount" />
+        </error-boundary>
+      </div>
+      <div style="margin-top:8px;padding:8px;background:#f0f8ff;border-radius:4px;font-size:.85rem">
+        🟢 &lt;error-boundary&gt; 之外的内容不受影响，页面其余部分正常显示
+      </div>
+    </div>
+  `
+})
+
+// ========================================================
+// Demo 2：Vue.config.errorHandler
+// ========================================================
+// 注意：本文件中 errorHandler 已在 Demo3 的 Vue 实例之前设置
+// 这里只展示 UI 说明，不重复创建实例
+new Vue({
+  el: '#demo2',
+  template: `
+    <div class="demo">
+      <div class="box-info">
+        <strong>Vue.config.errorHandler 配置示例</strong>（见上方代码块）<br>
+        本 Demo 重点：errorHandler 是一个函数，接收 <code>(err, vm, info)</code> 三个参数。<br>
+        在真实项目中，这里应该调用 Sentry、阿里云 ARMS、百度 FrontEnd Monitor 等 SDK 的上报方法。
+      </div>
+      <div style="margin-top:10px;background:#1e1e2e;color:#cdd6f4;padding:12px;border-radius:6px;font-family:monospace;font-size:.82rem">
+        <div style="color:#6c7086">// 实际 main.js 接入 Sentry 示例：</div>
+        <div><span style="color:#cba6f7">import</span> * <span style="color:#cba6f7">as</span> Sentry <span style="color:#cba6f7">from</span> <span style="color:#a6e3a1">'@sentry/vue'</span></div>
+        <div><span style="color:#cba6f7">import</span> { BrowserTracing } <span style="color:#cba6f7">from</span> <span style="color:#a6e3a1">'@sentry/tracing'</span></div>
+        <br>
+        <div>Sentry.<span style="color:#89b4fa">init</span>({ app: Vue, dsn: <span style="color:#a6e3a1">'https://xxx@sentry.io/xxx'</span>,</div>
+        <div>&nbsp;&nbsp;integrations: [<span style="color:#89b4fa">new</span> BrowserTracing({ router })],</div>
+        <div>&nbsp;&nbsp;tracesSampleRate: <span style="color:#fab387">0.2</span> })</div>
+        <br>
+        <div style="color:#6c7086">// Sentry SDK 会自动接管 Vue.config.errorHandler</div>
+      </div>
+    </div>
+  `
+})
+
+// ========================================================
+// Demo 3：生产级完整模式（可运行）
+// ========================================================
+const logs = []
+Vue.config.errorHandler = function(err, vm, info) {
+  const entry = { type: 'error', msg: err.message, info, time: new Date().toLocaleTimeString() }
+  logs.push(entry)
+  // 通知 demo3 实例刷新
+  if (window._demo3vm) window._demo3vm.logs = [...logs]
+}
+
+Vue.config.warnHandler = function(msg) {
+  const entry = { type: 'warn', msg: msg.slice(0, 80), time: new Date().toLocaleTimeString() }
+  logs.push(entry)
+  if (window._demo3vm) window._demo3vm.logs = [...logs]
+}
+
+const ErrorBoundary2 = {
+  name: 'ErrorBoundary2',
+  data() { return { hasError: false, errorMsg: '' } },
+  errorCaptured(err) {
+    this.hasError = true
+    this.errorMsg = err.message
+    // 不 return false → 错误继续传给全局 errorHandler
+  },
+  methods: { retry() { this.hasError = false } },
+  template: `
+    <div>
+      <div v-if="hasError" class="error-ui">
+        <p>⚠️ 局部区域异常，其他功能不受影响</p>
+        <p style="font-weight:700">{{ errorMsg }}</p>
+        <button @click="retry" style="margin-top:6px;padding:5px 12px;background:#c0392b;color:#fff;border:none;border-radius:4px;cursor:pointer">重试</button>
+      </div>
+      <slot v-else />
+    </div>
+  `
+}
+
+const CrashComponent = {
+  name: 'CrashComponent',
+  data() { return { count: 0 } },
+  methods: {
+    crash() { throw new Error('来自 CrashComponent.crash() 的错误（count=' + this.count + '）') }
+  },
+  template: `
+    <div style="padding:8px;background:#eafaf1;border-radius:4px">
+      <button class="btn-red" @click="crash">点击触发错误</button>
+      <span style="margin-left:8px;font-size:.85rem">点击后：①局部显示降级UI ②全局日志记录</span>
+    </div>
+  `
+}
+
+window._demo3vm = new Vue({
+  el: '#demo3',
+  components: { ErrorBoundary2, CrashComponent },
+  data() { return { logs: [] } },
+  template: `
+    <div class="demo">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <strong>功能区域（ErrorBoundary 保护）：</strong>
+          <div style="margin-top:8px">
+            <error-boundary2>
+              <crash-component />
+            </error-boundary2>
+          </div>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <strong>全局错误日志（模拟监控上报）：</strong>
+          <div class="log-box" style="margin-top:8px">
+            <div v-if="!logs.length" style="color:#6c7086">（暂无错误，触发后显示）</div>
+            <div v-for="(l,i) in logs" :key="i" :class="l.type==='error' ? 'log-err' : 'log-warn'">
+              [{{ l.time }}] [{{ l.type.toUpperCase() }}] {{ l.msg }}
+              <span v-if="l.info" style="color:#6c7086"> ({{ l.info }})</span>
+            </div>
+          </div>
+          <button class="btn-gray" style="margin-top:6px;font-size:.8rem" @click="logs=[]">清空日志</button>
+        </div>
+      </div>
+    </div>
+  `
+})
+
+// ========================================================
+// Demo 4：异步错误陷阱演示
+// ========================================================
+new Vue({
+  el: '#demo4',
+  data() { return { result: '', mode: '' } },
+  methods: {
+    testAsync() {
+      this.mode = 'async mounted 中的 await'
+      // 模拟：async 方法抛错 → Vue 能捕获
+      this.runAsync()
+    },
+    async runAsync() {
+      await new Promise(r => setTimeout(r, 100))
+      throw new Error('async 方法中的错误（会被 errorHandler 捕获）')
+    },
+    testSetTimeout() {
+      this.mode = 'setTimeout 回调'
+      setTimeout(() => {
+        try {
+          throw new Error('setTimeout 中的错误')
+        } catch(e) {
+          this.result = '✅ 通过 try/catch 手动捕获：' + e.message
+        }
+      }, 100)
+    },
+    testPromise() {
+      this.mode = 'unhandledrejection'
+      this.result = '查看控制台，window.unhandledrejection 事件触发'
+      // 这是未被 catch 的 promise rejection
+      Promise.reject(new Error('未 catch 的 Promise.reject'))
+    }
+  },
+  template: `
+    <div class="demo">
+      <button class="btn-red" @click="testAsync">async 方法抛错</button>
+      <button class="btn-blue" @click="testSetTimeout">setTimeout 回调（try/catch）</button>
+      <button class="btn-gray" @click="testPromise">未 catch 的 Promise</button>
+      <div v-if="mode" style="margin-top:10px;font-size:.88rem;color:#555">
+        <strong>测试：</strong>{{ mode }}<br>
+        <span v-if="result">{{ result }}</span>
+        <span v-else>错误已记录到上方日志面板（通过全局 errorHandler）</span>
+      </div>
+    </div>
+  `
+})
+</script>
+</body>
+</html>

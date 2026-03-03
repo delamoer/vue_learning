@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vue.extend 程序化组件</title>
+  <script src="../js/vue.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+    .header { background: linear-gradient(135deg, #6d28d9, #7c3aed); color: #fff; padding: 28px 36px; }
+    .header h1 { font-size: 1.8rem; }
+    .header p  { margin-top: 6px; opacity: .85; font-size: .95rem; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 28px 20px; }
+    .card { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+    .card h2 { font-size: 1.15rem; margin-bottom: 14px; color: #6d28d9; border-bottom: 2px solid #ede9fe; padding-bottom: 8px; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; font-size: .82rem; line-height: 1.75; overflow-x: auto; white-space: pre; }
+    .kw  { color: #cba6f7; }
+    .fn  { color: #89b4fa; }
+    .str { color: #a6e3a1; }
+    .cmt { color: #6c7086; font-style: italic; }
+    .num { color: #fab387; }
+    .box-info  { background: #eaf4fb; border-left: 4px solid #3498db; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .box-ok    { background: #eafaf1; border-left: 4px solid #2ecc71; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .box-warn  { background: #fef9e7; border-left: 4px solid #f1c40f; padding: 12px 16px; border-radius: 4px; margin: 10px 0; font-size: .88rem; }
+    .demo { border: 2px solid #e8e8e8; border-radius: 8px; padding: 18px; margin-top: 14px; }
+    code { background: #f0f2f5; padding: 1px 5px; border-radius: 3px; font-size: .87em; }
+    button { padding: 7px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: .88rem; margin: 4px; }
+    .btn-purple { background: #7c3aed; color: #fff; }
+    .btn-blue   { background: #3498db; color: #fff; }
+    .btn-gray   { background: #95a5a6; color: #fff; }
+    .btn-green  { background: #27ae60; color: #fff; }
+    .btn-red    { background: #e74c3c; color: #fff; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { background: #ede9fe; padding: 8px 12px; text-align: left; }
+    td { border-bottom: 1px solid #f0f0f0; padding: 8px 12px; }
+    /* Toast 样式 */
+    .v-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 10px 22px; border-radius: 6px; font-size: .9rem; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.18); z-index: 9999; pointer-events: none; animation: fadeInDown .25s ease; }
+    .v-toast-success { background: #27ae60; }
+    .v-toast-error   { background: #e74c3c; }
+    .v-toast-warning { background: #f39c12; }
+    .v-toast-info    { background: #2980b9; }
+    @keyframes fadeInDown { from { opacity:0; transform: translateX(-50%) translateY(-10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+    /* Loading 样式 */
+    .v-loading-mask { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:9998; }
+    .v-loading-box { background: #fff; border-radius: 10px; padding: 28px 36px; text-align: center; }
+    .v-loading-spinner { width: 36px; height: 36px; border: 3px solid #ede9fe; border-top-color: #7c3aed; border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔌 Vue.extend — 程序化组件</h1>
+  <p>命令式调用组件（$toast / $loading）· 挂载到 body · 组件构造函数 · Vue.prototype 扩展</p>
+</div>
+
+<div class="container">
+
+  <!-- ===== 概念 ===== -->
+  <div class="card">
+    <h2>📌 什么是 Vue.extend？</h2>
+    <p style="margin-bottom:12px;font-size:.9rem;color:#555">
+      <code>Vue.extend(options)</code> 基于一个普通组件对象创建一个<strong>子类构造函数</strong>，
+      然后可以用 <code>new</code> 手动实例化、挂载到 DOM 上——不需要在模板里写 <code>&lt;my-component /&gt;</code>，
+      而是像调用函数一样 <code>this.$toast('操作成功')</code>。
+    </p>
+    <div class="box-info">
+      <strong>Element UI / Vant 的底层原理：</strong><br>
+      <code>this.$message.success('保存成功')</code>、<code>this.$loading()</code>、<code>this.$notify()</code>
+      等命令式 API 全部基于 <code>Vue.extend</code> 实现。理解它，你也能手写自己的组件库工具方法。
+    </div>
+    <pre><span class="cmt">// 三步走：extend → new 实例化 → $mount 挂载</span>
+
+<span class="cmt">// 1. 创建构造函数</span>
+<span class="kw">const</span> ToastConstructor = Vue.<span class="fn">extend</span>(ToastComponent)
+
+<span class="cmt">// 2. 实例化（可以传 propsData）</span>
+<span class="kw">const</span> instance = <span class="kw">new</span> <span class="fn">ToastConstructor</span>({
+  propsData: { message: <span class="str">'操作成功'</span>, type: <span class="str">'success'</span> }
+})
+
+<span class="cmt">// 3. 挂载（不传参 = 创建一个脱离文档的DOM节点）</span>
+instance.<span class="fn">$mount</span>()
+document.body.<span class="fn">appendChild</span>(instance.$el)
+
+<span class="cmt">// 4. 若干秒后销毁</span>
+setTimeout(() => {
+  document.body.<span class="fn">removeChild</span>(instance.$el)
+  instance.<span class="fn">$destroy</span>()
+}, <span class="num">2500</span>)</pre>
+  </div>
+
+  <!-- ===== Demo 1: $toast ===== -->
+  <div class="card">
+    <h2>Demo 1：手写 $toast 消息提示</h2>
+    <div class="box-ok">完全可运行 — 点击下方按钮查看效果</div>
+
+    <div id="app1" class="demo">
+      <button class="btn-green"  @click="$toast('保存成功！', 'success')">成功提示</button>
+      <button class="btn-red"    @click="$toast('删除失败，权限不足', 'error')">错误提示</button>
+      <button class="btn-purple" @click="$toast('该功能即将上线', 'warning')">警告提示</button>
+      <button class="btn-blue"   @click="$toast('正在同步数据...', 'info')">信息提示</button>
+    </div>
+
+    <pre><span class="cmt">// toast.js — 实现文件</span>
+
+<span class="cmt">// ① Toast 组件定义</span>
+<span class="kw">const</span> ToastComp = {
+  <span class="fn">data</span>() { <span class="kw">return</span> { message: <span class="str">''</span>, type: <span class="str">'info'</span>, visible: <span class="kw">true</span> } },
+  template: <span class="str">`
+    &lt;transition name="fade"&gt;
+      &lt;div v-if="visible" :class="['v-toast', 'v-toast-' + type]"&gt;
+        {{ message }}
+      &lt;/div&gt;
+    &lt;/transition&gt;
+  `</span>
+}
+
+<span class="cmt">// ② 构造函数（只创建一次）</span>
+<span class="kw">const</span> ToastConstructor = Vue.<span class="fn">extend</span>(ToastComp)
+
+<span class="cmt">// ③ 工厂函数</span>
+<span class="kw">function</span> <span class="fn">toast</span>(message, type = <span class="str">'info'</span>, duration = <span class="num">2500</span>) {
+  <span class="kw">const</span> instance = <span class="kw">new</span> <span class="fn">ToastConstructor</span>()
+  instance.message = message
+  instance.type    = type
+  instance.<span class="fn">$mount</span>()
+  document.body.<span class="fn">appendChild</span>(instance.$el)
+  setTimeout(() => {
+    instance.visible = <span class="kw">false</span>
+    setTimeout(() => { instance.<span class="fn">$destroy</span>(); instance.$el.<span class="fn">remove</span>() }, <span class="num">300</span>)
+  }, duration)
+}
+
+<span class="cmt">// ④ 注册到 Vue.prototype → 所有组件可 this.$toast 调用</span>
+Vue.prototype.$toast = toast</pre>
+  </div>
+
+  <!-- ===== Demo 2: $loading ===== -->
+  <div class="card">
+    <h2>Demo 2：手写全屏 $loading</h2>
+    <div class="box-info">Loading 需要单例模式——避免重复创建多个遮罩层</div>
+
+    <div id="app2" class="demo">
+      <button class="btn-purple" @click="showLoading">显示 Loading（1.5秒后自动关闭）</button>
+      <button class="btn-gray"   @click="hideLoading">手动关闭</button>
+    </div>
+
+    <pre><span class="cmt">// loading.js — 单例模式</span>
+
+<span class="kw">const</span> LoadingComp = {
+  <span class="fn">data</span>() { <span class="kw">return</span> { text: <span class="str">'加载中...'</span>, visible: <span class="kw">false</span> } },
+  template: <span class="str">`
+    &lt;transition name="fade"&gt;
+      &lt;div v-if="visible" class="v-loading-mask"&gt;
+        &lt;div class="v-loading-box"&gt;
+          &lt;div class="v-loading-spinner"&gt;&lt;/div&gt;
+          &lt;div&gt;{{ text }}&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/transition&gt;
+  `</span>
+}
+
+<span class="cmt">// 单例：整个应用只创建一个 Loading 实例</span>
+<span class="kw">let</span> instance = <span class="kw">null</span>
+
+<span class="kw">function</span> <span class="fn">getOrCreateInstance</span>() {
+  <span class="kw">if</span> (!instance) {
+    instance = <span class="kw">new</span> (Vue.<span class="fn">extend</span>(LoadingComp))()
+    instance.<span class="fn">$mount</span>()
+    document.body.<span class="fn">appendChild</span>(instance.$el)
+  }
+  <span class="kw">return</span> instance
+}
+
+<span class="kw">const</span> Loading = {
+  <span class="fn">show</span>(text = <span class="str">'加载中...'</span>) {
+    <span class="kw">const</span> inst = <span class="fn">getOrCreateInstance</span>()
+    inst.text    = text
+    inst.visible = <span class="kw">true</span>
+  },
+  <span class="fn">hide</span>() {
+    <span class="kw">if</span> (instance) instance.visible = <span class="kw">false</span>
+  }
+}
+
+Vue.prototype.$loading = Loading</pre>
+  </div>
+
+  <!-- ===== 关键要点 ===== -->
+  <div class="card">
+    <h2>📊 关键对比：声明式 vs 程序化</h2>
+    <table>
+      <thead><tr><th>方式</th><th>使用方式</th><th>适用场景</th><th>典型例子</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>声明式</strong></td>
+          <td><code>&lt;my-modal v-if="show" /&gt;</code></td>
+          <td>固定位置、与父组件强绑定</td>
+          <td>表单弹窗、侧边栏</td>
+        </tr>
+        <tr>
+          <td><strong>程序化</strong><br>(Vue.extend)</td>
+          <td><code>this.$toast('...')</code></td>
+          <td>全局弹出、与当前组件无关</td>
+          <td>消息提示、全屏Loading、确认弹框</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="box-warn" style="margin-top:12px">
+      <strong>⚠️ 注意事项：</strong><br>
+      1. 程序化组件<strong>不在 Vue 组件树</strong>中，无法通过 Vuex / provide-inject 自动获取数据，需手动传入 <code>store</code>。<br>
+      2. 若需要访问 store：<code>new Ctor({ parent: vm })</code> 传入父实例，或 <code>new Ctor({ store })</code> 手动注入。<br>
+      3. 务必在适当时机调用 <code>instance.$destroy()</code> + <code>instance.$el.remove()</code>，防止内存泄漏。
+    </div>
+    <pre><span class="cmt">// 需要访问 Vuex store 的程序化组件（进阶）</span>
+<span class="kw">import</span> store <span class="kw">from</span> <span class="str">'@/store'</span>
+
+<span class="kw">function</span> <span class="fn">createConfirm</span>(options) {
+  <span class="kw">const</span> instance = <span class="kw">new</span> (Vue.<span class="fn">extend</span>(ConfirmComp))({
+    store,             <span class="cmt">// ✅ 手动注入 store</span>
+    propsData: options
+  })
+  instance.<span class="fn">$mount</span>()
+  document.body.<span class="fn">appendChild</span>(instance.$el)
+  <span class="kw">return</span> instance
+}</pre>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Toast 实现
+// ============================================================
+const ToastComp = {
+  data() { return { message: '', type: 'info', visible: true } },
+  template: `<div v-show="visible" :class="['v-toast', 'v-toast-' + type]">{{ message }}</div>`
+}
+const ToastCtor = Vue.extend(ToastComp)
+
+function toast(message, type = 'info', duration = 2000) {
+  const inst = new ToastCtor()
+  inst.message = message
+  inst.type    = type
+  inst.$mount()
+  document.body.appendChild(inst.$el)
+  setTimeout(() => {
+    inst.visible = false
+    setTimeout(() => { inst.$destroy(); if (inst.$el.parentNode) inst.$el.parentNode.removeChild(inst.$el) }, 300)
+  }, duration)
+}
+Vue.prototype.$toast = toast
+
+// App 1
+new Vue({
+  el: '#app1',
+  template: `
+    <div>
+      <button class="btn-green"  @click="$toast('保存成功！', 'success')">成功提示</button>
+      <button class="btn-red"    @click="$toast('删除失败，权限不足', 'error')">错误提示</button>
+      <button class="btn-purple" @click="$toast('该功能即将上线', 'warning')">警告提示</button>
+      <button class="btn-blue"   @click="$toast('正在同步数据...', 'info')">信息提示</button>
+    </div>
+  `
+})
+
+// ============================================================
+// Loading 实现
+// ============================================================
+const LoadingComp = {
+  data() { return { text: '加载中...', visible: false } },
+  template: `
+    <div v-if="visible" class="v-loading-mask">
+      <div class="v-loading-box">
+        <div class="v-loading-spinner"></div>
+        <div style="color:#555;font-size:.9rem">{{ text }}</div>
+      </div>
+    </div>
+  `
+}
+let loadingInst = null
+function getLoading() {
+  if (!loadingInst) {
+    loadingInst = new (Vue.extend(LoadingComp))()
+    loadingInst.$mount()
+    document.body.appendChild(loadingInst.$el)
+  }
+  return loadingInst
+}
+const Loading = {
+  show(text = '加载中...') { const i = getLoading(); i.text = text; i.visible = true },
+  hide()                   { if (loadingInst) loadingInst.visible = false }
+}
+Vue.prototype.$loading = Loading
+
+// App 2
+new Vue({
+  el: '#app2',
+  methods: {
+    showLoading() {
+      this.$loading.show('正在加载数据...')
+      setTimeout(() => { this.$loading.hide(); this.$toast('数据加载完成', 'success') }, 1500)
+    },
+    hideLoading() { this.$loading.hide() }
+  },
+  template: `
+    <div>
+      <button class="btn-purple" @click="showLoading">显示 Loading（1.5秒后自动关闭）</button>
+      <button class="btn-gray"   @click="hideLoading">手动关闭</button>
+    </div>
+  `
+})
+</script>
+</body>
+</html>

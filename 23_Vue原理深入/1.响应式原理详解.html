@@ -368,5 +368,46 @@
             }
         });
     </script>
-</body>
+    <!-- ================== 补充：Object.freeze ================== -->
+    <div id="freeze-section" style="max-width:900px;margin:0 auto 40px;padding:0 20px">
+      <div style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #fde2d8">
+          <span style="background:#e74c3c;color:#fff;padding:2px 10px;border-radius:12px;font-size:.75rem">补充知识点</span>
+          <h2 style="font-size:1.1rem;color:#c0392b">Object.freeze() — 跳过响应式劫持的性能优化</h2>
+        </div>
+        <p style="font-size:.9rem;color:#555;margin-bottom:12px">
+          Vue 2 在初始化时会对 <code>data</code> 中的每个属性递归调用 <code>Object.defineProperty</code> 添加 getter/setter。
+          对于<strong>永远不会改变的大型静态数据</strong>（如省市区联动数据、静态配置表），这是纯粹的性能浪费。
+          使用 <code>Object.freeze()</code> 冻结对象后，Vue 检测到属性不可配置（<code>configurable: false</code>），会自动跳过劫持。
+        </p>
+        <pre style="background:#1e1e2e;color:#cdd6f4;padding:16px;border-radius:8px;font-size:.82rem;line-height:1.75;overflow-x:auto"><span style="color:#6c7086">// ❌ 有问题的写法：几千条城市数据全部被响应式劫持，浪费内存</span>
+<span style="color:#89b4fa">data</span>() {
+  <span style="color:#cba6f7">return</span> {
+    cityList: <span style="color:#fab387">getCityData()</span>  <span style="color:#6c7086">// 3000+ 条，每条都被 defineProperty</span>
+  }
+}
+
+<span style="color:#6c7086">// ✅ 正确做法：冻结静态数据，Vue 跳过劫持</span>
+<span style="color:#89b4fa">data</span>() {
+  <span style="color:#cba6f7">return</span> {
+    cityList: Object.<span style="color:#89b4fa">freeze</span>(<span style="color:#fab387">getCityData()</span>)  <span style="color:#6c7086">// ✅ 不被响应化，节省内存+初始化时间</span>
+  }
+}
+
+<span style="color:#6c7086">// ✅ 也可以在 created 之前通过 this.$options 挂载（完全绕过响应式系统）</span>
+<span style="color:#89b4fa">created</span>() {
+  <span style="color:#6c7086">// this.$options.staticData 不会被响应式处理</span>
+  <span style="color:#cba6f7">this</span>.$options.staticTableData = Object.<span style="color:#89b4fa">freeze</span>(largeDataset)
+}
+
+<span style="color:#6c7086">// ⚠️ 注意：冻结的对象不能再修改，以下操作会静默失败（严格模式下抛错）</span>
+<span style="color:#cba6f7">const</span> obj = Object.<span style="color:#89b4fa">freeze</span>({ a: <span style="color:#fab387">1</span> })
+obj.a = <span style="color:#fab387">2</span>   <span style="color:#6c7086">// 静默失败，obj.a 仍为 1</span></pre>
+        <div style="background:#eafaf1;border-left:4px solid #2ecc71;padding:10px 14px;border-radius:4px;font-size:.87rem;margin-top:10px">
+          <strong>📈 实测效果（来自社区基准测试）：</strong><br>
+          包含 10000 条记录的列表，使用 <code>Object.freeze</code> 后初始化速度提升约 <strong>2-4 倍</strong>，内存占用减少约 <strong>30-50%</strong>。<br>
+          <strong>适用场景</strong>：省市区数据、静态菜单配置、只读的接口数据（如字典表、枚举配置）。
+        </div>
+      </div>
+    </div></body>
 </html>

@@ -332,5 +332,53 @@ methods: {
 <div style="text-align:center; padding: 40px 20px; color: #475569; font-size: 0.8rem;">
   25-5 · 路由守卫 &nbsp;|&nbsp; 全局 / 路由独享 / 组件内守卫 / 登录鉴权实战
 </div>
+
+<!-- ================== 补充：scrollBehavior ================== -->
+<div style="max-width:900px;margin:0 auto 40px;padding:0 20px">
+  <div style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.07)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e0e7ff">
+      <span style="background:#4f46e5;color:#fff;padding:2px 10px;border-radius:12px;font-size:.75rem">补充知识点</span>
+      <h2 style="font-size:1.1rem;color:#4f46e5">scrollBehavior — 路由切换时的滚动行为</h2>
+    </div>
+    <p style="font-size:.9rem;color:#555;margin-bottom:12px">
+      在创建 <code>VueRouter</code> 时传入 <code>scrollBehavior</code> 函数，可以控制每次路由切换后页面的滚动位置。
+      这是几乎所有多页应用都需要的功能，但常被遗忘。
+    </p>
+    <pre style="background:#1e1e2e;color:#cdd6f4;padding:16px;border-radius:8px;font-size:.82rem;line-height:1.75;overflow-x:auto"><span style="color:#6c7086">// router/index.js</span>
+<span style="color:#cba6f7">const</span> router = <span style="color:#cba6f7">new</span> <span style="color:#89b4fa">VueRouter</span>({
+  mode: <span style="color:#a6e3a1">'history'</span>,
+  routes,
+
+  <span style="color:#89b4fa">scrollBehavior</span>(to, from, savedPosition) {
+    <span style="color:#6c7086">// savedPosition：浏览器前进/后退时，保存的上次滚动位置（{x, y}）</span>
+    <span style="color:#6c7086">// 只有 popstate 导航（浏览器前进/后退按钮）才有 savedPosition</span>
+
+    <span style="color:#cba6f7">if</span> (savedPosition) {
+      <span style="color:#6c7086">// 1. 浏览器后退/前进 → 恢复上次位置（模拟浏览器原生行为）</span>
+      <span style="color:#cba6f7">return</span> savedPosition
+    }
+
+    <span style="color:#cba6f7">if</span> (to.hash) {
+      <span style="color:#6c7086">// 2. 有锚点 → 滚动到对应元素</span>
+      <span style="color:#cba6f7">return</span> { selector: to.hash, behavior: <span style="color:#a6e3a1">'smooth'</span> }
+    }
+
+    <span style="color:#cba6f7">if</span> (to.meta.keepScrollPosition) {
+      <span style="color:#6c7086">// 3. 特定路由保持当前滚动位置（如列表页 → 详情页 → 返回）</span>
+      <span style="color:#cba6f7">return</span> <span style="color:#cba6f7">false</span>
+    }
+
+    <span style="color:#6c7086">// 4. 默认：每次路由切换都回到顶部</span>
+    <span style="color:#cba6f7">return</span> { x: <span style="color:#fab387">0</span>, y: <span style="color:#fab387">0</span> }
+  }
+})</pre>
+    <div style="background:#eaf4fb;border-left:4px solid #3498db;padding:10px 14px;border-radius:4px;font-size:.87rem;margin-top:10px">
+      <strong>💡 常见使用场景：</strong><br>
+      • <strong>回到顶部</strong>（默认）：用户切换页面不会停在上个页面的滚动位置<br>
+      • <strong>锚点跳转</strong>：<code>router-link to="/docs#install"</code> 直接滚动到页面内 <code>id="install"</code> 的元素<br>
+      • <strong>后退恢复</strong>：列表页滚到第 N 条 → 进详情 → 后退 → 恢复到第 N 条位置（使用 savedPosition）
+    </div>
+  </div>
+</div>
 </body>
 </html>
