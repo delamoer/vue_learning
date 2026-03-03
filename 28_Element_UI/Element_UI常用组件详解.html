@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Element UI 常用组件详解</title>
+  <!-- Element UI CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.14/lib/theme-chalk/index.css" />
+  <script src="../js/vue.js"></script>
+  <script src="https://unpkg.com/element-ui@2.15.14/lib/index.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: #f0f2f5; color: #333; }
+    .page-header { background: linear-gradient(135deg, #409EFF, #1a73e8); color: #fff; padding: 30px 40px; }
+    .page-header h1 { font-size: 2rem; }
+    .page-header p  { margin-top: 8px; opacity: .85; font-size: .95rem; }
+    .toc { background: #fff; border-radius: 10px; padding: 20px 28px; margin: 20px auto; max-width: 1100px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .toc h2 { font-size: 1rem; color: #409EFF; margin-bottom: 10px; }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
+    .toc-grid a { color: #555; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: .85rem; }
+    .toc-grid a:hover { background: #ecf5ff; color: #409EFF; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; }
+    .section { background: #fff; border-radius: 10px; padding: 28px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .section-title { font-size: 1.25rem; font-weight: 700; color: #303133; padding-bottom: 12px; border-bottom: 2px solid #ecf5ff; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .section-title .num { background: #409EFF; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; }
+    .sub-title { font-size: 1rem; font-weight: 600; color: #409EFF; margin: 20px 0 10px; }
+    .demo-block { border: 1px solid #e4e7ed; border-radius: 6px; padding: 20px; margin: 10px 0; background: #fafafa; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; font-size: .81rem; line-height: 1.75; overflow-x: auto; margin: 10px 0; white-space: pre; }
+    .kw  { color: #cba6f7; }
+    .fn  { color: #89b4fa; }
+    .str { color: #a6e3a1; }
+    .cmt { color: #6c7086; font-style: italic; }
+    .attr{ color: #f38ba8; }
+    .num { color: #fab387; }
+    .box-info { background: #ecf5ff; border-left: 4px solid #409EFF; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    .box-warn { background: #fdf6ec; border-left: 4px solid #E6A23C; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    .box-ok   { background: #f0f9eb; border-left: 4px solid #67C23A; padding: 10px 14px; border-radius: 4px; margin: 8px 0; font-size: .87rem; }
+    code { background: #f0f2f5; padding: 1px 6px; border-radius: 3px; font-size: .86em; color: #e6354e; }
+    table.props { width: 100%; border-collapse: collapse; font-size: .86rem; margin: 10px 0; }
+    table.props th { background: #ecf5ff; padding: 8px 12px; text-align: left; font-weight: 600; }
+    table.props td { border-bottom: 1px solid #ebeef5; padding: 7px 12px; vertical-align: top; }
+    table.props tr:hover td { background: #f5f7fa; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .spacer { height: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🎨 Element UI 常用组件详解</h1>
+  <p>基于 Element UI 2.x（Vue 2）· 综合项目实战中使用的全部核心组件 · 含 Props / Events / Slots 速查</p>
+</div>
+
+<!-- 目录 -->
+<div class="toc">
+  <h2>📋 目录</h2>
+  <div class="toc-grid">
+    <a href="#s1">1. 安装与引入</a>
+    <a href="#s2">2. Layout 布局</a>
+    <a href="#s3">3. Button 按钮</a>
+    <a href="#s4">4. Form 表单</a>
+    <a href="#s5">5. Table 表格</a>
+    <a href="#s6">6. Dialog 弹窗</a>
+    <a href="#s7">7. Pagination 分页</a>
+    <a href="#s8">8. Tag / Badge</a>
+    <a href="#s9">9. Switch 开关</a>
+    <a href="#s10">10. Select / Input</a>
+    <a href="#s11">11. Card / Descriptions</a>
+    <a href="#s12">12. Message / Notification</a>
+    <a href="#s13">13. Loading</a>
+    <a href="#s14">14. 综合实战片段</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== 1. 安装与引入 ===== -->
+  <div class="section" id="s1">
+    <div class="section-title"><span class="num">1</span>安装与引入</div>
+
+    <div class="sub-title">完整引入（推荐入门）</div>
+    <pre><span class="cmt">// main.js</span>
+<span class="kw">import</span> Vue <span class="kw">from</span> <span class="str">'vue'</span>
+<span class="kw">import</span> ElementUI <span class="kw">from</span> <span class="str">'element-ui'</span>
+<span class="kw">import</span> <span class="str">'element-ui/lib/theme-chalk/index.css'</span>
+
+Vue.<span class="fn">use</span>(ElementUI, { size: <span class="str">'small'</span>, zIndex: <span class="num">3000</span> })
+<span class="cmt">// size: 'medium' | 'small' | 'mini'  （全局默认尺寸）</span></pre>
+
+    <div class="sub-title">按需引入（生产推荐，减小打包体积）</div>
+    <pre><span class="cmt">// babel.config.js 插件配置</span>
+plugins: [[ <span class="str">'component'</span>, { libraryName: <span class="str">'element-ui'</span>, styleLibraryName: <span class="str">'theme-chalk'</span> }]]
+
+<span class="cmt">// main.js 只引入需要的组件</span>
+<span class="kw">import</span> { Button, Table, Form, FormItem, Input, Select } <span class="kw">from</span> <span class="str">'element-ui'</span>
+[Button, Table, Form, FormItem, Input, Select].<span class="fn">forEach</span>(c => Vue.<span class="fn">component</span>(c.name, c))</pre>
+
+    <div class="box-info">
+      <strong>综合项目中的配置（vue2-admin-demo）：</strong>完整引入 + <code>size: 'small'</code> 全局 small 尺寸，
+      保持了代码简洁与原型演示速度，生产项目建议按需引入。
+    </div>
+  </div>
+
+  <!-- ===== 2. Layout ===== -->
+  <div class="section" id="s2">
+    <div class="section-title"><span class="num">2</span>Layout 布局（Row / Col）</div>
+    <div class="box-info">24 栅格系统，<code>:span</code> 指定列宽，<code>:gutter</code> 设置列间距，响应式断点 <code>:xs :sm :md :lg :xl</code>。</div>
+
+    <div id="layout-demo" class="demo-block"></div>
+    <pre><span class="cmt">&lt;!-- 基础用法 --&gt;</span>
+&lt;<span class="attr">el-row</span> <span class="attr">:gutter</span>=<span class="str">"20"</span>&gt;
+  &lt;<span class="attr">el-col</span> <span class="attr">:span</span>=<span class="str">"6"</span>&gt;左侧（占 6/24）&lt;/<span class="attr">el-col</span>&gt;
+  &lt;<span class="attr">el-col</span> <span class="attr">:span</span>=<span class="str">"18"</span>&gt;右侧（占 18/24）&lt;/<span class="attr">el-col</span>&gt;
+&lt;/<span class="attr">el-row</span>&gt;
+
+<span class="cmt">&lt;!-- 响应式：手机1列，平板2列，桌面4列 --&gt;</span>
+&lt;<span class="attr">el-row</span> <span class="attr">:gutter</span>=<span class="str">"16"</span>&gt;
+  &lt;<span class="attr">el-col</span> <span class="attr">:xs</span>=<span class="str">"24"</span> <span class="attr">:sm</span>=<span class="str">"12"</span> <span class="attr">:md</span>=<span class="str">"6"</span>&gt;卡片 1&lt;/<span class="attr">el-col</span>&gt;
+  &lt;<span class="attr">el-col</span> <span class="attr">:xs</span>=<span class="str">"24"</span> <span class="attr">:sm</span>=<span class="str">"12"</span> <span class="attr">:md</span>=<span class="str">"6"</span>&gt;卡片 2&lt;/<span class="attr">el-col</span>&gt;
+&lt;/<span class="attr">el-row</span>&gt;</pre>
+  </div>
+
+  <!-- ===== 3. Button ===== -->
+  <div class="section" id="s3">
+    <div class="section-title"><span class="num">3</span>Button 按钮</div>
+
+    <div id="btn-demo" class="demo-block"></div>
+
+    <table class="props" style="margin-top:14px">
+      <thead><tr><th>Prop</th><th>说明</th><th>可选值</th></tr></thead>
+      <tbody>
+        <tr><td><code>type</code></td><td>类型（颜色）</td><td>primary / success / warning / danger / info / text</td></tr>
+        <tr><td><code>size</code></td><td>尺寸</td><td>medium / small / mini</td></tr>
+        <tr><td><code>icon</code></td><td>图标类名</td><td>el-icon-edit / el-icon-delete / el-icon-plus …</td></tr>
+        <tr><td><code>loading</code></td><td>加载状态</td><td>Boolean</td></tr>
+        <tr><td><code>disabled</code></td><td>禁用</td><td>Boolean</td></tr>
+        <tr><td><code>plain</code></td><td>朴素按钮</td><td>Boolean</td></tr>
+        <tr><td><code>round / circle</code></td><td>圆角 / 圆形</td><td>Boolean</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 4. Form ===== -->
+  <div class="section" id="s4">
+    <div class="section-title"><span class="num">4</span>Form 表单（重点）</div>
+    <div class="box-info">
+      <strong>三要素：</strong> ① <code>:model</code> 绑定数据对象 · ② <code>:rules</code> 配置校验规则 · ③ <code>prop</code> 指定字段名（用于触发校验）
+    </div>
+
+    <div id="form-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- 模板 --&gt;</span>
+&lt;<span class="attr">el-form</span> <span class="attr">ref</span>=<span class="str">"form"</span> <span class="attr">:model</span>=<span class="str">"form"</span> <span class="attr">:rules</span>=<span class="str">"rules"</span> <span class="attr">label-width</span>=<span class="str">"80px"</span>&gt;
+  &lt;<span class="attr">el-form-item</span> <span class="attr">label</span>=<span class="str">"用户名"</span> <span class="attr">prop</span>=<span class="str">"username"</span>&gt;
+    &lt;<span class="attr">el-input</span> <span class="attr">v-model</span>=<span class="str">"form.username"</span> /&gt;
+  &lt;/<span class="attr">el-form-item</span>&gt;
+  &lt;<span class="attr">el-form-item</span>&gt;
+    &lt;<span class="attr">el-button</span> <span class="attr">type</span>=<span class="str">"primary"</span> <span class="attr">@click</span>=<span class="str">"submit"</span>&gt;提交&lt;/<span class="attr">el-button</span>&gt;
+  &lt;/<span class="attr">el-form-item</span>&gt;
+&lt;/<span class="attr">el-form</span>&gt;
+
+<span class="cmt">// JS</span>
+<span class="kw">data</span>() {
+  <span class="kw">return</span> {
+    form: { username: <span class="str">''</span>, email: <span class="str">''</span> },
+    rules: {
+      username: [
+        { required: <span class="kw">true</span>, message: <span class="str">'请输入用户名'</span>, trigger: <span class="str">'blur'</span> },
+        { min: <span class="num">3</span>, max: <span class="num">20</span>, message: <span class="str">'长度 3-20 位'</span>, trigger: <span class="str">'blur'</span> }
+      ],
+      email: [
+        { required: <span class="kw">true</span>, message: <span class="str">'请输入邮箱'</span> },
+        { type: <span class="str">'email'</span>, message: <span class="str">'邮箱格式不正确'</span>, trigger: <span class="str">'blur'</span> }
+      ]
+    }
+  }
+},
+methods: {
+  submit() {
+    <span class="kw">this</span>.$refs.form.<span class="fn">validate</span>(valid => {
+      <span class="kw">if</span> (valid) { <span class="cmt">/* 提交请求 */</span> }
+    })
+  },
+  reset() { <span class="kw">this</span>.$refs.form.<span class="fn">resetFields</span>() }
+}</pre>
+
+    <table class="props">
+      <thead><tr><th>方法（通过 ref 调用）</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>validate(callback)</code></td><td>校验全部字段，回调参数为是否通过</td></tr>
+        <tr><td><code>validateField(prop, cb)</code></td><td>校验单个字段</td></tr>
+        <tr><td><code>resetFields()</code></td><td>重置所有字段为初始值并清除校验</td></tr>
+        <tr><td><code>clearValidate(props?)</code></td><td>清除校验提示（不改变值）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 5. Table ===== -->
+  <div class="section" id="s5">
+    <div class="section-title"><span class="num">5</span>Table 表格（重点）</div>
+
+    <div id="table-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- 基础 + 自定义列 + 操作列 --&gt;</span>
+&lt;<span class="attr">el-table</span> <span class="attr">:data</span>=<span class="str">"tableData"</span> <span class="attr">stripe</span> <span class="attr">border</span> <span class="attr">style</span>=<span class="str">"width:100%"</span>&gt;
+  <span class="cmt">&lt;!-- 普通列 --&gt;</span>
+  &lt;<span class="attr">el-table-column</span> <span class="attr">prop</span>=<span class="str">"name"</span>   <span class="attr">label</span>=<span class="str">"姓名"</span>  <span class="attr">width</span>=<span class="str">"120"</span> /&gt;
+  &lt;<span class="attr">el-table-column</span> <span class="attr">prop</span>=<span class="str">"email"</span>  <span class="attr">label</span>=<span class="str">"邮箱"</span> /&gt;
+
+  <span class="cmt">&lt;!-- 自定义渲染（作用域插槽） --&gt;</span>
+  &lt;<span class="attr">el-table-column</span> <span class="attr">label</span>=<span class="str">"状态"</span> <span class="attr">width</span>=<span class="str">"90"</span>&gt;
+    <span class="kw">&lt;template</span> <span class="attr">v-slot</span>=<span class="str">"{ row }"</span>&gt;
+      &lt;<span class="attr">el-tag</span> <span class="attr">:type</span>=<span class="str">"row.status === 1 ? 'success' : 'danger'"</span>&gt;
+        {{ row.status === 1 ? '启用' : '禁用' }}
+      &lt;/<span class="attr">el-tag</span>&gt;
+    &lt;/template&gt;
+  &lt;/<span class="attr">el-table-column</span>&gt;
+
+  <span class="cmt">&lt;!-- 操作列 --&gt;</span>
+  &lt;<span class="attr">el-table-column</span> <span class="attr">label</span>=<span class="str">"操作"</span> <span class="attr">width</span>=<span class="str">"150"</span> <span class="attr">fixed</span>=<span class="str">"right"</span>&gt;
+    <span class="kw">&lt;template</span> <span class="attr">v-slot</span>=<span class="str">"{ row }"</span>&gt;
+      &lt;<span class="attr">el-button</span> <span class="attr">size</span>=<span class="str">"mini"</span> <span class="attr">@click</span>=<span class="str">"edit(row)"</span>&gt;编辑&lt;/<span class="attr">el-button</span>&gt;
+      &lt;<span class="attr">el-button</span> <span class="attr">size</span>=<span class="str">"mini"</span> <span class="attr">type</span>=<span class="str">"danger"</span> <span class="attr">@click</span>=<span class="str">"del(row)"</span>&gt;删除&lt;/<span class="attr">el-button</span>&gt;
+    &lt;/template&gt;
+  &lt;/<span class="attr">el-table-column</span>&gt;
+&lt;/<span class="attr">el-table</span>&gt;</pre>
+
+    <div class="box-warn">
+      <strong>⚠️ 自定义列必须用作用域插槽：</strong>通过 <code>v-slot="{ row }"</code> 拿到当前行数据，
+      <code>row</code> 是整行对象，<code>$index</code> 是行下标，<code>column</code> 是列配置对象。
+    </div>
+  </div>
+
+  <!-- ===== 6. Dialog ===== -->
+  <div class="section" id="s6">
+    <div class="section-title"><span class="num">6</span>Dialog 弹窗</div>
+
+    <div id="dialog-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- :visible.sync 等价于 :visible + @update:visible --&gt;</span>
+&lt;<span class="attr">el-dialog</span>
+  <span class="attr">title</span>=<span class="str">"编辑用户"</span>
+  <span class="attr">:visible.sync</span>=<span class="str">"dialogVisible"</span>
+  <span class="attr">width</span>=<span class="str">"480px"</span>
+  <span class="attr">:close-on-click-modal</span>=<span class="str">"false"</span>   <span class="cmt">&lt;-- 点遮罩不关闭（防误操作）</span>
+  <span class="attr">@closed</span>=<span class="str">"resetForm"</span>              <span class="cmt">&lt;-- 弹窗完全关闭后重置表单</span>
+&gt;
+  <span class="cmt">&lt;!-- 内容 --&gt;</span>
+  &lt;<span class="attr">el-form</span> ...&gt; ... &lt;/<span class="attr">el-form</span>&gt;
+
+  <span class="cmt">&lt;!-- 底部按钮（具名插槽） --&gt;</span>
+  <span class="kw">&lt;template</span> <span class="attr">#footer</span>&gt;
+    &lt;<span class="attr">el-button</span> <span class="attr">@click</span>=<span class="str">"dialogVisible = false"</span>&gt;取消&lt;/<span class="attr">el-button</span>&gt;
+    &lt;<span class="attr">el-button</span> <span class="attr">type</span>=<span class="str">"primary"</span> <span class="attr">:loading</span>=<span class="str">"submitting"</span> <span class="attr">@click</span>=<span class="str">"confirm"</span>&gt;确认&lt;/<span class="attr">el-button</span>&gt;
+  &lt;/template&gt;
+&lt;/<span class="attr">el-dialog</span>&gt;</pre>
+
+    <div class="box-info">
+      <strong>常见坑：</strong>Dialog 内的 Form 校验状态和 Dialog 生命周期解耦。
+      应在 <code>@closed</code>（完全关闭动画结束后）再 <code>resetFields()</code>，
+      否则 <code>@close</code> 时动画未结束会看到残留校验高亮。
+    </div>
+  </div>
+
+  <!-- ===== 7. Pagination ===== -->
+  <div class="section" id="s7">
+    <div class="section-title"><span class="num">7</span>Pagination 分页</div>
+
+    <div id="pager-demo" class="demo-block"></div>
+
+    <pre>&lt;<span class="attr">el-pagination</span>
+  <span class="attr">background</span>
+  <span class="attr">layout</span>=<span class="str">"total, sizes, prev, pager, next, jumper"</span>
+  <span class="attr">:total</span>=<span class="str">"total"</span>        <span class="cmt">&lt;-- 总条数</span>
+  <span class="attr">:page-size</span>=<span class="str">"pageSize"</span>
+  <span class="attr">:current-page</span>=<span class="str">"page"</span>
+  <span class="attr">:page-sizes</span>=<span class="str">"[10, 20, 50, 100]"</span>
+  <span class="attr">@current-change</span>=<span class="str">"onPageChange"</span>   <span class="cmt">&lt;-- 页码改变</span>
+  <span class="attr">@size-change</span>=<span class="str">"onSizeChange"</span>     <span class="cmt">&lt;-- 每页条数改变</span>
+/&gt;
+
+<span class="cmt">// layout 字段说明：</span>
+<span class="cmt">// total  → 显示"共 xx 条"</span>
+<span class="cmt">// sizes  → 每页条数选择器</span>
+<span class="cmt">// prev   → 上一页</span>
+<span class="cmt">// pager  → 页码列表</span>
+<span class="cmt">// next   → 下一页</span>
+<span class="cmt">// jumper → 跳转输入框</span></pre>
+  </div>
+
+  <!-- ===== 8. Tag / Badge ===== -->
+  <div class="section" id="s8">
+    <div class="section-title"><span class="num">8</span>Tag 标签 / Badge 徽章</div>
+
+    <div id="tag-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- Tag --&gt;</span>
+&lt;<span class="attr">el-tag</span>&gt;默认&lt;/<span class="attr">el-tag</span>&gt;
+&lt;<span class="attr">el-tag</span> <span class="attr">type</span>=<span class="str">"success"</span>&gt;成功&lt;/<span class="attr">el-tag</span>&gt;
+&lt;<span class="attr">el-tag</span> <span class="attr">type</span>=<span class="str">"warning"</span>&gt;警告&lt;/<span class="attr">el-tag</span>&gt;
+&lt;<span class="attr">el-tag</span> <span class="attr">type</span>=<span class="str">"danger"</span>&gt;危险&lt;/<span class="attr">el-tag</span>&gt;
+&lt;<span class="attr">el-tag</span> <span class="attr">type</span>=<span class="str">"info"</span>&gt;信息&lt;/<span class="attr">el-tag</span>&gt;
+<span class="cmt">&lt;!-- size: medium / small / mini --&gt;</span>
+<span class="cmt">&lt;!-- effect: dark / light（默认）/ plain --&gt;</span>
+<span class="cmt">&lt;!-- closable: 可关闭标签，@close 事件 --&gt;</span>
+
+<span class="cmt">&lt;!-- Badge: 数字/小红点徽章 --&gt;</span>
+&lt;<span class="attr">el-badge</span> <span class="attr">:value</span>=<span class="str">"12"</span>&gt;&lt;<span class="attr">el-button</span>&gt;消息&lt;/<span class="attr">el-button</span>&gt;&lt;/<span class="attr">el-badge</span>&gt;
+&lt;<span class="attr">el-badge</span> <span class="attr">is-dot</span>&gt;&lt;<span class="attr">i</span> <span class="attr">class</span>=<span class="str">"el-icon-bell"</span>&gt;&lt;/<span class="attr">i</span>&gt;&lt;/<span class="attr">el-badge</span>&gt;  <span class="cmt">&lt;-- 小红点</span>
+&lt;<span class="attr">el-badge</span> <span class="attr">:max</span>=<span class="str">"99"</span> <span class="attr">:value</span>=<span class="str">"200"</span>&gt;...&lt;/<span class="attr">el-badge</span>&gt;     <span class="cmt">&lt;-- 超出显示 99+</span></pre>
+  </div>
+
+  <!-- ===== 9. Switch ===== -->
+  <div class="section" id="s9">
+    <div class="section-title"><span class="num">9</span>Switch 开关</div>
+
+    <div id="switch-demo" class="demo-block"></div>
+
+    <pre>&lt;<span class="attr">el-switch</span>
+  <span class="attr">v-model</span>=<span class="str">"status"</span>
+  <span class="attr">:active-value</span>=<span class="str">"1"</span>           <span class="cmt">&lt;-- 开启时绑定值（默认 true）</span>
+  <span class="attr">:inactive-value</span>=<span class="str">"0"</span>        <span class="cmt">&lt;-- 关闭时绑定值（默认 false）</span>
+  <span class="attr">active-text</span>=<span class="str">"启用"</span>
+  <span class="attr">inactive-text</span>=<span class="str">"禁用"</span>
+  <span class="attr">active-color</span>=<span class="str">"#67C23A"</span>
+  <span class="attr">@change</span>=<span class="str">"onStatusChange"</span>
+/&gt;
+
+<span class="cmt">// 实战中常见写法：列表中切换状态后立即调接口</span>
+<span class="kw">async</span> <span class="fn">onStatusChange</span>(val, row) {
+  <span class="kw">try</span> {
+    <span class="kw">await</span> <span class="fn">updateUserStatus</span>(row.id, val)
+    <span class="kw">this</span>.$message.<span class="fn">success</span>(<span class="str">'状态更新成功'</span>)
+  } <span class="kw">catch</span> {
+    row.status = val === <span class="num">1</span> ? <span class="num">0</span> : <span class="num">1</span>  <span class="cmt">// 接口失败：回滚到原值</span>
+  }
+}</pre>
+  </div>
+
+  <!-- ===== 10. Select / Input ===== -->
+  <div class="section" id="s10">
+    <div class="section-title"><span class="num">10</span>Select 下拉 / Input 输入框</div>
+
+    <div id="input-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- Input 常用 Props --&gt;</span>
+&lt;<span class="attr">el-input</span>
+  <span class="attr">v-model</span>=<span class="str">"keyword"</span>
+  <span class="attr">placeholder</span>=<span class="str">"请输入关键词"</span>
+  <span class="attr">clearable</span>                       <span class="cmt">&lt;-- 显示清空按钮</span>
+  <span class="attr">prefix-icon</span>=<span class="str">"el-icon-search"</span>   <span class="cmt">&lt;-- 前缀图标</span>
+  <span class="attr">@keyup.enter.native</span>=<span class="str">"search"</span>   <span class="cmt">&lt;-- 回车搜索</span>
+/&gt;
+
+<span class="cmt">&lt;!-- 密码框 --&gt;</span>
+&lt;<span class="attr">el-input</span> <span class="attr">type</span>=<span class="str">"password"</span> <span class="attr">show-password</span> /&gt;
+
+<span class="cmt">&lt;!-- Select 下拉框 --&gt;</span>
+&lt;<span class="attr">el-select</span> <span class="attr">v-model</span>=<span class="str">"role"</span> <span class="attr">placeholder</span>=<span class="str">"选择角色"</span> <span class="attr">clearable</span>&gt;
+  &lt;<span class="attr">el-option</span>
+    <span class="attr">v-for</span>=<span class="str">"item in roleOptions"</span>
+    <span class="attr">:key</span>=<span class="str">"item.value"</span>
+    <span class="attr">:label</span>=<span class="str">"item.label"</span>
+    <span class="attr">:value</span>=<span class="str">"item.value"</span>
+  /&gt;
+&lt;/<span class="attr">el-select</span>&gt;
+
+<span class="cmt">// roleOptions 数据格式：</span>
+[
+  { label: <span class="str">'管理员'</span>, value: <span class="str">'admin'</span> },
+  { label: <span class="str">'编辑'</span>,   value: <span class="str">'editor'</span> }
+]</pre>
+
+    <div class="box-warn">
+      <strong>⚠️ Select 绑定值类型：</strong><code>v-model</code> 绑定的是 <code>el-option</code> 的 <code>:value</code>，
+      注意值类型要和后端保持一致（字符串 vs 数字），否则回显时会找不到匹配项显示空白。
+    </div>
+  </div>
+
+  <!-- ===== 11. Card / Descriptions ===== -->
+  <div class="section" id="s11">
+    <div class="section-title"><span class="num">11</span>Card 卡片 / Descriptions 描述列表</div>
+
+    <div id="card-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- Card --&gt;</span>
+&lt;<span class="attr">el-card</span> <span class="attr">shadow</span>=<span class="str">"hover"</span>&gt;      <span class="cmt">&lt;-- shadow: always / hover / never</span>
+  <span class="kw">&lt;template</span> <span class="attr">#header</span>&gt;
+    &lt;span&gt;卡片标题&lt;/span&gt;
+    &lt;<span class="attr">el-button</span> <span class="attr">style</span>=<span class="str">"float:right"</span> <span class="attr">type</span>=<span class="str">"text"</span>&gt;操作&lt;/<span class="attr">el-button</span>&gt;
+  &lt;/template&gt;
+  &lt;p&gt;卡片内容&lt;/p&gt;
+&lt;/<span class="attr">el-card</span>&gt;
+
+<span class="cmt">&lt;!-- Descriptions 描述列表（展示详情常用）--&gt;</span>
+&lt;<span class="attr">el-descriptions</span> <span class="attr">title</span>=<span class="str">"用户详情"</span> <span class="attr">:column</span>=<span class="str">"2"</span> <span class="attr">border</span>&gt;
+  &lt;<span class="attr">el-descriptions-item</span> <span class="attr">label</span>=<span class="str">"用户名"</span>&gt;{{ user.username }}&lt;/<span class="attr">el-descriptions-item</span>&gt;
+  &lt;<span class="attr">el-descriptions-item</span> <span class="attr">label</span>=<span class="str">"邮箱"</span>&gt;{{ user.email }}&lt;/<span class="attr">el-descriptions-item</span>&gt;
+  &lt;<span class="attr">el-descriptions-item</span> <span class="attr">label</span>=<span class="str">"状态"</span>&gt;
+    &lt;<span class="attr">el-tag</span> <span class="attr">type</span>=<span class="str">"success"</span>&gt;正常&lt;/<span class="attr">el-tag</span>&gt;
+  &lt;/<span class="attr">el-descriptions-item</span>&gt;
+&lt;/<span class="attr">el-descriptions</span>&gt;</pre>
+  </div>
+
+  <!-- ===== 12. Message / Notification ===== -->
+  <div class="section" id="s12">
+    <div class="section-title"><span class="num">12</span>Message 消息 / MessageBox 弹框 / Notification 通知</div>
+
+    <div id="msg-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">// ① Message（顶部轻提示，2-3秒自动消失）</span>
+<span class="kw">this</span>.$message.<span class="fn">success</span>(<span class="str">'操作成功'</span>)
+<span class="kw">this</span>.$message.<span class="fn">error</span>(<span class="str">'请求失败'</span>)
+<span class="kw">this</span>.$message.<span class="fn">warning</span>(<span class="str">'请注意'</span>)
+<span class="kw">this</span>.$message({ message: <span class="str">'自定义'</span>, type: <span class="str">'info'</span>, duration: <span class="num">5000</span>, showClose: <span class="kw">true</span> })
+
+<span class="cmt">// ② MessageBox（确认弹框，async/await 用法）</span>
+<span class="kw">async</span> <span class="fn">deleteUser</span>(id) {
+  <span class="kw">try</span> {
+    <span class="kw">await</span> <span class="kw">this</span>.$confirm(<span class="str">'确定删除该用户吗？'</span>, <span class="str">'提示'</span>, {
+      confirmButtonText: <span class="str">'确定'</span>,
+      cancelButtonText:  <span class="str">'取消'</span>,
+      type: <span class="str">'warning'</span>
+    })
+    <span class="kw">await</span> <span class="fn">deleteUserApi</span>(id)
+    <span class="kw">this</span>.$message.<span class="fn">success</span>(<span class="str">'删除成功'</span>)
+  } <span class="kw">catch</span> {
+    <span class="cmt">// 用户点"取消" → catch 但不需要处理</span>
+  }
+}
+
+<span class="cmt">// ③ Notification（右上角通知，适合后台异步任务完成提醒）</span>
+<span class="kw">this</span>.$notify({
+  title: <span class="str">'导出完成'</span>,
+  message: <span class="str">'报表已生成，点击下载'</span>,
+  type: <span class="str">'success'</span>,
+  duration: <span class="num">0</span>,        <span class="cmt">// 0 = 不自动关闭</span>
+  onClick: () => { <span class="kw">this</span>.<span class="fn">downloadReport</span>() }
+})</pre>
+  </div>
+
+  <!-- ===== 13. Loading ===== -->
+  <div class="section" id="s13">
+    <div class="section-title"><span class="num">13</span>Loading 加载</div>
+
+    <div id="loading-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">// ① v-loading 指令（局部 Loading，覆盖某个元素）</span>
+&lt;<span class="attr">div</span> <span class="attr">v-loading</span>=<span class="str">"loading"</span>&gt; ... &lt;/<span class="attr">div</span>&gt;
+&lt;<span class="attr">el-table</span> <span class="attr">v-loading</span>=<span class="str">"tableLoading"</span> <span class="attr">:data</span>=<span class="str">"list"</span>&gt;...&lt;/<span class="attr">el-table</span>&gt;
+
+<span class="cmt">// ② this.$loading()（全屏 Loading）</span>
+<span class="kw">const</span> loadingInst = <span class="kw">this</span>.<span class="fn">$loading</span>({
+  lock: <span class="kw">true</span>,
+  text: <span class="str">'数据加载中...'</span>,
+  spinner: <span class="str">'el-icon-loading'</span>,
+  background: <span class="str">'rgba(0,0,0,.7)'</span>
+})
+<span class="kw">await</span> <span class="fn">fetchData</span>()
+loadingInst.<span class="fn">close</span>()   <span class="cmt">// 务必手动关闭，建议放在 finally 中</span></pre>
+  </div>
+
+  <!-- ===== 14. 综合实战 ===== -->
+  <div class="section" id="s14">
+    <div class="section-title"><span class="num">14</span>综合实战片段（CRUD 搜索列表页）</div>
+    <div class="box-ok">下面是后台管理系统中最典型的"搜索 + 表格 + 分页 + 新建弹窗"完整骨架。</div>
+
+    <div id="crud-demo" class="demo-block"></div>
+
+    <pre><span class="cmt">&lt;!-- 完整 CRUD 页面骨架 --&gt;</span>
+&lt;<span class="attr">template</span>&gt;
+  &lt;<span class="attr">div</span>&gt;
+    <span class="cmt">&lt;!-- 搜索栏 --&gt;</span>
+    &lt;<span class="attr">el-card</span> <span class="attr">class</span>=<span class="str">"mb-md"</span>&gt;
+      &lt;<span class="attr">el-row</span> <span class="attr">:gutter</span>=<span class="str">"16"</span>&gt;
+        &lt;<span class="attr">el-col</span> <span class="attr">:span</span>=<span class="str">"8"</span>&gt;
+          &lt;<span class="attr">el-input</span> <span class="attr">v-model</span>=<span class="str">"query.keyword"</span> <span class="attr">placeholder</span>=<span class="str">"搜索姓名/邮箱"</span> <span class="attr">clearable</span>
+            <span class="attr">prefix-icon</span>=<span class="str">"el-icon-search"</span> <span class="attr">@keyup.enter.native</span>=<span class="str">"fetchList"</span> /&gt;
+        &lt;/<span class="attr">el-col</span>&gt;
+        &lt;<span class="attr">el-col</span> <span class="attr">:span</span>=<span class="str">"6"</span>&gt;
+          &lt;<span class="attr">el-select</span> <span class="attr">v-model</span>=<span class="str">"query.status"</span> <span class="attr">placeholder</span>=<span class="str">"状态"</span> <span class="attr">clearable</span>&gt;
+            &lt;<span class="attr">el-option</span> <span class="attr">label</span>=<span class="str">"启用"</span> <span class="attr">:value</span>=<span class="str">"1"</span> /&gt;
+            &lt;<span class="attr">el-option</span> <span class="attr">label</span>=<span class="str">"禁用"</span> <span class="attr">:value</span>=<span class="str">"0"</span> /&gt;
+          &lt;/<span class="attr">el-select</span>&gt;
+        &lt;/<span class="attr">el-col</span>&gt;
+        &lt;<span class="attr">el-col</span> <span class="attr">:span</span>=<span class="str">"10"</span>&gt;
+          &lt;<span class="attr">el-button</span> <span class="attr">type</span>=<span class="str">"primary"</span> <span class="attr">icon</span>=<span class="str">"el-icon-search"</span> <span class="attr">@click</span>=<span class="str">"fetchList"</span>&gt;查询&lt;/<span class="attr">el-button</span>&gt;
+          &lt;<span class="attr">el-button</span> <span class="attr">icon</span>=<span class="str">"el-icon-refresh"</span> <span class="attr">@click</span>=<span class="str">"resetQuery"</span>&gt;重置&lt;/<span class="attr">el-button</span>&gt;
+          &lt;<span class="attr">el-button</span> <span class="attr">type</span>=<span class="str">"primary"</span> <span class="attr">icon</span>=<span class="str">"el-icon-plus"</span> <span class="attr">@click</span>=<span class="str">"openDialog()"</span>&gt;新建&lt;/<span class="attr">el-button</span>&gt;
+        &lt;/<span class="attr">el-col</span>&gt;
+      &lt;/<span class="attr">el-row</span>&gt;
+    &lt;/<span class="attr">el-card</span>&gt;
+
+    <span class="cmt">&lt;!-- 表格 --&gt;</span>
+    &lt;<span class="attr">el-card</span>&gt;
+      &lt;<span class="attr">el-table</span> <span class="attr">v-loading</span>=<span class="str">"loading"</span> <span class="attr">:data</span>=<span class="str">"list"</span> <span class="attr">stripe</span> <span class="attr">border</span>&gt;
+        &lt;<span class="attr">el-table-column</span> <span class="attr">prop</span>=<span class="str">"name"</span>  <span class="attr">label</span>=<span class="str">"姓名"</span>  <span class="attr">width</span>=<span class="str">"120"</span> /&gt;
+        &lt;<span class="attr">el-table-column</span> <span class="attr">prop</span>=<span class="str">"email"</span> <span class="attr">label</span>=<span class="str">"邮箱"</span> /&gt;
+        &lt;<span class="attr">el-table-column</span> <span class="attr">label</span>=<span class="str">"状态"</span> <span class="attr">width</span>=<span class="str">"90"</span>&gt;
+          <span class="kw">&lt;template</span> <span class="attr">#default</span>=<span class="str">"{ row }"</span>&gt;
+            &lt;<span class="attr">el-tag</span> <span class="attr">:type</span>=<span class="str">"row.status ? 'success' : 'danger'"</span>&gt;
+              {{ row.status ? '启用' : '禁用' }}
+            &lt;/<span class="attr">el-tag</span>&gt;
+          &lt;/template&gt;
+        &lt;/<span class="attr">el-table-column</span>&gt;
+        &lt;<span class="attr">el-table-column</span> <span class="attr">label</span>=<span class="str">"操作"</span> <span class="attr">width</span>=<span class="str">"160"</span> <span class="attr">fixed</span>=<span class="str">"right"</span>&gt;
+          <span class="kw">&lt;template</span> <span class="attr">#default</span>=<span class="str">"{ row }"</span>&gt;
+            &lt;<span class="attr">el-button</span> <span class="attr">size</span>=<span class="str">"mini"</span> <span class="attr">type</span>=<span class="str">"primary"</span> <span class="attr">@click</span>=<span class="str">"openDialog(row)"</span>&gt;编辑&lt;/<span class="attr">el-button</span>&gt;
+            &lt;<span class="attr">el-button</span> <span class="attr">size</span>=<span class="str">"mini"</span> <span class="attr">type</span>=<span class="str">"danger"</span>   <span class="attr">@click</span>=<span class="str">"remove(row)"</span>&gt;删除&lt;/<span class="attr">el-button</span>&gt;
+          &lt;/template&gt;
+        &lt;/<span class="attr">el-table-column</span>&gt;
+      &lt;/<span class="attr">el-table</span>&gt;
+
+      <span class="cmt">&lt;!-- 分页 --&gt;</span>
+      &lt;<span class="attr">el-pagination</span> <span class="attr">background</span>
+        <span class="attr">layout</span>=<span class="str">"total, sizes, prev, pager, next"</span>
+        <span class="attr">:total</span>=<span class="str">"total"</span> <span class="attr">:page-size</span>=<span class="str">"query.pageSize"</span> <span class="attr">:current-page</span>=<span class="str">"query.page"</span>
+        <span class="attr">@current-change</span>=<span class="str">"p => { query.page = p; fetchList() }"</span>
+        <span class="attr">@size-change</span>=<span class="str">"s => { query.pageSize = s; query.page = 1; fetchList() }"</span>
+        <span class="attr">style</span>=<span class="str">"margin-top:16px;text-align:right"</span>
+      /&gt;
+    &lt;/<span class="attr">el-card</span>&gt;
+
+    <span class="cmt">&lt;!-- 弹窗 --&gt;</span>
+    &lt;<span class="attr">el-dialog</span> <span class="attr">:title</span>=<span class="str">"isEdit ? '编辑' : '新建'"</span> <span class="attr">:visible.sync</span>=<span class="str">"dialogVisible"</span>
+      <span class="attr">width</span>=<span class="str">"480px"</span> <span class="attr">:close-on-click-modal</span>=<span class="str">"false"</span> <span class="attr">@closed</span>=<span class="str">"resetForm"</span>&gt;
+      &lt;<span class="attr">el-form</span> <span class="attr">ref</span>=<span class="str">"form"</span> <span class="attr">:model</span>=<span class="str">"form"</span> <span class="attr">:rules</span>=<span class="str">"rules"</span> <span class="attr">label-width</span>=<span class="str">"80px"</span>&gt;
+        &lt;<span class="attr">el-form-item</span> <span class="attr">label</span>=<span class="str">"姓名"</span> <span class="attr">prop</span>=<span class="str">"name"</span>&gt;&lt;<span class="attr">el-input</span> <span class="attr">v-model</span>=<span class="str">"form.name"</span> /&gt;&lt;/<span class="attr">el-form-item</span>&gt;
+      &lt;/<span class="attr">el-form</span>&gt;
+      <span class="kw">&lt;template</span> <span class="attr">#footer</span>&gt;
+        &lt;<span class="attr">el-button</span> <span class="attr">@click</span>=<span class="str">"dialogVisible=false"</span>&gt;取消&lt;/<span class="attr">el-button</span>&gt;
+        &lt;<span class="attr">el-button</span> <span class="attr">type</span>=<span class="str">"primary"</span> <span class="attr">:loading</span>=<span class="str">"saving"</span> <span class="attr">@click</span>=<span class="str">"save"</span>&gt;保存&lt;/<span class="attr">el-button</span>&gt;
+      &lt;/template&gt;
+    &lt;/<span class="attr">el-dialog</span>&gt;
+  &lt;/<span class="attr">div</span>&gt;
+&lt;/<span class="attr">template</span>&gt;</pre>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+Vue.use(ELEMENT)
+
+// ===== Layout Demo =====
+new Vue({
+  el: '#layout-demo',
+  template: `
+    <div>
+      <el-row :gutter="12" style="margin-bottom:8px">
+        <el-col :span="6"><div style="background:#ecf5ff;padding:10px;border-radius:4px;text-align:center">span=6</div></el-col>
+        <el-col :span="6"><div style="background:#f0f9eb;padding:10px;border-radius:4px;text-align:center">span=6</div></el-col>
+        <el-col :span="6"><div style="background:#fdf6ec;padding:10px;border-radius:4px;text-align:center">span=6</div></el-col>
+        <el-col :span="6"><div style="background:#fef0f0;padding:10px;border-radius:4px;text-align:center">span=6</div></el-col>
+      </el-row>
+      <el-row :gutter="12">
+        <el-col :span="8"><div style="background:#ecf5ff;padding:10px;border-radius:4px;text-align:center">span=8（1/3）</div></el-col>
+        <el-col :span="16"><div style="background:#f0f9eb;padding:10px;border-radius:4px;text-align:center">span=16（2/3）</div></el-col>
+      </el-row>
+    </div>
+  `
+})
+
+// ===== Button Demo =====
+new Vue({
+  el: '#btn-demo',
+  data() { return { loading: false } },
+  methods: {
+    toggle() { this.loading = true; setTimeout(() => this.loading = false, 1500) }
+  },
+  template: `
+    <div>
+      <div class="tag-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <el-button>默认</el-button>
+        <el-button type="primary">Primary</el-button>
+        <el-button type="success">Success</el-button>
+        <el-button type="warning">Warning</el-button>
+        <el-button type="danger">Danger</el-button>
+        <el-button type="info">Info</el-button>
+        <el-button type="text">Text</el-button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <el-button type="primary" icon="el-icon-edit">带图标</el-button>
+        <el-button type="primary" icon="el-icon-edit" circle />
+        <el-button type="danger" icon="el-icon-delete">删除</el-button>
+        <el-button type="primary" round>圆角</el-button>
+        <el-button type="primary" plain>朴素</el-button>
+        <el-button type="primary" disabled>禁用</el-button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <el-button size="medium">Medium</el-button>
+        <el-button size="small">Small</el-button>
+        <el-button size="mini">Mini</el-button>
+        <el-button type="primary" :loading="loading" @click="toggle">
+          {{ loading ? '加载中...' : '点击触发 Loading' }}
+        </el-button>
+      </div>
+    </div>
+  `
+})
+
+// ===== Form Demo =====
+new Vue({
+  el: '#form-demo',
+  data() {
+    return {
+      form: { username: '', email: '', role: '' },
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 20, message: '长度 3-20 位', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
+        ],
+        role: [{ required: true, message: '请选择角色', trigger: 'change' }]
+      }
+    }
+  },
+  methods: {
+    submit() {
+      this.$refs.form.validate(valid => {
+        if (valid) this.$message.success('校验通过！可以提交')
+      })
+    },
+    reset() { this.$refs.form.resetFields() }
+  },
+  template: `
+    <el-form ref="form" :model="form" :rules="rules" label-width="80px" style="max-width:420px">
+      <el-form-item label="用户名" prop="username">
+        <el-input v-model="form.username" placeholder="3-20位字符" clearable />
+      </el-form-item>
+      <el-form-item label="邮箱" prop="email">
+        <el-input v-model="form.email" placeholder="请输入邮箱" clearable />
+      </el-form-item>
+      <el-form-item label="角色" prop="role">
+        <el-select v-model="form.role" placeholder="请选择" style="width:100%">
+          <el-option label="管理员" value="admin" />
+          <el-option label="编辑" value="editor" />
+          <el-option label="只读" value="viewer" />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit">提交验证</el-button>
+        <el-button @click="reset">重置</el-button>
+      </el-form-item>
+    </el-form>
+  `
+})
+
+// ===== Table Demo =====
+const tableData = [
+  { id: 1, name: '张伟', email: 'zhangwei@example.com', role: '管理员', status: 1 },
+  { id: 2, name: '李娜', email: 'lina@example.com',     role: '编辑',   status: 1 },
+  { id: 3, name: '王芳', email: 'wangfang@example.com', role: '只读',   status: 0 },
+]
+new Vue({
+  el: '#table-demo',
+  data() { return { list: tableData } },
+  methods: {
+    edit(row) { this.$message.info('编辑：' + row.name) },
+    del(row)  {
+      this.$confirm('确定删除 ' + row.name + '？', '提示', { type: 'warning' })
+        .then(() => this.$message.success('已删除'))
+        .catch(() => {})
+    }
+  },
+  template: `
+    <el-table :data="list" stripe border style="width:100%">
+      <el-table-column type="index" label="#" width="50" />
+      <el-table-column prop="name"  label="姓名" width="100" />
+      <el-table-column prop="email" label="邮箱" />
+      <el-table-column prop="role"  label="角色" width="90" />
+      <el-table-column label="状态" width="90">
+        <template #default="{ row }">
+          <el-tag :type="row.status ? 'success' : 'danger'" size="mini">
+            {{ row.status ? '启用' : '禁用' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="150" fixed="right">
+        <template #default="{ row }">
+          <el-button size="mini" type="primary" @click="edit(row)">编辑</el-button>
+          <el-button size="mini" type="danger"  @click="del(row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  `
+})
+
+// ===== Dialog Demo =====
+new Vue({
+  el: '#dialog-demo',
+  data() {
+    return {
+      visible: false,
+      form: { name: '', email: '' },
+      saving: false
+    }
+  },
+  methods: {
+    open() { this.visible = true },
+    save() {
+      this.saving = true
+      setTimeout(() => {
+        this.saving = false
+        this.visible = false
+        this.$message.success('保存成功')
+      }, 1200)
+    },
+    afterClose() { this.form = { name: '', email: '' } }
+  },
+  template: `
+    <div>
+      <el-button type="primary" @click="open">打开 Dialog</el-button>
+      <el-dialog title="新建用户" :visible.sync="visible" width="420px"
+        :close-on-click-modal="false" @closed="afterClose">
+        <el-form :model="form" label-width="60px">
+          <el-form-item label="姓名"><el-input v-model="form.name" /></el-form-item>
+          <el-form-item label="邮箱"><el-input v-model="form.email" /></el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="visible=false">取消</el-button>
+          <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  `
+})
+
+// ===== Pagination Demo =====
+new Vue({
+  el: '#pager-demo',
+  data() { return { page: 1, pageSize: 10, total: 256 } },
+  methods: {
+    onPage(p) { this.page = p; this.$message.info('跳转到第 ' + p + ' 页') },
+    onSize(s) { this.pageSize = s; this.page = 1 }
+  },
+  template: `
+    <div>
+      <div style="margin-bottom:8px;font-size:.88rem;color:#606266">
+        当前第 {{ page }} 页，每页 {{ pageSize }} 条，共 {{ total }} 条
+      </div>
+      <el-pagination
+        background
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        :page-size="pageSize"
+        :current-page="page"
+        :page-sizes="[10, 20, 50]"
+        @current-change="onPage"
+        @size-change="onSize"
+      />
+    </div>
+  `
+})
+
+// ===== Tag / Badge Demo =====
+new Vue({
+  el: '#tag-demo',
+  data() { return { count: 5 } },
+  template: `
+    <div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <el-tag>默认</el-tag>
+        <el-tag type="success">成功</el-tag>
+        <el-tag type="warning">警告</el-tag>
+        <el-tag type="danger">危险</el-tag>
+        <el-tag type="info">信息</el-tag>
+        <el-tag effect="dark" type="primary">dark</el-tag>
+        <el-tag effect="plain" type="success">plain</el-tag>
+        <el-tag closable type="warning" @close="$message.info('已关闭')">可关闭</el-tag>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+        <el-badge :value="count" type="primary">
+          <el-button size="small">消息</el-button>
+        </el-badge>
+        <el-badge :value="99" :max="99">
+          <el-button size="small">超出99</el-button>
+        </el-badge>
+        <el-badge is-dot type="danger">
+          <el-button size="small" icon="el-icon-bell">通知</el-button>
+        </el-badge>
+        <el-button size="mini" @click="count++">+1 消息</el-button>
+      </div>
+    </div>
+  `
+})
+
+// ===== Switch Demo =====
+new Vue({
+  el: '#switch-demo',
+  data() { return { s1: true, s2: 1, s3: false } },
+  template: `
+    <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:center">
+      <div>
+        <div style="font-size:.82rem;color:#909399;margin-bottom:6px">基础开关</div>
+        <el-switch v-model="s1" />
+        <span style="margin-left:8px;font-size:.85rem">{{ s1 ? '开' : '关' }}</span>
+      </div>
+      <div>
+        <div style="font-size:.82rem;color:#909399;margin-bottom:6px">数字值（1/0）</div>
+        <el-switch v-model="s2" :active-value="1" :inactive-value="0"
+          active-color="#67C23A" inactive-color="#F56C6C"
+          active-text="启用" inactive-text="禁用" />
+        <span style="margin-left:8px;font-size:.85rem">值={{ s2 }}</span>
+      </div>
+    </div>
+  `
+})
+
+// ===== Input / Select Demo =====
+new Vue({
+  el: '#input-demo',
+  data() { return { kw: '', role: '', pwd: '' } },
+  template: `
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
+      <el-input v-model="kw" placeholder="搜索关键词" clearable prefix-icon="el-icon-search"
+        style="width:200px" @keyup.enter.native="$message.info('搜索：'+kw)" />
+      <el-input v-model="pwd" type="password" show-password placeholder="密码" style="width:160px" />
+      <el-select v-model="role" placeholder="选择角色" clearable style="width:160px">
+        <el-option label="管理员" value="admin" />
+        <el-option label="编辑" value="editor" />
+        <el-option label="只读" value="viewer" />
+      </el-select>
+      <el-button type="primary" @click="$message.info('role='+role)">查询</el-button>
+    </div>
+  `
+})
+
+// ===== Card / Descriptions Demo =====
+new Vue({
+  el: '#card-demo',
+  template: `
+    <el-row :gutter="16">
+      <el-col :span="12">
+        <el-card shadow="hover">
+          <template #header>
+            <span style="font-weight:600">用户卡片</span>
+            <el-button style="float:right;padding:3px 0" type="text">更多</el-button>
+          </template>
+          <p>卡片内容区域，shadow="hover" 鼠标悬浮时显示阴影。</p>
+        </el-card>
+      </el-col>
+      <el-col :span="12">
+        <el-descriptions title="用户详情" :column="2" border size="small">
+          <el-descriptions-item label="用户名">admin</el-descriptions-item>
+          <el-descriptions-item label="角色">
+            <el-tag size="mini" type="danger">超级管理员</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="邮箱">admin@example.com</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag size="mini" type="success">正常</el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-col>
+    </el-row>
+  `
+})
+
+// ===== Message Demo =====
+new Vue({
+  el: '#msg-demo',
+  methods: {
+    showMsg(type) { this.$message[type](type + ' 类型的消息提示') },
+    showConfirm() {
+      this.$confirm('确定要删除这条记录吗？此操作不可撤销。', '删除确认', {
+        confirmButtonText: '确定删除', cancelButtonText: '取消', type: 'warning'
+      }).then(() => {
+        this.$message.success('删除成功')
+      }).catch(() => {
+        this.$message.info('已取消')
+      })
+    },
+    showNotify() {
+      this.$notify({ title: '导出完成', message: '报表已生成，请查看下载列表', type: 'success', duration: 3000 })
+    }
+  },
+  template: `
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <el-button size="small" type="success" @click="showMsg('success')">success</el-button>
+      <el-button size="small" type="danger"  @click="showMsg('error')">error</el-button>
+      <el-button size="small" type="warning" @click="showMsg('warning')">warning</el-button>
+      <el-button size="small" type="info"    @click="showMsg('info')">info</el-button>
+      <el-button size="small" type="danger"  plain @click="showConfirm">$confirm 确认框</el-button>
+      <el-button size="small" type="primary" plain @click="showNotify">$notify 通知</el-button>
+    </div>
+  `
+})
+
+// ===== Loading Demo =====
+new Vue({
+  el: '#loading-demo',
+  data() { return { tableLoading: false } },
+  methods: {
+    localLoading() {
+      this.tableLoading = true
+      setTimeout(() => { this.tableLoading = false; this.$message.success('加载完成') }, 1500)
+    },
+    fullLoading() {
+      const inst = this.$loading({ lock: true, text: '全屏加载中...', background: 'rgba(0,0,0,.6)' })
+      setTimeout(() => { inst.close(); this.$message.success('加载完成') }, 1500)
+    }
+  },
+  template: `
+    <div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <el-button size="small" type="primary" @click="localLoading">局部 v-loading（1.5s）</el-button>
+        <el-button size="small" type="primary" plain @click="fullLoading">全屏 $loading（1.5s）</el-button>
+      </div>
+      <el-table v-loading="tableLoading" :data="[{name:'数据行A'},{name:'数据行B'}]" size="mini" border style="width:300px">
+        <el-table-column prop="name" label="名称" />
+      </el-table>
+    </div>
+  `
+})
+
+// ===== CRUD Demo =====
+new Vue({
+  el: '#crud-demo',
+  data() {
+    return {
+      loading: false,
+      query: { keyword: '', status: '', page: 1, pageSize: 10 },
+      total: 86,
+      list: [
+        { id: 1, name: '张伟', email: 'zhangwei@demo.com', status: 1 },
+        { id: 2, name: '李娜', email: 'lina@demo.com',     status: 1 },
+        { id: 3, name: '王芳', email: 'wangfang@demo.com', status: 0 },
+      ],
+      dialogVisible: false,
+      isEdit: false,
+      saving: false,
+      form: { name: '', email: '' },
+      rules: {
+        name:  [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' },
+                { type: 'email', message: '格式错误', trigger: 'blur' }]
+      }
+    }
+  },
+  methods: {
+    fetchList() {
+      this.loading = true
+      setTimeout(() => { this.loading = false }, 600)
+    },
+    resetQuery() { this.query.keyword = ''; this.query.status = ''; this.query.page = 1; this.fetchList() },
+    openDialog(row) {
+      this.isEdit = !!row
+      this.form = row ? { ...row } : { name: '', email: '' }
+      this.dialogVisible = true
+    },
+    resetForm() { this.$refs.form && this.$refs.form.resetFields(); this.form = { name: '', email: '' } },
+    save() {
+      this.$refs.form.validate(v => {
+        if (!v) return
+        this.saving = true
+        setTimeout(() => {
+          this.saving = false
+          this.dialogVisible = false
+          this.$message.success(this.isEdit ? '编辑成功' : '新建成功')
+        }, 800)
+      })
+    },
+    remove(row) {
+      this.$confirm('确定删除 ' + row.name + '？', '提示', { type: 'warning' })
+        .then(() => this.$message.success('已删除'))
+        .catch(() => {})
+    }
+  },
+  template: `
+    <div>
+      <el-card style="margin-bottom:12px">
+        <el-row :gutter="12">
+          <el-col :span="8">
+            <el-input v-model="query.keyword" placeholder="搜索姓名/邮箱" clearable
+              prefix-icon="el-icon-search" @keyup.enter.native="fetchList" />
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="query.status" placeholder="状态" clearable style="width:100%">
+              <el-option label="启用" :value="1" />
+              <el-option label="禁用" :value="0" />
+            </el-select>
+          </el-col>
+          <el-col :span="10">
+            <el-button type="primary" icon="el-icon-search" @click="fetchList">查询</el-button>
+            <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+            <el-button type="primary" icon="el-icon-plus" @click="openDialog()">新建</el-button>
+          </el-col>
+        </el-row>
+      </el-card>
+
+      <el-card>
+        <el-table v-loading="loading" :data="list" stripe border>
+          <el-table-column prop="name"  label="姓名"  width="100" />
+          <el-table-column prop="email" label="邮箱" />
+          <el-table-column label="状态" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.status ? 'success' : 'danger'" size="mini">
+                {{ row.status ? '启用' : '禁用' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150" fixed="right">
+            <template #default="{ row }">
+              <el-button size="mini" type="primary" @click="openDialog(row)">编辑</el-button>
+              <el-button size="mini" type="danger"  @click="remove(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination background style="margin-top:12px;text-align:right"
+          layout="total, prev, pager, next"
+          :total="total" :page-size="query.pageSize" :current-page="query.page"
+          @current-change="p => { query.page = p; fetchList() }" />
+      </el-card>
+
+      <el-dialog :title="isEdit ? '编辑用户' : '新建用户'" :visible.sync="dialogVisible"
+        width="420px" :close-on-click-modal="false" @closed="resetForm">
+        <el-form ref="form" :model="form" :rules="rules" label-width="60px">
+          <el-form-item label="姓名" prop="name">
+            <el-input v-model="form.name" placeholder="请输入姓名" />
+          </el-form-item>
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="form.email" placeholder="请输入邮箱" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="dialogVisible=false">取消</el-button>
+          <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  `
+})
+</script>
+</body>
+</html>
