@@ -1,0 +1,100 @@
+// =============================================
+// Element UI 全局样式覆盖
+// 此文件 **不** 通过 additionalData 注入，
+// 在 index.scss 中用普通 @import 引入，
+// 确保这里的选择器能命中全局 Element 组件
+// =============================================
+
+// 表格
+.el-table {
+  border-radius: $radius-base;
+
+  th.el-table__cell {
+    background: #f5f7fa;
+    color: $text-regular;
+    font-weight: 600;
+  }
+
+  .el-table__row:hover > td.el-table__cell {
+    background: #f0f7ff;
+  }
+}
+
+// 表单
+.el-form-item__label {
+  font-weight: 500;
+  color: $text-regular;
+}
+
+// 按钮圆角统一
+.el-button {
+  border-radius: $radius-base;
+}
+
+// 卡片
+.el-card {
+  border-radius: $radius-md;
+  border: 1px solid $border-lighter;
+
+  .el-card__header {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $text-primary;
+    border-bottom: 1px solid $border-lighter;
+  }
+}
+
+// 分页
+.el-pagination {
+  margin-top: $spacing-md;
+  text-align: right;
+}
+
+// 对话框
+.el-dialog {
+  border-radius: $radius-md;
+
+  .el-dialog__header {
+    padding: $spacing-md;
+    border-bottom: 1px solid $border-lighter;
+
+    .el-dialog__title {
+      font-size: $font-size-md;
+      font-weight: 600;
+    }
+  }
+
+  .el-dialog__body {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .el-dialog__footer {
+    padding: $spacing-sm $spacing-md $spacing-md;
+    border-top: 1px solid $border-lighter;
+  }
+}
+
+// Tag 标签
+.el-tag {
+  border-radius: $radius-sm;
+}
+
+// Breadcrumb 面包屑
+.el-breadcrumb__item:last-child .el-breadcrumb__inner {
+  color: $text-primary;
+  font-weight: 500;
+}
+
+// 滚动条美化（webkit）
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(#000, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

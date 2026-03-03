@@ -1,0 +1,91 @@
+// 单行省略
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行省略
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  overflow: hidden;
+}
+
+// Flex 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-vcenter {
+  display: flex;
+  align-items: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 绝对定位居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 清除浮动
+@mixin clearfix {
+  &::after {
+    display: block;
+    content: '';
+    clear: both;
+  }
+}
+
+// 响应式断点
+@mixin mobile {
+  @media (max-width: 768px) { @content; }
+}
+
+@mixin tablet {
+  @media (min-width: 769px) and (max-width: 1024px) { @content; }
+}
+
+@mixin desktop {
+  @media (min-width: 1025px) { @content; }
+}
+
+// 卡片样式
+@mixin card($padding: $spacing-md) {
+  padding: $padding;
+  background: $bg-white;
+  border-radius: $radius-base;
+  box-shadow: $shadow-light;
+}
+
+// 页面容器
+@mixin page-container {
+  padding: $spacing-md;
+  background: $bg-page;
+  min-height: calc(100vh - #{$header-height} - #{$tags-view-height});
+}
+
+// 表格工具栏
+@mixin table-toolbar {
+  @include flex-between;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm 0;
+}
+
+// 文字颜色辅助
+@mixin text-overflow-hidden {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
