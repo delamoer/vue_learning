@@ -1,0 +1,98 @@
+// 全局变量
+$primary: #e4393c;
+$primary-light: #ff6b6e;
+$primary-dark: #c62828;
+$secondary: #ff9800;
+$text-primary: #333;
+$text-secondary: #666;
+$text-placeholder: #999;
+$border-color: #e8e8e8;
+$bg-page: #f5f5f5;
+$bg-card: #fff;
+$radius: 4px;
+$radius-lg: 8px;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+$shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.14);
+
+// 容器
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+// 通用卡片
+.card {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  padding: 20px;
+}
+
+// 价格文字
+.price {
+  color: $primary;
+  font-weight: 600;
+  &-original {
+    color: $text-placeholder;
+    text-decoration: line-through;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+}
+
+// 徽章
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  background: $primary;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 2px;
+}
+
+// 面包屑
+.breadcrumb {
+  padding: 14px 0;
+  font-size: 13px;
+  color: $text-secondary;
+  a { color: $text-secondary; text-decoration: none; &:hover { color: $primary; } }
+  span { color: $text-primary; }
+}
+
+// 页面分区标题
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: $text-primary;
+  padding-bottom: 12px;
+  border-bottom: 2px solid $primary;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+// 空状态
+.empty-state {
+  text-align: center;
+  padding: 60px 0;
+  color: $text-placeholder;
+  .empty-icon { font-size: 64px; margin-bottom: 12px; }
+  p { font-size: 15px; }
+}
+
+// Element UI 覆盖
+.el-button--primary {
+  background: $primary !important;
+  border-color: $primary !important;
+  &:hover { background: $primary-light !important; border-color: $primary-light !important; }
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+  background: $primary !important;
+}
+
+// 过渡动画
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter, .fade-leave-to { opacity: 0; }
+.slide-up-enter-active, .slide-up-leave-active { transition: all 0.3s; }
+.slide-up-enter, .slide-up-leave-to { opacity: 0; transform: translateY(10px); }
