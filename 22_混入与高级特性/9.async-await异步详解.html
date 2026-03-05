@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>async / await 异步详解</title>
+  <style>
+    /* ── 基础排版 ─────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f6fa; color: #333; }
+
+    .page-header {
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: #fff; padding: 36px 40px 32px;
+    }
+    .page-header h1 { font-size: 28px; margin-bottom: 8px; }
+    .page-header p  { font-size: 15px; opacity: .85; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 30px 20px 60px; }
+
+    /* ── 章节卡片 ─────────────────────── */
+    .section { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.07); margin-bottom: 28px; overflow: hidden; }
+    .section-head { background: #2c3e50; color: #fff; padding: 14px 22px; font-size: 16px; font-weight: 700; }
+    .section-body { padding: 22px; }
+
+    /* ── 提示框 ─────────────────────── */
+    .box { border-radius: 6px; padding: 14px 18px; margin: 14px 0; font-size: 14px; line-height: 1.8; }
+    .box-info  { background: #e8f4fd; border-left: 4px solid #3498db; }
+    .box-ok    { background: #eafaf1; border-left: 4px solid #27ae60; }
+    .box-warn  { background: #fef9e7; border-left: 4px solid #f39c12; }
+    .box-diff  { background: #fdf2f8; border-left: 4px solid #8e44ad; }
+    .box strong { color: #2c3e50; }
+
+    /* ── 代码 ─────────────────────── */
+    pre {
+      background: #1e2a38; color: #cdd9e5; border-radius: 8px;
+      padding: 18px; overflow-x: auto; font-size: 13.5px;
+      line-height: 1.7; margin: 14px 0;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    .kw  { color: #e06c75; }   /* keyword   */
+    .fn  { color: #61afef; }   /* function  */
+    .str { color: #98c379; }   /* string    */
+    .cmt { color: #7f848e; font-style: italic; } /* comment */
+    .num { color: #d19a66; }   /* number    */
+
+    /* ── 对比表格 ─────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 14px 0; }
+    th { background: #2c3e50; color: #fff; padding: 10px 14px; text-align: left; }
+    td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+    tr:nth-child(even) td { background: #f9f9f9; }
+
+    /* ── Demo 区 ─────────────────────── */
+    .demo-block { border: 2px dashed #3498db; border-radius: 8px; padding: 20px; margin-top: 16px; }
+    .demo-block h4 { font-size: 14px; color: #3498db; margin-bottom: 12px; }
+    button {
+      padding: 8px 18px; border: none; border-radius: 5px; cursor: pointer;
+      font-size: 13px; margin: 4px; transition: opacity .2s;
+    }
+    button:hover { opacity: .85; }
+    .btn-primary { background: #3498db; color: #fff; }
+    .btn-success { background: #27ae60; color: #fff; }
+    .btn-danger  { background: #e74c3c; color: #fff; }
+    .btn-warn    { background: #f39c12; color: #fff; }
+    #output {
+      background: #1e2a38; color: #98c379; border-radius: 6px;
+      padding: 14px; font-size: 13px; min-height: 80px; margin-top: 12px;
+      font-family: 'Consolas', monospace; line-height: 1.8; white-space: pre-wrap;
+    }
+
+    /* ── 目录 ─────────────────────── */
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .toc a {
+      padding: 6px 14px; background: #2c3e50; color: #fff;
+      border-radius: 20px; text-decoration: none; font-size: 13px;
+      transition: background .2s;
+    }
+    .toc a:hover { background: #3498db; }
+
+    h3 { font-size: 15px; color: #2c3e50; margin: 18px 0 8px; }
+    p  { font-size: 14px; line-height: 1.9; color: #444; margin-bottom: 8px; }
+    ul, ol { padding-left: 22px; font-size: 14px; line-height: 2; color: #444; }
+  </style>
+</head>
+<body>
+<div class="page-header">
+  <h1>⏳ async / await 异步详解</h1>
+  <p>彻底搞清楚：什么是异步？Promise 是什么？async/await 什么时候用？什么时候不用？</p>
+</div>
+
+<div class="container">
+
+  <!-- 目录 -->
+  <div class="toc">
+    <a href="#s1">① 什么是异步</a>
+    <a href="#s2">② 为什么需要 Promise</a>
+    <a href="#s3">③ async / await 语法</a>
+    <a href="#s4">④ 错误处理</a>
+    <a href="#s5">⑤ 什么时候用 / 不用</a>
+    <a href="#s6">⑥ 与 Vue 结合</a>
+    <a href="#s7">⑦ 常见误区</a>
+    <a href="#s8">⑧ 互动 Demo</a>
+  </div>
+
+  <!-- ① 什么是异步 -->
+  <div class="section" id="s1">
+    <div class="section-head">① 什么是"异步"——从直觉开始理解</div>
+    <div class="section-body">
+      <p>JavaScript 是<strong>单线程</strong>的，一次只能做一件事。但很多操作需要"等待"——等网络返回数据、等计时器到时、等文件读取完成……</p>
+      <p>如果等待期间什么都不做，页面就会"卡死"。所以 JS 用<strong>异步</strong>来解决：把"要等的事"丢出去，先继续执行后面的代码，等结果回来了再处理。</p>
+
+      <div class="box box-info">
+        <strong>最简单的比喻：</strong><br>
+        你在奶茶店点单（发起请求），店员说"好了叫你"（异步），你不需要站在那里发呆，可以先去旁边坐着刷手机（继续执行后面的代码）。奶茶做好了，店员叫你（回调/resolve），你去取奶茶（处理结果）。
+      </div>
+
+      <h3>同步 vs 异步 的代码表现</h3>
+<pre><span class="cmt">// 同步：从上到下，一行执行完才执行下一行</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'第1步'</span>)
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'第2步'</span>)
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'第3步'</span>)
+<span class="cmt">// 输出顺序：第1步 → 第2步 → 第3步</span>
+
+<span class="cmt">// 异步：setTimeout 把回调"延迟"执行</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'第1步'</span>)
+<span class="fn">setTimeout</span>(() => {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'第2步（1秒后）'</span>)
+}, <span class="num">1000</span>)
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'第3步'</span>)
+<span class="cmt">// 输出顺序：第1步 → 第3步 → 第2步（1秒后）</span>
+<span class="cmt">// 注意：第3步没有等第2步！</span></pre>
+
+      <div class="box box-warn">
+        <strong>常见异步场景：</strong>
+        网络请求（axios/fetch）、setTimeout / setInterval、读取文件（Node）、用户事件（点击按钮）、Promise、动画回调
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 为什么需要 Promise -->
+  <div class="section" id="s2">
+    <div class="section-head">② 回调地狱 → Promise → async/await 的演进</div>
+    <div class="section-body">
+      <p>异步操作早期用<strong>回调函数</strong>处理，但当异步操作嵌套时，代码会变成"回调地狱"，难以阅读和维护：</p>
+
+<pre><span class="cmt">// ❌ 回调地狱：先登录，再获取用户信息，再获取订单列表</span>
+<span class="fn">login</span>(user, <span class="kw">function</span>(err, token) {
+  <span class="kw">if</span> (err) { <span class="kw">return</span> <span class="fn">handleError</span>(err) }
+  <span class="fn">getUserInfo</span>(token, <span class="kw">function</span>(err, info) {
+    <span class="kw">if</span> (err) { <span class="kw">return</span> <span class="fn">handleError</span>(err) }
+    <span class="fn">getOrderList</span>(info.id, <span class="kw">function</span>(err, orders) {
+      <span class="kw">if</span> (err) { <span class="kw">return</span> <span class="fn">handleError</span>(err) }
+      <span class="cmt">// 到这里才能用 orders……已经嵌套了3层</span>
+      <span class="fn">console</span>.<span class="fn">log</span>(orders)
+    })
+  })
+})</pre>
+
+      <h3>Promise 改善了链式调用</h3>
+<pre><span class="cmt">// ✅ Promise 链式：更清晰，但还是有点啰嗦</span>
+<span class="fn">login</span>(user)
+  .<span class="fn">then</span>(token => <span class="fn">getUserInfo</span>(token))
+  .<span class="fn">then</span>(info  => <span class="fn">getOrderList</span>(info.id))
+  .<span class="fn">then</span>(orders => <span class="fn">console</span>.<span class="fn">log</span>(orders))
+  .<span class="fn">catch</span>(err  => <span class="fn">handleError</span>(err))</pre>
+
+      <h3>async/await 让异步代码"看起来像同步"</h3>
+<pre><span class="cmt">// ✅✅ async/await：最清晰，最直观，本质还是 Promise</span>
+<span class="kw">async function</span> <span class="fn">loadOrders</span>() {
+  <span class="kw">const</span> token  = <span class="kw">await</span> <span class="fn">login</span>(user)
+  <span class="kw">const</span> info   = <span class="kw">await</span> <span class="fn">getUserInfo</span>(token)
+  <span class="kw">const</span> orders = <span class="kw">await</span> <span class="fn">getOrderList</span>(info.id)
+  <span class="fn">console</span>.<span class="fn">log</span>(orders)
+}
+<span class="cmt">// 读起来和同步代码一样，但实际上每一行都在"等待"异步结果</span></pre>
+
+      <div class="box box-ok">
+        <strong>结论：async/await 不是新功能，是 Promise 的语法糖。</strong><br>
+        它们底层完全一样，只是写法更优雅。你在项目里看到 <code>await xxx()</code>，就意味着 <code>xxx()</code> 返回的是一个 Promise。
+      </div>
+
+      <h3>Promise 是什么？三种状态</h3>
+      <table>
+        <tr><th>状态</th><th>含义</th><th>触发</th></tr>
+        <tr><td>pending（等待中）</td><td>还在执行，结果未知</td><td>Promise 刚创建时</td></tr>
+        <tr><td>fulfilled（已成功）</td><td>操作成功，有返回值</td><td>调用 resolve(value)</td></tr>
+        <tr><td>rejected（已失败）</td><td>操作失败，有错误信息</td><td>调用 reject(error)</td></tr>
+      </table>
+<pre><span class="cmt">// 手动创建 Promise 的结构（了解即可，通常不需要自己写）</span>
+<span class="kw">const</span> p = <span class="kw">new</span> <span class="fn">Promise</span>((resolve, reject) => {
+  <span class="cmt">// 执行异步操作...</span>
+  <span class="kw">if</span> (成功) {
+    <span class="fn">resolve</span>(结果数据)   <span class="cmt">// → fulfilled，await 拿到这个值</span>
+  } <span class="kw">else</span> {
+    <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">'失败原因'</span>))  <span class="cmt">// → rejected，await 抛出异常</span>
+  }
+})</pre>
+    </div>
+  </div>
+
+  <!-- ③ async/await 语法 -->
+  <div class="section" id="s3">
+    <div class="section-head">③ async / await 语法详解</div>
+    <div class="section-body">
+
+      <h3>规则一：await 必须在 async 函数内使用</h3>
+<pre><span class="cmt">// ❌ 错误：在普通函数里用 await</span>
+<span class="kw">function</span> <span class="fn">bad</span>() {
+  <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchData</span>()  <span class="cmt">// SyntaxError！</span>
+}
+
+<span class="cmt">// ✅ 正确：函数声明前加 async</span>
+<span class="kw">async function</span> <span class="fn">good</span>() {
+  <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchData</span>()  <span class="cmt">// ✅</span>
+}
+
+<span class="cmt">// ✅ 箭头函数同样可以</span>
+<span class="kw">const</span> <span class="fn">good2</span> = <span class="kw">async</span> () => {
+  <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchData</span>()
+}</pre>
+
+      <h3>规则二：async 函数总是返回 Promise</h3>
+<pre><span class="kw">async function</span> <span class="fn">getNum</span>() {
+  <span class="kw">return</span> <span class="num">42</span>
+}
+
+<span class="cmt">// 调用 async 函数，得到的是 Promise，不是 42</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">getNum</span>())    <span class="cmt">// Promise { 42 }</span>
+
+<span class="cmt">// 要拿到 42，必须 await 或 .then()</span>
+<span class="kw">const</span> n = <span class="kw">await</span> <span class="fn">getNum</span>()  <span class="cmt">// 42</span>
+<span class="fn">getNum</span>().<span class="fn">then</span>(n => <span class="fn">console</span>.<span class="fn">log</span>(n))  <span class="cmt">// 42</span></pre>
+
+      <h3>规则三：await 暂停当前 async 函数，不阻塞整个线程</h3>
+<pre><span class="kw">async function</span> <span class="fn">demo</span>() {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A'</span>)
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">slowRequest</span>()  <span class="cmt">// 暂停在这里等待，但其他代码可以运行</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'B'</span>, result)
+}
+
+<span class="fn">demo</span>()
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'C'</span>)
+
+<span class="cmt">// 输出：A → C → B（C 不等 B，因为 B 在等异步结果）</span></pre>
+
+      <h3>规则四：await 可以用于任何返回 Promise 的表达式</h3>
+<pre><span class="cmt">// await axios 请求（最常见）</span>
+<span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>)
+
+<span class="cmt">// await setTimeout 包装成 Promise（延迟）</span>
+<span class="kw">const</span> <span class="fn">sleep</span> = ms => <span class="kw">new</span> <span class="fn">Promise</span>(r => <span class="fn">setTimeout</span>(r, ms))
+<span class="kw">await</span> <span class="fn">sleep</span>(<span class="num">1000</span>)  <span class="cmt">// 等 1 秒</span>
+
+<span class="cmt">// await 普通值（不是 Promise，直接返回）</span>
+<span class="kw">const</span> x = <span class="kw">await</span> <span class="num">42</span>  <span class="cmt">// x = 42（无意义但合法）</span>
+
+<span class="cmt">// await 多个并行请求：用 Promise.all</span>
+<span class="kw">const</span> [users, products] = <span class="kw">await</span> <span class="fn">Promise</span>.<span class="fn">all</span>([
+  axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>),
+  axios.<span class="fn">get</span>(<span class="str">'/api/products'</span>)
+])
+<span class="cmt">// 两个请求同时发出，都完成后才继续，比串行快很多</span></pre>
+
+      <div class="box box-diff">
+        <strong>串行 vs 并行（重要！）</strong><br><br>
+        <strong>串行（一个等一个，慢）：</strong><br>
+        <code>const a = await req1()  // 等1秒</code><br>
+        <code>const b = await req2()  // 再等1秒，共2秒</code><br><br>
+        <strong>并行（同时发出，快）：</strong><br>
+        <code>const [a, b] = await Promise.all([req1(), req2()])  // 共1秒</code><br><br>
+        如果两个请求之间没有依赖关系，一定要用 <code>Promise.all</code> 并行！
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ 错误处理 -->
+  <div class="section" id="s4">
+    <div class="section-head">④ 错误处理：try/catch 是标配</div>
+    <div class="section-body">
+      <p>当 await 的 Promise 被 reject（失败），会抛出异常。必须用 try/catch 捕获，否则是未处理的错误。</p>
+
+<pre><span class="cmt">// ❌ 没有错误处理：请求失败时，控制台报错，用户看到白屏</span>
+<span class="kw">async function</span> <span class="fn">loadData</span>() {
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>)  <span class="cmt">// 如果失败，崩了</span>
+  <span class="kw">this</span>.list = res.data
+}
+
+<span class="cmt">// ✅ 标准写法：try/catch 包裹</span>
+<span class="kw">async function</span> <span class="fn">loadData</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>)
+    <span class="kw">this</span>.list = res.data
+  } <span class="kw">catch</span> (error) {
+    <span class="fn">console</span>.<span class="fn">error</span>(<span class="str">'加载失败：'</span>, error)
+    <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">error</span>(<span class="str">'数据加载失败，请重试'</span>)
+  }
+}</pre>
+
+      <h3>在 Vue 中典型的完整写法（带 loading 状态）</h3>
+<pre><span class="kw">async</span> <span class="fn">loadUsers</span>() {
+  <span class="kw">this</span>.loading = <span class="kw">true</span>   <span class="cmt">// 开始：显示 loading</span>
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>)
+    <span class="kw">this</span>.users = res.data
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">error</span>(<span class="str">'请求失败'</span>)
+  } <span class="kw">finally</span> {
+    <span class="kw">this</span>.loading = <span class="kw">false</span>  <span class="cmt">// 无论成功失败，都关闭 loading</span>
+  }
+}</pre>
+
+      <div class="box box-ok">
+        <strong>finally 块的价值：</strong> 无论 try 成功还是 catch 捕获了异常，finally 都会执行。非常适合用来关闭 loading 状态，防止"请求失败后 loading 转圈转到天荒地老"。
+      </div>
+
+      <h3>另一种写法：不用 try/catch，用 .catch()</h3>
+<pre><span class="cmt">// 两种写法等价，选你喜欢的风格即可</span>
+<span class="kw">async function</span> <span class="fn">loadData</span>() {
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>).<span class="fn">catch</span>(err => {
+    <span class="fn">console</span>.<span class="fn">error</span>(err)
+    <span class="kw">return null</span>  <span class="cmt">// 失败时返回 null，避免后续代码崩溃</span>
+  })
+  <span class="kw">if</span> (!res) <span class="kw">return</span>  <span class="cmt">// 请求失败，提前退出</span>
+  <span class="kw">this</span>.list = res.data
+}</pre>
+    </div>
+  </div>
+
+  <!-- ⑤ 什么时候用 -->
+  <div class="section" id="s5">
+    <div class="section-head">⑤ 最关键问题：什么时候用 async/await，什么时候不用？</div>
+    <div class="section-body">
+
+      <div class="box box-info">
+        <strong>判断标准只有一个：这个操作需要等待结果吗？</strong><br>
+        如果需要"等待某件事完成才能继续"——就需要 async/await（或 Promise）。<br>
+        如果操作是瞬间完成的、不需要等待——就用普通函数。
+      </div>
+
+      <table>
+        <tr>
+          <th>场景</th>
+          <th>需要 async/await？</th>
+          <th>原因</th>
+        </tr>
+        <tr>
+          <td>发送网络请求（axios/fetch）</td>
+          <td>✅ 必须</td>
+          <td>网络 I/O 是异步的，需要等待服务器响应</td>
+        </tr>
+        <tr>
+          <td>读写 localStorage</td>
+          <td>❌ 不需要</td>
+          <td>localStorage 是同步的，立即返回结果</td>
+        </tr>
+        <tr>
+          <td>计算总价、过滤列表</td>
+          <td>❌ 不需要</td>
+          <td>纯 JS 计算，立即完成，用 computed 更合适</td>
+        </tr>
+        <tr>
+          <td>等待 Promise.all（多个并发请求）</td>
+          <td>✅ 必须</td>
+          <td>需要等所有 Promise 完成</td>
+        </tr>
+        <tr>
+          <td>setTimeout 延迟操作</td>
+          <td>✅ 若需要等待</td>
+          <td>把 setTimeout 包成 Promise，再 await</td>
+        </tr>
+        <tr>
+          <td>修改 data 中的变量</td>
+          <td>❌ 不需要</td>
+          <td>赋值是同步的</td>
+        </tr>
+        <tr>
+          <td>调用 Vuex action（内部有请求）</td>
+          <td>✅ 通常需要</td>
+          <td>action 本身返回 Promise，需要知道完成时机</td>
+        </tr>
+        <tr>
+          <td>v-on 事件处理器（如按钮点击）</td>
+          <td>✅ 内部有请求时</td>
+          <td>Vue 支持 async methods，放心用</td>
+        </tr>
+        <tr>
+          <td>生命周期钩子（created/mounted）</td>
+          <td>✅ 内部有请求时</td>
+          <td>直接在 created/mounted 前加 async 即可</td>
+        </tr>
+        <tr>
+          <td>watch 的 handler</td>
+          <td>✅ 内部有请求时</td>
+          <td>handler 可以是 async function</td>
+        </tr>
+      </table>
+
+      <h3>具体代码对比</h3>
+<pre><span class="cmt">// ── 不需要 async/await 的普通方法 ────────────────────</span>
+
+<span class="cmt">// ✅ 计算、格式化：纯同步，用普通函数</span>
+<span class="fn">formatPrice</span>(price) {
+  <span class="kw">return</span> <span class="str">'¥'</span> + price.<span class="fn">toFixed</span>(<span class="num">2</span>)
+},
+
+<span class="cmt">// ✅ 操作 DOM、修改 data：同步，不需要 await</span>
+<span class="fn">toggleMenu</span>() {
+  <span class="kw">this</span>.menuVisible = !<span class="kw">this</span>.menuVisible
+},
+
+<span class="cmt">// ✅ 过滤筛选：纯计算，用 computed 更好</span>
+<span class="kw">computed</span>: {
+  <span class="fn">filteredList</span>() {
+    <span class="kw">return this</span>.list.<span class="fn">filter</span>(item => item.name.<span class="fn">includes</span>(<span class="kw">this</span>.keyword))
+  }
+},
+
+
+<span class="cmt">// ── 需要 async/await 的场景 ────────────────────</span>
+
+<span class="cmt">// ✅ 网络请求：必须 async</span>
+<span class="kw">async</span> <span class="fn">loadList</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/list'</span>)
+    <span class="kw">this</span>.list = res.data
+  } <span class="kw">catch</span> (e) {
+    <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">error</span>(<span class="str">'加载失败'</span>)
+  }
+},
+
+<span class="cmt">// ✅ 提交表单（需要知道成功/失败再跳转）</span>
+<span class="kw">async</span> <span class="fn">handleSubmit</span>() {
+  <span class="kw">const</span> valid = <span class="kw">await</span> <span class="kw">this</span>.$refs.form.<span class="fn">validate</span>().<span class="fn">catch</span>(() => <span class="kw">false</span>)
+  <span class="kw">if</span> (!valid) <span class="kw">return</span>
+  <span class="kw">try</span> {
+    <span class="kw">await</span> axios.<span class="fn">post</span>(<span class="str">'/api/save'</span>, <span class="kw">this</span>.form)
+    <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">success</span>(<span class="str">'保存成功'</span>)
+    <span class="kw">this</span>.$router.<span class="fn">push</span>(<span class="str">'/'</span>)   <span class="cmt">// 成功后才跳转</span>
+  } <span class="kw">catch</span> (e) {
+    <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">error</span>(<span class="str">'保存失败'</span>)
+  }
+},
+
+<span class="cmt">// ✅ mounted 中加载初始数据</span>
+<span class="kw">async</span> <span class="fn">mounted</span>() {
+  <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">loadList</span>()
+  <span class="cmt">// 确保数据加载完才做后续操作</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- ⑥ 与 Vue 结合 -->
+  <div class="section" id="s6">
+    <div class="section-head">⑥ 在 Vue 2 中使用 async/await 的完整模式</div>
+    <div class="section-body">
+
+      <h3>模式一：生命周期钩子中请求初始数据</h3>
+<pre>export <span class="kw">default</span> {
+  data() {
+    <span class="kw">return</span> { list: [], loading: <span class="kw">false</span> }
+  },
+  <span class="cmt">// created 比 mounted 早，适合不依赖 DOM 的数据请求</span>
+  <span class="kw">async</span> <span class="fn">created</span>() {
+    <span class="kw">this</span>.loading = <span class="kw">true</span>
+    <span class="kw">try</span> {
+      <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/list'</span>)
+      <span class="kw">this</span>.list = res.data
+    } <span class="kw">finally</span> {
+      <span class="kw">this</span>.loading = <span class="kw">false</span>
+    }
+  }
+}</pre>
+
+      <h3>模式二：watch 监听路由变化后重新请求</h3>
+<pre>watch: {
+  <span class="cmt">// 路由 id 变了就重新加载商品详情</span>
+  <span class="str">'$route.params.id'</span>: {
+    immediate: <span class="kw">true</span>,
+    <span class="kw">async</span> <span class="fn">handler</span>(id) {
+      <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">`/api/product/</span>${id}<span class="str">`</span>)
+      <span class="kw">this</span>.product = res.data
+    }
+  }
+}</pre>
+
+      <h3>模式三：调用 Vuex action 并等待结果</h3>
+<pre>methods: {
+  <span class="kw">async</span> <span class="fn">handleLogin</span>() {
+    <span class="kw">try</span> {
+      <span class="cmt">// dispatch 返回 action 的 Promise，可以 await</span>
+      <span class="kw">await this</span>.<span class="fn">$store</span>.<span class="fn">dispatch</span>(<span class="str">'user/login'</span>, <span class="kw">this</span>.form)
+      <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">success</span>(<span class="str">'登录成功'</span>)
+      <span class="kw">this</span>.$router.<span class="fn">push</span>(<span class="str">'/'</span>)
+    } <span class="kw">catch</span> (e) {
+      <span class="kw">this</span>.<span class="fn">$message</span>.<span class="fn">error</span>(e.message)
+    }
+  }
+}</pre>
+
+      <h3>模式四：并行请求，使用 Promise.all</h3>
+<pre>methods: {
+  <span class="kw">async</span> <span class="fn">loadPageData</span>() {
+    <span class="kw">this</span>.loading = <span class="kw">true</span>
+    <span class="kw">try</span> {
+      <span class="cmt">// 两个请求同时发出，等最慢的那个完成，比串行快</span>
+      <span class="kw">const</span> [userRes, orderRes] = <span class="kw">await</span> Promise.<span class="fn">all</span>([
+        axios.<span class="fn">get</span>(<span class="str">'/api/me'</span>),
+        axios.<span class="fn">get</span>(<span class="str">'/api/orders'</span>)
+      ])
+      <span class="kw">this</span>.user   = userRes.data
+      <span class="kw">this</span>.orders = orderRes.data
+    } <span class="kw">finally</span> {
+      <span class="kw">this</span>.loading = <span class="kw">false</span>
+    }
+  }
+}</pre>
+
+      <h3>模式五：依赖上一步结果的串行请求</h3>
+<pre>methods: {
+  <span class="kw">async</span> <span class="fn">loadUserOrders</span>() {
+    <span class="cmt">// 必须先知道用户 id，才能查订单——只能串行</span>
+    <span class="kw">const</span> userRes = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/me'</span>)
+    <span class="kw">const</span> userId  = userRes.data.id
+
+    <span class="kw">const</span> orderRes = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">`/api/orders?userId=</span>${userId}<span class="str">`</span>)
+    <span class="kw">this</span>.orders = orderRes.data
+  }
+}</pre>
+
+      <div class="box box-warn">
+        <strong>Vue 2 中 async methods 的注意事项：</strong><br>
+        Vue 本身对 async methods 有完整支持，但有一点要注意：async 方法返回的 Promise，Vue <strong>不会</strong>自动捕获其中的异常并展示错误，异常会变成 unhandledRejection。所以你必须自己在 async 方法里写 try/catch！
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 常见误区 -->
+  <div class="section" id="s7">
+    <div class="section-head">⑦ 常见误区 & 陷阱</div>
+    <div class="section-body">
+
+      <h3>误区一：以为 await 会让代码"同步执行"</h3>
+<pre><span class="kw">async function</span> <span class="fn">test</span>() {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'1'</span>)
+  <span class="kw">const</span> r = <span class="kw">await</span> <span class="fn">fetchData</span>()
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'2'</span>, r)
+}
+
+<span class="fn">test</span>()
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'3'</span>)
+
+<span class="cmt">// 输出：1 → 3 → 2
+// ❌ 误区：以为是 1 → 2 → 3
+// ✅ 正确：await 只暂停 test() 函数内部，不阻塞函数外面的 console.log('3')</span></pre>
+
+      <h3>误区二：在循环里串行发请求（性能问题）</h3>
+<pre><span class="cmt">// ❌ 慢！每次循环都等上一个请求完成</span>
+<span class="kw">for</span> (<span class="kw">const</span> id <span class="kw">of</span> ids) {
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">`/api/item/</span>${id}<span class="str">`</span>)
+  results.<span class="fn">push</span>(res.data)
+}
+
+<span class="cmt">// ✅ 快！所有请求并行发出</span>
+<span class="kw">const</span> results = <span class="kw">await</span> Promise.<span class="fn">all</span>(
+  ids.<span class="fn">map</span>(id => axios.<span class="fn">get</span>(<span class="str">`/api/item/</span>${id}<span class="str">`</span>))
+)</pre>
+
+      <h3>误区三：忘记 await，以为拿到了数据</h3>
+<pre><span class="kw">async</span> <span class="fn">mounted</span>() {
+  <span class="cmt">// ❌ 忘了写 await！res 是 Promise 对象，不是数据</span>
+  <span class="kw">const</span> res = axios.<span class="fn">get</span>(<span class="str">'/api/list'</span>)
+  <span class="kw">this</span>.list = res.data  <span class="cmt">// undefined！Promise 没有 .data</span>
+
+  <span class="cmt">// ✅ 正确</span>
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'/api/list'</span>)
+  <span class="kw">this</span>.list = res.data  <span class="cmt">// ✅ 正确的数组</span>
+}</pre>
+
+      <h3>误区四：在 forEach 里用 async/await（不生效！）</h3>
+<pre><span class="cmt">// ❌ 错误：forEach 的回调是 async，但 forEach 本身不 await</span>
+ids.<span class="fn">forEach</span>(<span class="kw">async</span> id => {
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">`/api/item/</span>${id}<span class="str">`</span>)
+  <span class="fn">console</span>.<span class="fn">log</span>(res.data)   <span class="cmt">// 顺序不可预测，并且 forEach 结束时请求未必完成</span>
+})
+
+<span class="cmt">// ✅ 正确：用 for...of 配合 await（串行）</span>
+<span class="kw">for</span> (<span class="kw">const</span> id <span class="kw">of</span> ids) {
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">`/api/item/</span>${id}<span class="str">`</span>)
+  <span class="fn">console</span>.<span class="fn">log</span>(res.data)
+}
+
+<span class="cmt">// ✅ 正确：用 Promise.all + map（并行）</span>
+<span class="kw">await</span> Promise.<span class="fn">all</span>(ids.<span class="fn">map</span>(<span class="kw">async</span> id => {
+  <span class="kw">const</span> res = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">`/api/item/</span>${id}<span class="str">`</span>)
+  <span class="fn">console</span>.<span class="fn">log</span>(res.data)
+}))</pre>
+
+      <h3>误区五：async/await 不能用在模板里</h3>
+<pre><span class="cmt">// ❌ 模板里不能直接 await，不合法</span>
+&lt;template&gt;
+  &lt;div&gt;{{ await fetchName() }}&lt;/div&gt;  &lt;!-- 报错！ --&gt;
+&lt;/template&gt;
+
+<span class="cmt">// ✅ 正确：在 mounted/created 里获取数据，存到 data，模板展示 data</span>
+data() { <span class="kw">return</span> { name: <span class="str">''</span> } },
+<span class="kw">async</span> <span class="fn">created</span>() {
+  <span class="kw">this</span>.name = <span class="kw">await</span> <span class="fn">fetchName</span>()
+}</pre>
+    </div>
+  </div>
+
+  <!-- ⑧ 互动 Demo -->
+  <div class="section" id="s8">
+    <div class="section-head">⑧ 互动 Demo — 在控制台感受 async/await</div>
+    <div class="section-body">
+      <div class="demo-block">
+        <h4>点击按钮，观察输出顺序</h4>
+        <button class="btn-primary" onclick="demoOrder()">① 执行顺序演示</button>
+        <button class="btn-success" onclick="demoSerial()">② 串行请求（慢）</button>
+        <button class="btn-warn"    onclick="demoParallel()">③ 并行请求（快）</button>
+        <button class="btn-danger"  onclick="demoError()">④ 错误处理演示</button>
+        <button class="btn-primary" onclick="demoForEach()">⑤ forEach 陷阱</button>
+        <button onclick="clearOutput()" style="background:#95a5a6;color:#fff">清空</button>
+        <div id="output">点击上方按钮查看演示结果...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 总结 -->
+  <div class="section">
+    <div class="section-head">📝 核心总结 — 一句话记忆法</div>
+    <div class="section-body">
+      <table>
+        <tr><th>问题</th><th>答案</th></tr>
+        <tr>
+          <td>什么时候加 async？</td>
+          <td>方法内部有 await 的时候（有 await 必须有 async）</td>
+        </tr>
+        <tr>
+          <td>什么时候用 await？</td>
+          <td>调用返回 Promise 的函数，且需要等待结果（axios/fetch/dispatch 等）</td>
+        </tr>
+        <tr>
+          <td>普通方法什么时候用？</td>
+          <td>纯计算、修改 data、操作 DOM——不涉及等待的操作</td>
+        </tr>
+        <tr>
+          <td>async/await 和 Promise 什么关系？</td>
+          <td>async/await 是 Promise 的语法糖，底层完全一样</td>
+        </tr>
+        <tr>
+          <td>错误怎么捕获？</td>
+          <td>必须用 try/catch 包裹，finally 用来关闭 loading</td>
+        </tr>
+        <tr>
+          <td>多个独立请求怎么写最快？</td>
+          <td>await Promise.all([ req1(), req2() ]) 并行</td>
+        </tr>
+      </table>
+
+      <div class="box box-diff" style="margin-top:18px">
+        <strong>🎯 实际项目中的经验法则：</strong><br>
+        <strong>只要是调用 axios（或任何 API 函数），方法就加 async，调用前加 await，外面包 try/catch。</strong><br>
+        其他情况（计算属性、事件的同步操作、修改变量）都用普通方法，不需要 async/await。
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ── 工具函数 ──────────────────────────────────────────
+  const output = document.getElementById('output')
+  const log = (msg, color = '#98c379') => {
+    output.innerHTML += `<span style="color:${color}">${msg}</span>\n`
+    output.scrollTop = output.scrollHeight
+  }
+  const clearOutput = () => { output.innerHTML = '' }
+
+  // 模拟网络请求（返回 Promise）
+  const fakeRequest = (name, ms, fail = false) =>
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (fail) reject(new Error(`${name} 请求失败（网络超时）`))
+        else resolve({ data: `【${name} 的数据】` })
+      }, ms)
+    })
+
+  // ── Demo ① 执行顺序 ──────────────────────────────────
+  async function demoOrder() {
+    clearOutput()
+    log('=== 执行顺序演示 ===')
+    log('1. async 函数开始', '#61afef')
+    const result = await fakeRequest('用户信息', 1000)
+    log(`3. await 完成，拿到：${result.data}`, '#98c379')
+    log('4. async 函数结束', '#61afef')
+  }
+  // 注意这行在 demoOrder() 调用后、await 完成前执行
+  window.demoOrder = async function() {
+    clearOutput()
+    log('=== ① 执行顺序演示 ===')
+    log('步骤1：async 函数内，发起请求（等待1秒）...', '#61afef')
+    fakeRequest('用户信息', 1000).then(r => {
+      log(`步骤3：1秒后，await 完成 → ${r.data}`, '#98c379')
+    })
+    log('步骤2：这行在 await 等待期间执行（函数外）', '#e06c75')
+    log('', '')
+    log('↑ 注意：步骤2 在步骤3 之前打印，证明 await 不阻塞外部代码', '#d19a66')
+  }
+
+  // ── Demo ② 串行请求 ──────────────────────────────────
+  window.demoSerial = async function() {
+    clearOutput()
+    log('=== ② 串行请求（一个等一个）===')
+    const t1 = Date.now()
+    log('开始串行请求...', '#61afef')
+
+    const r1 = await fakeRequest('用户信息', 600)
+    log(`  → 用户信息完成 (${Date.now()-t1}ms): ${r1.data}`)
+    const r2 = await fakeRequest('订单列表', 600)
+    log(`  → 订单列表完成 (${Date.now()-t1}ms): ${r2.data}`)
+
+    log(`串行总耗时: ${Date.now()-t1}ms（两个请求各600ms，合计约1200ms）`, '#e06c75')
+  }
+
+  // ── Demo ③ 并行请求 ──────────────────────────────────
+  window.demoParallel = async function() {
+    clearOutput()
+    log('=== ③ 并行请求 Promise.all ===')
+    const t1 = Date.now()
+    log('同时发出两个请求...', '#61afef')
+
+    const [r1, r2] = await Promise.all([
+      fakeRequest('用户信息', 600),
+      fakeRequest('订单列表', 600)
+    ])
+
+    const elapsed = Date.now() - t1
+    log(`  → 用户信息: ${r1.data}`)
+    log(`  → 订单列表: ${r2.data}`)
+    log(`并行总耗时: ${elapsed}ms（两个请求同时跑，约600ms）`, '#98c379')
+    log('')
+    log('对比串行约1200ms，并行节省了约50%的时间 🚀', '#d19a66')
+  }
+
+  // ── Demo ④ 错误处理 ──────────────────────────────────
+  window.demoError = async function() {
+    clearOutput()
+    log('=== ④ 错误处理演示 ===')
+
+    // 场景1：无 try/catch（unhandled rejection）
+    log('--- 场景1：没有 try/catch ---', '#e06c75')
+    log('❌ 如果不写 try/catch，reject 会变成未捕获的错误', '#e06c75')
+    log('   （实际项目中会在浏览器控制台看到红色报错）', '#e06c75')
+    log('')
+
+    // 场景2：有 try/catch
+    log('--- 场景2：标准的 try/catch/finally ---', '#61afef')
+    log('loading = true  →  显示加载中...')
+    try {
+      await fakeRequest('危险请求', 500, true /* 模拟失败 */)
+      log('这行不会执行（上面失败了）', '#e06c75')
+    } catch (err) {
+      log(`✅ catch 捕获到错误: ${err.message}`, '#e06c75')
+      log('  向用户展示错误提示', '#e06c75')
+    } finally {
+      log('✅ finally 始终执行: loading = false  →  关闭加载中', '#98c379')
+    }
+    log('')
+    log('--- 场景3：请求成功 ---', '#61afef')
+    log('loading = true')
+    try {
+      const res = await fakeRequest('安全请求', 400)
+      log(`✅ 成功: ${res.data}`, '#98c379')
+    } catch (err) {
+      log(`catch 不执行（成功了）`)
+    } finally {
+      log('✅ finally 执行: loading = false', '#98c379')
+    }
+  }
+
+  // ── Demo ⑤ forEach 陷阱 ──────────────────────────────
+  window.demoForEach = async function() {
+    clearOutput()
+    log('=== ⑤ forEach 里用 async 的陷阱 ===')
+    const ids = [1, 2, 3]
+
+    log('--- 错误示范：forEach + async（顺序不可控）---', '#e06c75')
+    const errResults = []
+    ids.forEach(async id => {
+      const res = await fakeRequest(`ID=${id}`, Math.random() * 400 + 100)
+      errResults.push(id)
+      log(`  ❌ forEach 完成: ${res.data} (顺序随机)`, '#e06c75')
+    })
+    log('forEach 调用后立刻打印这行，但上面的请求还没完成！', '#d19a66')
+
+    await new Promise(r => setTimeout(r, 700)) // 等所有请求完成再演示下一段
+
+    log('')
+    log('--- 正确示范：for...of + await（严格串行）---', '#98c379')
+    for (const id of ids) {
+      const res = await fakeRequest(`ID=${id}`, 200)
+      log(`  ✅ for...of 完成: ${res.data} (顺序固定: ${id})`, '#98c379')
+    }
+  }
+</script>
+</body>
+</html>
