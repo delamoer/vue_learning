@@ -193,22 +193,22 @@
         <div class="example-box">
             <div class="example-title">局部过滤器只在定义它的 Vue 实例中可用</div>
             <pre v-pre>// 全局过滤器定义（所有实例都可用）
-Vue.filter('uppercase', function(value) {
-  return value.toString().toUpperCase();
-});
+                  Vue.filter('uppercase', function(value) {
+                    return value.toString().toUpperCase();
+                  });
 
-// 局部过滤器定义（仅当前实例可用）
-new Vue({
-  el: '#root',
-  filters: {
-    reverse(value) {
-      return value.toString().split('').reverse().join('');
-    },
-    repeat(value, times = 2) {
-      return value.toString().repeat(times);
-    }
-  }
-});</pre>
+                  // 局部过滤器定义（仅当前实例可用）
+                  new Vue({
+                    el: '#root',
+                    filters: {
+                      reverse(value) {
+                        return value.toString().split('').reverse().join('');
+                      },
+                      repeat(value, times = 2) {
+                        return value.toString().repeat(times);
+                      }
+                    }
+                  });</pre>
 
             <div class="input-demo">
                 <label>输入文本测试局部过滤器：</label>
