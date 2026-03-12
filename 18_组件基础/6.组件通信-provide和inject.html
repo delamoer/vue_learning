@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,7 @@
             text-align: center;
             color: white;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .main-title h1 {
@@ -41,7 +42,7 @@
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .demo-title {
@@ -201,7 +202,7 @@
             width: 100%;
             margin: 20px 0;
             border-collapse: collapse;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .comparison-table th,
@@ -302,18 +303,18 @@
 
         .theme-switch button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .component-box {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 8px;
             margin: 15px 0;
         }
 
         .nested-component {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 6px;
             margin: 10px 0;
@@ -395,7 +396,7 @@
 
         .button-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .stats-container {
@@ -409,7 +410,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -425,6 +426,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="main-title">
         <h1>💉 Vue组件通信 - provide/inject</h1>
@@ -434,7 +436,7 @@
     <!-- Demo 1: 什么是 provide/inject -->
     <div id="app1" class="demo-container">
         <h2 class="demo-title">📚 Demo 1: 什么是 provide/inject？</h2>
-        
+
         <div class="concept-box">
             <h3>🎯 核心概念</h3>
             <ul>
@@ -449,23 +451,23 @@
             <h4>🏢 类比：Spring 依赖注入（你会秒懂！）</h4>
             <p>
                 <strong>Spring 中的依赖注入：</strong><br><br>
-                
+
                 <strong>1️⃣ 提供Bean（相当于 provide）</strong><br>
                 <code style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 3px;">
                 @Component<br>
                 public class UserService {}
                 </code><br><br>
-                
+
                 <strong>2️⃣ 注入使用（相当于 inject）</strong><br>
                 <code style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 3px;">
                 @Autowired<br>
                 private UserService userService;
                 </code><br><br>
-                
+
                 <strong>3️⃣ 无需手动传递</strong><br>
                 - Spring容器自动注入，不需要在构造函数中一层层传递<br>
                 - Vue的provide/inject也是同样的原理！<br><br>
-                
+
                 <strong>💡 核心思想：</strong>祖先"提供"资源，后代"注入"使用，中间组件无感知！
             </p>
         </div>
@@ -485,26 +487,27 @@
         </div>
 
         <div class="code-example">
-<span class="comment">// 祖先组件：提供数据</span>
-<span class="keyword">export</span> <span class="keyword">default</span> {
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
+            <span class="comment">// 祖先组件：提供数据</span>
+            <span class="keyword">export</span> <span class="keyword">default</span> {
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
             theme: <span class="string">'dark'</span>,
             username: <span class="string">'张三'</span>,
             userRole: <span class="string">'admin'</span>
-        }
-    }
-}<br>
+            }
+            }
+            }<br>
 
-<span class="comment">// 后代组件：注入使用（跨N层！）</span>
-<span class="keyword">export</span> <span class="keyword">default</span> {
-    <span class="function">inject</span>: [<span class="string">'theme'</span>, <span class="string">'username'</span>, <span class="string">'userRole'</span>],
-    mounted() {
-        console.log(<span class="keyword">this</span>.theme)     <span class="comment">// 'dark'</span>
-        console.log(<span class="keyword">this</span>.username)  <span class="comment">// '张三'</span>
-        console.log(<span class="keyword">this</span>.userRole)  <span class="comment">// 'admin'</span>
-    }
-}
+            <span class="comment">// 后代组件：注入使用（跨N层！）</span>
+            <span class="keyword">export</span> <span class="keyword">default</span> {
+            <span class="function">inject</span>: [<span class="string">'theme'</span>, <span
+                class="string">'username'</span>, <span class="string">'userRole'</span>],
+            mounted() {
+            console.log(<span class="keyword">this</span>.theme) <span class="comment">// 'dark'</span>
+            console.log(<span class="keyword">this</span>.username) <span class="comment">// '张三'</span>
+            console.log(<span class="keyword">this</span>.userRole) <span class="comment">// 'admin'</span>
+            }
+            }
         </div>
 
         <table class="comparison-table">
@@ -563,7 +566,7 @@
     <!-- Demo 2: 基础用法 - 静态数据注入 -->
     <div id="app2" class="demo-container">
         <h2 class="demo-title">🎬 Demo 2: 基础用法 - 静态数据注入</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>App提供用户信息，深层子组件直接注入使用（无需props逐层传递）
         </div>
@@ -571,30 +574,31 @@
         <app-root></app-root>
 
         <div class="code-example">
-<span class="comment">// 根组件：提供数据</span>
-Vue.<span class="function">component</span>(<span class="string">'app-root'</span>, {
-    <span class="function">provide</span>: {
-        <span class="comment">// 简单写法：直接提供静态数据</span>
-        appName: <span class="string">'Vue学习平台'</span>,
-        version: <span class="string">'2.6.14'</span>,
-        author: <span class="string">'张三'</span>
-    }
-})<br>
+            <span class="comment">// 根组件：提供数据</span>
+            Vue.<span class="function">component</span>(<span class="string">'app-root'</span>, {
+            <span class="function">provide</span>: {
+            <span class="comment">// 简单写法：直接提供静态数据</span>
+            appName: <span class="string">'Vue学习平台'</span>,
+            version: <span class="string">'2.6.14'</span>,
+            author: <span class="string">'张三'</span>
+            }
+            })<br>
 
-<span class="comment">// 中间层组件：不需要接收和传递!</span>
-Vue.<span class="function">component</span>(<span class="string">'middle-layer'</span>, {
-    <span class="comment">// 什么都不用做，数据自动穿透！</span>
-})<br>
+            <span class="comment">// 中间层组件：不需要接收和传递!</span>
+            Vue.<span class="function">component</span>(<span class="string">'middle-layer'</span>, {
+            <span class="comment">// 什么都不用做，数据自动穿透！</span>
+            })<br>
 
-<span class="comment">// 孙组件：直接注入使用</span>
-Vue.<span class="function">component</span>(<span class="string">'deep-child'</span>, {
-    <span class="function">inject</span>: [<span class="string">'appName'</span>, <span class="string">'version'</span>, <span class="string">'author'</span>],
-    mounted() {
-        console.log(<span class="keyword">this</span>.appName)  <span class="comment">// 可以直接用！</span>
-        console.log(<span class="keyword">this</span>.version)
-        console.log(<span class="keyword">this</span>.author)
-    }
-})
+            <span class="comment">// 孙组件：直接注入使用</span>
+            Vue.<span class="function">component</span>(<span class="string">'deep-child'</span>, {
+            <span class="function">inject</span>: [<span class="string">'appName'</span>, <span
+                class="string">'version'</span>, <span class="string">'author'</span>],
+            mounted() {
+            console.log(<span class="keyword">this</span>.appName) <span class="comment">// 可以直接用！</span>
+            console.log(<span class="keyword">this</span>.version)
+            console.log(<span class="keyword">this</span>.author)
+            }
+            })
         </div>
 
         <div class="warning-box">
@@ -602,10 +606,10 @@ Vue.<span class="function">component</span>(<span class="string">'deep-child'</s
             <p>
                 <strong>1. 不能访问 this：</strong><br>
                 &nbsp;&nbsp;&nbsp;provide: { value: this.xxx } ❌ 错误！this是undefined<br><br>
-                
+
                 <strong>2. 数据不响应：</strong><br>
                 &nbsp;&nbsp;&nbsp;祖先组件修改数据，后代组件不会更新（除非特殊处理）<br><br>
-                
+
                 <strong>3. 只能提供静态值：</strong><br>
                 &nbsp;&nbsp;&nbsp;适合提供不变的配置信息，如 appName、version 等
             </p>
@@ -615,7 +619,7 @@ Vue.<span class="function">component</span>(<span class="string">'deep-child'</s
     <!-- Demo 3: 响应式注入 - 函数式 provide -->
     <div id="app3" class="demo-container">
         <h2 class="demo-title">⚡ Demo 3: 响应式注入 - 让数据动起来！</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>实现响应式的用户信息注入，祖先修改数据，后代自动更新
         </div>
@@ -623,53 +627,53 @@ Vue.<span class="function">component</span>(<span class="string">'deep-child'</s
         <responsive-app></responsive-app>
 
         <div class="code-example">
-<span class="comment">// ❌ 错误写法：静态 provide 不响应式</span>
-{
-    data() {
-        <span class="keyword">return</span> { count: 0 }
-    },
-    provide: {
-        count: <span class="keyword">this</span>.count  <span class="comment">// ❌ this是undefined</span>
-    }
-}<br>
+            <span class="comment">// ❌ 错误写法：静态 provide 不响应式</span>
+            {
+            data() {
+            <span class="keyword">return</span> { count: 0 }
+            },
+            provide: {
+            count: <span class="keyword">this</span>.count <span class="comment">// ❌ this是undefined</span>
+            }
+            }<br>
 
-<span class="comment">// ✅ 正确写法1：provide 改为函数</span>
-{
-    data() {
-        <span class="keyword">return</span> { count: 0 }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
-            count: <span class="keyword">this</span>.count  <span class="comment">// ❌ 仍然不响应！</span>
-        }
-    }
-}<br>
+            <span class="comment">// ✅ 正确写法1：provide 改为函数</span>
+            {
+            data() {
+            <span class="keyword">return</span> { count: 0 }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
+            count: <span class="keyword">this</span>.count <span class="comment">// ❌ 仍然不响应！</span>
+            }
+            }
+            }<br>
 
-<span class="comment">// ✅ 正确写法2：提供整个组件实例（Vue 2 推荐）</span>
-{
-    data() {
-        <span class="keyword">return</span> { count: 0 }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
-            app: <span class="keyword">this</span>  <span class="comment">// ✅ 提供整个实例，访问 app.count</span>
-        }
-    }
-}<br>
+            <span class="comment">// ✅ 正确写法2：提供整个组件实例（Vue 2 推荐）</span>
+            {
+            data() {
+            <span class="keyword">return</span> { count: 0 }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
+            app: <span class="keyword">this</span> <span class="comment">// ✅ 提供整个实例，访问 app.count</span>
+            }
+            }
+            }<br>
 
-<span class="comment">// ✅ 正确写法3：使用 Vue.observable（Vue 2.6+推荐）</span>
-{
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// ✅ 正确写法3：使用 Vue.observable（Vue 2.6+推荐）</span>
+            {
+            data() {
+            <span class="keyword">return</span> {
             state: Vue.<span class="function">observable</span>({ count: 0 })
-        }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
-            state: <span class="keyword">this</span>.state  <span class="comment">// ✅ 响应式对象</span>
-        }
-    }
-}
+            }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
+            state: <span class="keyword">this</span>.state <span class="comment">// ✅ 响应式对象</span>
+            }
+            }
+            }
         </div>
 
         <div class="best-practice">
@@ -685,7 +689,7 @@ Vue.<span class="function">component</span>(<span class="string">'deep-child'</s
     <!-- Demo 4: 实战案例 - 主题切换 -->
     <div id="app4" class="demo-container">
         <h2 class="demo-title">🎨 Demo 4: 实战案例 - 全局主题切换</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>App提供主题，所有深层组件自动应用主题样式
         </div>
@@ -693,46 +697,47 @@ Vue.<span class="function">component</span>(<span class="string">'deep-child'</s
         <theme-app></theme-app>
 
         <div class="code-example">
-<span class="comment">// App组件：提供主题状态和切换方法</span>
-Vue.<span class="function">component</span>(<span class="string">'theme-app'</span>, {
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// App组件：提供主题状态和切换方法</span>
+            Vue.<span class="function">component</span>(<span class="string">'theme-app'</span>, {
+            data() {
+            <span class="keyword">return</span> {
             currentTheme: <span class="string">'light'</span>
-        }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
+            }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
             <span class="comment">// 提供响应式数据</span>
             themeState: <span class="keyword">this</span>,
             <span class="comment">// 提供切换方法</span>
             changeTheme: (theme) => {
-                <span class="keyword">this</span>.currentTheme = theme
+            <span class="keyword">this</span>.currentTheme = theme
             }
-        }
-    }
-})<br>
+            }
+            }
+            })<br>
 
-<span class="comment">// 深层子组件：注入并使用</span>
-Vue.<span class="function">component</span>(<span class="string">'deep-component'</span>, {
-    <span class="function">inject</span>: [<span class="string">'themeState'</span>, <span class="string">'changeTheme'</span>],
-    computed: {
-        <span class="function">theme</span>() {
+            <span class="comment">// 深层子组件：注入并使用</span>
+            Vue.<span class="function">component</span>(<span class="string">'deep-component'</span>, {
+            <span class="function">inject</span>: [<span class="string">'themeState'</span>, <span
+                class="string">'changeTheme'</span>],
+            computed: {
+            <span class="function">theme</span>() {
             <span class="keyword">return</span> <span class="keyword">this</span>.themeState.currentTheme
-        }
-    },
-    methods: {
-        <span class="function">switchTheme</span>(newTheme) {
+            }
+            },
+            methods: {
+            <span class="function">switchTheme</span>(newTheme) {
             <span class="keyword">this</span>.<span class="function">changeTheme</span>(newTheme)
-        }
-    }
-})
+            }
+            }
+            })
         </div>
     </div>
 
     <!-- Demo 5: 实战案例 - 权限控制 -->
     <div id="app5" class="demo-container">
         <h2 class="demo-title">🔐 Demo 5: 实战案例 - 权限控制系统</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>根据用户角色控制功能权限（admin可删除，user只读，guest无权）
         </div>
@@ -740,48 +745,52 @@ Vue.<span class="function">component</span>(<span class="string">'deep-component
         <permission-app></permission-app>
 
         <div class="code-example">
-<span class="comment">// App组件：提供用户信息和权限判断方法</span>
-{
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// App组件：提供用户信息和权限判断方法</span>
+            {
+            data() {
+            <span class="keyword">return</span> {
             user: {
-                name: <span class="string">'张三'</span>,
-                role: <span class="string">'admin'</span> <span class="comment">// admin | user | guest</span>
+            name: <span class="string">'张三'</span>,
+            role: <span class="string">'admin'</span> <span class="comment">// admin | user | guest</span>
             }
-        }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
+            }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
             userInfo: <span class="keyword">this</span>.user,
             <span class="comment">// 权限判断方法</span>
             <span class="function">hasPermission</span>: (permission) => {
-                <span class="keyword">const</span> permissions = {
-                    admin: [<span class="string">'read'</span>, <span class="string">'write'</span>, <span class="string">'delete'</span>],
-                    user: [<span class="string">'read'</span>, <span class="string">'write'</span>],
-                    guest: [<span class="string">'read'</span>]
-                }
-                <span class="keyword">return</span> permissions[<span class="keyword">this</span>.user.role].<span class="function">includes</span>(permission)
+            <span class="keyword">const</span> permissions = {
+            admin: [<span class="string">'read'</span>, <span class="string">'write'</span>, <span
+                class="string">'delete'</span>],
+            user: [<span class="string">'read'</span>, <span class="string">'write'</span>],
+            guest: [<span class="string">'read'</span>]
             }
-        }
-    }
-}<br>
+            <span class="keyword">return</span> permissions[<span class="keyword">this</span>.user.role].<span
+                class="function">includes</span>(permission)
+            }
+            }
+            }
+            }<br>
 
-<span class="comment">// 子组件：根据权限显示/隐藏功能</span>
-{
-    <span class="function">inject</span>: [<span class="string">'userInfo'</span>, <span class="string">'hasPermission'</span>],
-    computed: {
-        <span class="function">canDelete</span>() {
-            <span class="keyword">return</span> <span class="keyword">this</span>.<span class="function">hasPermission</span>(<span class="string">'delete'</span>)
-        }
-    }
-}
+            <span class="comment">// 子组件：根据权限显示/隐藏功能</span>
+            {
+            <span class="function">inject</span>: [<span class="string">'userInfo'</span>, <span
+                class="string">'hasPermission'</span>],
+            computed: {
+            <span class="function">canDelete</span>() {
+            <span class="keyword">return</span> <span class="keyword">this</span>.<span
+                class="function">hasPermission</span>(<span class="string">'delete'</span>)
+            }
+            }
+            }
         </div>
     </div>
 
     <!-- Demo 6: 实战案例 - 表单验证 -->
     <div id="app6" class="demo-container">
         <h2 class="demo-title">📝 Demo 6: 实战案例 - 表单验证（Element UI原理）</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>模拟 Element UI 的表单验证，Form提供验证方法，FormItem注入使用
         </div>
@@ -789,57 +798,59 @@ Vue.<span class="function">component</span>(<span class="string">'deep-component
         <custom-form></custom-form>
 
         <div class="code-example">
-<span class="comment">// Form组件：提供验证规则和验证方法</span>
-Vue.<span class="function">component</span>(<span class="string">'custom-form'</span>, {
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// Form组件：提供验证规则和验证方法</span>
+            Vue.<span class="function">component</span>(<span class="string">'custom-form'</span>, {
+            data() {
+            <span class="keyword">return</span> {
             formData: {
-                username: <span class="string">''</span>,
-                email: <span class="string">''</span>
+            username: <span class="string">''</span>,
+            email: <span class="string">''</span>
             },
             rules: {
-                username: [
-                    { required: <span class="keyword">true</span>, message: <span class="string">'用户名必填'</span> },
-                    { min: 3, message: <span class="string">'至少3个字符'</span> }
-                ],
-                email: [
-                    { required: <span class="keyword">true</span>, message: <span class="string">'邮箱必填'</span> },
-                    { pattern: <span class="string">/^.+@.+$/</span>, message: <span class="string">'邮箱格式错误'</span> }
-                ]
+            username: [
+            { required: <span class="keyword">true</span>, message: <span class="string">'用户名必填'</span> },
+            { min: 3, message: <span class="string">'至少3个字符'</span> }
+            ],
+            email: [
+            { required: <span class="keyword">true</span>, message: <span class="string">'邮箱必填'</span> },
+            { pattern: <span class="string">/^.+@.+$/</span>, message: <span class="string">'邮箱格式错误'</span> }
+            ]
             }
-        }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
+            }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
             formInstance: <span class="keyword">this</span>
-        }
-    }
-})<br>
+            }
+            }
+            })<br>
 
-<span class="comment">// FormItem组件：注入Form实例，实现验证</span>
-Vue.<span class="function">component</span>(<span class="string">'custom-form-item'</span>, {
-    props: [<span class="string">'prop'</span>],
-    <span class="function">inject</span>: [<span class="string">'formInstance'</span>],
-    methods: {
-        <span class="function">validate</span>() {
-            <span class="keyword">const</span> rules = <span class="keyword">this</span>.formInstance.rules[<span class="keyword">this</span>.prop]
-            <span class="keyword">const</span> value = <span class="keyword">this</span>.formInstance.formData[<span class="keyword">this</span>.prop]
+            <span class="comment">// FormItem组件：注入Form实例，实现验证</span>
+            Vue.<span class="function">component</span>(<span class="string">'custom-form-item'</span>, {
+            props: [<span class="string">'prop'</span>],
+            <span class="function">inject</span>: [<span class="string">'formInstance'</span>],
+            methods: {
+            <span class="function">validate</span>() {
+            <span class="keyword">const</span> rules = <span class="keyword">this</span>.formInstance.rules[<span
+                class="keyword">this</span>.prop]
+            <span class="keyword">const</span> value = <span class="keyword">this</span>.formInstance.formData[<span
+                class="keyword">this</span>.prop]
             <span class="comment">// 执行验证逻辑...</span>
-        }
-    }
-})
+            }
+            }
+            })
         </div>
 
         <div class="analogy-box">
             <h4>💡 这就是 Element UI 的原理！</h4>
             <p>
                 <strong>el-form 的实现原理：</strong><br><br>
-                
+
                 1️⃣ <strong>&lt;el-form&gt;</strong> 通过 provide 提供表单实例<br>
                 2️⃣ <strong>&lt;el-form-item&gt;</strong> 通过 inject 注入表单实例<br>
                 3️⃣ <strong>&lt;el-input&gt;</strong> 通过 inject 注入 form-item 实例<br>
                 4️⃣ 三层嵌套，通过 provide/inject 实现数据流通！<br><br>
-                
+
                 <strong>这就是为什么写 Element UI 表单时，三个组件能完美配合！</strong>
             </p>
         </div>
@@ -848,54 +859,56 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
     <!-- Demo 7: inject 高级用法 -->
     <div id="app7" class="demo-container">
         <h2 class="demo-title">🚀 Demo 7: inject 高级用法</h2>
-        
+
         <div class="demo-desc">
             <strong>学习：</strong>inject 的默认值、别名、from 语法
         </div>
 
         <div class="code-example">
-<span class="comment">// 1. 数组语法（简单）</span>
-{
-    inject: [<span class="string">'theme'</span>, <span class="string">'user'</span>]
-    <span class="comment">// 直接使用：this.theme, this.user</span>
-}<br>
+            <span class="comment">// 1. 数组语法（简单）</span>
+            {
+            inject: [<span class="string">'theme'</span>, <span class="string">'user'</span>]
+            <span class="comment">// 直接使用：this.theme, this.user</span>
+            }<br>
 
-<span class="comment">// 2. 对象语法（推荐，支持更多选项）</span>
-{
-    inject: {
-        <span class="comment">// 基本用法</span>
-        theme: {
-            from: <span class="string">'theme'</span>  <span class="comment">// 从哪个key注入</span>
-        },
-        
-        <span class="comment">// 设置默认值</span>
-        locale: {
+            <span class="comment">// 2. 对象语法（推荐，支持更多选项）</span>
+            {
+            inject: {
+            <span class="comment">// 基本用法</span>
+            theme: {
+            from: <span class="string">'theme'</span> <span class="comment">// 从哪个key注入</span>
+            },
+
+            <span class="comment">// 设置默认值</span>
+            locale: {
             from: <span class="string">'locale'</span>,
-            <span class="keyword">default</span>: <span class="string">'zh-CN'</span>  <span class="comment">// 如果祖先没提供，用默认值</span>
-        },
-        
-        <span class="comment">// 默认值为函数（用于对象/数组）</span>
-        config: {
+            <span class="keyword">default</span>: <span class="string">'zh-CN'</span> <span class="comment">//
+                如果祖先没提供，用默认值</span>
+            },
+
+            <span class="comment">// 默认值为函数（用于对象/数组）</span>
+            config: {
             from: <span class="string">'config'</span>,
             <span class="keyword">default</span>: () => ({ theme: <span class="string">'light'</span> })
-        },
-        
-        <span class="comment">// 重命名（避免命名冲突）</span>
-        appTheme: {
-            from: <span class="string">'theme'</span>  <span class="comment">// 注入theme，但在组件中叫appTheme</span>
-        }
-    }
-}<br>
+            },
 
-<span class="comment">// 3. 简写语法（对象+字符串混合）</span>
-{
-    inject: {
-        theme: <span class="string">'theme'</span>,              <span class="comment">// 等同于 { from: 'theme' }</span>
-        locale: {
-            <span class="keyword">default</span>: <span class="string">'zh-CN'</span>      <span class="comment">// from自动推断为'locale'</span>
-        }
-    }
-}
+            <span class="comment">// 重命名（避免命名冲突）</span>
+            appTheme: {
+            from: <span class="string">'theme'</span> <span class="comment">// 注入theme，但在组件中叫appTheme</span>
+            }
+            }
+            }<br>
+
+            <span class="comment">// 3. 简写语法（对象+字符串混合）</span>
+            {
+            inject: {
+            theme: <span class="string">'theme'</span>, <span class="comment">// 等同于 { from: 'theme' }</span>
+            locale: {
+            <span class="keyword">default</span>: <span class="string">'zh-CN'</span> <span class="comment">//
+                from自动推断为'locale'</span>
+            }
+            }
+            }
         </div>
 
         <advanced-inject></advanced-inject>
@@ -904,7 +917,7 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
     <!-- Demo 8: 最佳实践 -->
     <div id="app8" class="demo-container">
         <h2 class="demo-title">🌟 Demo 8: provide/inject 最佳实践</h2>
-        
+
         <div class="best-practice">
             <h4>✅ 推荐做法</h4>
             <ul>
@@ -929,58 +942,58 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
         </div>
 
         <div class="code-example">
-<span class="comment">// ===== 最佳实践示例 =====</span>
-<br>
-<span class="comment">// 1. 使用 Symbol 避免冲突（推荐）</span>
-<span class="keyword">const</span> ThemeSymbol = Symbol(<span class="string">'theme'</span>)
-<br>
-{
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
+            <span class="comment">// ===== 最佳实践示例 =====</span>
+            <br>
+            <span class="comment">// 1. 使用 Symbol 避免冲突（推荐）</span>
+            <span class="keyword">const</span> ThemeSymbol = Symbol(<span class="string">'theme'</span>)
+            <br>
+            {
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
             [ThemeSymbol]: <span class="keyword">this</span>.theme
-        }
-    }
-}
-<br>
-{
-    inject: {
-        theme: { from: ThemeSymbol, <span class="keyword">default</span>: <span class="string">'light'</span> }
-    }
-}
-<br>
-<span class="comment">// 2. 完整的响应式方案（Vue 2.6+ 推荐）</span>
-{
-    data() {
-        <span class="keyword">return</span> {
+            }
+            }
+            }
+            <br>
+            {
+            inject: {
+            theme: { from: ThemeSymbol, <span class="keyword">default</span>: <span class="string">'light'</span> }
+            }
+            }
+            <br>
+            <span class="comment">// 2. 完整的响应式方案（Vue 2.6+ 推荐）</span>
+            {
+            data() {
+            <span class="keyword">return</span> {
             <span class="comment">// 使用 Vue.observable 创建响应式状态</span>
             state: Vue.<span class="function">observable</span>({
-                theme: <span class="string">'dark'</span>,
-                locale: <span class="string">'zh-CN'</span>,
-                user: { name: <span class="string">'张三'</span>, role: <span class="string">'admin'</span> }
+            theme: <span class="string">'dark'</span>,
+            locale: <span class="string">'zh-CN'</span>,
+            user: { name: <span class="string">'张三'</span>, role: <span class="string">'admin'</span> }
             })
-        }
-    },
-    <span class="function">provide</span>() {
-        <span class="keyword">return</span> {
+            }
+            },
+            <span class="function">provide</span>() {
+            <span class="keyword">return</span> {
             <span class="comment">// 提供响应式状态</span>
             globalState: <span class="keyword">this</span>.state,
             <span class="comment">// 提供修改方法</span>
             <span class="function">updateTheme</span>: (theme) => {
-                <span class="keyword">this</span>.state.theme = theme
+            <span class="keyword">this</span>.state.theme = theme
             },
             <span class="function">updateLocale</span>: (locale) => {
-                <span class="keyword">this</span>.state.locale = locale
+            <span class="keyword">this</span>.state.locale = locale
             }
-        }
-    }
-}
-<br>
-<span class="comment">// 3. 类型安全的注入（配合 TypeScript）</span>
-<span class="comment">// 在实际项目中，建议定义类型接口</span>
-<span class="keyword">interface</span> InjectedProps {
-    theme: string
-    updateTheme: (theme: string) => <span class="keyword">void</span>
-}
+            }
+            }
+            }
+            <br>
+            <span class="comment">// 3. 类型安全的注入（配合 TypeScript）</span>
+            <span class="comment">// 在实际项目中，建议定义类型接口</span>
+            <span class="keyword">interface</span> InjectedProps {
+            theme: string
+            updateTheme: (theme: string) => <span class="keyword">void</span>
+            }
         </div>
 
         <table class="comparison-table" style="margin-top: 30px;">
@@ -1042,7 +1055,7 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
             <h4>🎯 provide/inject 的职责定位</h4>
             <p>
                 <strong>✅ 核心使命：跨层级依赖注入（祖先→后代）</strong><br><br>
-                
+
                 <strong>⭐ 最佳应用场景：</strong><br>
                 • 主题切换系统（theme provider）<br>
                 • 权限控制系统（permission provider）<br>
@@ -1050,13 +1063,13 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
                 • 全局配置中心（config provider）<br>
                 • 组件库内部通信（el-form → el-form-item → el-input）<br>
                 • 祖孙组件通信（4层以上，避免 props drilling）<br><br>
-                
+
                 <strong>❌ 不适合的场景：</strong><br>
                 • 父子组件直接通信 → 用 <strong>props/$emit</strong>（简单明了）<br>
                 • 兄弟组件平级通信 → 用 <strong>Event Bus</strong>（语义清晰）<br>
                 • 复杂全局状态管理 → 用 <strong>Vuex</strong>（完整方案）<br>
                 • 需要时间旅行调试 → 用 <strong>Vuex DevTools</strong><br><br>
-                
+
                 <strong>💡 记住：</strong><br>
                 • provide/inject = 轻量级依赖注入（类似 Spring @Autowired）<br>
                 • Vuex = 完整状态管理（类似 Redux）<br>
@@ -1458,19 +1471,19 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
             inject: {
                 // 基本用法
                 theme: 'theme',
-                
+
                 // 设置默认值
                 language: {
                     from: 'locale',
                     default: 'en-US'
                 },
-                
+
                 // 默认值为函数
                 settings: {
                     from: 'config',
                     default: () => ({ api: 'default-api' })
                 },
-                
+
                 // 不存在的key，使用默认值
                 missing: {
                     from: 'notExist',
@@ -1495,4 +1508,5 @@ Vue.<span class="function">component</span>(<span class="string">'custom-form-it
         })
     </script>
 </body>
+
 </html>

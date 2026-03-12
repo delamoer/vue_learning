@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,7 @@
             text-align: center;
             color: white;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .main-title h1 {
@@ -41,7 +42,7 @@
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .demo-title {
@@ -166,7 +167,7 @@
             width: 100%;
             margin: 20px 0;
             border-collapse: collapse;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .comparison-table th,
@@ -243,7 +244,7 @@
 
         .my-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .my-button.secondary {
@@ -258,14 +259,14 @@
         .my-card {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             margin: 20px 0;
             transition: all 0.3s;
         }
 
         .my-card:hover {
-            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
             transform: translateY(-5px);
         }
 
@@ -295,7 +296,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -305,7 +306,7 @@
         .my-dialog {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             min-width: 400px;
             max-width: 600px;
             animation: dialogSlideIn 0.3s;
@@ -316,6 +317,7 @@
                 opacity: 0;
                 transform: translateY(-50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -420,6 +422,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="main-title">
         <h1>🎰 Vue组件插槽 - Slot</h1>
@@ -429,7 +432,7 @@
     <!-- Demo 1: 什么是插槽 -->
     <div id="app1" class="demo-container">
         <h2 class="demo-title">📚 Demo 1: 什么是插槽（Slot）？</h2>
-        
+
         <div class="concept-box">
             <h3>🎯 核心概念</h3>
             <ul>
@@ -444,7 +447,7 @@
             <h4>🏢 类比：模板方法模式（Template Method Pattern）</h4>
             <p>
                 <strong>Spring/Java 中的模板方法：</strong><br><br>
-                
+
                 <strong>1️⃣ 抽象类定义"框架"</strong><br>
                 <code style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 3px;">
                 abstract class Report {<br>
@@ -456,7 +459,7 @@
                 &nbsp;&nbsp;abstract void printBody(); // 抽象方法（插槽）<br>
                 }
                 </code><br><br>
-                
+
                 <strong>2️⃣ 子类"填充内容"</strong><br>
                 <code style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 3px;">
                 class SalesReport extends Report {<br>
@@ -465,7 +468,7 @@
                 &nbsp;&nbsp;}<br>
                 }
                 </code><br><br>
-                
+
                 <strong>💡 插槽就是这个原理：</strong><br>
                 - 子组件定义"框架"和"插槽位置"<br>
                 - 父组件"填充内容"到插槽中<br>
@@ -477,16 +480,16 @@
             <h4>🏠 类比：装修房子</h4>
             <p>
                 <strong>想象你买了一个精装修的房子：</strong><br><br>
-                
+
                 <strong>🏗️ 开发商提供（子组件）：</strong><br>
                 • 房子结构、墙壁、门窗 → 固定的HTML结构<br>
                 • 预留了"客厅、卧室、书房"的位置 → <strong>&lt;slot&gt;</strong><br><br>
-                
+
                 <strong>🎨 你自己装修（父组件）：</strong><br>
                 • 客厅放沙发、电视 → 插槽1的内容<br>
                 • 卧室放床、衣柜 → 插槽2的内容<br>
                 • 书房放书桌、书架 → 插槽3的内容<br><br>
-                
+
                 <strong>📋 同一套房结构，不同装修风格！</strong><br>
                 - 小明的家：现代简约风<br>
                 - 小红的家：中式古典风<br>
@@ -495,20 +498,22 @@
         </div>
 
         <div class="code-example" v-pre>
-<span class="comment">// 子组件：定义"框架"和"插槽"</span>
-Vue.<span class="function">component</span>(<span class="string">'my-button'</span>, {
-    template: `
-        &lt;button class="my-button"&gt;
-            &lt;<span class="keyword">slot</span>&gt;&lt;/<span class="keyword">slot</span>&gt;  <span class="comment">&lt;-- 插槽！父组件可以在这里插入内容</span>
-        &lt;/button&gt;
-    `
-})<br>
+            <span class="comment">// 子组件：定义"框架"和"插槽"</span>
+            Vue.<span class="function">component</span>(<span class="string">'my-button'</span>, {
+            template: `
+            &lt;button class="my-button"&gt;
+            &lt;<span class="keyword">slot</span>&gt;&lt;/<span class="keyword">slot</span>&gt; <span
+                class="comment">&lt;-- 插槽！父组件可以在这里插入内容</span>
+            &lt;/button&gt;
+            `
+            })<br>
 
-<span class="comment">// 父组件：向插槽"填充内容"</span>
-&lt;my-button&gt;<span class="string">点击我</span>&lt;/my-button&gt;           <span class="comment">// 显示：点击我</span>
-&lt;my-button&gt;<span class="string">提交表单</span>&lt;/my-button&gt;         <span class="comment">// 显示：提交表单</span>
-&lt;my-button&gt;<span class="string">❤️ 收藏</span>&lt;/my-button&gt;          <span class="comment">// 显示：❤️ 收藏</span>
-&lt;my-button&gt;&lt;i&gt;删除&lt;/i&gt;&lt;/my-button&gt;  <span class="comment">// 可以插入HTML！</span>
+            <span class="comment">// 父组件：向插槽"填充内容"</span>
+            &lt;my-button&gt;<span class="string">点击我</span>&lt;/my-button&gt; <span class="comment">// 显示：点击我</span>
+            &lt;my-button&gt;<span class="string">提交表单</span>&lt;/my-button&gt; <span class="comment">// 显示：提交表单</span>
+            &lt;my-button&gt;<span class="string">❤️ 收藏</span>&lt;/my-button&gt; <span class="comment">// 显示：❤️
+                收藏</span>
+            &lt;my-button&gt;&lt;i&gt;删除&lt;/i&gt;&lt;/my-button&gt; <span class="comment">// 可以插入HTML！</span>
         </div>
 
         <no-slot-demo></no-slot-demo>
@@ -517,7 +522,7 @@ Vue.<span class="function">component</span>(<span class="string">'my-button'</sp
     <!-- Demo 2: 默认插槽 -->
     <div id="app2" class="demo-container">
         <h2 class="demo-title">🎬 Demo 2: 默认插槽 - 基础用法</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>创建一个按钮组件，内容由父组件决定
         </div>
@@ -525,21 +530,22 @@ Vue.<span class="function">component</span>(<span class="string">'my-button'</sp
         <default-slot-demo></default-slot-demo>
 
         <div class="code-example" v-pre>
-<span class="comment">// 1. 子组件：定义插槽</span>
-Vue.<span class="function">component</span>(<span class="string">'my-button'</span>, {
-    template: `
-        &lt;button class="my-button"&gt;
-            &lt;<span class="keyword">slot</span>&gt;默认文字&lt;/<span class="keyword">slot</span>&gt;  <span class="comment">&lt;-- 如果父组件没传内容，显示"默认文字"</span>
-        &lt;/button&gt;
-    `
-})<br>
+            <span class="comment">// 1. 子组件：定义插槽</span>
+            Vue.<span class="function">component</span>(<span class="string">'my-button'</span>, {
+            template: `
+            &lt;button class="my-button"&gt;
+            &lt;<span class="keyword">slot</span>&gt;默认文字&lt;/<span class="keyword">slot</span>&gt; <span
+                class="comment">&lt;-- 如果父组件没传内容，显示"默认文字"</span>
+            &lt;/button&gt;
+            `
+            })<br>
 
-<span class="comment">// 2. 父组件：使用并填充内容</span>
-&lt;my-button&gt;点击我&lt;/my-button&gt;        <span class="comment">// 替换默认内容</span>
-&lt;my-button&gt;&lt;/my-button&gt;              <span class="comment">// 没传内容，显示"默认文字"</span>
-&lt;my-button&gt;
-    &lt;span style="color: red"&gt;删除&lt;/span&gt;  <span class="comment">// 可以传HTML</span>
-&lt;/my-button&gt;
+            <span class="comment">// 2. 父组件：使用并填充内容</span>
+            &lt;my-button&gt;点击我&lt;/my-button&gt; <span class="comment">// 替换默认内容</span>
+            &lt;my-button&gt;&lt;/my-button&gt; <span class="comment">// 没传内容，显示"默认文字"</span>
+            &lt;my-button&gt;
+            &lt;span style="color: red"&gt;删除&lt;/span&gt; <span class="comment">// 可以传HTML</span>
+            &lt;/my-button&gt;
         </div>
 
         <div class="warning-box">
@@ -547,10 +553,10 @@ Vue.<span class="function">component</span>(<span class="string">'my-button'</sp
             <p>
                 <strong>1. 插槽内容的编译作用域：</strong><br>
                 &nbsp;&nbsp;&nbsp;插槽内容是在<strong>父组件</strong>中编译的，只能访问父组件的数据<br><br>
-                
+
                 <strong>2. 后备内容（默认内容）：</strong><br>
                 &nbsp;&nbsp;&nbsp;&lt;slot&gt;默认文字&lt;/slot&gt; - 父组件不传内容时显示<br><br>
-                
+
                 <strong>3. 插槽可以包含任何内容：</strong><br>
                 &nbsp;&nbsp;&nbsp;文本、HTML、甚至其他组件
             </p>
@@ -560,7 +566,7 @@ Vue.<span class="function">component</span>(<span class="string">'my-button'</sp
     <!-- Demo 3: 具名插槽 -->
     <div id="app3" class="demo-container">
         <h2 class="demo-title">🏷️ Demo 3: 具名插槽 - 多个插槽位置</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>卡片组件有标题、内容、底部三个区域，需要分别填充
         </div>
@@ -568,50 +574,54 @@ Vue.<span class="function">component</span>(<span class="string">'my-button'</sp
         <named-slot-demo></named-slot-demo>
 
         <div class="code-example" v-pre>
-<span class="comment">// 1. 子组件：定义多个具名插槽</span>
-Vue.<span class="function">component</span>(<span class="string">'my-card'</span>, {
-    template: `
-        &lt;div class="my-card"&gt;
+            <span class="comment">// 1. 子组件：定义多个具名插槽</span>
+            Vue.<span class="function">component</span>(<span class="string">'my-card'</span>, {
+            template: `
+            &lt;div class="my-card"&gt;
             &lt;div class="card-header"&gt;
-                &lt;<span class="keyword">slot</span> name="<span class="string">header</span>"&gt;默认标题&lt;/<span class="keyword">slot</span>&gt;  <span class="comment">&lt;-- 具名插槽：header</span>
+            &lt;<span class="keyword">slot</span> name="<span class="string">header</span>"&gt;默认标题&lt;/<span
+                class="keyword">slot</span>&gt; <span class="comment">&lt;-- 具名插槽：header</span>
             &lt;/div&gt;
             &lt;div class="card-body"&gt;
-                &lt;<span class="keyword">slot</span>&gt;默认内容&lt;/<span class="keyword">slot</span>&gt;  <span class="comment">&lt;-- 默认插槽（没有name）</span>
+            &lt;<span class="keyword">slot</span>&gt;默认内容&lt;/<span class="keyword">slot</span>&gt; <span
+                class="comment">&lt;-- 默认插槽（没有name）</span>
             &lt;/div&gt;
             &lt;div class="card-footer"&gt;
-                &lt;<span class="keyword">slot</span> name="<span class="string">footer</span>"&gt;默认底部&lt;/<span class="keyword">slot</span>&gt;  <span class="comment">&lt;-- 具名插槽：footer</span>
+            &lt;<span class="keyword">slot</span> name="<span class="string">footer</span>"&gt;默认底部&lt;/<span
+                class="keyword">slot</span>&gt; <span class="comment">&lt;-- 具名插槽：footer</span>
             &lt;/div&gt;
-        &lt;/div&gt;
-    `
-})<br>
+            &lt;/div&gt;
+            `
+            })<br>
 
-<span class="comment">// 2. 父组件：向具名插槽填充内容（Vue 2.6+ 新语法）</span>
-&lt;my-card&gt;
-    &lt;<span class="keyword">template</span> v-slot:<span class="string">header</span>&gt;  <span class="comment">&lt;-- v-slot:header 或简写 #header</span>
-        &lt;h2&gt;这是标题&lt;/h2&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-    
-    <span class="comment">&lt;!-- 默认插槽可以不用template --&gt;</span>
-    &lt;p&gt;这是卡片内容&lt;/p&gt;
-    
-    &lt;<span class="keyword">template</span> v-slot:<span class="string">footer</span>&gt;
-        &lt;button&gt;确定&lt;/button&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-&lt;/my-card&gt;<br>
+            <span class="comment">// 2. 父组件：向具名插槽填充内容（Vue 2.6+ 新语法）</span>
+            &lt;my-card&gt;
+            &lt;<span class="keyword">template</span> v-slot:<span class="string">header</span>&gt; <span
+                class="comment">&lt;-- v-slot:header 或简写 #header</span>
+            &lt;h2&gt;这是标题&lt;/h2&gt;
+            &lt;/<span class="keyword">template</span>&gt;
 
-<span class="comment">// 3. 父组件：旧语法（Vue 2.6 之前）</span>
-&lt;my-card&gt;
-    &lt;h2 slot="<span class="string">header</span>"&gt;标题&lt;/h2&gt;          <span class="comment">&lt;-- slot属性</span>
-    &lt;p&gt;内容&lt;/p&gt;
-    &lt;button slot="<span class="string">footer</span>"&gt;确定&lt;/button&gt;
-&lt;/my-card&gt;
+            <span class="comment">&lt;!-- 默认插槽可以不用template --&gt;</span>
+            &lt;p&gt;这是卡片内容&lt;/p&gt;
+
+            &lt;<span class="keyword">template</span> v-slot:<span class="string">footer</span>&gt;
+            &lt;button&gt;确定&lt;/button&gt;
+            &lt;/<span class="keyword">template</span>&gt;
+            &lt;/my-card&gt;<br>
+
+            <span class="comment">// 3. 父组件：旧语法（Vue 2.6 之前）</span>
+            &lt;my-card&gt;
+            &lt;h2 slot="<span class="string">header</span>"&gt;标题&lt;/h2&gt; <span class="comment">&lt;-- slot属性</span>
+            &lt;p&gt;内容&lt;/p&gt;
+            &lt;button slot="<span class="string">footer</span>"&gt;确定&lt;/button&gt;
+            &lt;/my-card&gt;
         </div>
     </div>
 
     <!-- Demo 4: 作用域插槽 -->
     <div id="app4" class="demo-container">
         <h2 class="demo-title">🔄 Demo 4: 作用域插槽 - 子组件向父组件传数据</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>列表组件提供数据，父组件自定义渲染方式
         </div>
@@ -622,16 +632,16 @@ Vue.<span class="function">component</span>(<span class="string">'my-card'</span
             <h4>💡 理解作用域插槽</h4>
             <p>
                 <strong>普通插槽 vs 作用域插槽：</strong><br><br>
-                
+
                 <strong>普通插槽：</strong>父组件传内容给子组件（父→子）<br>
                 • 父组件决定显示什么<br>
                 • 只能访问父组件数据<br><br>
-                
+
                 <strong>作用域插槽：</strong>子组件传数据给父组件（子→父）<br>
                 • 子组件提供数据<br>
                 • 父组件决定如何渲染这些数据<br>
                 • <strong>数据的"反向传递"！</strong><br><br>
-                
+
                 <strong>类比餐厅：</strong><br>
                 • 普通插槽 = 你点菜，厨房做好端上来<br>
                 • 作用域插槽 = 厨房提供食材，你自己烹饪！
@@ -639,47 +649,50 @@ Vue.<span class="function">component</span>(<span class="string">'my-card'</span
         </div>
 
         <div class="code-example" v-pre>
-<span class="comment">// 1. 子组件：提供数据给插槽</span>
-Vue.<span class="function">component</span>(<span class="string">'user-list'</span>, {
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// 1. 子组件：提供数据给插槽</span>
+            Vue.<span class="function">component</span>(<span class="string">'user-list'</span>, {
+            data() {
+            <span class="keyword">return</span> {
             users: [
-                { id: 1, name: <span class="string">'张三'</span>, age: 25 },
-                { id: 2, name: <span class="string">'李四'</span>, age: 30 }
+            { id: 1, name: <span class="string">'张三'</span>, age: 25 },
+            { id: 2, name: <span class="string">'李四'</span>, age: 30 }
             ]
-        }
-    },
-    template: `
-        &lt;div&gt;
+            }
+            },
+            template: `
+            &lt;div&gt;
             &lt;div v-for="user in users" :key="user.id"&gt;
-                &lt;<span class="keyword">slot</span> :user="<span class="string">user</span>"&gt;  <span class="comment">&lt;-- 通过props传递数据</span>
-                    {{ user.name }}  <span class="comment">&lt;-- 默认渲染</span>
-                &lt;/<span class="keyword">slot</span>&gt;
+            &lt;<span class="keyword">slot</span> :user="<span class="string">user</span>"&gt; <span
+                class="comment">&lt;-- 通过props传递数据</span>
+            {{ user.name }} <span class="comment">&lt;-- 默认渲染</span>
+            &lt;/<span class="keyword">slot</span>&gt;
             &lt;/div&gt;
-        &lt;/div&gt;
-    `
-})<br>
+            &lt;/div&gt;
+            `
+            })<br>
 
-<span class="comment">// 2. 父组件：接收数据并自定义渲染</span>
-&lt;user-list&gt;
-    &lt;<span class="keyword">template</span> v-slot="<span class="string">slotProps</span>"&gt;  <span class="comment">&lt;-- slotProps接收所有传递的数据</span>
-        &lt;strong&gt;{{ slotProps.user.name }}&lt;/strong&gt; - {{ slotProps.user.age }}岁
-    &lt;/<span class="keyword">template</span>&gt;
-&lt;/user-list&gt;<br>
+            <span class="comment">// 2. 父组件：接收数据并自定义渲染</span>
+            &lt;user-list&gt;
+            &lt;<span class="keyword">template</span> v-slot="<span class="string">slotProps</span>"&gt; <span
+                class="comment">&lt;-- slotProps接收所有传递的数据</span>
+            &lt;strong&gt;{{ slotProps.user.name }}&lt;/strong&gt; - {{ slotProps.user.age }}岁
+            &lt;/<span class="keyword">template</span>&gt;
+            &lt;/user-list&gt;<br>
 
-<span class="comment">// 3. 解构写法（推荐）</span>
-&lt;user-list&gt;
-    &lt;<span class="keyword">template</span> v-slot="<span class="string">{ user }</span>"&gt;  <span class="comment">&lt;-- 解构赋值</span>
-        &lt;span style="color: blue"&gt;{{ user.name }}&lt;/span&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-&lt;/user-list&gt;
+            <span class="comment">// 3. 解构写法（推荐）</span>
+            &lt;user-list&gt;
+            &lt;<span class="keyword">template</span> v-slot="<span class="string">{ user }</span>"&gt; <span
+                class="comment">&lt;-- 解构赋值</span>
+            &lt;span style="color: blue"&gt;{{ user.name }}&lt;/span&gt;
+            &lt;/<span class="keyword">template</span>&gt;
+            &lt;/user-list&gt;
         </div>
     </div>
 
     <!-- Demo 5: 实战 - 对话框组件 -->
     <div id="app5" class="demo-container">
         <h2 class="demo-title">📝 Demo 5: 实战案例 - 对话框组件</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>封装一个通用对话框，标题和内容可自定义
         </div>
@@ -687,37 +700,39 @@ Vue.<span class="function">component</span>(<span class="string">'user-list'</sp
         <dialog-demo></dialog-demo>
 
         <div class="code-example" v-pre>
-<span class="comment">// 对话框组件：使用具名插槽</span>
-Vue.<span class="function">component</span>(<span class="string">'my-dialog'</span>, {
-    props: [<span class="string">'visible'</span>],
-    template: `
-        &lt;div v-if="visible" class="my-dialog-overlay"&gt;
+            <span class="comment">// 对话框组件：使用具名插槽</span>
+            Vue.<span class="function">component</span>(<span class="string">'my-dialog'</span>, {
+            props: [<span class="string">'visible'</span>],
+            template: `
+            &lt;div v-if="visible" class="my-dialog-overlay"&gt;
             &lt;div class="my-dialog"&gt;
-                &lt;div class="dialog-header"&gt;
-                    &lt;div class="dialog-title"&gt;
-                        &lt;<span class="keyword">slot</span> name="<span class="string">title</span>"&gt;提示&lt;/<span class="keyword">slot</span>&gt;
-                    &lt;/div&gt;
-                    &lt;button @click="$emit('close')" class="dialog-close"&gt;✕&lt;/button&gt;
-                &lt;/div&gt;
-                &lt;div class="dialog-body"&gt;
-                    &lt;<span class="keyword">slot</span>&gt;&lt;/<span class="keyword">slot</span>&gt;  <span class="comment">&lt;-- 默认插槽：内容</span>
-                &lt;/div&gt;
-                &lt;div class="dialog-footer"&gt;
-                    &lt;<span class="keyword">slot</span> name="<span class="string">footer</span>"&gt;
-                        &lt;button @click="$emit('close')"&gt;关闭&lt;/button&gt;
-                    &lt;/<span class="keyword">slot</span>&gt;
-                &lt;/div&gt;
+            &lt;div class="dialog-header"&gt;
+            &lt;div class="dialog-title"&gt;
+            &lt;<span class="keyword">slot</span> name="<span class="string">title</span>"&gt;提示&lt;/<span
+                class="keyword">slot</span>&gt;
             &lt;/div&gt;
-        &lt;/div&gt;
-    `
-})
+            &lt;button @click="$emit('close')" class="dialog-close"&gt;✕&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="dialog-body"&gt;
+            &lt;<span class="keyword">slot</span>&gt;&lt;/<span class="keyword">slot</span>&gt; <span
+                class="comment">&lt;-- 默认插槽：内容</span>
+            &lt;/div&gt;
+            &lt;div class="dialog-footer"&gt;
+            &lt;<span class="keyword">slot</span> name="<span class="string">footer</span>"&gt;
+            &lt;button @click="$emit('close')"&gt;关闭&lt;/button&gt;
+            &lt;/<span class="keyword">slot</span>&gt;
+            &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;/div&gt;
+            `
+            })
         </div>
     </div>
 
     <!-- Demo 6: 实战 - 表格组件 -->
     <div id="app6" class="demo-container">
         <h2 class="demo-title">📊 Demo 6: 实战案例 - 表格组件（作用域插槽）</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>表格组件提供数据，父组件自定义每列的渲染方式
         </div>
@@ -728,11 +743,11 @@ Vue.<span class="function">component</span>(<span class="string">'my-dialog'</sp
             <h4>💡 这就是 Element UI 表格的原理！</h4>
             <p>
                 <strong>&lt;el-table&gt; 的实现原理：</strong><br><br>
-                
+
                 1️⃣ 表格组件提供【行数据】（作用域插槽）<br>
                 2️⃣ 父组件接收数据，自定义渲染（标签、按钮、图片）<br>
                 3️⃣ 灵活性强：同一份数据，不同的展示方式！<br><br>
-                
+
                 <strong>对比：</strong><br>
                 • 不用插槽：表格组件写死渲染方式，不灵活❌<br>
                 • 使用插槽：父组件自定义渲染，超级灵活✅
@@ -740,132 +755,139 @@ Vue.<span class="function">component</span>(<span class="string">'my-dialog'</sp
         </div>
 
         <div class="code-example" v-pre>
-<span class="comment">// 表格组件：通过作用域插槽传递行数据</span>
-Vue.<span class="function">component</span>(<span class="string">'my-table'</span>, {
-    props: [<span class="string">'columns'</span>, <span class="string">'data'</span>],
-    template: `
-        &lt;table class="my-table"&gt;
+            <span class="comment">// 表格组件：通过作用域插槽传递行数据</span>
+            Vue.<span class="function">component</span>(<span class="string">'my-table'</span>, {
+            props: [<span class="string">'columns'</span>, <span class="string">'data'</span>],
+            template: `
+            &lt;table class="my-table"&gt;
             &lt;thead&gt;
-                &lt;tr&gt;
-                    &lt;th v-for="col in columns" :key="col.prop"&gt;
-                        {{ col.label }}
-                    &lt;/th&gt;
-                &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;th v-for="col in columns" :key="col.prop"&gt;
+            {{ col.label }}
+            &lt;/th&gt;
+            &lt;/tr&gt;
             &lt;/thead&gt;
             &lt;tbody&gt;
-                &lt;tr v-for="row in data" :key="row.id"&gt;
-                    &lt;td v-for="col in columns" :key="col.prop"&gt;
-                        &lt;<span class="keyword">slot</span> 
-                            :name="<span class="string">col.prop</span>" 
-                            :row="<span class="string">row</span>"&gt;  <span class="comment">&lt;-- 传递行数据</span>
-                            {{ row[col.prop] }}  <span class="comment">&lt;-- 默认显示</span>
-                        &lt;/<span class="keyword">slot</span>&gt;
-                    &lt;/td&gt;
-                &lt;/tr&gt;
+            &lt;tr v-for="row in data" :key="row.id"&gt;
+            &lt;td v-for="col in columns" :key="col.prop"&gt;
+            &lt;<span class="keyword">slot</span>
+            :name="<span class="string">col.prop</span>"
+            :row="<span class="string">row</span>"&gt; <span class="comment">&lt;-- 传递行数据</span>
+            {{ row[col.prop] }} <span class="comment">&lt;-- 默认显示</span>
+            &lt;/<span class="keyword">slot</span>&gt;
+            &lt;/td&gt;
+            &lt;/tr&gt;
             &lt;/tbody&gt;
-        &lt;/table&gt;
-    `
-})<br>
+            &lt;/table&gt;
+            `
+            })<br>
 
-<span class="comment">// 父组件：自定义列渲染</span>
-&lt;my-table :columns="columns" :data="users"&gt;
-    <span class="comment">&lt;!-- 自定义"状态"列 --&gt;</span>
-    &lt;<span class="keyword">template</span> #status="<span class="string">{ row }</span>"&gt;
-        &lt;span :class="'status-' + row.status"&gt;
+            <span class="comment">// 父组件：自定义列渲染</span>
+            &lt;my-table :columns="columns" :data="users"&gt;
+            <span class="comment">&lt;!-- 自定义"状态"列 --&gt;</span>
+            &lt;<span class="keyword">template</span> #status="<span class="string">{ row }</span>"&gt;
+            &lt;span :class="'status-' + row.status"&gt;
             {{ row.status === 'active' ? '在线' : '离线' }}
-        &lt;/span&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-    
-    <span class="comment">&lt;!-- 自定义"操作"列 --&gt;</span>
-    &lt;<span class="keyword">template</span> #actions="<span class="string">{ row }</span>"&gt;
-        &lt;button @click="edit(row)"&gt;编辑&lt;/button&gt;
-        &lt;button @click="del(row)"&gt;删除&lt;/button&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-&lt;/my-table&gt;
+            &lt;/span&gt;
+            &lt;/<span class="keyword">template</span>&gt;
+
+            <span class="comment">&lt;!-- 自定义"操作"列 --&gt;</span>
+            &lt;<span class="keyword">template</span> #actions="<span class="string">{ row }</span>"&gt;
+            &lt;button @click="edit(row)"&gt;编辑&lt;/button&gt;
+            &lt;button @click="del(row)"&gt;删除&lt;/button&gt;
+            &lt;/<span class="keyword">template</span>&gt;
+            &lt;/my-table&gt;
         </div>
     </div>
 
     <!-- Demo 7: 插槽简写语法 -->
     <div id="app7" class="demo-container">
         <h2 class="demo-title">⚡ Demo 7: 插槽简写语法（Vue 2.6+）</h2>
-        
+
         <div class="demo-desc">
             <strong>学习：</strong>v-slot 的各种简写方式
         </div>
 
         <div class="code-example" v-pre>
-<span class="comment">// ========== 1. 具名插槽简写 ==========</span><br>
+            <span class="comment">// ========== 1. 具名插槽简写 ==========</span><br>
 
-<span class="comment">// 完整写法</span>
-&lt;<span class="keyword">template</span> v-slot:<span class="string">header</span>&gt;标题&lt;/<span class="keyword">template</span>&gt;<br>
+            <span class="comment">// 完整写法</span>
+            &lt;<span class="keyword">template</span> v-slot:<span class="string">header</span>&gt;标题&lt;/<span
+                class="keyword">template</span>&gt;<br>
 
-<span class="comment">// 简写（# 代替 v-slot:）</span>
-&lt;<span class="keyword">template</span> #<span class="string">header</span>&gt;标题&lt;/<span class="keyword">template</span>&gt;<br><br>
-
-
-<span class="comment">// ========== 2. 默认插槽简写 ==========</span><br>
-
-<span class="comment">// 完整写法</span>
-&lt;my-component&gt;
-    &lt;<span class="keyword">template</span> v-slot:<span class="string">default</span>&gt;内容&lt;/<span class="keyword">template</span>&gt;
-&lt;/my-component&gt;<br>
-
-<span class="comment">// 简写1（省略default）</span>
-&lt;my-component&gt;
-    &lt;<span class="keyword">template</span> v-slot&gt;内容&lt;/<span class="keyword">template</span>&gt;
-&lt;/my-component&gt;<br>
-
-<span class="comment">// 简写2（只有默认插槽时，可以直接写在组件标签上）</span>
-&lt;my-component v-slot="<span class="string">slotProps</span>"&gt;
-    {{ slotProps.data }}
-&lt;/my-component&gt;<br><br>
+            <span class="comment">// 简写（# 代替 v-slot:）</span>
+            &lt;<span class="keyword">template</span> #<span class="string">header</span>&gt;标题&lt;/<span
+                class="keyword">template</span>&gt;<br><br>
 
 
-<span class="comment">// ========== 3. 作用域插槽简写 ==========</span><br>
+            <span class="comment">// ========== 2. 默认插槽简写 ==========</span><br>
 
-<span class="comment">// 完整写法</span>
-&lt;<span class="keyword">template</span> v-slot:<span class="string">default</span>="<span class="string">slotProps</span>"&gt;
-    {{ slotProps.user.name }}
-&lt;/<span class="keyword">template</span>&gt;<br>
+            <span class="comment">// 完整写法</span>
+            &lt;my-component&gt;
+            &lt;<span class="keyword">template</span> v-slot:<span class="string">default</span>&gt;内容&lt;/<span
+                class="keyword">template</span>&gt;
+            &lt;/my-component&gt;<br>
 
-<span class="comment">// 简写1（解构）</span>
-&lt;<span class="keyword">template</span> v-slot="<span class="string">{ user }</span>"&gt;
-    {{ user.name }}
-&lt;/<span class="keyword">template</span>&gt;<br>
+            <span class="comment">// 简写1（省略default）</span>
+            &lt;my-component&gt;
+            &lt;<span class="keyword">template</span> v-slot&gt;内容&lt;/<span class="keyword">template</span>&gt;
+            &lt;/my-component&gt;<br>
 
-<span class="comment">// 简写2（解构 + 重命名）</span>
-&lt;<span class="keyword">template</span> v-slot="<span class="string">{ user: person }</span>"&gt;
-    {{ person.name }}
-&lt;/<span class="keyword">template</span>&gt;<br>
-
-<span class="comment">// 简写3（解构 + 默认值）</span>
-&lt;<span class="keyword">template</span> v-slot="<span class="string">{ user = { name: '匿名' } }</span>"&gt;
-    {{ user.name }}
-&lt;/<span class="keyword">template</span>&gt;<br><br>
+            <span class="comment">// 简写2（只有默认插槽时，可以直接写在组件标签上）</span>
+            &lt;my-component v-slot="<span class="string">slotProps</span>"&gt;
+            {{ slotProps.data }}
+            &lt;/my-component&gt;<br><br>
 
 
-<span class="comment">// ========== 4. 具名插槽 + 作用域 ==========</span><br>
+            <span class="comment">// ========== 3. 作用域插槽简写 ==========</span><br>
 
-<span class="comment">// 完整写法</span>
-&lt;<span class="keyword">template</span> v-slot:<span class="string">header</span>="<span class="string">headerProps</span>"&gt;
-    {{ headerProps.title }}
-&lt;/<span class="keyword">template</span>&gt;<br>
+            <span class="comment">// 完整写法</span>
+            &lt;<span class="keyword">template</span> v-slot:<span class="string">default</span>="<span
+                class="string">slotProps</span>"&gt;
+            {{ slotProps.user.name }}
+            &lt;/<span class="keyword">template</span>&gt;<br>
 
-<span class="comment">// 简写</span>
-&lt;<span class="keyword">template</span> #<span class="string">header</span>="<span class="string">{ title }</span>"&gt;
-    {{ title }}
-&lt;/<span class="keyword">template</span>&gt;<br><br>
+            <span class="comment">// 简写1（解构）</span>
+            &lt;<span class="keyword">template</span> v-slot="<span class="string">{ user }</span>"&gt;
+            {{ user.name }}
+            &lt;/<span class="keyword">template</span>&gt;<br>
+
+            <span class="comment">// 简写2（解构 + 重命名）</span>
+            &lt;<span class="keyword">template</span> v-slot="<span class="string">{ user: person }</span>"&gt;
+            {{ person.name }}
+            &lt;/<span class="keyword">template</span>&gt;<br>
+
+            <span class="comment">// 简写3（解构 + 默认值）</span>
+            &lt;<span class="keyword">template</span> v-slot="<span class="string">{ user = { name: '匿名' } }</span>"&gt;
+            {{ user.name }}
+            &lt;/<span class="keyword">template</span>&gt;<br><br>
 
 
-<span class="comment">// ========== 5. 动态插槽名 ==========</span><br>
+            <span class="comment">// ========== 4. 具名插槽 + 作用域 ==========</span><br>
 
-&lt;<span class="keyword">template</span> v-slot:[<span class="string">dynamicSlotName</span>]&gt;
-    动态插槽
-&lt;/<span class="keyword">template</span>&gt;<br>
+            <span class="comment">// 完整写法</span>
+            &lt;<span class="keyword">template</span> v-slot:<span class="string">header</span>="<span
+                class="string">headerProps</span>"&gt;
+            {{ headerProps.title }}
+            &lt;/<span class="keyword">template</span>&gt;<br>
 
-&lt;<span class="keyword">template</span> #[<span class="string">dynamicSlotName</span>]&gt;  <span class="comment">&lt;-- 简写</span>
-    动态插槽
-&lt;/<span class="keyword">template</span>&gt;
+            <span class="comment">// 简写</span>
+            &lt;<span class="keyword">template</span> #<span class="string">header</span>="<span class="string">{ title
+                }</span>"&gt;
+            {{ title }}
+            &lt;/<span class="keyword">template</span>&gt;<br><br>
+
+
+            <span class="comment">// ========== 5. 动态插槽名 ==========</span><br>
+
+            &lt;<span class="keyword">template</span> v-slot:[<span class="string">dynamicSlotName</span>]&gt;
+            动态插槽
+            &lt;/<span class="keyword">template</span>&gt;<br>
+
+            &lt;<span class="keyword">template</span> #[<span class="string">dynamicSlotName</span>]&gt; <span
+                class="comment">&lt;-- 简写</span>
+            动态插槽
+            &lt;/<span class="keyword">template</span>&gt;
         </div>
 
         <table class="comparison-table">
@@ -904,7 +926,7 @@ Vue.<span class="function">component</span>(<span class="string">'my-table'</spa
     <!-- Demo 8: 最佳实践 -->
     <div id="app8" class="demo-container">
         <h2 class="demo-title">🌟 Demo 8: 插槽最佳实践</h2>
-        
+
         <div class="best-practice">
             <h4>✅ 推荐做法</h4>
             <ul>
@@ -969,17 +991,17 @@ Vue.<span class="function">component</span>(<span class="string">'my-table'</spa
             <h4>🎯 插槽 vs 通信方式对比</h4>
             <p>
                 <strong>插槽不是组件通信！是内容分发！</strong><br><br>
-                
+
                 <strong>📦 组件通信（数据传递）：</strong><br>
                 • props：父→子传<strong>数据</strong><br>
                 • $emit：子→父传<strong>数据</strong><br>
                 • provide/inject：祖→孙传<strong>数据</strong><br><br>
-                
+
                 <strong>🎰 插槽（内容分发）：</strong><br>
                 • 默认插槽：父→子传<strong>HTML内容</strong><br>
                 • 具名插槽：父→子传<strong>多块HTML内容</strong><br>
                 • 作用域插槽：子→父传<strong>数据，父决定如何渲染</strong><br><br>
-                
+
                 <strong>💡 核心区别：</strong><br>
                 • 通信 = 传数据（data、变量）<br>
                 • 插槽 = 传内容（HTML、组件）<br>
@@ -988,56 +1010,58 @@ Vue.<span class="function">component</span>(<span class="string">'my-table'</spa
         </div>
 
         <div class="code-example" v-pre>
-<span class="comment">// ===== 完整示例：组合使用所有特性 =====</span><br>
+            <span class="comment">// ===== 完整示例：组合使用所有特性 =====</span><br>
 
-<span class="comment">// 子组件：卡片组件（props + 插槽）</span>
-Vue.<span class="function">component</span>(<span class="string">'card'</span>, {
-    props: {
-        width: { type: String, <span class="keyword">default</span>: <span class="string">'300px'</span> },
-        shadow: { type: String, <span class="keyword">default</span>: <span class="string">'hover'</span> }
-    },
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// 子组件：卡片组件（props + 插槽）</span>
+            Vue.<span class="function">component</span>(<span class="string">'card'</span>, {
+            props: {
+            width: { type: String, <span class="keyword">default</span>: <span class="string">'300px'</span> },
+            shadow: { type: String, <span class="keyword">default</span>: <span class="string">'hover'</span> }
+            },
+            data() {
+            <span class="keyword">return</span> {
             timestamp: <span class="keyword">new</span> Date().<span class="function">toLocaleString</span>()
-        }
-    },
-    template: `
-        &lt;div class="my-card" :style="{ width }"&gt;
+            }
+            },
+            template: `
+            &lt;div class="my-card" :style="{ width }"&gt;
             &lt;div class="card-header"&gt;
-                &lt;<span class="keyword">slot</span> name="<span class="string">header</span>" :time="<span class="string">timestamp</span>"&gt;
-                    默认标题
-                &lt;/<span class="keyword">slot</span>&gt;
+            &lt;<span class="keyword">slot</span> name="<span class="string">header</span>" :time="<span
+                class="string">timestamp</span>"&gt;
+            默认标题
+            &lt;/<span class="keyword">slot</span>&gt;
             &lt;/div&gt;
             &lt;div class="card-body"&gt;
-                &lt;<span class="keyword">slot</span>&gt;默认内容&lt;/<span class="keyword">slot</span>&gt;
+            &lt;<span class="keyword">slot</span>&gt;默认内容&lt;/<span class="keyword">slot</span>&gt;
             &lt;/div&gt;
             &lt;div class="card-footer"&gt;
-                &lt;<span class="keyword">slot</span> name="<span class="string">footer</span>"&gt;
-                    &lt;button&gt;确定&lt;/button&gt;
-                &lt;/<span class="keyword">slot</span>&gt;
+            &lt;<span class="keyword">slot</span> name="<span class="string">footer</span>"&gt;
+            &lt;button&gt;确定&lt;/button&gt;
+            &lt;/<span class="keyword">slot</span>&gt;
             &lt;/div&gt;
-        &lt;/div&gt;
-    `
-})<br>
+            &lt;/div&gt;
+            `
+            })<br>
 
-<span class="comment">// 父组件使用</span>
-&lt;card width="<span class="string">400px</span>" shadow="<span class="string">always</span>"&gt;
-    <span class="comment">&lt;!-- 具名插槽 + 作用域插槽 --&gt;</span>
-    &lt;<span class="keyword">template</span> #<span class="string">header</span>="<span class="string">{ time }</span>"&gt;
-        &lt;h2&gt;用户信息&lt;/h2&gt;
-        &lt;small&gt;创建时间：{{ time }}&lt;/small&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-    
-    <span class="comment">&lt;!-- 默认插槽 --&gt;</span>
-    &lt;p&gt;姓名：张三&lt;/p&gt;
-    &lt;p&gt;年龄：25岁&lt;/p&gt;
-    
-    <span class="comment">&lt;!-- 具名插槽 --&gt;</span>
-    &lt;<span class="keyword">template</span> #<span class="string">footer</span>&gt;
-        &lt;button @click="save"&gt;保存&lt;/button&gt;
-        &lt;button @click="cancel"&gt;取消&lt;/button&gt;
-    &lt;/<span class="keyword">template</span>&gt;
-&lt;/card&gt;
+            <span class="comment">// 父组件使用</span>
+            &lt;card width="<span class="string">400px</span>" shadow="<span class="string">always</span>"&gt;
+            <span class="comment">&lt;!-- 具名插槽 + 作用域插槽 --&gt;</span>
+            &lt;<span class="keyword">template</span> #<span class="string">header</span>="<span class="string">{ time
+                }</span>"&gt;
+            &lt;h2&gt;用户信息&lt;/h2&gt;
+            &lt;small&gt;创建时间：{{ time }}&lt;/small&gt;
+            &lt;/<span class="keyword">template</span>&gt;
+
+            <span class="comment">&lt;!-- 默认插槽 --&gt;</span>
+            &lt;p&gt;姓名：张三&lt;/p&gt;
+            &lt;p&gt;年龄：25岁&lt;/p&gt;
+
+            <span class="comment">&lt;!-- 具名插槽 --&gt;</span>
+            &lt;<span class="keyword">template</span> #<span class="string">footer</span>&gt;
+            &lt;button @click="save"&gt;保存&lt;/button&gt;
+            &lt;button @click="cancel"&gt;取消&lt;/button&gt;
+            &lt;/<span class="keyword">template</span>&gt;
+            &lt;/card&gt;
         </div>
     </div>
 
@@ -1422,4 +1446,5 @@ Vue.<span class="function">component</span>(<span class="string">'card'</span>, 
         new Vue({ el: '#app8' })
     </script>
 </body>
+
 </html>

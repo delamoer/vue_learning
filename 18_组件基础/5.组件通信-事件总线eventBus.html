@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,7 @@
             text-align: center;
             color: white;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .main-title h1 {
@@ -41,7 +42,7 @@
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .demo-title {
@@ -128,7 +129,7 @@
             min-width: 250px;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .component-a {
@@ -171,7 +172,7 @@
 
         .component-a button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .component-b button {
@@ -181,7 +182,7 @@
 
         .component-b button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .component-c button {
@@ -191,7 +192,7 @@
 
         .component-c button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .component input {
@@ -204,7 +205,7 @@
         }
 
         .message-display {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 15px;
             border-radius: 6px;
             margin-top: 15px;
@@ -276,7 +277,7 @@
             width: 100%;
             margin: 20px 0;
             border-collapse: collapse;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .comparison-table th,
@@ -365,6 +366,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -416,7 +418,7 @@
 
         .chat-input-area button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .todo-container {
@@ -430,7 +432,7 @@
             background: white;
             border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .todo-category h4 {
@@ -499,6 +501,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="main-title">
         <h1>🚌 Vue组件通信 - 事件总线EventBus</h1>
@@ -508,7 +511,7 @@
     <!-- Demo 1: 什么是事件总线 -->
     <div id="app1" class="demo-container">
         <h2 class="demo-title">📚 Demo 1: 什么是事件总线（Event Bus）</h2>
-        
+
         <div class="concept-box">
             <h3>🎯 核心概念</h3>
             <ul>
@@ -523,42 +526,43 @@
             <h4>🏢 类比：公司内的广播系统</h4>
             <p>
                 <strong>想象一个公司的广播系统：</strong><br><br>
-                
+
                 <strong>1️⃣ 广播室（Event Bus）</strong><br>
                 - 就像公司的广播室，负责接收和发送消息<br>
                 - 它本身是个空房间，只是个通信中介<br><br>
-                
+
                 <strong>2️⃣ 部门员工（各个组件）</strong><br>
                 - 销售部（组件A）可以通过广播发消息<br>
                 - 技术部（组件B）可以监听广播接收消息<br>
                 - 人事部（组件C）也可以监听和发送<br><br>
-                
+
                 <strong>3️⃣ 通信过程</strong><br>
                 - 销售部拿起话筒广播："下午3点开会"（$emit触发事件）<br>
                 - 所有订阅了"会议通知"频道的部门都能听到（$on监听事件）<br>
                 - 各部门不需要直接联系，通过广播室就能通信<br><br>
-                
+
                 <strong>💡 这就是Event Bus的本质：一个中央消息中间件！</strong>
             </p>
         </div>
 
         <div class="code-example">
-<span class="comment">// 1. 创建事件总线（在main.js或单独文件中）</span>
-<span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()<br>
+            <span class="comment">// 1. 创建事件总线（在main.js或单独文件中）</span>
+            <span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()<br>
 
-<span class="comment">// 或者挂载到Vue原型上，方便全局访问</span>
-Vue.prototype.$bus = <span class="keyword">new</span> Vue()<br>
+            <span class="comment">// 或者挂载到Vue原型上，方便全局访问</span>
+            Vue.prototype.$bus = <span class="keyword">new</span> Vue()<br>
 
-<span class="comment">// 2. 组件A：发送消息（触发事件）</span>
-EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'Hello from A'</span>)<br>
+            <span class="comment">// 2. 组件A：发送消息（触发事件）</span>
+            EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span
+                class="string">'Hello from A'</span>)<br>
 
-<span class="comment">// 3. 组件B：接收消息（监听事件）</span>
-EventBus.<span class="function">$on</span>(<span class="string">'message'</span>, (data) => {
-    console.log(data) <span class="comment">// 'Hello from A'</span>
-})<br>
+            <span class="comment">// 3. 组件B：接收消息（监听事件）</span>
+            EventBus.<span class="function">$on</span>(<span class="string">'message'</span>, (data) => {
+            console.log(data) <span class="comment">// 'Hello from A'</span>
+            })<br>
 
-<span class="comment">// 4. 组件销毁时：移除监听（避免内存泄漏）</span>
-EventBus.<span class="function">$off</span>(<span class="string">'message'</span>)<br>
+            <span class="comment">// 4. 组件销毁时：移除监听（避免内存泄漏）</span>
+            EventBus.<span class="function">$off</span>(<span class="string">'message'</span>)<br>
         </div>
 
         <table class="comparison-table">
@@ -611,7 +615,7 @@ EventBus.<span class="function">$off</span>(<span class="string">'message'</span
     <!-- Demo 2: 基础使用 - 兄弟组件通信 -->
     <div id="app2" class="demo-container">
         <h2 class="demo-title">🎬 Demo 2: 基础使用 - 兄弟组件通信</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>两个兄弟组件（ComponentA和ComponentB）之间互相发送消息
         </div>
@@ -624,8 +628,8 @@ EventBus.<span class="function">$off</span>(<span class="string">'message'</span
         <div class="event-log">
             <div><strong>📋 事件日志：</strong></div>
             <div v-for="(log, index) in eventLogs" :key="index" class="event-log-item">
-                <span class="timestamp">[{{ log.time }}]</span> 
-                <span class="event-name">{{ log.event }}</span> - 
+                <span class="timestamp">[{{ log.time }}]</span>
+                <span class="event-name">{{ log.event }}</span> -
                 <span class="event-data">{{ log.data }}</span>
             </div>
             <div v-if="eventLogs.length === 0" style="color: #95a5a6; padding: 10px 0;">
@@ -634,50 +638,51 @@ EventBus.<span class="function">$off</span>(<span class="string">'message'</span
         </div>
 
         <div class="code-example">
-<span class="comment">// 创建事件总线</span><br>
-<span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()<br>
+            <span class="comment">// 创建事件总线</span><br>
+            <span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()<br>
 
-<span class="comment">// 组件A：发送消息</span><br>
-Vue.<span class="function">component</span>(<span class="string">'component-a'</span>, {
-    template: `
-        &lt;div class="component component-a"&gt;
+            <span class="comment">// 组件A：发送消息</span><br>
+            Vue.<span class="function">component</span>(<span class="string">'component-a'</span>, {
+            template: `
+            &lt;div class="component component-a"&gt;
             &lt;h3&gt;组件 A&lt;/h3&gt;
             &lt;button @click="sendToB"&gt;发送消息给B&lt;/button&gt;
-        &lt;/div&gt;
-    `,
-    methods: {
-        <span class="function">sendToB</span>() {
+            &lt;/div&gt;
+            `,
+            methods: {
+            <span class="function">sendToB</span>() {
             <span class="comment">// 触发事件，发送数据</span>
-            EventBus.<span class="function">$emit</span>(<span class="string">'a-to-b'</span>, <span class="string">'Hello from A!'</span>)
-        }
-    }
-})<br>
+            EventBus.<span class="function">$emit</span>(<span class="string">'a-to-b'</span>, <span
+                class="string">'Hello from A!'</span>)
+            }
+            }
+            })<br>
 
-<span class="comment">// 组件B：接收消息</span><br>
-Vue.<span class="function">component</span>(<span class="string">'component-b'</span>, {
-    data() {
-        <span class="keyword">return</span> {
+            <span class="comment">// 组件B：接收消息</span><br>
+            Vue.<span class="function">component</span>(<span class="string">'component-b'</span>, {
+            data() {
+            <span class="keyword">return</span> {
             message: <span class="string">'等待接收消息...'</span>
-        }
-    },
-    mounted() {
-        <span class="comment">// 监听事件，接收数据</span><br>
-        EventBus.<span class="function">$on</span>(<span class="string">'a-to-b'</span>, (data) => {
+            }
+            },
+            mounted() {
+            <span class="comment">// 监听事件，接收数据</span><br>
+            EventBus.<span class="function">$on</span>(<span class="string">'a-to-b'</span>, (data) => {
             <span class="keyword">this</span>.message = data
-        })
-    },
-    beforeDestroy() {
-        <span class="comment">// 组件销毁前移除监听</span>
-        EventBus.<span class="function">$off</span>(<span class="string">'a-to-b'</span>)
-    }
-})
+            })
+            },
+            beforeDestroy() {
+            <span class="comment">// 组件销毁前移除监听</span>
+            EventBus.<span class="function">$off</span>(<span class="string">'a-to-b'</span>)
+            }
+            })
         </div>
     </div>
 
     <!-- Demo 3: 传递复杂数据 -->
     <div id="app3" class="demo-container">
         <h2 class="demo-title">📦 Demo 3: 传递复杂数据对象</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>组件发送者输入用户信息，接收者实时显示
         </div>
@@ -688,28 +693,29 @@ Vue.<span class="function">component</span>(<span class="string">'component-b'</
         </div>
 
         <div class="code-example">
-<span class="comment">// 发送复杂对象</span>
-<span class="keyword">const</span> userInfo = {
-    name: <span class="string">'张三'</span>,
-    age: 25,
-    skills: [<span class="string">'Vue'</span>, <span class="string">'JavaScript'</span>, <span class="string">'CSS'</span>]
-}
+            <span class="comment">// 发送复杂对象</span>
+            <span class="keyword">const</span> userInfo = {
+            name: <span class="string">'张三'</span>,
+            age: 25,
+            skills: [<span class="string">'Vue'</span>, <span class="string">'JavaScript'</span>, <span
+                class="string">'CSS'</span>]
+            }
 
-EventBus.<span class="function">$emit</span>(<span class="string">'user-update'</span>, userInfo)
+            EventBus.<span class="function">$emit</span>(<span class="string">'user-update'</span>, userInfo)
 
-<span class="comment">// 接收复杂对象</span>
-EventBus.<span class="function">$on</span>(<span class="string">'user-update'</span>, (user) => {
-    console.log(user.name)    <span class="comment">// '张三'</span>
-    console.log(user.age)     <span class="comment">// 25</span>
-    console.log(user.skills)  <span class="comment">// ['Vue', 'JavaScript', 'CSS']</span>
-})
+            <span class="comment">// 接收复杂对象</span>
+            EventBus.<span class="function">$on</span>(<span class="string">'user-update'</span>, (user) => {
+            console.log(user.name) <span class="comment">// '张三'</span>
+            console.log(user.age) <span class="comment">// 25</span>
+            console.log(user.skills) <span class="comment">// ['Vue', 'JavaScript', 'CSS']</span>
+            })
         </div>
     </div>
 
     <!-- Demo 4: 多对多通信 -->
     <div id="app4" class="demo-container">
         <h2 class="demo-title">🔀 Demo 4: 多对多通信 - 聊天室</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>模拟多个用户在聊天室中发送和接收消息（多对多通信）
         </div>
@@ -728,7 +734,7 @@ EventBus.<span class="function">$on</span>(<span class="string">'user-update'</s
     <!-- Demo 5: 条件监听与取消监听 -->
     <div id="app5" class="demo-container">
         <h2 class="demo-title">🎚️ Demo 5: $on、$once、$off 详解</h2>
-        
+
         <div class="demo-desc">
             <strong>学习：</strong>Event Bus的三个核心API的使用方法
         </div>
@@ -773,27 +779,34 @@ EventBus.<span class="function">$on</span>(<span class="string">'user-update'</s
         </table>
 
         <div class="code-example">
-<span class="comment">// 1. $on - 持续监听</span>
-EventBus.<span class="function">$on</span>(<span class="string">'message'</span>, (data) => {
-    console.log(data)
-})
-EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'第1次'</span>) <span class="comment">// 触发</span>
-EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'第2次'</span>) <span class="comment">// 触发</span>
-EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span class="string">'第3次'</span>) <span class="comment">// 触发</span>
+            <span class="comment">// 1. $on - 持续监听</span>
+            EventBus.<span class="function">$on</span>(<span class="string">'message'</span>, (data) => {
+            console.log(data)
+            })
+            EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span
+                class="string">'第1次'</span>) <span class="comment">// 触发</span>
+            EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span
+                class="string">'第2次'</span>) <span class="comment">// 触发</span>
+            EventBus.<span class="function">$emit</span>(<span class="string">'message'</span>, <span
+                class="string">'第3次'</span>) <span class="comment">// 触发</span>
 
-<span class="comment">// 2. $once - 只监听一次</span>
-EventBus.<span class="function">$once</span>(<span class="string">'init'</span>, (data) => {
-    console.log(data)
-})
-EventBus.<span class="function">$emit</span>(<span class="string">'init'</span>, <span class="string">'第1次'</span>) <span class="comment">// 触发</span>
-EventBus.<span class="function">$emit</span>(<span class="string">'init'</span>, <span class="string">'第2次'</span>) <span class="comment">// 不触发</span>
+            <span class="comment">// 2. $once - 只监听一次</span>
+            EventBus.<span class="function">$once</span>(<span class="string">'init'</span>, (data) => {
+            console.log(data)
+            })
+            EventBus.<span class="function">$emit</span>(<span class="string">'init'</span>, <span
+                class="string">'第1次'</span>) <span class="comment">// 触发</span>
+            EventBus.<span class="function">$emit</span>(<span class="string">'init'</span>, <span
+                class="string">'第2次'</span>) <span class="comment">// 不触发</span>
 
-<span class="comment">// 3. $off - 移除监听</span>
-<span class="keyword">const</span> handler = (data) => console.log(data)
-EventBus.<span class="function">$on</span>(<span class="string">'test'</span>, handler)
-EventBus.<span class="function">$off</span>(<span class="string">'test'</span>, handler)  <span class="comment">// 移除特定回调</span>
-EventBus.<span class="function">$off</span>(<span class="string">'test'</span>)          <span class="comment">// 移除该事件所有回调</span>
-EventBus.<span class="function">$off</span>()                  <span class="comment">// 移除所有事件监听（慎用！）</span>
+            <span class="comment">// 3. $off - 移除监听</span>
+            <span class="keyword">const</span> handler = (data) => console.log(data)
+            EventBus.<span class="function">$on</span>(<span class="string">'test'</span>, handler)
+            EventBus.<span class="function">$off</span>(<span class="string">'test'</span>, handler) <span
+                class="comment">// 移除特定回调</span>
+            EventBus.<span class="function">$off</span>(<span class="string">'test'</span>) <span class="comment">//
+                移除该事件所有回调</span>
+            EventBus.<span class="function">$off</span>() <span class="comment">// 移除所有事件监听（慎用！）</span>
         </div>
 
         <div class="warning-box">
@@ -801,12 +814,12 @@ EventBus.<span class="function">$off</span>()                  <span class="comm
             <p>
                 <strong>1. 必须在beforeDestroy中$off：</strong><br>
                 &nbsp;&nbsp;&nbsp;如果组件被销毁但没有移除监听，会造成内存泄漏！<br><br>
-                
+
                 <strong>2. $off移除监听的三种方式：</strong><br>
                 &nbsp;&nbsp;&nbsp;• $off('event', callback) - 移除特定事件的特定回调<br>
                 &nbsp;&nbsp;&nbsp;• $off('event') - 移除特定事件的所有回调<br>
                 &nbsp;&nbsp;&nbsp;• $off() - 移除所有事件监听（慎用，会影响其他组件）<br><br>
-                
+
                 <strong>3. 回调函数不能用箭头函数：</strong><br>
                 &nbsp;&nbsp;&nbsp;如果需要访问组件的this，不能用箭头函数，除非在外面用变量保存this
             </p>
@@ -816,13 +829,13 @@ EventBus.<span class="function">$off</span>()                  <span class="comm
     <!-- Demo 6: 实战案例 - Todo分类管理 -->
     <div id="app6" class="demo-container">
         <h2 class="demo-title">✅ Demo 6: 实战案例 - Todo分类管理</h2>
-        
+
         <div class="demo-desc">
             <strong>场景：</strong>三个分类面板（工作、学习、生活），点击完成按钮可将任务移到"已完成"面板
         </div>
 
         <todo-input></todo-input>
-        
+
         <div class="todo-container">
             <todo-list category="工作" color="#667eea"></todo-list>
             <todo-list category="学习" color="#f5576c"></todo-list>
@@ -850,7 +863,7 @@ EventBus.<span class="function">$off</span>()                  <span class="comm
     <!-- Demo 7: 最佳实践 -->
     <div id="app7" class="demo-container">
         <h2 class="demo-title">🌟 Demo 7: Event Bus 最佳实践</h2>
-        
+
         <div class="best-practice">
             <h4>✅ 推荐做法</h4>
             <ul>
@@ -876,64 +889,70 @@ EventBus.<span class="function">$off</span>()                  <span class="comm
         </div>
 
         <div class="code-example">
-<span class="comment">// ===== eventBus.js =====</span>
-<span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>
+            <span class="comment">// ===== eventBus.js =====</span>
+            <span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>
 
-<span class="comment">// 创建事件总线</span>
-<span class="keyword">export</span> <span class="keyword">const</span> EventBus = <span class="keyword">new</span> Vue()
+            <span class="comment">// 创建事件总线</span>
+            <span class="keyword">export</span> <span class="keyword">const</span> EventBus = <span
+                class="keyword">new</span> Vue()
 
-<span class="comment">// 定义事件名称常量（避免拼写错误）</span>
-<span class="keyword">export</span> <span class="keyword">const</span> EVENT_TYPES = {
-    USER_LOGIN: <span class="string">'user-login'</span>,
-    USER_LOGOUT: <span class="string">'user-logout'</span>,
-    DATA_UPDATE: <span class="string">'data-update'</span>,
-    SHOW_TOAST: <span class="string">'show-toast'</span>
-}
+            <span class="comment">// 定义事件名称常量（避免拼写错误）</span>
+            <span class="keyword">export</span> <span class="keyword">const</span> EVENT_TYPES = {
+            USER_LOGIN: <span class="string">'user-login'</span>,
+            USER_LOGOUT: <span class="string">'user-logout'</span>,
+            DATA_UPDATE: <span class="string">'data-update'</span>,
+            SHOW_TOAST: <span class="string">'show-toast'</span>
+            }
 
-<span class="comment">// ===== main.js =====</span>
-<span class="keyword">import</span> { EventBus } <span class="keyword">from</span> <span class="string">'./eventBus'</span>
+            <span class="comment">// ===== main.js =====</span>
+            <span class="keyword">import</span> { EventBus } <span class="keyword">from</span> <span
+                class="string">'./eventBus'</span>
 
-<span class="comment">// 挂载到Vue原型，全局访问</span>
-Vue.prototype.$bus = EventBus
+            <span class="comment">// 挂载到Vue原型，全局访问</span>
+            Vue.prototype.$bus = EventBus
 
-<span class="comment">// ===== ComponentA.vue =====</span>
-<span class="keyword">import</span> { EVENT_TYPES } <span class="keyword">from</span> <span class="string">'@/eventBus'</span>
+            <span class="comment">// ===== ComponentA.vue =====</span>
+            <span class="keyword">import</span> { EVENT_TYPES } <span class="keyword">from</span> <span
+                class="string">'@/eventBus'</span>
 
-<span class="keyword">export</span> <span class="keyword">default</span> {
-    methods: {
-        <span class="function">login</span>() {
+            <span class="keyword">export</span> <span class="keyword">default</span> {
+            methods: {
+            <span class="function">login</span>() {
             <span class="comment">// 使用常量，避免拼写错误</span>
             <span class="keyword">this</span>.$bus.<span class="function">$emit</span>(EVENT_TYPES.USER_LOGIN, {
-                username: <span class="string">'张三'</span>,
-                token: <span class="string">'abc123'</span>
+            username: <span class="string">'张三'</span>,
+            token: <span class="string">'abc123'</span>
             })
-        }
-    }
-}
+            }
+            }
+            }
 
-<span class="comment">// ===== ComponentB.vue =====</span>
-<span class="keyword">import</span> { EVENT_TYPES } <span class="keyword">from</span> <span class="string">'@/eventBus'</span>
+            <span class="comment">// ===== ComponentB.vue =====</span>
+            <span class="keyword">import</span> { EVENT_TYPES } <span class="keyword">from</span> <span
+                class="string">'@/eventBus'</span>
 
-<span class="keyword">export</span> <span class="keyword">default</span> {
-    data() {
-        <span class="keyword">return</span> {
+            <span class="keyword">export</span> <span class="keyword">default</span> {
+            data() {
+            <span class="keyword">return</span> {
             userInfo: <span class="keyword">null</span>
-        }
-    },
-    mounted() {
-        <span class="comment">// 监听登录事件</span>
-        <span class="keyword">this</span>.$bus.<span class="function">$on</span>(EVENT_TYPES.USER_LOGIN, <span class="keyword">this</span>.handleLogin)
-    },
-    methods: {
-        <span class="function">handleLogin</span>(data) {
+            }
+            },
+            mounted() {
+            <span class="comment">// 监听登录事件</span>
+            <span class="keyword">this</span>.$bus.<span class="function">$on</span>(EVENT_TYPES.USER_LOGIN, <span
+                class="keyword">this</span>.handleLogin)
+            },
+            methods: {
+            <span class="function">handleLogin</span>(data) {
             <span class="keyword">this</span>.userInfo = data
-        }
-    },
-    beforeDestroy() {
-        <span class="comment">// 必须移除监听！</span>
-        <span class="keyword">this</span>.$bus.<span class="function">$off</span>(EVENT_TYPES.USER_LOGIN, <span class="keyword">this</span>.handleLogin)
-    }
-}
+            }
+            },
+            beforeDestroy() {
+            <span class="comment">// 必须移除监听！</span>
+            <span class="keyword">this</span>.$bus.<span class="function">$off</span>(EVENT_TYPES.USER_LOGIN, <span
+                class="keyword">this</span>.handleLogin)
+            }
+            }
         </div>
 
         <div class="analogy-box">
@@ -944,14 +963,14 @@ Vue.prototype.$bus = EventBus
                 • 偶尔需要跨组件通信<br>
                 • 不需要状态持久化<br>
                 • 临时的、一次性的事件通知<br><br>
-                
+
                 <strong>使用 Vuex 的场景：</strong><br>
                 • 大型项目（30+组件）<br>
                 • 多个组件共享状态<br>
                 • 需要状态持久化（如登录信息）<br>
                 • 需要时间旅行调试<br>
                 • 复杂的状态变更逻辑<br><br>
-                
+
                 <strong>💡 记住：Event Bus是轻量级工具，Vuex是完整的状态管理方案！</strong>
             </p>
         </div>
@@ -1165,9 +1184,9 @@ Vue.prototype.$bus = EventBus
                 },
                 darkenColor(color) {
                     // 简单地返回一个更深的颜色
-                    return color === '#667eea' ? '#764ba2' : 
-                           color === '#f5576c' ? '#b91f45' : 
-                           '#00b8d4'
+                    return color === '#667eea' ? '#764ba2' :
+                        color === '#f5576c' ? '#b91f45' :
+                            '#00b8d4'
                 }
             },
             beforeDestroy() {
@@ -1436,4 +1455,5 @@ Vue.prototype.$bus = EventBus
         })
     </script>
 </body>
+
 </html>
